@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #2A3FFB;
+  --secondary: #FF6B4A;
+  --accent: #7000FF;
+  --space: #0A0A0F;
+}
+
+body {
+  @apply bg-space text-white min-h-screen;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.section {
+  @apply py-20 px-4 md:px-8 max-w-7xl mx-auto;
+}
+
+.btn {
+  @apply px-6 py-3 rounded-lg font-medium transition-all duration-300;
+}
+
+.btn-primary {
+  @apply bg-primary hover:bg-opacity-90 text-white;
+}
+
+.heading {
+  @apply text-4xl md:text-5xl font-bold mb-6;
+}
+
+.subheading {
+  @apply text-xl md:text-2xl text-gray-300 mb-8;
+}
