@@ -73,7 +73,7 @@ onMounted(() => {
         </div>
         
         <div class="text-center">
-          <button type="submit" class="btn btn-primary">
+          <button type="submit" class="btn btn--primary">
             Send Message
           </button>
         </div>

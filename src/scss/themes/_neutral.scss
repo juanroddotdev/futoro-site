@@ -1,0 +1,59 @@
+// Neutral color theme
+
+// Text colors
+.text-neutral {
+  &-dark {
+    color: map-get($colors, 'neutral-900');
+  }
+  
+  &-medium {
+    color: map-get($colors, 'neutral-700');
+  }
+  
+  &-light {
+    color: map-get($colors, 'neutral-100');
+  }
+}
+
+// Background colors
+.bg-neutral {
+  &-dark {
+    background-color: map-get($colors, 'neutral-900');
+  }
+  
+  &-medium {
+    background-color: map-get($colors, 'neutral-700');
+  }
+  
+  &-light {
+    background-color: map-get($colors, 'neutral-100');
+  }
+  
+  &-gray {
+    background-color: map-get($colors, 'neutral-500');
+  }
+  
+  &-lighter {
+    background-color: map-get($colors, 'neutral-300');
+  }
+}
+
+// Border colors
+.border-neutral {
+  &-dark {
+    border-color: map-get($colors, 'neutral-900');
+  }
+  
+  &-medium {
+    border-color: map-get($colors, 'neutral-700');
+  }
+  
+  &-light {
+    border-color: map-get($colors, 'neutral-400');
+  }
+}
+
+// Gradient using neutral colors
+.gradient-neutral {
+  background: linear-gradient(to right, map-get($colors, 'neutral-900'), map-get($colors, 'neutral-700'));
+}

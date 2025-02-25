@@ -1,0 +1,7 @@
+/* postcss */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+// Import all Sass files
+@import './scss/main';

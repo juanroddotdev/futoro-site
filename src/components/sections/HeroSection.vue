@@ -31,7 +31,7 @@ onMounted(() => {
           Transform your digital presence with cutting-edge design solutions that push the boundaries of innovation.
         </p>
         <div class="flex flex-wrap gap-4">
-          <a href="#contact" class="btn btn-primary">Get Started</a>
+          <a href="#contact" class="btn btn--primary">Get Started</a>
           <a href="#portfolio" class="btn border border-white/20 hover:bg-white/10">View Our Work</a>
         </div>
       </div>

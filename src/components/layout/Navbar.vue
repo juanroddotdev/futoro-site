@@ -30,7 +30,7 @@ onUnmounted(() => {
           <a href="#about" class="text-white hover:text-secondary transition-colors">About</a>
           <a href="#services" class="text-white hover:text-secondary transition-colors">Services</a>
           <a href="#portfolio" class="text-white hover:text-secondary transition-colors">Portfolio</a>
-          <a href="#contact" class="btn btn-primary">Contact Us</a>
+          <a href="#contact" class="btn btn--primary">Contact Us</a>
         </div>
         
         <button class="md:hidden text-white">

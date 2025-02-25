@@ -19,14 +19,32 @@ import ContactSection from './components/sections/ContactSection.vue';
       <TestimonialsSection />
       <ContactSection />
     </main>
-    <footer class="py-8 text-center text-gray-400 text-sm">
-      <div class="max-w-7xl mx-auto px-4">
+    <footer class="footer">
+      <div class="footer-content">
         <p>© {{ new Date().getFullYear() }} Futoro Digital Design Lab. All rights reserved.</p>
-        <div class="mt-4 space-x-4">
-          <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
-          <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
+        <div class="footer-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
         </div>
       </div>
     </footer>
   </div>
 </template>
+
+<style lang="postcss" scoped>
+.footer {
+  @apply py-8 text-center text-gray-400 text-sm;
+
+  &-content {
+    @apply max-w-7xl mx-auto px-4;
+  }
+
+  &-links {
+    @apply mt-4 space-x-4;
+
+    a {
+      @apply hover:text-white transition-colors;
+    }
+  }
+}
+</style>

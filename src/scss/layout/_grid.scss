@@ -1,0 +1,23 @@
+.container {
+  width: 100%;
+  max-width: $container-max-width;
+  margin: 0 auto;
+  padding: 0 $spacing-unit;
+}
+
+.grid {
+  display: grid;
+  gap: $spacing-unit * 2;
+  
+  &--2-cols {
+    @include respond-to('md') {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  &--3-cols {
+    @include respond-to('lg') {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+}

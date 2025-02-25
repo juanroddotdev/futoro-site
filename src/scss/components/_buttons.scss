@@ -1,0 +1,41 @@
+.btn {
+  @layer components {
+    @apply px-6 py-3 rounded-lg font-medium transition-all duration-300;
+  }
+  
+  &--primary {
+    background-color: map-get($colors, 'primary');
+    color: white;
+    
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+  
+  &--secondary {
+    background-color: map-get($colors, 'secondary');
+    color: white;
+    
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+  
+  &--neutral {
+    background-color: map-get($colors, 'neutral-900');
+    color: map-get($colors, 'neutral-100');
+    
+    &:hover {
+      background-color: map-get($colors, 'neutral-700');
+    }
+    
+    &-light {
+      background-color: map-get($colors, 'neutral-300');
+      color: map-get($colors, 'neutral-900');
+      
+      &:hover {
+        background-color: map-get($colors, 'neutral-400');
+      }
+    }
+  }
+}

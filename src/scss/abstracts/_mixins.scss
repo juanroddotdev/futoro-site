@@ -1,0 +1,21 @@
+@mixin respond-to($breakpoint) {
+  @media (min-width: map-get($breakpoints, $breakpoint)) {
+    & {
+      @content;
+    }
+  }
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin section-padding {
+  padding: $spacing-unit * 2;
+  
+  @include respond-to('md') {
+    padding: $spacing-unit * 3;
+  }
+}

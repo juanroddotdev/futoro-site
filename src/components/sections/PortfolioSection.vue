@@ -64,7 +64,7 @@ onMounted(() => {
     </div>
     
     <div class="text-center mt-12">
-      <a href="#contact" class="btn btn-primary">Start Your Project</a>
+      <a href="#contact" class="btn btn--primary">Start Your Project</a>
     </div>
   </section>
 </template>

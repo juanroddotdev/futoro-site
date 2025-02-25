@@ -1,0 +1,36 @@
+src/
+└── scss/
+    ├── abstracts/
+    │   ├── _variables.scss    (variables, colors, config)
+    │   ├── _functions.scss    (Sass functions)
+    │   └── _mixins.scss      (Sass mixins)
+    │
+    ├── base/
+    │   ├── _reset.scss       (reset/normalize)
+    │   ├── _typography.scss  (typography rules)
+    │   └── _animations.scss  (animations)
+    │
+    ├── components/
+    │   ├── _buttons.scss     (buttons)
+    │   ├── _cards.scss      (cards)
+    │   └── _forms.scss      (forms)
+    │
+    ├── layout/
+    │   ├── _header.scss     (header)
+    │   ├── _footer.scss     (footer)
+    │   ├── _navigation.scss (navigation)
+    │   └── _grid.scss       (grid system)
+    │
+    ├── pages/
+    │   ├── _home.scss       (home specific styles)
+    │   ├── _about.scss      (about specific styles)
+    │   └── _contact.scss    (contact specific styles)
+    │
+    ├── themes/
+    │   ├── _dark.scss       (dark theme)
+    │   └── _admin.scss      (admin theme variations)
+    │
+    ├── vendors/
+    │   └── _tailwind.scss   (third-party styles)
+    │
+    └── main.scss            (main file that imports all other files)
