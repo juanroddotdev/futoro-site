@@ -21,7 +21,7 @@ onUnmounted(() => {
 
 <template>
   <nav :class="['fixed w-full z-50 transition-all duration-300', 
-    isScrolled ? 'bg-neutral-gray/90 backdrop-blur-md py-4' : 'py-6']">
+    isScrolled ? 'bg-neutral-gray backdrop-blur-md py-4' : 'py-6']">
     <div class="max-w-7xl mx-auto px-4 md:px-8">
       <div class="flex items-center justify-between">
         <a href="#" class="text-2xl font-bold text-white">Futoro</a>
@@ -30,7 +30,7 @@ onUnmounted(() => {
           <a href="#about" class="text-white hover:text-secondary transition-colors">About</a>
           <a href="#services" class="text-white hover:text-secondary transition-colors">Services</a>
           <a href="#portfolio" class="text-white hover:text-secondary transition-colors">Portfolio</a>
-          <a href="#contact" class="btn btn--primary">Contact Us</a>
+          <a href="#contact" class="btn-neutral btn-neutral--primary">Contact Us</a>
         </div>
         
         <button class="md:hidden text-white">

@@ -41,7 +41,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <section id="services" class="section py-32 bg-space/50">
+  <section id="services" class="section py-32 bg-neutral-gray/50">
     <div class="text-center mb-16">
       <h2 class="heading">Our Services</h2>
       <p class="subheading max-w-2xl mx-auto">
@@ -51,7 +51,7 @@ onMounted(() => {
     
     <div class="services-grid grid md:grid-cols-2 lg:grid-cols-4 gap-8">
       <div v-for="service in services" :key="service.title" 
-           class="service-card group bg-space p-6 rounded-xl border border-white/10 hover:border-secondary/50 transition-all duration-300">
+           class="service-card group bg-neutral-gray p-6 rounded-xl border border-white/10 hover:border-secondary/50 transition-all duration-300">
         <div class="text-secondary mb-4" v-html="service.icon"></div>
         <h3 class="text-xl font-semibold mb-3">{{ service.title }}</h3>
         <p class="text-gray-300">{{ service.description }}</p>

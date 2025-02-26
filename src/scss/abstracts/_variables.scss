@@ -12,6 +12,17 @@ $colors: (
   'neutral-300': #E8E8E8,
   'neutral-100': #FBFBFB,
 );
+$fontSize: (
+  'xs': 0.75rem,/* 12px */
+  'sm': 0.875rem,/* 14px */
+  'base': 1rem,/* 16px */
+  'lg': 2rem,/* 32px */
+  'xl': 3rem,/* 48px */
+  '2xl': 4rem,/* 64px */
+  '3xl': 5rem,/* 80px */
+  '4xl': 6rem,/* 96px */
+  '5xl': 7rem,/* 112px */
+);
 
 // Breakpoints
 $breakpoints: (
@@ -24,3 +35,19 @@ $breakpoints: (
 // Spacing
 $spacing-unit: 8px;
 $container-max-width: 1280px;
+
+// creates a class for each $fontSize key and sets value
+// .heading-xs{font-size: 0.75rem}
+@each $name, $size in $fontSize {
+  .heading-#{$name} {
+    font-size: $size;
+  }
+}
+
+@each $border, $color in $colors {
+  .border-#{$border} {
+    border: 1px solid;
+    border-color: $color;
+  }
+}
+

@@ -1,6 +1,6 @@
 // Neutral color theme
 
-// Text colors
+// Text colors/
 .text-neutral {
   &-dark {
     color: map-get($colors, 'neutral-900');
@@ -8,6 +8,9 @@
   
   &-medium {
     color: map-get($colors, 'neutral-700');
+  }
+  &-gray {
+    color: map-get($colors, 'neutral-500');
   }
   
   &-light {

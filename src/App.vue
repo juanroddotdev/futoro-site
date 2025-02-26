@@ -1,23 +1,31 @@
 <script setup lang="ts">
-import Navbar from './components/layout/Navbar.vue';
-import HeroSection from './components/sections/HeroSection.vue';
-import AboutSection from './components/sections/AboutSection.vue';
-import ServicesSection from './components/sections/ServicesSection.vue';
-import PortfolioSection from './components/sections/PortfolioSection.vue';
-import TestimonialsSection from './components/sections/TestimonialsSection.vue';
-import ContactSection from './components/sections/ContactSection.vue';
+// import Navbar from './components/layout/Navbar.vue';
+import NeutralNavbar from './components/layout/NeutralNavbar.vue';
+// import HeroSection from './components/sections/HeroSection.vue';
+import NeutralHeroSection from './components/sections/NeutralHeroSection.vue';
+import NeutralAboutSection from './components/sections/NeutralAboutSection.vue';
+// import AboutSection from './components/sections/AboutSection.vue';
+// import ServicesSection from './components/sections/ServicesSection.vue';
+import NeutralServicesSection from './components/sections/NeutralServicesSection.vue';
+// import PortfolioSection from './components/sections/PortfolioSection.vue';
+// import TestimonialsSection from './components/sections/TestimonialsSection.vue';
+// import ContactSection from './components/sections/ContactSection.vue';
 </script>
 
 <template>
   <div class="app">
-    <Navbar />
+    <!-- <Navbar /> -->
+    <NeutralNavbar />
     <main>
-      <HeroSection />
-      <AboutSection />
+      <NeutralHeroSection />
+      <NeutralAboutSection />
+      <NeutralServicesSection />
+      <!-- <HeroSection /> -->
+      <!-- <AboutSection />
       <ServicesSection />
       <PortfolioSection />
       <TestimonialsSection />
-      <ContactSection />
+      <ContactSection /> -->
     </main>
     <footer class="footer">
       <div class="footer-content">

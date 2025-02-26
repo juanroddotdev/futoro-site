@@ -35,7 +35,7 @@ onMounted(() => {
       </div>
       <div class="relative">
         <div class="absolute inset-0 bg-gradient-to-tr from-primary/20 to-accent/20 rounded-2xl transform rotate-3"></div>
-        <div class="relative bg-space p-8 rounded-2xl border border-white/10">
+        <div class="relative bg-neutral-gray p-8 rounded-2xl border border-white/10">
           <div class="grid grid-cols-2 gap-4">
             <div class="p-4 text-center">
               <h3 class="text-4xl font-bold text-secondary mb-2">150+</h3>
