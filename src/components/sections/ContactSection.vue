@@ -29,6 +29,16 @@ onMounted(() => {
 </script>
 
 <template>
+  <section id="services" class="section w-fullbg-neutral-gray/50">
+    <div class="grid grid-cols-5 gap-4">
+      <div class="col-span-2">
+        <h2 class="heading text-neutral-medium heading-2xl">Our Services</h2>
+      </div>
+      <div class="col-span-3">
+        <ServicesData />
+      </div>
+    </div>
+  </section>
   <section id="contact" class="section py-32">
     <div class="contact-content max-w-4xl mx-auto">
       <div class="text-center mb-16">

@@ -1,3 +1,4 @@
+//TODO: smooth out accordion transitions
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from 'vue';
 import { gsap } from 'gsap';
