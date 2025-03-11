@@ -1,26 +1,12 @@
 .btn {
-  @layer components {
-    @apply px-6 py-3 rounded-lg font-medium transition-all duration-300;
-  }
-  
-  &--primary {
-    background-color: map-get($colors, 'primary');
-    color: white;
+  @include themed {
+    background-color: var(--primary);
+    color: var(--text);
     
     &:hover {
-      opacity: 0.9;
+      background-color: var(--secondary);
     }
   }
-  
-  &--secondary {
-    background-color: map-get($colors, 'secondary');
-    color: white;
-    
-    &:hover {
-      opacity: 0.9;
-    }
-  }
-  
 }
 .btn-neutral {
   font-weight: 500;
@@ -78,3 +64,48 @@
     }
   }
 } */
+
+button {
+  @include themed {
+    &.active {
+      background-color: var(--secondary);
+      color: var(--primary);
+    }
+
+    &:not(.active) {
+      color: var(--neutral);
+      
+      &:hover {
+        color: var(--secondary);
+      }
+    }
+  }
+}
+
+// Theme-specific gradients with enhanced contrast
+.theme-neon-horizon {
+  --card-gradient-extended: linear-gradient(
+    to right,
+    #88C0D0 0%,
+    #A3BE8C 50%,
+    #88C0D0 100%
+  );
+}
+
+.theme-digital-sunset {
+  --card-gradient-extended: linear-gradient(
+    to right,
+    #D08770 0%,
+    #B48EAD 50%,
+    #D08770 100%
+  );
+}
+
+.theme-retro-wave {
+  --card-gradient-extended: linear-gradient(
+    to right,
+    #6A5ACD 0%,
+    #98FB98 50%,
+    #6A5ACD 100%
+  );
+}

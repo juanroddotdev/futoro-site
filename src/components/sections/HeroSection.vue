@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { onMounted, reactive } from 'vue';
+import { onMounted, ref } from 'vue';
 import gsap from 'gsap';
 import heroImage from '@/assets/images/hero-image.jpg';
+import { HeroContent, getRandomHeroContent } from '@/data/heroContent';
 
 onMounted(() => {
   gsap.from('.hero-content > *', {
@@ -12,10 +13,7 @@ onMounted(() => {
     ease: 'power2.out'
   });
 });
-const heading = reactive({
-  one: 'Designing the Future of Digital',
-  two: 'Pioneering the Future of Design',
-})
+const heroContent = ref<HeroContent>(getRandomHeroContent());
 </script>
 
 <template>
@@ -28,14 +26,23 @@ const heading = reactive({
     </div> -->
     
     <div class="section relative z-10 my-40">
-      <h1 class="heading heading--accent mb-6">{{ heading.one }}</h1>
-      <!-- <h2 class="heading heading--highlight mb-12">{{ heading.two }}</h2> -->
-      <p class="body-text text-xl mb-8">
-        We craft digital experiences that inspire, engage, and transform.
+      <h1 class="heading--accent mb-6 headline heading-responsive">{{ heroContent.headline }}</h1>
+      <p class=" mb-8 subheadline subheading-responsive">
+        {{ heroContent.subheadline }}
       </p>
       <div class="flex gap-4">
-        <a href="#contact" class="theme-btn theme-btn--secondary">Start Your Project</a>
-        <a href="#services" class="theme-btn theme-btn--outline">Our Services</a>
+        <a 
+          href="#contact" 
+          class="btn-round-large-secondary cta"
+        >
+          {{ heroContent.cta }}
+        </a>
+        <a 
+          href="#services" 
+          class="btn-round-large-outline-primary"
+        >
+          Our Services
+        </a>
       </div>
     </div>
   </section>

@@ -1,6 +1,10 @@
 // Theme Classes
 @each $theme-name, $theme-map in $themes {
   .theme-#{$theme-name} {
+    // Add transition for all theme-related properties
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    
     // Add body background color based on theme
     background-color: (
       if($theme-name == 'neon-horizon', #1a1b26,
@@ -8,100 +12,81 @@
       if($theme-name == 'retro-wave', #0f0f17,
       if($theme-name == 'pastel-future', #f8f9fa, #ffffff))))
     );
+
+    // Add a pseudo-element for gradient overlay animation
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      z-index: -1;
+      transition: opacity 0.8s ease;
+      background: if($theme-name == 'neon-horizon',
+        linear-gradient(135deg, #1a1b26 0%, #2E3440 50%, #A3BE8C 100%),
+      if($theme-name == 'digital-sunset',
+        linear-gradient(135deg, #2E3440 0%, #4C566A 50%, #B48EAD 100%),
+      if($theme-name == 'retro-wave',
+        linear-gradient(135deg, #0f0f17 0%, #1A1A1A 50%, #FF4081 100%),
+        linear-gradient(135deg, #f8f9fa 0%, #6A5ACD 50%, #98FB98 100%)
+      )));
+    }
+
+    &.theme-transition-active::before {
+      opacity: 1;
+    }
     
-    // Typography
+    // Typography transitions
     .heading {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       font-family: map-get($theme-map, 'heading-font');
       color: map-get($theme-map, 'primary');
       
       &--accent {
+        transition: color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         color: map-get($theme-map, 'accent');
       }
       
       &--highlight {
+        transition: color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         color: map-get($theme-map, 'highlight');
       }
     }
     
-    // Adjust text color based on background
     .body-text {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       font-family: map-get($theme-map, 'body-font');
-      color: if($theme-name == 'pastel-future', 
-        map-get($theme-map, 'primary'),  // Dark text for light theme
-        map-get($theme-map, 'neutral')   // Light text for dark themes
-      );
-    }
-    
-    // Buttons
-    .theme-btn {
-      padding: 0.75rem 1.5rem;
-      border-radius: 0.5rem;
-      transition: all 0.3s ease;
-      
-      &--primary {
-        background-color: map-get($theme-map, 'primary');
+      @if $theme-name == 'pastel-future' {
+        color: map-get($theme-map, 'primary-dark'); // Use darker shade for light theme
+      } @else {
         color: map-get($theme-map, 'neutral');
-        
-        &:hover {
-          opacity: 0.9;
-        }
-      }
-      
-      &--secondary {
-        @if $theme-name == 'retro-wave' {
-          background: linear-gradient(
-            to right,
-            map-get(map-get($theme-map, 'secondary-gradient'), 'start'),
-            map-get(map-get($theme-map, 'secondary-gradient'), 'end')
-          );
-        } @else {
-          background-color: map-get($theme-map, 'secondary');
-        }
-        color: map-get($theme-map, 'neutral');
-        
-        &:hover {
-          opacity: 0.9;
-        }
-      }
-      
-      &--outline {
-        border: 2px solid map-get($theme-map, 'primary');
-        color: map-get($theme-map, 'primary');
-        background: transparent;
-        
-        &:hover {
-          background-color: map-get($theme-map, 'primary');
-          color: map-get($theme-map, 'neutral');
-        }
       }
     }
-    
-    // Backgrounds
-    .theme-bg {
+
+    // Text colors for dark vs light themes
+    .theme-text {
       &--primary {
-        background-color: map-get($theme-map, 'primary');
-        color: map-get($theme-map, 'neutral');
+        color: if($theme-name == 'pastel-future',
+          map-get($theme-map, 'primary-dark'),  // Use darker shade for light theme
+          map-get($theme-map, 'neutral')
+        );
       }
-      
-      &--secondary {
-        @if $theme-name == 'retro-wave' {
-          background: linear-gradient(
-            to right,
-            map-get(map-get($theme-map, 'secondary-gradient'), 'start'),
-            map-get(map-get($theme-map, 'secondary-gradient'), 'end')
-          );
-        } @else {
-          background-color: map-get($theme-map, 'secondary');
-        }
-        color: map-get($theme-map, 'neutral');
-      }
-      
-      &--accent {
-        background-color: map-get($theme-map, 'accent');
-      }
-      
+
       &--neutral {
-        background-color: map-get($theme-map, 'neutral');
+        color: if($theme-name == 'pastel-future',
+          map-get($theme-map, 'primary-dark'),  // Use darker shade for light theme
+          rgba(map-get($theme-map, 'neutral'), 0.7)
+        );
+      }
+
+      // New gradient text classes
+      &--gradient {
+        background: if($theme-name == 'retro-wave',
+          linear-gradient(to right, map-get($theme-map, 'accent'), map-get($theme-map, 'highlight')),
+          linear-gradient(to right, map-get($theme-map, 'secondary'), map-get($theme-map, 'accent'))
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
       }
     }
   }

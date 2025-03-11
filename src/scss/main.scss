@@ -7,11 +7,14 @@
 @import 'base/fonts';
 @import 'base/typography';
 @import 'base/debug'; // Add debug stylesheet
-// @import 'base/animations';
+@import 'base/animations';
 
 @import 'components/buttons';
+@import 'components/buttons-round';  // Added new buttons-round component
 // @import 'components/cards';
 @import 'components/form';
+@import 'components/transitions';
+@import 'components/headings';
 
 // @import 'layout/header';
 // @import 'layout/navigation';

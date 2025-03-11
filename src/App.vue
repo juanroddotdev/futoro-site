@@ -1,31 +1,51 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import Navbar from '@/components/layout/Navbar.vue';
+import ThemeSwitcher from '@/components/ThemeSwitcher.vue';
 import HeroSection from './components/sections/HeroSection.vue';
 import AboutSection from './components/sections/AboutSection.vue';
 import ServicesSection from './components/sections/ServicesSection.vue';
 import HowItWorksSection from './components/sections/HowItWorksSection.vue';
-import StrugglesOffersSection from './components/sections/StrugglesOffersSection.vue';
+import StrugglesOffersTabs from './components/sections/StrugglesOffersTabs.vue';
 import ContactSection from '@/components/sections/ContactSection.vue';
 
-const themes = ['theme-neon-horizon', 'theme-digital-sunset', 'theme-retro-wave', 'theme-pastel-future']
-const currentTheme = ref('theme-neon-horizon')
+const currentTheme = ref('theme-neon-horizon');
+const isThemeTransitioning = ref(false);
 
-const setTheme = (theme: string) => {
-  currentTheme.value = theme
-}
+const handleThemeChange = (newTheme: string) => {
+  if (currentTheme.value === newTheme) return;
+  
+  isThemeTransitioning.value = true;
+  document.documentElement.classList.add('theme-transition-active');
+  
+  setTimeout(() => {
+    currentTheme.value = newTheme;
+  }, 50);
+  
+  setTimeout(() => {
+    document.documentElement.classList.remove('theme-transition-active');
+    isThemeTransitioning.value = false;
+  }, 800);
+};
 </script>
 
 <template>
-  <div id="app" class="debug">
-    <div class="app min-h-screen" :class="currentTheme">
+  <div id="app">
+  <!-- <div id="app" class="debug"> -->
+    <div 
+      class="app min-h-screen relative" 
+      :class="[
+        currentTheme,
+        { 'theme-transition-active': isThemeTransitioning }
+      ]"
+    >
       <Navbar />
       <main>
         <HeroSection />
-        <AboutSection />
+        <StrugglesOffersTabs />
         <ServicesSection />
         <HowItWorksSection />
-        <StrugglesOffersSection />
+        <AboutSection />
         <ContactSection />
       </main>
       <footer class="footer theme-bg--neutral">
@@ -37,20 +57,16 @@ const setTheme = (theme: string) => {
           </div>
         </div>
       </footer>
-      <div class="fixed bottom-4 right-4 flex gap-2">
-        <button 
-          v-for="theme in themes" 
-          :key="theme"
-          @click="setTheme(theme)"
-          class="theme-btn theme-btn--outline text-sm">
-          {{ theme.replace('theme-', '') }}
-        </button>
-      </div>
+      
+      <ThemeSwitcher
+        v-model:currentTheme="currentTheme"
+        @update:currentTheme="handleThemeChange"
+      />
     </div>
   </div>
 </template>
 
-<style lang="postcss" scoped>
+<style lang="scss" scoped>
 .footer {
   @apply py-8 text-center text-gray-400 text-sm;
 
@@ -65,5 +81,16 @@ const setTheme = (theme: string) => {
       @apply hover:text-white transition-colors;
     }
   }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
 }
 </style>

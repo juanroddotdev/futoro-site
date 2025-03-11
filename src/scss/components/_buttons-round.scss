@@ -1,0 +1,334 @@
+@import '../abstracts/variables';
+
+// ==========================================================================
+// Button Variables
+// ==========================================================================
+$button-sizes: (
+  'medium': (
+    'font-size': 16px,
+    'padding': 10px 20px
+  ),
+  'large': (
+    'font-size': 18px,
+    'padding': 12px 24px
+  ),
+  'xlarge': (
+    'font-size': 20px,
+    'padding': 14px 28px
+  )
+);
+
+$border-radius: 99px;
+
+// ==========================================================================
+// Mixins
+// ==========================================================================
+@mixin button-base {
+  border: none;
+  border-radius: $border-radius;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+}
+
+@mixin button-size($size) {
+  $size-map: map-get($button-sizes, $size);
+  font-size: map-get($size-map, 'font-size');
+  padding: map-get($size-map, 'padding');
+}
+
+@mixin button-variant($is-outline: false) {
+  @each $theme-name, $theme-map in $themes {
+    .theme-#{$theme-name} & {
+      @if $is-outline {
+        background-color: transparent;
+        border: 2px solid map-get($theme-map, 'accent'); // Changed from primary to accent
+        color: map-get($theme-map, 'accent'); // Changed from primary to accent
+
+        &:hover {
+          background-color: rgba(map-get($theme-map, 'accent'), 0.1);
+        }
+
+        &:active {
+          background-color: rgba(map-get($theme-map, 'accent'), 0.2);
+        }
+
+        &:disabled {
+          border-color: map-get($theme-map, 'neutral');
+          color: map-get($theme-map, 'neutral');
+          opacity: 0.5;
+        }
+
+        // Add glow effect for dark themes
+        @if $theme-name != 'pastel-future' {
+          box-shadow: 0 0 10px rgba(map-get($theme-map, 'accent'), 0.2);
+          
+          &:hover {
+            box-shadow: 0 0 15px rgba(map-get($theme-map, 'accent'), 0.4);
+          }
+        }
+      } @else {
+        background-color: map-get($theme-map, 'primary');
+        color: map-get($theme-map, 'neutral');
+
+        &:hover {
+          opacity: 0.9;
+        }
+
+        &:active {
+          opacity: 0.8;
+        }
+
+        &:disabled {
+          background-color: map-get($theme-map, 'neutral');
+          color: map-get($theme-map, 'primary');
+          opacity: 0.5;
+        }
+      }
+    }
+  }
+}
+
+@mixin button-variant-secondary($is-outline: false) {
+  @each $theme-name, $theme-map in $themes {
+    .theme-#{$theme-name} & {
+      @if $is-outline {
+        background-color: transparent;
+        border: 2px solid map-get($theme-map, 'secondary');
+        color: map-get($theme-map, 'secondary');
+
+        &.active {
+          background-color: map-get($theme-map, 'secondary');
+          color: map-get($theme-map, 'primary');
+        }
+
+        &:hover:not(.active) {
+          background-color: rgba(map-get($theme-map, 'secondary'), 0.1);
+        }
+
+        &:active:not(.active) {
+          background-color: rgba(map-get($theme-map, 'secondary'), 0.2);
+        }
+      } @else {
+        @if map-has-key($theme-map, 'secondary-gradient') {
+          background: linear-gradient(
+            to right,
+            map-get(map-get($theme-map, 'secondary-gradient'), 'start'),
+            map-get(map-get($theme-map, 'secondary-gradient'), 'end')
+          );
+        } @else {
+          background-color: map-get($theme-map, 'secondary');
+        }
+        color: map-get($theme-map, 'neutral');
+
+        &:hover {
+          opacity: 0.9;
+        }
+
+        &:active {
+          opacity: 0.8;
+        }
+
+        &:disabled {
+          background: map-get($theme-map, 'neutral');
+          color: map-get($theme-map, 'secondary');
+          opacity: 0.5;
+        }
+      }
+    }
+  }
+}
+
+// ==========================================================================
+// Button Base Classes
+// ==========================================================================
+%button {
+  @include button-base;
+}
+
+// ==========================================================================
+// Button Variants
+// ==========================================================================
+.btn-round {
+  &--primary {
+    @extend %button;
+    @include button-variant(false);
+  }
+
+  &--secondary {
+    @extend %button;
+    @include button-variant-secondary(false);
+  }
+
+  &--outline-primary {
+    @extend %button;
+    @include button-variant(true);
+  }
+
+  &--outline-secondary {
+    @extend %button;
+    @include button-variant-secondary(true);
+  }
+
+  // ==========================================================================
+  // Button Sizes
+  // ==========================================================================
+  &--medium {
+    @include button-size('medium');
+  }
+
+  &--large {
+    @include button-size('large');
+  }
+
+  &--xlarge {
+    @include button-size('xlarge');
+  }
+}
+
+// ==========================================================================
+// Composite Classes
+// ==========================================================================
+// Medium variants
+.btn-round-medium-primary {
+  @extend .btn-round--primary;
+  @extend .btn-round--medium;
+}
+
+.btn-round-medium-secondary {
+  @extend .btn-round--secondary;
+  @extend .btn-round--medium;
+}
+
+.btn-round-medium-outline-primary {
+  @extend .btn-round--outline-primary;
+  @extend .btn-round--medium;
+}
+
+.btn-round-medium-outline-secondary {
+  @extend .btn-round--outline-secondary;
+  @extend .btn-round--medium;
+}
+
+// Large variants
+.btn-round-large-primary {
+  @extend .btn-round--primary;
+  @extend .btn-round--large;
+}
+
+.btn-round-large-secondary {
+  @extend .btn-round--secondary;
+  @extend .btn-round--large;
+}
+
+.btn-round-large-outline-primary {
+  @extend .btn-round--outline-primary;
+  @extend .btn-round--large;
+}
+
+.btn-round-large-outline-secondary {
+  @extend .btn-round--outline-secondary;
+  @extend .btn-round--large;
+}
+
+// XLarge variants
+.btn-round-xlarge-primary {
+  @extend .btn-round--primary;
+  @extend .btn-round--xlarge;
+}
+
+.btn-round-xlarge-secondary {
+  @extend .btn-round--secondary;
+  @extend .btn-round--xlarge;
+}
+
+.btn-round-xlarge-outline-primary {
+  @extend .btn-round--outline-primary;
+  @extend .btn-round--xlarge;
+}
+
+.btn-round-xlarge-outline-secondary {
+  @extend .btn-round--outline-secondary;
+  @extend .btn-round--xlarge;
+}
+
+// The duplicate .btn-round--outline-secondary definition has been removed
+
+// Pill Container
+.btn-round-pill-container {
+  position: relative;
+  display: inline-flex;
+  border-radius: 9999px;
+  padding: 0.25rem;
+  min-width: 300px;
+
+  @each $theme-name, $theme-map in $themes {
+    .theme-#{$theme-name} & {
+      background-color: rgba(map-get($theme-map, 'neutral'), 0.1);
+      backdrop-filter: blur(4px);
+    }
+  }
+}
+
+// Sliding Background
+.btn-round-pill-slider {
+  position: absolute;
+  width: 50%;
+  height: calc(100% - 0.5rem);
+  top: 0.25rem;
+  left: 0.25rem;
+  border-radius: 9999px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &.slide-right {
+    transform: translateX(100%);
+  }
+
+  @each $theme-name, $theme-map in $themes {
+    .theme-#{$theme-name} & {
+      background: map-get($theme-map, 'secondary');
+    }
+  }
+}
+
+// Pill Buttons
+.btn-round-pill {
+  position: relative;
+  z-index: 1;
+  width: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center; // Centers the text and icon horizontally
+  text-align: center; // Ensures text is centered
+  padding: 0.75rem 1rem; // Adjust padding as needed
+  font-weight: bold;
+  transition: all 0.3s ease;
+  
+  // Center the icon and text together
+  span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  @include button-size('medium');
+
+  @each $theme-name, $theme-map in $themes {
+    .theme-#{$theme-name} & {
+      color: map-get($theme-map, 'secondary');
+      
+      &.active {
+        color: map-get($theme-map, 'primary');
+      }
+
+      &:not(.active):hover {
+        color: rgba(map-get($theme-map, 'secondary'), 0.8);
+      }
+    }
+  }
+}

@@ -1,4 +1,19 @@
 
+// Typography Scale
+$fontSize: (
+  'xs': 0.75rem,/* 12px */
+  'sm': 0.875rem,/* 14px */
+  'base': 1rem,/* 16px */
+  'md': 1.5rem,/* 24px */
+  'lg': 2rem,/* 32px */
+  'xl': 3rem,/* 48px */
+  '2xl': 4rem,/* 64px */
+  '3xl': 5rem,/* 80px */
+  '4xl': 6rem,/* 96px */
+  '5xl': 7rem,/* 112px */
+);
+
+// Base heading styles
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 700;
@@ -8,31 +23,115 @@ body {
   font-family: 'Raleway', sans-serif;
   font-weight: 400;
 }
-/* .heading-xl {
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 700;
-  line-height: 1.2;
-} */
 
-.heading-large {
+// Heading base class
+.heading {
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 700;
-  font-size: 3rem;
   line-height: 1.2;
+  
+  &:not([class*="text-"]) {
+    font-size: map-get($fontSize, 'lg'); // Default size (2rem)
+  }
+  
+  // Theme-specific styles will be handled in _theme-classes.scss
+  &--accent {
+    // Color will be set by theme classes
+  }
+  
+  &--highlight {
+    // Color will be set by theme classes
+  }
 }
 
+// Body text base class
 .body-text {
   font-family: 'Raleway', sans-serif;
   font-weight: 400;
-  font-size: 1rem;
   line-height: 1.5;
+  
+  &:not([class*="text-"]) {
+    font-size: map-get($fontSize, 'base'); // Default size (1rem)
+  }
 }
+
+// Subheading base class
+.subheading {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  line-height: 1.3;
+  
+  &:not([class*="text-"]) {
+    font-size: map-get($fontSize, 'lg'); // Default size (2rem)
+  }
+}
+
+// Text variants
 .text-black-400 {
   font-family: 'Raleway', sans-serif;
   font-weight: 400;
-  font-size: 1rem;
   line-height: 1.5;
   color: map-get($colors, 'neutral-900');
+  
+  &:not([class*="text-"]) {
+    font-size: map-get($fontSize, 'base'); // Default size (1rem)
+  }
 }
-/* TODO: responsive flex text. maybe container queries */
-/* TODO: Refactor. better classes */
+
+// Text size utility classes (can be used with any element)
+@each $name, $size in $fontSize {
+  .text-#{$name} {
+    font-size: $size;
+  }
+}
+
+// Large heading variant
+.heading-large {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  line-height: 1.2;
+  
+  &:not([class*="text-"]) {
+    font-size: map-get($fontSize, 'xl'); // Default size (3rem)
+  }
+}
+
+// Responsive typography helper classes
+.text-responsive {
+  font-size: clamp(map-get($fontSize, 'base'), 2.5vw, map-get($fontSize, 'lg'));
+}
+
+.heading-responsive {
+  font-size: clamp(map-get($fontSize, '2xl'), 6vw, map-get($fontSize, '4xl'));
+}
+
+.subheading-responsive {
+  font-size: clamp(map-get($fontSize, 'base'), 2.5vw, map-get($fontSize, 'xl'));
+  line-height: 1.3;
+}
+
+// Font family utility classes
+.font-grotesk {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.font-raleway {
+  font-family: 'Raleway', sans-serif;
+}
+
+// Font weights
+.font-normal {
+  font-weight: 400;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}

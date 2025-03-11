@@ -12,17 +12,6 @@ $colors: (
   'neutral-300': #E8E8E8,
   'neutral-100': #FBFBFB,
 );
-$fontSize: (
-  'xs': 0.75rem,/* 12px */
-  'sm': 0.875rem,/* 14px */
-  'base': 1rem,/* 16px */
-  'lg': 2rem,/* 32px */
-  'xl': 3rem,/* 48px */
-  '2xl': 4rem,/* 64px */
-  '3xl': 5rem,/* 80px */
-  '4xl': 6rem,/* 96px */
-  '5xl': 7rem,/* 112px */
-);
 
 // Breakpoints
 $breakpoints: (
@@ -39,8 +28,8 @@ $neon-horizon-accent: #A3BE8C;
 $neon-horizon-highlight: #BF616A;
 $neon-horizon-neutral: #ECEFF4;
 
-$neon-horizon-heading-font: 'Montserrat', sans-serif;
-$neon-horizon-body-font: 'Open Sans', sans-serif;
+$neon-horizon-heading-font: 'Space Grotesk', sans-serif;
+$neon-horizon-body-font: 'Raleway', sans-serif;
 
 /* Style Guide Option 2: "Digital Sunset" */
 
@@ -50,8 +39,8 @@ $digital-sunset-accent: #B48EAD;
 $digital-sunset-highlight: #8FBCBB;
 $digital-sunset-neutral: #F8F8F8;
 
-$digital-sunset-heading-font: 'Raleway', sans-serif;
-$digital-sunset-body-font: 'Lato', sans-serif;
+$digital-sunset-heading-font: 'Space Grotesk', sans-serif;
+$digital-sunset-body-font: 'Raleway', sans-serif;
 
 /* Style Guide Option 3: "Retro Wave" */
 
@@ -63,18 +52,19 @@ $retro-wave-highlight: #FDD835;
 $retro-wave-neutral: #E0E0E0;
 
 $retro-wave-heading-font: 'Space Grotesk', sans-serif;
-$retro-wave-body-font: 'Space Grotesk', sans-serif;
+$retro-wave-body-font: 'Raleway', sans-serif;
 
 /* Style Guide Option 4: "Pastel Future" */
 
 $pastel-future-primary: #6A5ACD;
+$pastel-future-primary-dark: #483D8B; // Added darker shade for text
 $pastel-future-secondary: #FFB6C1;
 $pastel-future-accent: #98FB98;
 $pastel-future-highlight: #FFA07A;
 $pastel-future-neutral: #F5F5F5;
 
 $pastel-future-heading-font: 'Space Grotesk', sans-serif;
-$pastel-future-body-font: 'Nunito', sans-serif;
+$pastel-future-body-font: 'Raleway', sans-serif;
 
 .retro-wave-element {
   background: linear-gradient(to right, $retro-wave-secondary-start, $retro-wave-secondary-end);
@@ -125,6 +115,7 @@ $themes: (
   ),
   'pastel-future': (
     'primary': $pastel-future-primary,
+    'primary-dark': $pastel-future-primary-dark, // Add the darker shade
     'secondary': $pastel-future-secondary,
     'accent': $pastel-future-accent,
     'highlight': $pastel-future-highlight,
@@ -139,18 +130,11 @@ $themes: (
 @mixin themed() {
   @each $theme-name, $theme-map in $themes {
     .theme-#{$theme-name} & {
-      @content($theme-map);
+      @content;
     }
   }
 }
 
-// creates a class for each $fontSize key and sets value
-// .heading-xs{font-size: 0.75rem}
-@each $name, $size in $fontSize {
-  .heading-#{$name} {
-    font-size: $size;
-  }
-}
 
 @each $border, $color in $colors {
   .border-#{$border} {
