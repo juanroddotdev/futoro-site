@@ -6,11 +6,12 @@
 @import 'base/reset';
 @import 'base/fonts';
 @import 'base/typography';
+@import 'base/debug'; // Add debug stylesheet
 // @import 'base/animations';
 
 @import 'components/buttons';
 // @import 'components/cards';
-// @import 'components/forms';
+@import 'components/form';
 
 // @import 'layout/header';
 // @import 'layout/navigation';
@@ -24,6 +25,7 @@
 @import 'themes/neutral';
 // @import 'themes/dark';
 // @import 'themes/admin';
+@import 'themes/theme-classes';
 
 // Vendors (Tailwind last)
 @import 'vendors/tailwind';

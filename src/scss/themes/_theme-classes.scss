@@ -1,0 +1,108 @@
+// Theme Classes
+@each $theme-name, $theme-map in $themes {
+  .theme-#{$theme-name} {
+    // Add body background color based on theme
+    background-color: (
+      if($theme-name == 'neon-horizon', #1a1b26,
+      if($theme-name == 'digital-sunset', #2E3440,
+      if($theme-name == 'retro-wave', #0f0f17,
+      if($theme-name == 'pastel-future', #f8f9fa, #ffffff))))
+    );
+    
+    // Typography
+    .heading {
+      font-family: map-get($theme-map, 'heading-font');
+      color: map-get($theme-map, 'primary');
+      
+      &--accent {
+        color: map-get($theme-map, 'accent');
+      }
+      
+      &--highlight {
+        color: map-get($theme-map, 'highlight');
+      }
+    }
+    
+    // Adjust text color based on background
+    .body-text {
+      font-family: map-get($theme-map, 'body-font');
+      color: if($theme-name == 'pastel-future', 
+        map-get($theme-map, 'primary'),  // Dark text for light theme
+        map-get($theme-map, 'neutral')   // Light text for dark themes
+      );
+    }
+    
+    // Buttons
+    .theme-btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      transition: all 0.3s ease;
+      
+      &--primary {
+        background-color: map-get($theme-map, 'primary');
+        color: map-get($theme-map, 'neutral');
+        
+        &:hover {
+          opacity: 0.9;
+        }
+      }
+      
+      &--secondary {
+        @if $theme-name == 'retro-wave' {
+          background: linear-gradient(
+            to right,
+            map-get(map-get($theme-map, 'secondary-gradient'), 'start'),
+            map-get(map-get($theme-map, 'secondary-gradient'), 'end')
+          );
+        } @else {
+          background-color: map-get($theme-map, 'secondary');
+        }
+        color: map-get($theme-map, 'neutral');
+        
+        &:hover {
+          opacity: 0.9;
+        }
+      }
+      
+      &--outline {
+        border: 2px solid map-get($theme-map, 'primary');
+        color: map-get($theme-map, 'primary');
+        background: transparent;
+        
+        &:hover {
+          background-color: map-get($theme-map, 'primary');
+          color: map-get($theme-map, 'neutral');
+        }
+      }
+    }
+    
+    // Backgrounds
+    .theme-bg {
+      &--primary {
+        background-color: map-get($theme-map, 'primary');
+        color: map-get($theme-map, 'neutral');
+      }
+      
+      &--secondary {
+        @if $theme-name == 'retro-wave' {
+          background: linear-gradient(
+            to right,
+            map-get(map-get($theme-map, 'secondary-gradient'), 'start'),
+            map-get(map-get($theme-map, 'secondary-gradient'), 'end')
+          );
+        } @else {
+          background-color: map-get($theme-map, 'secondary');
+        }
+        color: map-get($theme-map, 'neutral');
+      }
+      
+      &--accent {
+        background-color: map-get($theme-map, 'accent');
+      }
+      
+      &--neutral {
+        background-color: map-get($theme-map, 'neutral');
+      }
+    }
+  }
+}

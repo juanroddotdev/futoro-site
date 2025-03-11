@@ -19,7 +19,7 @@ const heading = reactive({
 </script>
 
 <template>
-  <section class="min-h-screen flex items-center relative overflow-hidden">
+  <section class="min-h-screen flex items-center relative overflow-hidden theme-bg--primary">
     <!-- Background Animation -->
     <!-- <div class="absolute inset-0 bg-neutral-gray">
       <div class="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 opacity-50"></div>
@@ -28,17 +28,14 @@ const heading = reactive({
     </div> -->
     
     <div class="section relative z-10 my-40">
-      <div class="hero-content max-w-auto">
-          <h1 class="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-           {{ heading.two }}
-        </h1>
-
-        <img class="h-auto max-w-full rounded-lg shadow-lg mb-8" :src="heroImage" alt="Design showcase">
-
-        <div class="flex flex-wrap gap-4">
-          <a href="#contact" class="btn-neutral btn-neutral--primary">Get Started</a>
-          <a href="#howItWorks" class="btn-neutral btn-neutral--secondary">How It Works</a>
-        </div>
+      <h1 class="heading heading--accent mb-6">{{ heading.one }}</h1>
+      <!-- <h2 class="heading heading--highlight mb-12">{{ heading.two }}</h2> -->
+      <p class="body-text text-xl mb-8">
+        We craft digital experiences that inspire, engage, and transform.
+      </p>
+      <div class="flex gap-4">
+        <a href="#contact" class="theme-btn theme-btn--secondary">Start Your Project</a>
+        <a href="#services" class="theme-btn theme-btn--outline">Our Services</a>
       </div>
     </div>
   </section>

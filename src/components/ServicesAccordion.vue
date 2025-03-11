@@ -166,34 +166,23 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="services-accordion bg-neutral-grey" ref="accordionRef">
+  <div class="services-accordion theme-bg--neutral" ref="accordionRef">
     <div 
       v-for="service in services" 
       :key="service.id" 
-      class="accordion-item text-neutral-medium border-neutral-900"
+      class="accordion-item body-text border-neutral-900"
       :class="{ 'active': openServiceId === service.id }"
       :data-id="service.id"
     >
-      <div 
-        class="accordion-header"
-        @click="(e) => toggleService(service.id, e)"
-        :aria-expanded="openServiceId === service.id"
-        role="button"
-        tabindex="0"
-        @keydown="(e) => handleKeydown(service.id, e)"
+      <button 
+        class="accordion-header theme-btn theme-btn--outline w-full text-left"
+        @click="toggleService(service.id, $event)"
       >
-        <h2 class="heading-lg">{{ service.title }}</h2>
-        <span class="accordion-icon heading-lg">
-          {{ openServiceId === service.id ? '−' : '+' }}
-        </span>
-      </div>
-      <div 
-        class="accordion-content"
-        :style="{ visibility: openServiceId === service.id ? 'visible' : 'hidden' }"
-        role="region"
-      >
-        <div class="content-inner">
-          <p>{{ service.description }}</p>
+        <h3 class="heading heading--highlight">{{ service.title }}</h3>
+      </button>
+      <div class="accordion-content">
+        <div class="content-inner body-text">
+          {{ service.description }}
         </div>
       </div>
     </div>
@@ -209,19 +198,12 @@ onMounted(async () => {
 }
 
 .accordion-item {
-  /* border: 1px solid; */
-  /* border-radius: 8px; */
   border-left: 0;
   border-right: 0;
   border-bottom: 0;
-  /* margin-bottom: 10px; */
   overflow: hidden;
   position: relative; /* For positioning context */
 }
-
-/* .accordion-item.active {
-  border-color: #646cff;
-} */
 
 .accordion-header {
   display: flex;
@@ -235,17 +217,7 @@ onMounted(async () => {
   z-index: 2;
 }
 
-/* .accordion-header:hover {
-  background-color: #f1f5f9;
-} */
-/* 
-.accordion-item.active .accordion-header {
-  border-top: 2px solid #342E2E;
-} */
-
 .accordion-icon {
-  /* font-size: 20px; */
-  font-weight: bold;
   transition: transform 0.3s ease;
 }
 
@@ -266,28 +238,5 @@ onMounted(async () => {
 .content-inner {
   padding: 0 20px 20px;
   line-height: 1.6;
-}
-
-/* Dark mode adjustments */
-@media (prefers-color-scheme: dark) {
-  .accordion-header {
-    background-color: #2a2a2a;
-  }
-  
-  .accordion-header:hover {
-    background-color: #333333;
-  }
-  
-  .accordion-item.active .accordion-header {
-    background-color: #3a3a3a;
-  }
-  
-  .accordion-item {
-    border-color: #444444;
-  }
-  
-  /* .accordion-item.active {
-    border-color: #646cff;
-  } */
 }
 </style>
