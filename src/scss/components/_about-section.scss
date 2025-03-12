@@ -1,25 +1,39 @@
 @import '../abstracts/variables';
 @import '../abstracts/mixins';
 
+// Let's define the transition-base mixin directly here for now
+@mixin transition-base {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .about-section {
-  padding: $spacing-unit * 8 0;
+  position: relative;
+  transform-style: preserve-3d;
+  transform: translateZ(0);
+  box-shadow: 1px 16px 10px 6px rgba(0, 0, 0, 0.4);
+  
+  @each $theme-name, $theme-map in $themes {
+    .theme-#{$theme-name} & {
+      background-color: map-get($theme-map, 'background');
+    }
+  }
 
   .highlights {
     display: grid;
     gap: $spacing-unit * 2;
     margin-bottom: $spacing-unit * 5;
-    padding: 0 $spacing-unit * 2; // Added padding on sides
+    padding: 0 $spacing-unit * 2;
     
     @include respond-to('md') {
       grid-template-columns: repeat(4, 1fr);
-      padding: 0 $spacing-unit * 4; // More padding on larger screens
+      padding: 0 $spacing-unit * 4;
     }
     
     &__card {
       @include transition-base;
       padding: $spacing-unit * 1.5;
       text-align: center;
-      min-height: 140px; // Set a fixed minimum height
+      min-height: 140px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -78,7 +92,7 @@
           -webkit-background-clip: text;
           background-clip: text;
           color: transparent;
-          font-size: 4rem; // Slightly smaller font size
+          font-size: 4rem;
           font-weight: 700;
           margin-bottom: $spacing-unit;
         }
@@ -86,7 +100,7 @@
     }
 
     p {
-      font-size: 1rem; // Slightly smaller text
+      font-size: 1rem;
       line-height: 1.4;
       
       // Different text colors for each card
@@ -124,37 +138,6 @@
     }
   }
 
-  .journey-section {
-    display: grid;
-    gap: $spacing-unit * 1.5;
-    margin-bottom: $spacing-unit * 5;
-    margin-top: $spacing-unit * 20;
-    
-    @include respond-to('md') {
-      grid-template-columns: repeat(2, 1fr);
-    }
-    
-    &__card {
-      padding: $spacing-unit * 2;
-      
-      @each $theme-name, $theme-map in $themes {
-        .theme-#{$theme-name} & {
-          h3 {
-            color: map-get($theme-map, 'accent');
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: $spacing-unit;
-          }
-          
-          p {
-            color: map-get($theme-map, 'neutral');
-            line-height: 1.75;
-          }
-        }
-      }
-    }
-  }
-
   .expertise-grid {
     display: grid;
     gap: $spacing-unit * 2;
@@ -169,6 +152,8 @@
       @include transition-base;
       max-height: 222px;
       padding: $spacing-unit * 2;
+      will-change: transform, opacity;
+      backface-visibility: hidden;
       
       @each $theme-name, $theme-map in $themes {
         .theme-#{$theme-name} & {
@@ -201,4 +186,35 @@
       }
     }
   }
-}
+
+  .journey-section {
+    display: grid;
+    gap: $spacing-unit * 1.5;
+    margin-bottom: $spacing-unit * 5;
+    margin-top: $spacing-unit * 20;
+    
+    @include respond-to('md') {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    &__card {
+      padding: $spacing-unit * 2;
+      
+      @each $theme-name, $theme-map in $themes {
+        .theme-#{$theme-name} & {
+          h3 {
+            color: map-get($theme-map, 'accent');
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: $spacing-unit;
+          }
+          
+          p {
+            color: map-get($theme-map, 'neutral');
+            line-height: 1.75;
+          }
+        }
+      }
+    }
+  }
+} // This is the closing bracket for .about-section

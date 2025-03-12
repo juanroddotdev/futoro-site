@@ -1,0 +1,66 @@
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+.availability-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.875rem;
+  border-radius: 9999px;
+  transition: all 0.3s ease;
+
+  @each $theme-name, $theme-map in $themes {
+    .theme-#{$theme-name} & {
+      background: rgba(map-get($theme-map, 'secondary'), 0.1);
+      border: 1px solid rgba(map-get($theme-map, 'secondary'), 0.2);
+
+      &:hover {
+        background: rgba(map-get($theme-map, 'secondary'), 0.15);
+        transform: translateY(-1px);
+      }
+
+      .availability-badge__text {
+        color: map-get($theme-map, 'secondary');
+      }
+
+      .availability-badge__response {
+        color: map-get($theme-map, 'secondary');
+      }
+
+      .availability-badge__dot {
+        background: map-get($theme-map, 'secondary');
+        
+        @keyframes pulse-#{$theme-name} {
+          0% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(map-get($theme-map, 'secondary'), 0.7);
+          }
+          
+          70% {
+            transform: scale(1);
+            box-shadow: 0 0 0 6px rgba(map-get($theme-map, 'secondary'), 0);
+          }
+          
+          100% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(map-get($theme-map, 'secondary'), 0);
+          }
+        }
+
+        animation: pulse-#{$theme-name} 2s infinite;
+      }
+    }
+  }
+
+  &__text {
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  &__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+}

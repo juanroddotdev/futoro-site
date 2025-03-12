@@ -42,7 +42,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <section id="about" class="about-section">
+  <section class="about-section relative z-50 bg-background shadow-3d">
     <div class="text-center mb-20">
       <h2 class="heading heading--accent heading-responsive mb-6">About Futoro</h2>
       <div class="max-w-3xl mx-auto">
@@ -79,10 +79,7 @@ onMounted(() => {
 
 </template>
 
-<style lang="scss" scoped>
-.expertise-grid__card {
-  will-change: transform, opacity;
-  backface-visibility: hidden;
-}
+<style lang="scss">
+@import '@/scss/components/about-section';
 </style>
 

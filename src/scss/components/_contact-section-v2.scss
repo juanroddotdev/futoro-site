@@ -1,0 +1,136 @@
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+.contact-v2 {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &__content {
+    max-width: 90rem;
+    width: 100%;
+    text-align: center;
+    padding: 0 2rem;
+  }
+
+  @each $theme-name, $theme-map in $themes {
+    .theme-#{$theme-name} & {
+      background: linear-gradient(
+        135deg,
+        map-get($theme-map, 'primary') 0%,
+        map-get($theme-map, 'secondary') 50%,
+        map-get($theme-map, 'accent') 100%
+      );
+    }
+  }
+
+  &__heading {
+    font-size: clamp(2.5rem, 5vw, 5rem);
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 4rem;
+    color: white;
+
+    .underline {
+      position: relative;
+      white-space: nowrap;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: -0.2em;
+        width: 100%;
+        height: 0.1em;
+        background: currentColor;
+        opacity: 0.3;
+      }
+    }
+  }
+
+  &__cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  &__email {
+    font-size: clamp(1.25rem, 2vw, 2rem);
+    font-weight: 600;
+    color: white;
+    opacity: 0.9;
+    transition: opacity 0.3s ease;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  &__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 8rem;
+    height: 8rem;
+    border-radius: 50%;
+    font-weight: 600;
+    font-size: 1.125rem;
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+
+    &:hover {
+      transform: scale(1.05);
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .contact-v2 {
+    padding: 3rem 1.5rem;
+
+    &__button {
+      width: 6rem;
+      height: 6rem;
+      font-size: 1rem;
+    }
+  }
+}
+// Add this to your main App.vue or layout component
+.main-content {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  margin-bottom: 100vh;
+  
+  @each $theme-name, $theme-map in $themes {
+    .theme-#{$theme-name} & {
+      background-color: (
+        if($theme-name == 'neon-horizon', #1a1b26,
+        if($theme-name == 'digital-sunset', #2E3440,
+        if($theme-name == 'retro-wave', #0f0f17,
+        if($theme-name == 'pastel-future', #f8f9fa, #ffffff))))
+      );
+    }
+  }
+}
+
+.footer {
+  position: relative;
+  z-index: 1;
+}
