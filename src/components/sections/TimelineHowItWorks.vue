@@ -1,171 +1,32 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from "vue";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { steps } from "@/data/howItWorksSteps";
+import { onMounted, computed } from "vue";
+import { timelineAnimations } from "@/animations/timelineHowItWorks";
+import { steps as defaultSteps, alternativeSteps, type ProcessSteps } from "@/data/howItWorksSteps";
 
-gsap.registerPlugin(ScrollTrigger);
+interface Props {
+  useAlternative?: boolean;
+}
 
-// Remove prop definition
-// interface Props {
-//   useTypewriter?: boolean;
-// }
+const props = withDefaults(defineProps<Props>(), {
+  useAlternative: false
+});
 
-// const props = withDefaults(defineProps<Props>(), {
-//   useTypewriter: true
-// });
+const steps = computed<ProcessSteps>(() => 
+  props.useAlternative ? alternativeSteps : defaultSteps
+);
 
 const handleContactClick = () => {
   const contactSection = document.querySelector('#contact');
   contactSection?.scrollIntoView({ behavior: 'smooth' });
 };
 
-// Track which bullets are currently being typed
-const activeSteps = ref<Set<string>>(new Set());
-
-// Slightly adjust timing for Space Grotesk's cleaner letterforms
-const getRandomDelay = () => gsap.utils.random(0.01, 0.04); // Even faster timing
-
 onMounted(() => {
-  // Animate the main timeline line
-  gsap.set('.timeline-line', {
-    scaleY: 0,
-    transformOrigin: 'top center'
-  });
+  // Initialize main timeline animation
+  timelineAnimations.initMainTimeline();
 
-  // Create master timeline
-  const masterTl = gsap.timeline({
-    scrollTrigger: {
-      trigger: '.timeline-container',
-      start: 'top 80%',
-      end: 'bottom 20%',
-      scrub: true,
-    }
-  });
-
-  // Add main stem animation to master timeline
-  masterTl.to('.timeline-line', {
-    scaleY: 1,
-    ease: 'none',
-  });
-
-  // Animate individual items
-  gsap.utils.toArray('.timeline-item').forEach((item, i) => {
-    const stem = (item as Element).querySelector('.timeline-stem');
-    const title = (item as Element).querySelector('.timeline-title');
-    const bullets = (item as Element).querySelectorAll('.timeline-bullet');
-    const isLeft = i % 2 === 0;
-    
-    // Set initial states
-    gsap.set(item, {
-      opacity: 0,
-      x: isLeft ? -50 : 50
-    });
-    
-    gsap.set(stem, {
-      scaleX: 0,
-      transformOrigin: isLeft ? 'left center' : 'right center'
-    });
-
-    // Create timeline for each item
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: item,
-        start: "top center",
-        toggleActions: "play none none reverse"
-      }
-    });
-
-    // Add animations to timeline
-    tl.to(item, {
-      opacity: 1,
-      x: 0,
-      duration: 0.8,
-      ease: "power2.out"
-    })
-    .to(stem, {
-      scaleX: 1,
-      duration: 0.8,
-      ease: "power2.out",
-    }, 0)
-    .to(title, {
-      opacity: 1,
-      duration: 0.4,
-    }, 0.4);
-
-    // Animate each bullet point's text sequentially
-    let delay = 0.8; // Start bullets after stem animation
-    bullets.forEach((bullet, bulletIndex) => {
-      const text = bullet.textContent || '';
-      const key = `${steps[i].id}-${bulletIndex}`;
-      
-      bullet.textContent = '';
-      
-      const words = text.split(' ');
-      words.forEach((word, wordIndex) => {
-        const wordSpan = document.createElement('span');
-        wordSpan.style.display = 'inline-block';
-        wordSpan.style.whiteSpace = 'nowrap';
-        
-        const chars = word.split('');
-        chars.forEach((char) => {
-          const charSpan = document.createElement('span');
-          charSpan.textContent = char;
-          charSpan.style.opacity = '0';
-          charSpan.style.display = 'inline-block';
-          charSpan.style.transform = `rotate(${gsap.utils.random(-0.3, 0.3)}deg)`;
-          wordSpan.appendChild(charSpan);
-        });
-
-        bullet.appendChild(wordSpan);
-        
-        if (wordIndex < words.length - 1) {
-          const spaceSpan = document.createElement('span');
-          spaceSpan.innerHTML = '&nbsp;';
-          spaceSpan.style.opacity = '0';
-          spaceSpan.style.display = 'inline-block';
-          spaceSpan.style.width = '0.4em';
-          bullet.appendChild(spaceSpan);
-        }
-      });
-
-      // Animate each character and space
-      const allSpans = bullet.querySelectorAll('span span, span:not(:has(span))');
-      allSpans.forEach((span) => {
-        tl.to(span, {
-          opacity: 1,
-          duration: 0.01,
-          ease: "none",
-          onStart: () => {
-            gsap.to(bullet, {
-              y: 1,
-              duration: 0.03,
-              yoyo: true,
-              repeat: 1
-            });
-          }
-        }, delay);
-        delay += getRandomDelay();
-      });
-    });
-  });
-
-  // Add cursor following logic
-  const btn = document.querySelector('.touch-circle-btn');
-  if (!btn) return;
-  
-  const updateCursor = (e: MouseEvent) => {
-    btn.style.setProperty('--cursor-x', `${e.clientX}`);
-    btn.style.setProperty('--cursor-y', `${e.clientY}`);
-  };
-
-  btn.addEventListener('mousemove', updateCursor);
-  btn.addEventListener('mouseenter', updateCursor);
-  
-  // Clean up
-  onUnmounted(() => {
-    btn.removeEventListener('mousemove', updateCursor);
-    btn.removeEventListener('mouseenter', updateCursor);
+  // Animate each timeline item
+  document.querySelectorAll('.timeline-item').forEach((item, index) => {
+    timelineAnimations.animateTimelineItems(item, index);
   });
 });
 </script>

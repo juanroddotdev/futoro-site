@@ -3,13 +3,11 @@ import { ref } from 'vue'
 import Navbar from '@/components/layout/Navbar.vue';
 import ThemeSwitcher from '@/components/ThemeSwitcher.vue';
 import HeroSection from './components/sections/HeroSection.vue';
-import AboutSectionAlt from './components/sections/AboutSectionAlt.vue';
-// import AboutSection from './components/sections/AboutSection.vue';
 import ServicesSection from './components/sections/ServicesSection.vue';
-// import HowItWorksSection from './components/sections/HowItWorksSection.vue';
 import TimelineHowItWorks from './components/sections/TimelineHowItWorks.vue';
 import StrugglesOffersTabs from './components/sections/StrugglesOffersTabs.vue';
 import ContactSection from '@/components/sections/ContactSection.vue';
+import AboutSectionAlt from './components/sections/AboutSectionAlt.vue';
 
 const currentTheme = ref('theme-neon-horizon');
 const isThemeTransitioning = ref(false);

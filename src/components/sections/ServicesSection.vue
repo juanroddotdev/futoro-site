@@ -1,20 +1,11 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
-import gsap from 'gsap';
-import ServicesData from '../ServicesData.vue';
+import { servicesSectionAnimations } from '@/animations/servicesSection';
+import { services } from '@/data/services';
+import ServicesData from '@/components/ServicesData.vue';
 
 onMounted(() => {
-  gsap.from('.service-card', {
-    scrollTrigger: {
-      trigger: '.services-grid',
-      start: 'top 80%',
-    },
-    y: 50,
-    opacity: 0,
-    duration: 0.8,
-    stagger: 0.2,
-    ease: 'power2.out'
-  });
+  servicesSectionAnimations.cardsFadeIn();
 });
 </script>
 
