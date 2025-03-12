@@ -10,28 +10,27 @@ const animateCards = (show: 'struggles' | 'solutions') => {
   const cards = show === 'struggles' ? '.struggle-card' : '.solution-card';
   const otherCards = show === 'struggles' ? '.solution-card' : '.struggle-card';
 
-  // Simultaneously animate both sets of cards
+  // Fade out current cards
   gsap.to(otherCards, {
-    x: show === 'struggles' ? -100 : 100,
     opacity: 0,
     duration: 0.3,
     stagger: 0.02,
+    display: 'none'
   });
 
+  // Fade in new cards
   gsap.fromTo(cards,
     { 
-      x: show === 'struggles' ? 100 : -100, 
       opacity: 0,
       display: 'none'
     },
     {
-      x: 0,
       opacity: 1,
       duration: 0.3,
       stagger: 0.02,
       display: 'block',
       ease: 'power2.out',
-      delay: 0.1 // Slight delay to create pushing effect
+      delay: 0.1
     }
   );
 };
@@ -39,8 +38,8 @@ const animateCards = (show: 'struggles' | 'solutions') => {
 // Initial animation for first load
 onMounted(() => {
   gsap.fromTo('.struggle-card', 
-    { x: 100, opacity: 0 },
-    { x: 0, opacity: 1, duration: 0.3, stagger: 0.02, ease: 'power2.out' }
+    { opacity: 0 },
+    { opacity: 1, duration: 0.3, stagger: 0.02, ease: 'power2.out' }
   );
 });
 
@@ -53,7 +52,7 @@ watch(activeTab, (newTab) => {
 <template>
   <section class="section py-32">
     <div class="max-w-7xl mx-auto px-4">
-      <h1 class="heading heading-responsive text-center mb-12">From Frustration to Fantastic: Website Solutions</h1>
+      <h1 class="heading-responsive gradient-text text-center mb-40">From Frustration to Fantastic: Website Solutions</h1>
       <!-- Tab Headers -->
       <div class="flex justify-center mb-12">
         <div class="btn-round-pill-container">
@@ -63,22 +62,22 @@ watch(activeTab, (newTab) => {
           ></div>
           <button 
             @click="activeTab = 'struggles'"
-            class="btn-round-pill"
+            class="btn-round-pill btn-round--medium"
             :class="{ 'active': activeTab === 'struggles' }"
           >
             <span class="inline-flex items-center justify-center">
-              <span v-html="icons.struggle.confusion" class="w-5 h-5 mr-2"></span>
-              <span>Common Struggles</span>
+              <span v-html="icons.struggle.poorUX" class="w-5 h-5 mr-2"></span>
+              <span>Common Hurdles</span>
             </span>
           </button>
           <button 
             @click="activeTab = 'solutions'"
-            class="btn-round-pill"
+            class="btn-round-pill btn-round--medium"
             :class="{ 'active': activeTab === 'solutions' }"
           >
             <span class="inline-flex items-center justify-center">
-              <span v-html="icons.solution.expert" class="w-5 h-5 mr-2"></span>
-              <span>Our Solutions</span>
+              <span v-html="icons.solution.expertGuidance" class="w-5 h-5 mr-2"></span>
+              <span>Clear Solutions</span>
             </span>
           </button>
         </div>
@@ -180,5 +179,12 @@ watch(activeTab, (newTab) => {
 .solution-card {
   will-change: transform, opacity;
   backface-visibility: hidden;
+}
+
+// Only keep the slide-right animation as it's specific to this component
+.btn-round-pill-slider {
+  &.slide-right {
+    transform: translateX(100%);
+  }
 }
 </style>

@@ -5,6 +5,29 @@
     transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     
+    // Add theme-specific CSS custom properties
+    @if $theme-name == 'neon-horizon' {
+      --neon-horizon-secondary: #{$neon-horizon-secondary};
+      --neon-horizon-accent: #{$neon-horizon-accent};
+      --neon-horizon-neutral: #{$neon-horizon-neutral};
+    }
+    @if $theme-name == 'digital-sunset' {
+      --digital-sunset-secondary: #{$digital-sunset-secondary};
+      --digital-sunset-accent: #{$digital-sunset-accent};
+      --digital-sunset-neutral: #{$digital-sunset-neutral};
+    }
+    @if $theme-name == 'retro-wave' {
+      --retro-wave-secondary: #{$retro-wave-secondary-start};
+      --retro-wave-accent: #{$retro-wave-accent};
+      --retro-wave-neutral: #{$retro-wave-neutral};
+    }
+    @if $theme-name == 'pastel-future' {
+      --pastel-future-secondary: #{$pastel-future-secondary};
+      --pastel-future-accent: #{$pastel-future-accent};
+      --pastel-future-primary-dark: #{$pastel-future-primary-dark};
+      --pastel-future-neutral: #{$pastel-future-neutral};
+    }
+
     // Add body background color based on theme
     background-color: (
       if($theme-name == 'neon-horizon', #1a1b26,

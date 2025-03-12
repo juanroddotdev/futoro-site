@@ -13,11 +13,30 @@
   justify-content: center;
 }
 
+@mixin flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 @mixin section-padding {
   padding: $spacing-unit * 2;
   
   @include respond-to('md') {
     padding: $spacing-unit * 3;
+  }
+}
+
+@mixin gradient-text($start-color, $end-color) {
+  background: linear-gradient(to right, $start-color, $end-color);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  background-size: 200% auto;
+  background-position: 0% center;
+  
+  &:hover {
+    background-position: 100% center;
   }
 }
 

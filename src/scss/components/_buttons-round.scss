@@ -99,20 +99,42 @@ $border-radius: 99px;
     .theme-#{$theme-name} & {
       @if $is-outline {
         background-color: transparent;
-        border: 2px solid map-get($theme-map, 'secondary');
-        color: map-get($theme-map, 'secondary');
+        // For Retro Wave theme, use the end color of the gradient for outline
+        @if $theme-name == 'retro-wave' {
+          border: 2px solid map-get(map-get($theme-map, 'secondary-gradient'), 'end');
+          color: map-get(map-get($theme-map, 'secondary-gradient'), 'end');
+
+          &:hover:not(.active) {
+            background-color: rgba(map-get(map-get($theme-map, 'secondary-gradient'), 'end'), 0.1);
+          }
+
+          &:active:not(.active) {
+            background-color: rgba(map-get(map-get($theme-map, 'secondary-gradient'), 'end'), 0.2);
+          }
+        } @else {
+          border: 2px solid map-get($theme-map, 'secondary');
+          color: map-get($theme-map, 'secondary');
+
+          &:hover:not(.active) {
+            background-color: rgba(map-get($theme-map, 'secondary'), 0.1);
+          }
+
+          &:active:not(.active) {
+            background-color: rgba(map-get($theme-map, 'secondary'), 0.2);
+          }
+        }
 
         &.active {
-          background-color: map-get($theme-map, 'secondary');
+          @if $theme-name == 'retro-wave' {
+            background: linear-gradient(
+              to right,
+              map-get(map-get($theme-map, 'secondary-gradient'), 'start'),
+              map-get(map-get($theme-map, 'secondary-gradient'), 'end')
+            );
+          } @else {
+            background-color: map-get($theme-map, 'secondary');
+          }
           color: map-get($theme-map, 'primary');
-        }
-
-        &:hover:not(.active) {
-          background-color: rgba(map-get($theme-map, 'secondary'), 0.1);
-        }
-
-        &:active:not(.active) {
-          background-color: rgba(map-get($theme-map, 'secondary'), 0.2);
         }
       } @else {
         @if map-has-key($theme-map, 'secondary-gradient') {

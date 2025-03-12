@@ -1,7 +1,8 @@
 //TODO: smooth out accordion transitions
 <script setup lang="ts">
-import { ref, onMounted, nextTick } from 'vue';
+import { ref, onMounted, nextTick, computed } from 'vue';
 import { gsap } from 'gsap';
+
 
 interface Service {
   id: number;
@@ -14,6 +15,7 @@ const props = defineProps<{
   defaultOpenIndex?: number;
 }>();
 
+
 // Track which service is currently open
 const openServiceId = ref(props.services[props.defaultOpenIndex || 0]?.id);
 
@@ -22,118 +24,56 @@ const accordionRef = ref<HTMLElement | null>(null);
 
 // Toggle accordion item
 const toggleService = async (serviceId: number, event?: Event) => {
-  // Prevent default behavior to avoid page scrolling
   if (event) {
     event.preventDefault();
   }
   
-  // Get the current scroll position
-  const scrollPosition = window.scrollY;
-  
   if (openServiceId.value === serviceId) {
-    // Close the current item
     const content = document.querySelector(`.accordion-item[data-id="${serviceId}"] .accordion-content`);
     if (content) {
-      // Get the height before animation to maintain container size
-      const contentHeight = content.scrollHeight;
-      const accordionHeight = accordionRef.value?.offsetHeight || 0;
-      
-      // Set a fixed height on the accordion container to prevent layout shifts
-      if (accordionRef.value) {
-        gsap.set(accordionRef.value, { height: accordionHeight });
-      }
-      
       await animateClose(content);
       openServiceId.value = -1;
-      
-      // Animate the accordion container back to its natural height
-      if (accordionRef.value) {
-        gsap.to(accordionRef.value, { 
-          height: 'auto', 
-          duration: 0.3, 
-          ease: 'power2.out',
-          onComplete: () => {
-            // Reset to natural flow after animation
-            gsap.set(accordionRef.value, { clearProps: 'height' });
-          }
-        });
-      }
     }
   } else {
-    // If another item is open, close it first
     if (openServiceId.value !== -1) {
-      // Get the current accordion height before any changes
-      const accordionHeight = accordionRef.value?.offsetHeight || 0;
-      
-      // Fix the height of the accordion container
-      if (accordionRef.value) {
-        gsap.set(accordionRef.value, { height: accordionHeight });
-      }
-      
       const oldContent = document.querySelector(`.accordion-item[data-id="${openServiceId.value}"] .accordion-content`);
       if (oldContent) {
         await animateClose(oldContent);
       }
     }
     
-    // Open the new item
     openServiceId.value = serviceId;
     await nextTick();
     
     const newContent = document.querySelector(`.accordion-item[data-id="${serviceId}"] .accordion-content`);
     if (newContent) {
       await animateOpen(newContent);
-      
-      // Animate the accordion container to its new height
-      if (accordionRef.value) {
-        gsap.to(accordionRef.value, { 
-          height: 'auto', 
-          duration: 0.3, 
-          ease: 'power2.out',
-          onComplete: () => {
-            // Reset to natural flow after animation
-            gsap.set(accordionRef.value, { clearProps: 'height' });
-          }
-        });
-      }
     }
   }
-  
-  // Maintain the same scroll position
-  window.scrollTo(0, scrollPosition);
 };
 
 // Animation functions
 const animateOpen = (element: Element) => {
-  // First measure the content
   const contentInner = element.querySelector('.content-inner');
   const contentHeight = contentInner ? contentInner.scrollHeight : 0;
   
-  // Set initial state
   gsap.set(element, { 
-    height: 0, 
-    opacity: 0, 
-    overflow: 'hidden',
+    height: 0,
     visibility: 'visible'
   });
   
-  // Animate to the exact measured height
   return gsap.to(element, { 
-    duration: 0.4, 
     height: contentHeight,
-    opacity: 1, 
-    ease: 'power2.out'
+    duration: 0.3,
+    ease: 'power1.inOut'
   });
 };
 
 const animateClose = (element: Element) => {
-  // Animate to zero height
   return gsap.to(element, { 
-    duration: 0.4, 
     height: 0,
-    opacity: 0,
-    ease: 'power2.in',
-    overflow: 'hidden'
+    duration: 0.3,
+    ease: 'power1.inOut'
   });
 };
 
@@ -167,18 +107,33 @@ onMounted(async () => {
 
 <template>
   <div class="services-accordion theme-bg--neutral" ref="accordionRef">
+
+
     <div 
       v-for="service in services" 
       :key="service.id" 
-      class="accordion-item body-text border-neutral-900"
+      class="accordion-item body-text"
       :class="{ 'active': openServiceId === service.id }"
       :data-id="service.id"
     >
       <button 
-        class="accordion-header theme-btn theme-btn--outline w-full text-left"
+        class="accordion-header theme-btn theme-btn--outline"
         @click="toggleService(service.id, $event)"
       >
-        <h3 class="heading heading--highlight">{{ service.title }}</h3>
+        <h3 class="subheading-responsive heading--highlight">{{ service.title }}</h3>
+        <span 
+          class="accordion-icon"
+          :class="{ 
+            'gradient-fill': openServiceId === service.id,
+            'theme-text--secondary': openServiceId !== service.id,
+            'rotate': openServiceId === service.id 
+          }"
+        >
+          <svg class="plus-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </span>
       </button>
       <div class="accordion-content">
         <div class="content-inner body-text">
@@ -189,54 +144,58 @@ onMounted(async () => {
   </div>
 </template>
 
-<style scoped>
-.services-accordion {
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
-  position: relative; /* For positioning context */
-}
-
-.accordion-item {
-  border-left: 0;
-  border-right: 0;
-  border-bottom: 0;
-  overflow: hidden;
-  position: relative; /* For positioning context */
-}
-
-.accordion-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 0;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  user-select: none; /* Prevent text selection */
-  position: relative; /* Keep header in place */
-  z-index: 2;
-}
+<style lang="scss">
+@import '@/scss/components/accordion';
 
 .accordion-icon {
-  transition: transform 0.3s ease;
-}
+  @apply transition-transform duration-300 ease-in-out;
+  
+  .plus-icon {
+    @apply w-6 h-6;
+    
+    line {
+      transition: stroke 0.3s ease;
+    }
+  }
+  
+  &.rotate {
+    transform: rotate(45deg);
+  }
 
-.accordion-item.active .accordion-icon {
-  transform: rotate(0deg);
-}
+  // Default colors for each theme
+  .theme-neon-horizon & .plus-icon line {
+    stroke: var(--neon-horizon-neutral);
+  }
+  
+  .theme-digital-sunset & .plus-icon line {
+    stroke: var(--digital-sunset-neutral);
+  }
+  
+  .theme-retro-wave & .plus-icon line {
+    stroke: var(--retro-wave-neutral);
+  }
+  
+  .theme-pastel-future & .plus-icon line {
+    stroke: var(--pastel-future-primary-dark); // Using the darker shade for better contrast
+  }
 
-.accordion-content {
-  overflow: hidden;
-  will-change: height, opacity; /* Optimize for animations */
-  height: 0;
-  opacity: 0;
-  visibility: hidden;
-  position: relative;
-  z-index: 1;
-}
-
-.content-inner {
-  padding: 0 20px 20px;
-  line-height: 1.6;
+  // Gradient styles for different themes when active
+  &.gradient-fill {
+    .theme-neon-horizon & .plus-icon line {
+      stroke: var(--neon-horizon-secondary);
+    }
+    
+    .theme-digital-sunset & .plus-icon line {
+      stroke: var(--digital-sunset-secondary);
+    }
+    
+    .theme-retro-wave & .plus-icon line {
+      stroke: var(--retro-wave-secondary);
+    }
+    
+    .theme-pastel-future & .plus-icon line {
+      stroke: var(--pastel-future-secondary);
+    }
+  }
 }
 </style>

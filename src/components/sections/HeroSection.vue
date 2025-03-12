@@ -27,7 +27,7 @@ const heroContent = ref<HeroContent>(getRandomHeroContent());
     
     <div class="section relative z-10 my-40">
       <h1 class="heading--accent mb-6 headline heading-responsive">{{ heroContent.headline }}</h1>
-      <p class=" mb-8 subheadline subheading-responsive">
+      <p class="mb-8 subheadline subheading-responsive heading heading--highlight">
         {{ heroContent.subheadline }}
       </p>
       <div class="flex gap-4">
