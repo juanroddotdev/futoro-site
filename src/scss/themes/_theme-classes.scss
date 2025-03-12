@@ -112,5 +112,63 @@
         color: transparent;
       }
     }
+
+    // Add theme-specific gradient text styles
+    .theme-text--gradient {
+      background-clip: text !important;
+      -webkit-background-clip: text !important;
+      color: transparent !important;
+      display: inline-block; // This ensures the background-clip works properly
+      
+      &.gradient-normal {
+        @if $theme-name == 'retro-wave' {
+          background-image: linear-gradient(
+            to right,
+            map-get($theme-map, 'accent'),
+            map-get($theme-map, 'highlight')
+          );
+        } @else {
+          background-image: linear-gradient(
+            to right,
+            map-get($theme-map, 'secondary'),
+            map-get($theme-map, 'accent')
+          );
+        }
+      }
+
+      &.gradient-reverse {
+        @if $theme-name == 'retro-wave' {
+          background-image: linear-gradient(
+            to left,
+            map-get($theme-map, 'accent'),
+            map-get($theme-map, 'highlight')
+          );
+        } @else {
+          background-image: linear-gradient(
+            to left,
+            map-get($theme-map, 'secondary'),
+            map-get($theme-map, 'accent')
+          );
+        }
+      }
+    }
+
+    // Add theme-specific gradient backgrounds
+    .theme-bg--gradient {
+      background: if($theme-name == 'retro-wave',
+        linear-gradient(to right, map-get($theme-map, 'accent'), map-get($theme-map, 'highlight')),
+        linear-gradient(to right, map-get($theme-map, 'secondary'), map-get($theme-map, 'accent'))
+      );
+    }
+
+    // If you need a Tailwind layer, wrap it like this:
+    @layer components {
+      .theme-bg--gradient {
+        background: if($theme-name == 'retro-wave',
+          linear-gradient(to right, map-get($theme-map, 'accent'), map-get($theme-map, 'highlight')),
+          linear-gradient(to right, map-get($theme-map, 'secondary'), map-get($theme-map, 'accent'))
+        );
+      }
+    }
   }
 }

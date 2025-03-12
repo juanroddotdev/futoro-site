@@ -6,29 +6,20 @@
 @import 'base/reset';
 @import 'base/fonts';
 @import 'base/typography';
-@import 'base/debug'; // Add debug stylesheet
+@import 'base/debug';
 @import 'base/animations';
 
 @import 'components/buttons';
-@import 'components/buttons-round';  // Added new buttons-round component
-// @import 'components/cards';
+@import 'components/buttons-round';
 @import 'components/form';
 @import 'components/transitions';
 @import 'components/headings';
 @import 'components/accordion';
+@import 'components/timeline';
 
-// @import 'layout/header';
-// @import 'layout/navigation';
-// @import 'layout/footer';
 @import 'layout/grid';
 
-// @import 'pages/home';
-// @import 'pages/about';
-// @import 'pages/contact';
-
 @import 'themes/neutral';
-// @import 'themes/dark';
-// @import 'themes/admin';
 @import 'themes/theme-classes';
 
 // Vendors (Tailwind last)

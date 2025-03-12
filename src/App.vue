@@ -6,6 +6,7 @@ import HeroSection from './components/sections/HeroSection.vue';
 import AboutSection from './components/sections/AboutSection.vue';
 import ServicesSection from './components/sections/ServicesSection.vue';
 import HowItWorksSection from './components/sections/HowItWorksSection.vue';
+import TimelineHowItWorks from './components/sections/TimelineHowItWorks.vue';
 import StrugglesOffersTabs from './components/sections/StrugglesOffersTabs.vue';
 import ContactSection from '@/components/sections/ContactSection.vue';
 
@@ -64,7 +65,8 @@ const handleThemeChange = (newTheme: string) => {
         <HeroSection />
         <StrugglesOffersTabs />
         <ServicesSection />
-        <HowItWorksSection />
+        <!-- <HowItWorksSection /> -->
+        <TimelineHowItWorks :use-typewriter="true"  />
         <AboutSection />
         <ContactSection />
       </main>

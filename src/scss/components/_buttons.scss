@@ -14,6 +14,7 @@
   border-radius: 300px;
   transition: 0.3s all linear;
   -webkit-backface-visibility: hidden;
+  
   &--primary {
     background-color: map-get($colors, 'neutral-900');
     border-color: map-get($colors, 'neutral-500');
@@ -33,50 +34,36 @@
       }
     }
   }
+  
   &--secondary {
     background-color: transparent;
-    /* background-color: map-get($colors, 'neutral-500'); */
     border-color: map-get($colors, 'neutral-900');
     color: map-get($colors, 'neutral-900');
     border: 3px solid;
+    
     &:hover {
       border-color: map-get($colors, 'neutral-700');
       color: map-get($colors, 'neutral-700');
       font-weight: 500;
       opacity: 0.8;
     }
-    &-light {}
-  }
-  &--tertiary {
-    &:hover {}
-    &-light {}
   }
 }
 
-/* .content {
-  container-type: inline-size;
-  width: 100vw;
-
-  :is(p, ul, ol, h1) {
-     @container (width >= 0) {
-      line-height: 1.5;
-      font-size: clamp(map-get($fontSize, 'lg'), 5cqw, map-get($fontSize, '5xl'));
-    }
-  }
-} */
-
 button {
-  @include themed {
-    &.active {
-      background-color: var(--secondary);
-      color: var(--primary);
-    }
+  @each $theme-name, $theme-map in $themes {
+    .theme-#{$theme-name} & {
+      &.active {
+        background-color: map-get($theme-map, 'secondary');
+        color: map-get($theme-map, 'primary');
+      }
 
-    &:not(.active) {
-      color: var(--neutral);
-      
-      &:hover {
-        color: var(--secondary);
+      &:not(.active) {
+        color: map-get($theme-map, 'neutral');
+        
+        &:hover {
+          color: map-get($theme-map, 'secondary');
+        }
       }
     }
   }

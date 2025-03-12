@@ -6,42 +6,39 @@ import gsap from 'gsap';
 
 const activeTab = ref('struggles');
 
-const animateCards = (show: 'struggles' | 'solutions') => {
-  const cards = show === 'struggles' ? '.struggle-card' : '.solution-card';
-  const otherCards = show === 'struggles' ? '.solution-card' : '.struggle-card';
-
-  // Fade out current cards
-  gsap.to(otherCards, {
-    opacity: 0,
-    duration: 0.3,
-    stagger: 0.02,
-    display: 'none'
-  });
-
-  // Fade in new cards
-  gsap.fromTo(cards,
-    { 
-      opacity: 0,
-      display: 'none'
-    },
-    {
-      opacity: 1,
-      duration: 0.3,
-      stagger: 0.02,
-      display: 'block',
-      ease: 'power2.out',
-      delay: 0.1
-    }
-  );
-};
-
-// Initial animation for first load
+// First, ensure both card sets are properly initialized
 onMounted(() => {
+  // Set initial state for solutions cards
+  gsap.set('.solution-card', { opacity: 0 });
+  // Fade in struggle cards
   gsap.fromTo('.struggle-card', 
     { opacity: 0 },
     { opacity: 1, duration: 0.3, stagger: 0.02, ease: 'power2.out' }
   );
 });
+
+const animateCards = (show: 'struggles' | 'solutions') => {
+  const cards = show === 'struggles' ? '.struggle-card' : '.solution-card';
+  const otherCards = show === 'struggles' ? '.solution-card' : '.struggle-card';
+
+  // Create a timeline for smoother sequencing
+  const tl = gsap.timeline();
+
+  // Fade out current cards
+  tl.to(otherCards, {
+    opacity: 0,
+    duration: 0.3,
+    stagger: 0.02
+  });
+
+  // Fade in new cards
+  tl.to(cards, {
+    opacity: 1,
+    duration: 0.3,
+    stagger: 0.02,
+    ease: 'power2.out'
+  }, "<0.2"); // Start slightly before the fade out completes
+};
 
 // Watch for tab changes
 watch(activeTab, (newTab) => {
@@ -83,11 +80,11 @@ watch(activeTab, (newTab) => {
         </div>
       </div>
       <!-- Tab Content -->
-      <div class="relative" style="min-height: 800px;"> <!-- Increased min-height -->
+      <div class="relative" style="min-height: 800px;">
         <!-- Struggles Tab -->
         <div 
-          v-show="activeTab === 'struggles'"
-          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 absolute w-full"
+          :style="{ display: activeTab === 'struggles' ? 'grid' : 'none' }"
+          class="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 absolute w-full"
           style="transform-origin: center; backface-visibility: hidden;"
         >
           <div 
@@ -110,8 +107,8 @@ watch(activeTab, (newTab) => {
 
         <!-- Solutions Tab -->
         <div 
-          v-show="activeTab === 'solutions'"
-          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 absolute w-full"
+          :style="{ display: activeTab === 'solutions' ? 'grid' : 'none' }"
+          class="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 absolute w-full"
           style="transform-origin: center; backface-visibility: hidden;"
         >
           <div 

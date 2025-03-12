@@ -1,13 +1,12 @@
 
 <script setup lang="ts">
-import { onMounted, reactive, computed } from "vue";
+import { onMounted, computed } from "vue";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { steps as defaultSteps, alternativeSteps, type ProcessSteps } from "@/data/howItWorksSteps";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Props to allow switching between versions
 interface Props {
   useAlternative?: boolean;
 }
@@ -19,6 +18,11 @@ const props = withDefaults(defineProps<Props>(), {
 const steps = computed<ProcessSteps>(() => 
   props.useAlternative ? alternativeSteps : defaultSteps
 );
+
+const handleContactClick = () => {
+  const contactSection = document.querySelector('#contact');
+  contactSection?.scrollIntoView({ behavior: 'smooth' });
+};
 
 onMounted(() => {
   // Set initial state for all cards
@@ -46,7 +50,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <section id="howItWorks" class="section min-h-screen py-32 theme-bg--secondary">
+  <section id="howItWorks" class="section min-h-screen py-32">
     <div class="text-center mb-24">
       <h2 class="heading">How It Works</h2>
       <p class="body-text text-lg max-w-2xl mx-auto mt-4">
@@ -86,9 +90,13 @@ onMounted(() => {
     </div>
 
     <div class="text-center mt-24">
-      <a href="#contact" class="theme-btn theme-btn--primary">
+      <button 
+        type="button"
+        class="btn-round-large-secondary"
+        @click="handleContactClick"
+      >
         Start Your Project
-      </a>
+      </button>
     </div>
   </section>
 </template>
@@ -98,11 +106,4 @@ onMounted(() => {
   @apply text-4xl md:text-5xl font-bold;
 }
 
-.btn-neutral {
-  @apply px-6 py-3 rounded-lg font-semibold transition-all duration-300;
-}
-
-.btn-neutral--primary {
-  @apply bg-secondary text-white hover:bg-secondary/80;
-}
 </style>
