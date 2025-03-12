@@ -1,0 +1,78 @@
+.theme-switcher {
+  @apply fixed bottom-4 right-4 z-50;
+}
+
+.theme-toggle-btn {
+  @apply w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  position: relative;
+  color: inherit;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 50%;
+    padding: 2px;
+    background: var(--current-theme-gradient);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border-radius: 50%;
+    background: var(--current-theme-gradient);
+    opacity: 0.2;
+    filter: blur(4px);
+    z-index: -1;
+    transition: all 0.3s ease;
+  }
+  
+  &:hover::after {
+    opacity: 0.3;
+    filter: blur(6px);
+  }
+  
+  &.active {
+    @apply bg-opacity-20;
+    transform: rotate(180deg);
+    
+    &::after {
+      opacity: 0.4;
+      filter: blur(8px);
+    }
+  }
+}
+
+.theme-list-container {
+  @apply absolute bottom-full right-0 mb-2;
+  min-width: 200px;
+}
+
+.theme-list {
+  @apply bg-white/10 backdrop-blur-lg rounded-lg p-2 shadow-lg;
+}
+
+.theme-list-item {
+  @apply w-full text-left px-4 py-2 rounded-md mb-1 last:mb-0 transition-all duration-300;
+  
+  &:hover {
+    @apply bg-white/10;
+  }
+  
+  .active-indicator {
+    @apply w-2 h-2 rounded-full bg-white;
+  }
+}

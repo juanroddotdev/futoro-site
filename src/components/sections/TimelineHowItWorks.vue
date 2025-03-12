@@ -33,13 +33,18 @@ onMounted(() => {
     transformOrigin: 'top center'
   });
 
-  gsap.to('.timeline-line', {
+  // Create master timeline
+  const masterTl = gsap.timeline({
     scrollTrigger: {
       trigger: '.timeline-container',
       start: 'top 80%',
       end: 'bottom 20%',
       scrub: true,
-    },
+    }
+  });
+
+  // Add main stem animation to master timeline
+  masterTl.to('.timeline-line', {
     scaleY: 1,
     ease: 'none',
   });
@@ -62,12 +67,11 @@ onMounted(() => {
       transformOrigin: isLeft ? 'left center' : 'right center'
     });
 
-    // Create timeline for coordinated animations
+    // Create timeline for each item
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: item,
-        start: "top 80%",
-        end: "top 60%",
+        start: "top center",
         toggleActions: "play none none reverse"
       }
     });
@@ -90,14 +94,13 @@ onMounted(() => {
     }, 0.4);
 
     // Animate each bullet point's text sequentially
+    let delay = 0.8; // Start bullets after stem animation
     bullets.forEach((bullet, bulletIndex) => {
       const text = bullet.textContent || '';
       const key = `${steps[i].id}-${bulletIndex}`;
       
-      // Clear the text content initially
       bullet.textContent = '';
       
-      // Typewriter effect code
       const words = text.split(' ');
       words.forEach((word, wordIndex) => {
         const wordSpan = document.createElement('span');
@@ -230,7 +233,7 @@ onMounted(() => {
     </div>
 
     <div class="flex justify-center mt-24 relative">
-      <div class="absolute left-1/2 transform -translate-x-1/2 -top-4 w-1 h-4 timeline-connector"></div>
+      <!-- <div class="absolute left-1/2 transform -translate-x-1/2 -top-4 w-1 h-4 timeline-connector"></div> -->
       <button 
         type="button"
         class="touch-circle-btn btn-round--outline-secondary"

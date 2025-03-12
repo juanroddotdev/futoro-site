@@ -3,9 +3,10 @@ import { ref } from 'vue'
 import Navbar from '@/components/layout/Navbar.vue';
 import ThemeSwitcher from '@/components/ThemeSwitcher.vue';
 import HeroSection from './components/sections/HeroSection.vue';
-import AboutSection from './components/sections/AboutSection.vue';
+import AboutSectionAlt from './components/sections/AboutSectionAlt.vue';
+// import AboutSection from './components/sections/AboutSection.vue';
 import ServicesSection from './components/sections/ServicesSection.vue';
-import HowItWorksSection from './components/sections/HowItWorksSection.vue';
+// import HowItWorksSection from './components/sections/HowItWorksSection.vue';
 import TimelineHowItWorks from './components/sections/TimelineHowItWorks.vue';
 import StrugglesOffersTabs from './components/sections/StrugglesOffersTabs.vue';
 import ContactSection from '@/components/sections/ContactSection.vue';
@@ -66,8 +67,9 @@ const handleThemeChange = (newTheme: string) => {
         <StrugglesOffersTabs />
         <ServicesSection />
         <!-- <HowItWorksSection /> -->
-        <TimelineHowItWorks :use-typewriter="true"  />
-        <AboutSection />
+        <TimelineHowItWorks  />
+        <AboutSectionAlt />
+        <!-- <AboutSection /> -->
         <ContactSection />
       </main>
       <footer class="footer theme-bg--neutral">

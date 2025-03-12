@@ -33,7 +33,7 @@ const heroContent = ref<HeroContent>(getRandomHeroContent());
       <div class="flex gap-4">
         <a 
           href="#contact" 
-          class="btn-round-large-secondary cta"
+          class="btn-round-large-primary cta"
         >
           {{ heroContent.cta }}
         </a>

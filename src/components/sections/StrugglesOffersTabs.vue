@@ -88,7 +88,7 @@ watch(activeTab, (newTab) => {
         </div>
       </div>
       <!-- Tab Content -->
-      <div class="relative" style="min-height: 800px;">
+      <div class="relative" style="min-height: 900px;">
         <!-- Struggles Tab -->
         <div 
           :style="{ display: activeTab === 'struggles' ? 'grid' : 'none' }"
