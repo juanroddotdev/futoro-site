@@ -6,6 +6,9 @@ type IconCategory = {
 type IconSet = {
   struggle: IconCategory;
   solution: IconCategory;
+  happyFace: string;
+  happyFaceRight: string;
+  sadFaceLeft: string;  // Add new type
 };
 
 export const icons: IconSet = {
@@ -71,7 +74,21 @@ export const icons: IconSet = {
     mobilePriority: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
     </svg>`,
-  }
+  },
+  // Add happy face as its own category
+  happyFace: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+  </svg>`,
+  // Add new right-looking happy face
+  happyFaceRight: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M10 10h.01M16 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.5 10l1 0M16.5 10l1 0"></path>
+  </svg>`,
+  // Add new sad face looking left
+  sadFaceLeft: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M8 10h.01M14 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.5 10l1 0M13.5 10l1 0"></path>
+  </svg>`
 };
 
 export const plusIcon = `<svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

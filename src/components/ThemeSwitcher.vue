@@ -54,6 +54,7 @@ const toggleThemeList = () => {
       @click="toggleThemeList"
       class="theme-toggle-btn"
       :class="{ 'active': showThemes }"
+      :style="{ '--current-theme-gradient': currentThemeGradient }"
     >
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="8" r="4"/>
@@ -63,8 +64,8 @@ const toggleThemeList = () => {
     </button>
 
     <div 
-      v-show="showThemes"
       class="theme-list-container"
+      :class="{ 'hidden': !showThemes }"
     >
       <div class="theme-list">
         <button
@@ -90,81 +91,61 @@ const toggleThemeList = () => {
 <style lang="scss" scoped>
 .theme-switcher {
   @apply fixed bottom-4 right-4 z-50;
+}
 
-  .theme-toggle-btn {
-    @apply w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(8px);
-    position: relative;
-    color: inherit;
-    
-    // Create pseudo-element for the gradient border
-    &::before {
-      content: '';
-      position: absolute;
-      top: -2px;
-      left: -2px;
-      right: -2px;
-      bottom: -2px;
-      border-radius: 50%;
-      padding: 2px;
-      background: v-bind('currentThemeGradient');
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-    }
-    
-    &.active {
-      @apply bg-opacity-20;
-      transform: rotate(180deg);
-    }
-
-    &:hover {
-      @apply bg-opacity-20;
-    }
-
-    svg {
-      @apply w-6 h-6;
-    }
+.theme-toggle-btn {
+  @apply w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  position: relative;
+  color: inherit;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 50%;
+    padding: 2px;
+    background: v-bind('currentThemeGradient');
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
   }
-
-  .theme-list-container {
-    @apply absolute bottom-full right-0 mb-2;
-    min-width: 200px;
-  }
-
-  .theme-list {
-    @apply flex flex-col gap-2 p-2;
-    background: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(8px);
-    border-radius: 8px;
-    animation: slideIn 0.2s ease-out;
-  }
-
-  .theme-list-item {
-    @apply w-full px-4 py-3 rounded-lg text-left text-sm font-medium transition-all duration-300;
-    color: rgba(255, 255, 255, 0.9);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-
-    .active-indicator {
-      @apply w-2 h-2 rounded-full bg-white;
-    }
-
-    &:hover {
-      opacity: 0.9;
-    }
+  
+  &.active {
+    @apply bg-opacity-20;
+    transform: rotate(180deg);
   }
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+.theme-list-container {
+  @apply absolute bottom-full right-0 mb-2;
+  min-width: 200px;
+}
+
+.theme-list {
+  @apply flex flex-col gap-2 p-2;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(8px);
+  border-radius: 8px;
+  animation: slideIn 0.2s ease-out;
+}
+
+.theme-list-item {
+  @apply w-full px-4 py-3 rounded-lg text-left text-sm font-medium transition-all duration-300;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+
+  .active-indicator {
+    @apply w-2 h-2 rounded-full bg-white;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  &:hover {
+    opacity: 0.9;
   }
 }
 </style>

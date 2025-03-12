@@ -57,23 +57,31 @@ watch(activeTab, (newTab) => {
             class="btn-round-pill-slider"
             :class="{ 'slide-right': activeTab === 'solutions' }"
           ></div>
+          <!-- Common Hurdles button -->
           <button 
             @click="activeTab = 'struggles'"
             class="btn-round-pill btn-round--medium"
             :class="{ 'active': activeTab === 'struggles' }"
           >
             <span class="inline-flex items-center justify-center">
-              <span v-html="icons.struggle.poorUX" class="w-5 h-5 mr-2"></span>
+              <span 
+                v-html="activeTab === 'solutions' ? icons.happyFaceRight : icons.struggle.poorUX" 
+                class="w-8 h-8 mr-2"
+              ></span>
               <span>Common Hurdles</span>
             </span>
           </button>
+          <!-- Clear Solutions button -->
           <button 
             @click="activeTab = 'solutions'"
             class="btn-round-pill btn-round--medium"
             :class="{ 'active': activeTab === 'solutions' }"
           >
             <span class="inline-flex items-center justify-center">
-              <span v-html="icons.solution.expertGuidance" class="w-5 h-5 mr-2"></span>
+              <span 
+                v-html="activeTab === 'struggles' ? icons.sadFaceLeft : icons.happyFace" 
+                class="w-8 h-8 mr-2"
+              ></span>
               <span>Clear Solutions</span>
             </span>
           </button>
