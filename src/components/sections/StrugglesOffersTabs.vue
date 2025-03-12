@@ -2,47 +2,17 @@
 import { ref, watch, onMounted } from 'vue';
 import { struggles, solutions } from '@/data/strugglesAndSolutions';
 import { icons } from '@/utils/icons';
-import gsap from 'gsap';
+import { strugglesOffersAnimations } from '@/animations/strugglesOffersTabs';
 
 const activeTab = ref('struggles');
 
-// First, ensure both card sets are properly initialized
 onMounted(() => {
-  // Set initial state for solutions cards
-  gsap.set('.solution-card', { opacity: 0 });
-  // Fade in struggle cards
-  gsap.fromTo('.struggle-card', 
-    { opacity: 0 },
-    { opacity: 1, duration: 0.3, stagger: 0.02, ease: 'power2.out' }
-  );
+  strugglesOffersAnimations.initializeCards();
 });
-
-const animateCards = (show: 'struggles' | 'solutions') => {
-  const cards = show === 'struggles' ? '.struggle-card' : '.solution-card';
-  const otherCards = show === 'struggles' ? '.solution-card' : '.struggle-card';
-
-  // Create a timeline for smoother sequencing
-  const tl = gsap.timeline();
-
-  // Fade out current cards
-  tl.to(otherCards, {
-    opacity: 0,
-    duration: 0.3,
-    stagger: 0.02
-  });
-
-  // Fade in new cards
-  tl.to(cards, {
-    opacity: 1,
-    duration: 0.3,
-    stagger: 0.02,
-    ease: 'power2.out'
-  }, "<0.2"); // Start slightly before the fade out completes
-};
 
 // Watch for tab changes
 watch(activeTab, (newTab) => {
-  animateCards(newTab as 'struggles' | 'solutions');
+  strugglesOffersAnimations.switchTabs(newTab as 'struggles' | 'solutions');
 });
 </script>
 

@@ -30,7 +30,7 @@ body {
   font-weight: 700;
   line-height: 1.2;
   
-  &:not([class*="text-"]) {
+  &:not([class*="text-"]):not([class*="heading-"]) {
     font-size: map-get($fontSize, 'lg'); // Default size (2rem)
   }
   

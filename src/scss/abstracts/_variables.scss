@@ -57,11 +57,16 @@ $retro-wave-body-font: 'Raleway', sans-serif;
 /* Style Guide Option 4: "Pastel Future" */
 
 $pastel-future-primary: #6A5ACD;
-$pastel-future-primary-dark: #483D8B; // Added darker shade for text
+$pastel-future-primary-dark: #483D8B;
 $pastel-future-secondary: #FFB6C1;
-$pastel-future-accent: #98FB98;
+
+// Different accent color options with contrast ratios
+$pastel-future-accent: #98FB98;  // Original Pale Green (contrast ratio: 1.04:1)
+
 $pastel-future-highlight: #FFA07A;
 $pastel-future-neutral: #F5F5F5;
+$pastel-future-background: #E8E9F3;
+$pastel-future-background-alt: #E2E4F0;
 
 $pastel-future-heading-font: 'Space Grotesk', sans-serif;
 $pastel-future-body-font: 'Raleway', sans-serif;
@@ -115,14 +120,13 @@ $themes: (
   ),
   'pastel-future': (
     'primary': $pastel-future-primary,
-    'primary-dark': $pastel-future-primary-dark, // Add the darker shade
+    'primary-dark': $pastel-future-primary-dark,
     'secondary': $pastel-future-secondary,
-    'accent': $pastel-future-accent,
+    'accent': #98FB98,  // Back to original pale green
     'highlight': $pastel-future-highlight,
     'neutral': $pastel-future-neutral,
-    'heading-font': $pastel-future-heading-font,
-    'body-font': $pastel-future-body-font,
-    'background': #f8f9fa  // Light, soft background
+    'background': $pastel-future-background,
+    'background-alt': $pastel-future-background-alt
   )
 );
 

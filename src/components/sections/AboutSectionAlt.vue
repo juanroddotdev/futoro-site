@@ -1,81 +1,88 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { onMounted, ref } from 'vue';
+import { aboutSectionAnimations } from '@/animations/aboutSectionAlt';
 import { highlights, expertise, journey } from '@/data/aboutSectionData';
 
-gsap.registerPlugin(ScrollTrigger);
+const animatedNumbers = ref<string[]>(highlights.map(highlight => 
+  highlight.number.includes('+') ? '0+' : 
+  highlight.number.includes('%') ? '0%' : 
+  highlight.number.includes('/') ? '0/7' : '0'
+));
 
 onMounted(() => {
-  gsap.from('.highlights__number', {
-    scrollTrigger: {
-      trigger: '.highlights',
-      start: 'top 80%',
-    },
-    textContent: 0,
-    duration: 2,
-    ease: 'power1.out',
-    snap: { textContent: 1 },
-    stagger: 0.2
-  });
+  try {
+    // Initialize highlights counter animations
+    highlights.forEach((highlight, index) => {
+      let endNumber = parseInt(highlight.number.replace(/[^0-9]/g, '')) || 0;
+      const obj = { val: 0 };
+      
+      aboutSectionAnimations.highlightCounter(obj, endNumber)
+        .eventCallback('onUpdate', () => {
+          const value = Math.round(obj.val).toString();
+          if (highlight.number.includes('+')) {
+            animatedNumbers.value[index] = value + '+';
+          } else if (highlight.number.includes('%')) {
+            animatedNumbers.value[index] = value + '%';
+          } else if (highlight.number.includes('/')) {
+            animatedNumbers.value[index] = value + '/7';
+          } else {
+            animatedNumbers.value[index] = value;
+          }
+        });
+    });
 
-  gsap.from('.expertise-grid__card', {
-    scrollTrigger: {
-      trigger: '.expertise-grid',
-      start: 'top 80%',
-    },
-    y: 50,
-    opacity: 0,
-    duration: 0.8,
-    stagger: 0.2
-  });
-
-  gsap.from('.journey-section__card', {
-    scrollTrigger: {
-      trigger: '.journey-section',
-      start: 'top 80%',
-    },
-    y: 30,
-    opacity: 0,
-    duration: 0.8,
-    stagger: 0.2
-  });
+    // Initialize card animations
+    aboutSectionAnimations.expertiseCards();
+    aboutSectionAnimations.journeyCards();
+    
+  } catch (error) {
+    console.error('Error in animation setup:', error);
+  }
 });
 </script>
 
 <template>
   <section id="about" class="about-section">
     <div class="text-center mb-20">
-      <h2 class="heading heading--accent mb-6">About Futoro</h2>
+      <h2 class="heading heading--accent heading-responsive mb-6">About Futoro</h2>
       <div class="max-w-3xl mx-auto">
-        <p class="text-xl theme-text--highlight mb-4">Transforming Ideas into Engaging Digital Experiences</p>
+        <p class="theme-text--highlight mb-4 body-text text-md">Transforming Ideas into Engaging Digital Experiences</p>
       </div>
     </div>
 
-    <div class="highlights">
-      <div v-for="highlight in highlights" :key="highlight.label" 
-           class="highlights__card">
-        <h3 class="highlights__number">{{ highlight.number }}</h3>
+    <!-- Highlights Section -->
+    <div class="highlights mb-20">
+      <div v-for="(highlight, index) in highlights" :key="highlight.label" class="highlights__card">
+        <h3 class="highlights__number">{{ animatedNumbers[index] }}</h3>
         <p class="theme-text--neutral">{{ highlight.label }}</p>
       </div>
     </div>
 
-    <div class="journey-section">
-      <div v-for="item in journey" :key="item.title"
-           class="journey-section__card">
+    <!-- Journey Section -->
+    <div class="journey-section mb-20">
+      <div v-for="item in journey" :key="item.title" class="journey-section__card">
         <h3>{{ item.title }}</h3>
         <p>{{ item.content }}</p>
       </div>
     </div>
 
-    <div class="expertise-grid">
-      <div v-for="item in expertise" :key="item.title" 
-           class="expertise-grid__card">
-        <div class="icon">{{ item.icon }}</div>
-        <h3>{{ item.title }}</h3>
-        <p>{{ item.description }}</p>
+    <!-- Expertise Section -->
+    <div class="expertise-grid mb-20">
+      <div v-for="item in expertise" :key="item.title" class="expertise-grid__card p-6 rounded-lg theme-bg--secondary"
+        style="visibility: visible; opacity: 1;">
+        <div class="text-4xl mb-4">{{ item.icon }}</div>
+        <h3 class="text-xl font-bold mb-3">{{ item.title }}</h3>
+        <p class="theme-text--neutral">{{ item.description }}</p>
       </div>
     </div>
   </section>
+
 </template>
+
+<style lang="scss" scoped>
+.expertise-grid__card {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+</style>
 

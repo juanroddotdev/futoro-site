@@ -23,7 +23,7 @@
     }
     @if $theme-name == 'pastel-future' {
       --pastel-future-secondary: #{$pastel-future-secondary};
-      --pastel-future-accent: #{$pastel-future-accent};
+      --pastel-future-accent: #{map-get($theme-map, 'accent')};
       --pastel-future-primary-dark: #{$pastel-future-primary-dark};
       --pastel-future-neutral: #{$pastel-future-neutral};
     }
@@ -169,6 +169,57 @@
           linear-gradient(to right, map-get($theme-map, 'secondary'), map-get($theme-map, 'accent'))
         );
       }
+    }
+
+    // Update background color specifically for pastel-future
+    @if $theme-name == 'pastel-future' {
+      background-color: map-get($theme-map, 'background');
+
+      // Add subtle gradient overlay for better readability
+      &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        opacity: 0.4;
+        z-index: -1;
+        background: linear-gradient(
+          135deg,
+          #{$pastel-future-background} 0%,
+          #{$pastel-future-background-alt} 100%
+        );
+      }
+
+      // Adjust card and container backgrounds for better contrast
+      .card, 
+      .container-alt {
+        background-color: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(8px);
+      }
+    }
+
+    // Adjust text contrast for better readability in pastel theme
+    .body-text {
+      @if $theme-name == 'pastel-future' {
+        color: rgba($pastel-future-primary-dark, 0.87); // Slightly softer text
+      }
+    }
+
+    // For text elements using the accent color
+    .theme-text--accent {
+      color: map-get($theme-map, 'accent');
+      font-weight: 600;
+    }
+
+    // For larger headings or important elements
+    .heading--accent {
+      color: map-get($theme-map, 'accent');
+      position: relative;
+    }
+
+    // For elements that need the green as background
+    .bg-accent {
+      background-color: map-get($theme-map, 'accent');
+      color: #000;
     }
   }
 }

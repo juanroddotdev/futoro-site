@@ -18,7 +18,7 @@ export const highlights: Highlight[] = [
   { number: "10+", label: "Years Experience" },
   { number: "150+", label: "Projects Completed" },
   { number: "98%", label: "Client Satisfaction" },
-  { number: "24/7", label: "Support" }
+  { number: "24/", label: "Support" }
 ];
 
 export const expertise: ExpertiseItem[] = [
