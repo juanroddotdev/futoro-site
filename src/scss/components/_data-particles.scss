@@ -1,0 +1,43 @@
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+.data-particles {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  overflow: hidden;
+  background: transparent;
+  
+  canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+// Theme-specific particle colors
+.theme-neon-horizon .data-particles {
+  --particle-color-1: #{rgba($neon-horizon-secondary, 0.7)};
+  --particle-color-2: #{rgba($neon-horizon-accent, 0.7)};
+  --particle-color-3: #{rgba($neon-horizon-highlight, 0.7)};
+}
+
+.theme-digital-sunset .data-particles {
+  --particle-color-1: #{rgba(#FF6B6B, 0.7)}; // Coral red
+  --particle-color-2: #{rgba(#4ECDC4, 0.7)}; // Turquoise
+  --particle-color-3: #{rgba(#FFE66D, 0.7)}; // Soft yellow
+}
+
+.theme-retro-wave .data-particles {
+  --particle-color-1: #{rgba(#FF00FF, 0.7)}; // Magenta
+  --particle-color-2: #{rgba(#00FFFF, 0.7)}; // Cyan
+  --particle-color-3: #{rgba(#FF71CE, 0.7)}; // Pink
+}
+
+.theme-pastel-future .data-particles {
+  --particle-color-1: #{rgba(#FFB6C1, 0.7)}; // Light pink
+  --particle-color-2: #{rgba(#87CEEB, 0.7)}; // Sky blue
+  --particle-color-3: #{rgba(#98FB98, 0.7)}; // Pale green
+}

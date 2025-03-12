@@ -1,7 +1,6 @@
 // Main file that imports all other files
 @import 'abstracts/variables';
 @import 'abstracts/mixins';
-// @import 'abstracts/functions';
 
 @import 'base/reset';
 @import 'base/fonts';
@@ -23,6 +22,9 @@
 @import 'components/about-section';
 @import 'components/contact-section';
 @import 'components/contact-section-v2';
+
+// Add separators imports
+@import 'separators/code-evolution';
 
 @import 'layout/grid';
 @import 'layout/app';

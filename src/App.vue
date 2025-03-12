@@ -8,6 +8,7 @@ import TimelineHowItWorks from './components/sections/TimelineHowItWorks.vue';
 import StrugglesOffersTabs from './components/sections/StrugglesOffersTabs.vue';
 import ContactSectionV2 from './components/sections/ContactSectionV2.vue';
 import AboutSectionAlt from './components/sections/AboutSectionAlt.vue';
+// import GlitchingDataParticles from './components/ui/GlitchingDataParticles.vue';
 
 const currentTheme = ref('theme-neon-horizon');
 const isThemeTransitioning = ref(false);
@@ -62,6 +63,8 @@ const handleThemeChange = (newTheme: string) => {
       <Navbar />
       <div class="main-content">
         <HeroSection />
+        <!-- <GlitchingDataParticles :current-theme="currentTheme" /> -->
+        <!-- <CodeEvolution /> -->
         <StrugglesOffersTabs />
         <ServicesSection />
         <TimelineHowItWorks  />
