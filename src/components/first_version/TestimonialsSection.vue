@@ -39,7 +39,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="section py-32 bg-space/50">
+  <section class="section py-32 bg-neutral-gray/50">
     <div class="text-center mb-16">
       <h2 class="heading">What Our Clients Say</h2>
       <p class="subheading max-w-2xl mx-auto">
@@ -49,7 +49,7 @@ onMounted(() => {
     
     <div class="testimonials-grid grid md:grid-cols-3 gap-8">
       <div v-for="testimonial in testimonials" :key="testimonial.name" 
-           class="testimonial-card bg-space p-6 rounded-xl border border-white/10 hover:border-secondary/50 transition-all duration-300">
+           class="testimonial-card bg-neutral-gray p-6 rounded-xl border border-white/10 hover:border-secondary/50 transition-all duration-300">
         <div class="flex items-center mb-6">
           <img 
             :src="testimonial.image" 

@@ -1,0 +1,145 @@
+// Colors
+$colors: (
+  'primary': #2A3FFB,
+  'secondary': #FF6B4A,
+  'accent': #7000FF,
+  'space': #0A0A0F,
+  // New neutral color theme
+  'neutral-900': #342E2E,
+  'neutral-700': #817A7A,
+  'neutral-500': #CFCDC7,
+  'neutral-400': #D9D9D9, //Not necessary
+  'neutral-300': #E8E8E8,
+  'neutral-100': #FBFBFB,
+);
+
+// Breakpoints
+$breakpoints: (
+  'sm': 640px,
+  'md': 768px,
+  'lg': 1024px,
+  'xl': 1280px,
+);
+/* Style Guide Option 1: "Neon Horizon" */
+
+$neon-horizon-primary: #2E3440;
+$neon-horizon-secondary: #88C0D0;
+$neon-horizon-accent: #A3BE8C;
+$neon-horizon-highlight: #BF616A;
+$neon-horizon-neutral: #ECEFF4;
+
+$neon-horizon-heading-font: 'Space Grotesk', sans-serif;
+$neon-horizon-body-font: 'Raleway', sans-serif;
+
+/* Style Guide Option 2: "Digital Sunset" */
+
+$digital-sunset-primary: #4C566A;
+$digital-sunset-secondary: #D08770;
+$digital-sunset-accent: #B48EAD;
+$digital-sunset-highlight: #8FBCBB;
+$digital-sunset-neutral: #F8F8F8;
+
+$digital-sunset-heading-font: 'Space Grotesk', sans-serif;
+$digital-sunset-body-font: 'Raleway', sans-serif;
+
+/* Style Guide Option 3: "Retro Wave" */
+
+$retro-wave-primary: #1A1A1A;
+$retro-wave-secondary-start: #2980B9;
+$retro-wave-secondary-end: #6DD5FA;
+$retro-wave-accent: #FF4081;
+$retro-wave-highlight: #FDD835;
+$retro-wave-neutral: #E0E0E0;
+
+$retro-wave-heading-font: 'Space Grotesk', sans-serif;
+$retro-wave-body-font: 'Raleway', sans-serif;
+
+/* Style Guide Option 4: "Pastel Future" */
+
+$pastel-future-primary: #6A5ACD;
+$pastel-future-primary-dark: #483D8B; // Added darker shade for text
+$pastel-future-secondary: #FFB6C1;
+$pastel-future-accent: #98FB98;
+$pastel-future-highlight: #FFA07A;
+$pastel-future-neutral: #F5F5F5;
+
+$pastel-future-heading-font: 'Space Grotesk', sans-serif;
+$pastel-future-body-font: 'Raleway', sans-serif;
+
+.retro-wave-element {
+  background: linear-gradient(to right, $retro-wave-secondary-start, $retro-wave-secondary-end);
+}
+
+// Spacing
+$spacing-unit: 8px;
+$container-max-width: 1280px;
+
+// Theme Management
+$current-theme: 'neon-horizon' !default; // Default theme
+
+// Theme Maps
+$themes: (
+  'neon-horizon': (
+    'primary': $neon-horizon-primary,
+    'secondary': $neon-horizon-secondary,
+    'accent': $neon-horizon-accent,
+    'highlight': $neon-horizon-highlight,
+    'neutral': $neon-horizon-neutral,
+    'heading-font': $neon-horizon-heading-font,
+    'body-font': $neon-horizon-body-font,
+    'background': #1a1b26  // Dark, cool-toned background
+  ),
+  'digital-sunset': (
+    'primary': $digital-sunset-primary,
+    'secondary': $digital-sunset-secondary,
+    'accent': $digital-sunset-accent,
+    'highlight': $digital-sunset-highlight,
+    'neutral': $digital-sunset-neutral,
+    'heading-font': $digital-sunset-heading-font,
+    'body-font': $digital-sunset-body-font,
+    'background': #2E3440  // Nordic dark background
+  ),
+  'retro-wave': (
+    'primary': $retro-wave-primary,
+    'secondary': $retro-wave-secondary-start,
+    'secondary-gradient': (
+      'start': $retro-wave-secondary-start,
+      'end': $retro-wave-secondary-end
+    ),
+    'accent': $retro-wave-accent,
+    'highlight': $retro-wave-highlight,
+    'neutral': $retro-wave-neutral,
+    'heading-font': $retro-wave-heading-font,
+    'body-font': $retro-wave-body-font,
+    'background': #0f0f17  // Deep dark background for neon effects
+  ),
+  'pastel-future': (
+    'primary': $pastel-future-primary,
+    'primary-dark': $pastel-future-primary-dark, // Add the darker shade
+    'secondary': $pastel-future-secondary,
+    'accent': $pastel-future-accent,
+    'highlight': $pastel-future-highlight,
+    'neutral': $pastel-future-neutral,
+    'heading-font': $pastel-future-heading-font,
+    'body-font': $pastel-future-body-font,
+    'background': #f8f9fa  // Light, soft background
+  )
+);
+
+// Theme Mixins
+@mixin themed() {
+  @each $theme-name, $theme-map in $themes {
+    .theme-#{$theme-name} & {
+      @content;
+    }
+  }
+}
+
+
+@each $border, $color in $colors {
+  .border-#{$border} {
+    border: 1px solid;
+    border-color: $color;
+  }
+}
+

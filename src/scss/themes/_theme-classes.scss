@@ -1,0 +1,174 @@
+// Theme Classes
+@each $theme-name, $theme-map in $themes {
+  .theme-#{$theme-name} {
+    // Add transition for all theme-related properties
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    
+    // Add theme-specific CSS custom properties
+    @if $theme-name == 'neon-horizon' {
+      --neon-horizon-secondary: #{$neon-horizon-secondary};
+      --neon-horizon-accent: #{$neon-horizon-accent};
+      --neon-horizon-neutral: #{$neon-horizon-neutral};
+    }
+    @if $theme-name == 'digital-sunset' {
+      --digital-sunset-secondary: #{$digital-sunset-secondary};
+      --digital-sunset-accent: #{$digital-sunset-accent};
+      --digital-sunset-neutral: #{$digital-sunset-neutral};
+    }
+    @if $theme-name == 'retro-wave' {
+      --retro-wave-secondary: #{$retro-wave-secondary-start};
+      --retro-wave-accent: #{$retro-wave-accent};
+      --retro-wave-neutral: #{$retro-wave-neutral};
+    }
+    @if $theme-name == 'pastel-future' {
+      --pastel-future-secondary: #{$pastel-future-secondary};
+      --pastel-future-accent: #{$pastel-future-accent};
+      --pastel-future-primary-dark: #{$pastel-future-primary-dark};
+      --pastel-future-neutral: #{$pastel-future-neutral};
+    }
+
+    // Add body background color based on theme
+    background-color: (
+      if($theme-name == 'neon-horizon', #1a1b26,
+      if($theme-name == 'digital-sunset', #2E3440,
+      if($theme-name == 'retro-wave', #0f0f17,
+      if($theme-name == 'pastel-future', #f8f9fa, #ffffff))))
+    );
+
+    // Add a pseudo-element for gradient overlay animation
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      z-index: -1;
+      transition: opacity 0.8s ease;
+      background: if($theme-name == 'neon-horizon',
+        linear-gradient(135deg, #1a1b26 0%, #2E3440 50%, #A3BE8C 100%),
+      if($theme-name == 'digital-sunset',
+        linear-gradient(135deg, #2E3440 0%, #4C566A 50%, #B48EAD 100%),
+      if($theme-name == 'retro-wave',
+        linear-gradient(135deg, #0f0f17 0%, #1A1A1A 50%, #FF4081 100%),
+        linear-gradient(135deg, #f8f9fa 0%, #6A5ACD 50%, #98FB98 100%)
+      )));
+    }
+
+    &.theme-transition-active::before {
+      opacity: 1;
+    }
+    
+    // Typography transitions
+    .heading {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      font-family: map-get($theme-map, 'heading-font');
+      color: map-get($theme-map, 'primary');
+      
+      &--accent {
+        transition: color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        color: map-get($theme-map, 'accent');
+      }
+      
+      &--highlight {
+        transition: color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        color: map-get($theme-map, 'highlight');
+      }
+    }
+    
+    .body-text {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      font-family: map-get($theme-map, 'body-font');
+      @if $theme-name == 'pastel-future' {
+        color: map-get($theme-map, 'primary-dark'); // Use darker shade for light theme
+      } @else {
+        color: map-get($theme-map, 'neutral');
+      }
+    }
+
+    // Text colors for dark vs light themes
+    .theme-text {
+      &--primary {
+        color: if($theme-name == 'pastel-future',
+          map-get($theme-map, 'primary-dark'),  // Use darker shade for light theme
+          map-get($theme-map, 'neutral')
+        );
+      }
+
+      &--neutral {
+        color: if($theme-name == 'pastel-future',
+          map-get($theme-map, 'primary-dark'),  // Use darker shade for light theme
+          rgba(map-get($theme-map, 'neutral'), 0.7)
+        );
+      }
+
+      // New gradient text classes
+      &--gradient {
+        background: if($theme-name == 'retro-wave',
+          linear-gradient(to right, map-get($theme-map, 'accent'), map-get($theme-map, 'highlight')),
+          linear-gradient(to right, map-get($theme-map, 'secondary'), map-get($theme-map, 'accent'))
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+    }
+
+    // Add theme-specific gradient text styles
+    .theme-text--gradient {
+      background-clip: text !important;
+      -webkit-background-clip: text !important;
+      color: transparent !important;
+      display: inline-block; // This ensures the background-clip works properly
+      
+      &.gradient-normal {
+        @if $theme-name == 'retro-wave' {
+          background-image: linear-gradient(
+            to right,
+            map-get($theme-map, 'accent'),
+            map-get($theme-map, 'highlight')
+          );
+        } @else {
+          background-image: linear-gradient(
+            to right,
+            map-get($theme-map, 'secondary'),
+            map-get($theme-map, 'accent')
+          );
+        }
+      }
+
+      &.gradient-reverse {
+        @if $theme-name == 'retro-wave' {
+          background-image: linear-gradient(
+            to left,
+            map-get($theme-map, 'accent'),
+            map-get($theme-map, 'highlight')
+          );
+        } @else {
+          background-image: linear-gradient(
+            to left,
+            map-get($theme-map, 'secondary'),
+            map-get($theme-map, 'accent')
+          );
+        }
+      }
+    }
+
+    // Add theme-specific gradient backgrounds
+    .theme-bg--gradient {
+      background: if($theme-name == 'retro-wave',
+        linear-gradient(to right, map-get($theme-map, 'accent'), map-get($theme-map, 'highlight')),
+        linear-gradient(to right, map-get($theme-map, 'secondary'), map-get($theme-map, 'accent'))
+      );
+    }
+
+    // If you need a Tailwind layer, wrap it like this:
+    @layer components {
+      .theme-bg--gradient {
+        background: if($theme-name == 'retro-wave',
+          linear-gradient(to right, map-get($theme-map, 'accent'), map-get($theme-map, 'highlight')),
+          linear-gradient(to right, map-get($theme-map, 'secondary'), map-get($theme-map, 'accent'))
+        );
+      }
+    }
+  }
+}

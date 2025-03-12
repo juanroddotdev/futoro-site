@@ -1,0 +1,66 @@
+// Creative heading component styles
+.creative-heading {
+  perspective: 1000px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: map-get($fontSize, 'xl');
+  
+  @media (min-width: map-get($breakpoints, 'md')) {
+    font-size: map-get($fontSize, '2xl');
+  }
+  
+  @media (min-width: map-get($breakpoints, 'lg')) {
+    font-size: map-get($fontSize, '3xl');
+  }
+  
+  .frustration {
+    position: relative;
+    transform-origin: center;
+    animation: shake 5s ease-in-out infinite;
+  }
+  
+  .transition-text {
+    position: relative;
+    font-style: italic;
+    transform: translateY(-0.5em);
+    font-size: map-get($fontSize, 'lg');
+    
+    @media (min-width: map-get($breakpoints, 'md')) {
+      font-size: map-get($fontSize, 'xl');
+    }
+    
+    @media (min-width: map-get($breakpoints, 'lg')) {
+      font-size: map-get($fontSize, '2xl');
+    }
+  }
+  
+  .fantastic {
+    position: relative;
+    animation: shine 3s linear infinite;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    .theme-neon-horizon & {
+      text-shadow: 0 0 10px var(--secondary);
+      background: linear-gradient(to right, 
+        var(--primary),
+        var(--secondary)
+      );
+    }
+    
+    .theme-digital-sunset & {
+      background: linear-gradient(to right, #FF6B6B, #4ECDC4);
+    }
+    
+    .theme-retro-wave & {
+      background: linear-gradient(to right, #FF61D8, #905CFF);
+    }
+    
+    .theme-pastel-future & {
+      background: linear-gradient(to right, #64B5F6, #81C784);
+    }
+  }
+}

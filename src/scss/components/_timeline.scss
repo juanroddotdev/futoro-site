@@ -1,0 +1,78 @@
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+.timeline-container {
+  @apply relative py-8;
+}
+
+.timeline-item {
+  @apply relative;
+  
+  &::before {
+    content: '';
+    @apply absolute top-4 w-8 h-1;
+    [class*="text-right"] & {
+      @apply right-0;
+    }
+    [class*="text-left"] & {
+      @apply left-0;
+    }
+  }
+}
+
+.timeline-stem {
+  content: '';
+  @apply absolute top-4;
+}
+
+.timeline-connector {
+  background: inherit;
+  @apply theme-bg--gradient;
+}
+
+// Extended timeline line styles
+.timeline-line {
+  will-change: transform;
+  height: calc(100% + 66px);
+}
+
+// Theme-aware styling
+@each $theme-name, $theme-map in $themes {
+  .theme-#{$theme-name} {
+    .timeline-line {
+      background: linear-gradient(
+        to bottom,
+        map-get($theme-map, 'secondary') 0%,
+        map-get($theme-map, 'accent') 100%
+      );
+      @apply w-1; // Ensure consistent width
+    }
+
+    .timeline-stem {
+      background: linear-gradient(
+        to right,
+        map-get($theme-map, 'secondary'),
+        map-get($theme-map, 'accent')
+      );
+    }
+
+    .timeline-number {
+      background-color: map-get($theme-map, 'secondary');
+      color: if($theme-name == 'pastel-future', 
+               map-get($theme-map, 'primary-dark'),
+               map-get($theme-map, 'neutral'));
+      border: 2px solid map-get($theme-map, 'accent');
+    }
+
+    .timeline-card {
+      background-color: if($theme-name == 'pastel-future',
+                         rgba(map-get($theme-map, 'primary'), 0.1),
+                         rgba(map-get($theme-map, 'primary'), 0.3));
+      border: 1px solid rgba(map-get($theme-map, 'secondary'), 0.2);
+
+      &:hover {
+        border-color: rgba(map-get($theme-map, 'accent'), 0.5);
+      }
+    }
+  }
+}

@@ -1,0 +1,98 @@
+.btn {
+  @include themed {
+    background-color: var(--primary);
+    color: var(--text);
+    
+    &:hover {
+      background-color: var(--secondary);
+    }
+  }
+}
+.btn-neutral {
+  font-weight: 500;
+  padding: 1.2em 2em;
+  border-radius: 300px;
+  transition: 0.3s all linear;
+  -webkit-backface-visibility: hidden;
+  
+  &--primary {
+    background-color: map-get($colors, 'neutral-900');
+    border-color: map-get($colors, 'neutral-500');
+    color: map-get($colors, 'neutral-500');
+    
+    &:hover {
+      background-color: map-get($colors, 'neutral-900');
+      opacity: 0.8;
+    }
+    
+    &-light {
+      background-color: map-get($colors, 'neutral-300');
+      color: map-get($colors, 'neutral-900');
+      
+      &:hover {
+        background-color: map-get($colors, 'neutral-400');
+      }
+    }
+  }
+  
+  &--secondary {
+    background-color: transparent;
+    border-color: map-get($colors, 'neutral-900');
+    color: map-get($colors, 'neutral-900');
+    border: 3px solid;
+    
+    &:hover {
+      border-color: map-get($colors, 'neutral-700');
+      color: map-get($colors, 'neutral-700');
+      font-weight: 500;
+      opacity: 0.8;
+    }
+  }
+}
+
+button {
+  @each $theme-name, $theme-map in $themes {
+    .theme-#{$theme-name} & {
+      &.active {
+        background-color: map-get($theme-map, 'secondary');
+        color: map-get($theme-map, 'primary');
+      }
+
+      &:not(.active) {
+        color: map-get($theme-map, 'neutral');
+        
+        &:hover {
+          color: map-get($theme-map, 'secondary');
+        }
+      }
+    }
+  }
+}
+
+// Theme-specific gradients with enhanced contrast
+.theme-neon-horizon {
+  --card-gradient-extended: linear-gradient(
+    to right,
+    #88C0D0 0%,
+    #A3BE8C 50%,
+    #88C0D0 100%
+  );
+}
+
+.theme-digital-sunset {
+  --card-gradient-extended: linear-gradient(
+    to right,
+    #D08770 0%,
+    #B48EAD 50%,
+    #D08770 100%
+  );
+}
+
+.theme-retro-wave {
+  --card-gradient-extended: linear-gradient(
+    to right,
+    #6A5ACD 0%,
+    #98FB98 50%,
+    #6A5ACD 100%
+  );
+}

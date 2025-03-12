@@ -1,0 +1,19 @@
+.form-wrapper {
+  .field-list {
+    display: flex;
+    flex-direction: column;
+    .form-item {
+      flex: 1;
+      .field {
+        flex: 1;
+      }
+      input, textarea {
+        width: 100%;
+      }
+    }
+    .field-inputs-row {
+      display: flex;
+      flex-direction: row;
+    }
+  }
+}

@@ -1,0 +1,83 @@
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+.services-accordion {
+  .accordion-item {
+    @each $theme-name, $theme-map in $themes {
+      .theme-#{$theme-name} & {
+        border-color: map-get($theme-map, 'neutral');
+      }
+    }
+    
+    .accordion-header {
+      @include flex-between;
+      width: 100%;
+      text-align: left;
+      padding: 1.5rem;
+    }
+
+    .accordion-icon {
+      width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transform-origin: center;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+      svg {
+        width: 24px;
+        height: 24px;
+      }
+
+      &.rotate-45 {
+        transform: rotate(45deg);
+      }
+
+      // Gradient style matching the heading style
+      &.gradient-fill {
+        svg {
+          .theme-neon-horizon & path {
+            stroke: url(#accordion-gradient-neon);
+          }
+          
+          .theme-digital-sunset & path {
+            stroke: url(#accordion-gradient-sunset);
+          }
+          
+          .theme-retro-wave & path {
+            stroke: url(#accordion-gradient-retro);
+          }
+          
+          .theme-pastel-future & path {
+            stroke: url(#accordion-gradient-pastel);
+          }
+        }
+      }
+
+      &:not(.gradient-fill) {
+        @each $theme-name, $theme-map in $themes {
+          .theme-#{$theme-name} & {
+            color: map-get($theme-map, 'neutral');
+          }
+        }
+      }
+    }
+
+    .accordion-content {
+      height: 0;
+      overflow: hidden;
+      transition: height 0.3s ease;
+
+      .content-inner {
+        padding: 0 1.5rem 1.5rem;
+      }
+    }
+
+    &.active {
+      .accordion-content {
+        height: auto;
+      }
+    }
+  }
+}

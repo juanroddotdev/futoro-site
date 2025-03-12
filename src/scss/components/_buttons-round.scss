@@ -1,0 +1,546 @@
+@import '../abstracts/variables';
+
+// ==========================================================================
+// Button Variables
+// ==========================================================================
+$button-sizes: (
+  'medium': (
+    'font-size': 16px,
+    'padding': 10px 20px
+  ),
+  'large': (
+    'font-size': 18px,
+    'padding': 12px 24px
+  ),
+  'xlarge': (
+    'font-size': 20px,
+    'padding': 14px 28px
+  )
+);
+
+$border-radius: 99px;
+
+// ==========================================================================
+// Mixins
+// ==========================================================================
+@mixin button-base {
+  border: none;
+  border-radius: $border-radius;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+}
+
+@mixin button-size($size) {
+  $size-map: map-get($button-sizes, $size);
+  font-size: map-get($size-map, 'font-size');
+  padding: map-get($size-map, 'padding');
+}
+
+@mixin button-variant($is-outline: false) {
+  @each $theme-name, $theme-map in $themes {
+    .theme-#{$theme-name} & {
+      @if $is-outline {
+        background-color: transparent;
+        border: 2px solid map-get($theme-map, 'accent'); // Changed from primary to accent
+        color: map-get($theme-map, 'accent'); // Changed from primary to accent
+
+        &:hover {
+          background-color: rgba(map-get($theme-map, 'accent'), 0.1);
+        }
+
+        &:active {
+          background-color: rgba(map-get($theme-map, 'accent'), 0.2);
+        }
+
+        &:disabled {
+          border-color: map-get($theme-map, 'neutral');
+          color: map-get($theme-map, 'neutral');
+          opacity: 0.5;
+        }
+
+        // Add glow effect for dark themes
+        @if $theme-name != 'pastel-future' {
+          box-shadow: 0 0 10px rgba(map-get($theme-map, 'accent'), 0.2);
+          
+          &:hover {
+            box-shadow: 0 0 15px rgba(map-get($theme-map, 'accent'), 0.4);
+          }
+        }
+      } @else {
+        background-color: map-get($theme-map, 'primary');
+        color: map-get($theme-map, 'neutral');
+
+        &:hover {
+          opacity: 0.9;
+        }
+
+        &:active {
+          opacity: 0.8;
+        }
+
+        &:disabled {
+          background-color: map-get($theme-map, 'neutral');
+          color: map-get($theme-map, 'primary');
+          opacity: 0.5;
+        }
+      }
+    }
+  }
+}
+
+@mixin button-variant-secondary($is-outline: false) {
+  @each $theme-name, $theme-map in $themes {
+    .theme-#{$theme-name} & {
+      @if $is-outline {
+        background-color: transparent;
+        // For Retro Wave theme, use the end color of the gradient for outline
+        @if $theme-name == 'retro-wave' {
+          border: 2px solid map-get(map-get($theme-map, 'secondary-gradient'), 'end');
+          color: map-get(map-get($theme-map, 'secondary-gradient'), 'end');
+
+          &:hover:not(.active) {
+            background-color: rgba(map-get(map-get($theme-map, 'secondary-gradient'), 'end'), 0.1);
+          }
+
+          &:active:not(.active) {
+            background-color: rgba(map-get(map-get($theme-map, 'secondary-gradient'), 'end'), 0.2);
+          }
+        } @else {
+          border: 2px solid map-get($theme-map, 'secondary');
+          color: map-get($theme-map, 'secondary');
+
+          &:hover:not(.active) {
+            background-color: rgba(map-get($theme-map, 'secondary'), 0.1);
+          }
+
+          &:active:not(.active) {
+            background-color: rgba(map-get($theme-map, 'secondary'), 0.2);
+          }
+        }
+
+        &.active {
+          @if $theme-name == 'retro-wave' {
+            background: linear-gradient(
+              to right,
+              map-get(map-get($theme-map, 'secondary-gradient'), 'start'),
+              map-get(map-get($theme-map, 'secondary-gradient'), 'end')
+            );
+          } @else {
+            background-color: map-get($theme-map, 'secondary');
+          }
+          color: map-get($theme-map, 'primary');
+        }
+      } @else {
+        @if map-has-key($theme-map, 'secondary-gradient') {
+          background: linear-gradient(
+            to right,
+            map-get(map-get($theme-map, 'secondary-gradient'), 'start'),
+            map-get(map-get($theme-map, 'secondary-gradient'), 'end')
+          );
+        } @else {
+          background-color: map-get($theme-map, 'secondary');
+        }
+        color: map-get($theme-map, 'neutral');
+
+        &:hover {
+          opacity: 0.9;
+        }
+
+        &:active {
+          opacity: 0.8;
+        }
+
+        &:disabled {
+          background: map-get($theme-map, 'neutral');
+          color: map-get($theme-map, 'secondary');
+          opacity: 0.5;
+        }
+      }
+    }
+  }
+}
+
+// ==========================================================================
+// Button Base Classes
+// ==========================================================================
+%button {
+  @include button-base;
+}
+
+// ==========================================================================
+// Button Variants
+// ==========================================================================
+.btn-round {
+  &--primary {
+    @extend %button;
+    @include button-variant(false);
+  }
+
+  &--secondary {
+    @extend %button;
+    @include button-variant-secondary(false);
+  }
+
+  &--outline-primary {
+    @extend %button;
+    @include button-variant(true);
+  }
+
+  &--outline-secondary {
+    @extend %button;
+    @include button-variant-secondary(true);
+  }
+
+  // ==========================================================================
+  // Button Sizes
+  // ==========================================================================
+  &--medium {
+    @include button-size('medium');
+  }
+
+  &--large {
+    @include button-size('large');
+  }
+
+  &--xlarge {
+    @include button-size('xlarge');
+  }
+}
+
+// ==========================================================================
+// Composite Classes
+// ==========================================================================
+// Medium variants
+.btn-round-medium-primary {
+  @extend .btn-round--primary;
+  @extend .btn-round--medium;
+}
+
+.btn-round-medium-secondary {
+  @extend .btn-round--secondary;
+  @extend .btn-round--medium;
+}
+
+.btn-round-medium-outline-primary {
+  @extend .btn-round--outline-primary;
+  @extend .btn-round--medium;
+}
+
+.btn-round-medium-outline-secondary {
+  @extend .btn-round--outline-secondary;
+  @extend .btn-round--medium;
+}
+
+// Large variants
+.btn-round-large-primary {
+  @extend .btn-round--primary;
+  @extend .btn-round--large;
+}
+
+.btn-round-large-secondary {
+  @include button-size('large');
+  position: relative;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  @each $theme-name, $theme-map in $themes {
+    .theme-#{$theme-name} & {
+      color: map-get($theme-map, 'text'); // Ensure text is visible
+      background: rgba(map-get($theme-map, 'secondary'), 0.1);
+      border: 2px solid map-get($theme-map, 'secondary');
+      
+      &:hover {
+        color: map-get($theme-map, 'text'); // Keep text visible on hover
+        background: rgba(map-get($theme-map, 'secondary'), 0.2);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(map-get($theme-map, 'secondary'), 0.2);
+      }
+      
+      &:active {
+        transform: translateY(0);
+      }
+    }
+  }
+}
+
+.btn-round-large-outline-primary {
+  @extend .btn-round--outline-primary;
+  @extend .btn-round--large;
+}
+
+.btn-round-large-outline-secondary {
+  @extend .btn-round--outline-secondary;
+  @extend .btn-round--large;
+}
+
+// XLarge variants
+.btn-round-xlarge-primary {
+  @extend .btn-round--primary;
+  @extend .btn-round--xlarge;
+}
+
+.btn-round-xlarge-secondary {
+  @extend .btn-round--secondary;
+  @extend .btn-round--xlarge;
+}
+
+.btn-round-xlarge-outline-primary {
+  @extend .btn-round--outline-primary;
+  @extend .btn-round--xlarge;
+}
+
+.btn-round-xlarge-outline-secondary {
+  @extend .btn-round--outline-secondary;
+  @extend .btn-round--xlarge;
+}
+
+// The duplicate .btn-round--outline-secondary definition has been removed
+
+// Pill Container
+.btn-round-pill-container {
+  position: relative;
+  display: inline-flex;
+  border-radius: 9999px;
+  padding: 0.25rem;
+  min-width: 300px;
+
+  @each $theme-name, $theme-map in $themes {
+    .theme-#{$theme-name} & {
+      background-color: rgba(map-get($theme-map, 'neutral'), 0.1);
+      backdrop-filter: blur(4px);
+    }
+  }
+}
+
+// Sliding Background
+.btn-round-pill-slider {
+  position: absolute;
+  width: 50%;
+  height: calc(100% - 0.5rem);
+  top: 0.25rem;
+  left: 0.25rem;
+  border-radius: 9999px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 0; // Add this to ensure slider stays behind buttons
+  
+  &.slide-right {
+    transform: translateX(100%);
+  }
+
+  @each $theme-name, $theme-map in $themes {
+    .theme-#{$theme-name} & {
+      background: map-get($theme-map, 'secondary');
+    }
+  }
+}
+
+// Pill Buttons
+.btn-round-pill {
+  position: relative;
+  z-index: 1;
+  width: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0.75rem 1rem;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  background: transparent; // Add this to ensure no background color
+  border: none; // Add this to remove any borders
+  
+  // Center the icon and text together
+  span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  @include button-size('medium');
+
+  @each $theme-name, $theme-map in $themes {
+    .theme-#{$theme-name} & {
+      color: map-get($theme-map, 'secondary');
+      
+      &.active {
+        color: map-get($theme-map, 'primary');
+        background: transparent; // Add this to ensure no background color when active
+      }
+
+      &:not(.active):hover {
+        color: rgba(map-get($theme-map, 'secondary'), 0.8);
+      }
+    }
+  }
+}
+
+.touch-circle-btn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  
+  .pulse-gradient {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .default-text,
+  .hover-text {
+    position: absolute;
+    z-index: 2;
+    width: 85%; // Adjusted for better containment
+    text-align: center;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    font-weight: 800;
+    text-transform: uppercase;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .default-text {
+    top: 50%;
+    font-size: 3.5em; // Adjusted base size
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    
+    span:first-child { // "TOUCH"
+      font-size: 1em;
+      display: block;
+    }
+    
+    span:last-child { // "ME"
+      font-size: 1.3em;
+      display: block;
+    }
+  }
+
+  .hover-text {
+    top: 150%;
+    font-size: 2em;
+    opacity: 0;
+    width: 80%;
+    transition: all 0.3s ease;
+  }
+
+  &:hover {
+    .default-text {
+      top: -50%;
+      opacity: 0;
+    }
+
+    .hover-text {
+      top: 50%;
+      opacity: 1;
+    }
+  }
+}
+
+// Add the pulse gradient styles
+.touch-circle-btn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  .pulse-gradient {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .default-text,
+  .hover-text {
+    position: absolute;
+    z-index: 2;
+    width: 100%;
+    text-align: center;
+    left: 0;
+  }
+
+  .default-text {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .hover-text {
+    top: 150%;
+    transform: translateY(-50%);
+    opacity: 0;
+  }
+
+  &:hover {
+    .default-text {
+      top: -50%;
+      opacity: 0;
+    }
+
+    .hover-text {
+      top: 50%;
+      opacity: 1;
+    }
+  }
+}
+
+// Theme-specific styles using the theme map
+@each $theme-name, $theme-map in $themes {
+  .theme-#{$theme-name} .touch-circle-btn {
+    .pulse-gradient {
+      @if $theme-name == 'retro-wave' {
+        background: radial-gradient(
+          circle at center,
+          map-get($theme-map, 'accent') 0%,
+          map-get($theme-map, 'highlight') 35%,
+          transparent 60%
+        );
+      } @else {
+        background: radial-gradient(
+          circle at center,
+          map-get($theme-map, 'accent') 0%,
+          map-get($theme-map, 'secondary') 35%,
+          transparent 60%
+        );
+      }
+      opacity: 0.2;
+      animation: pulse 3s ease-in-out infinite;
+    }
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.2;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0.2;
+  }
+}

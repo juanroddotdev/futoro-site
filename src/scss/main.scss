@@ -1,0 +1,28 @@
+// Main file that imports all other files
+@import 'abstracts/variables';
+@import 'abstracts/mixins';
+// @import 'abstracts/functions';
+
+@import 'base/reset';
+@import 'base/fonts';
+@import 'base/typography';
+@import 'base/debug';
+@import 'base/animations';
+
+@import 'components/buttons';
+@import 'components/buttons-round';
+@import 'components/form';
+@import 'components/transitions';
+@import 'components/headings';
+@import 'components/accordion';
+@import 'components/timeline';
+@import 'components/theme-switcher';
+@import 'components/about-section';
+
+@import 'layout/grid';
+
+@import 'themes/neutral';
+@import 'themes/theme-classes';
+
+// Vendors (Tailwind last)
+@import 'vendors/tailwind';

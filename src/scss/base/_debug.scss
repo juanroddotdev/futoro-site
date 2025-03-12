@@ -1,0 +1,83 @@
+/* Debug borders - add .debug class to body to enable */
+.debug {
+  * { outline: 1px solid #f0f !important; }
+  
+  // First level elements (direct children of body)
+  > * {
+    outline: 3px solid #f00 !important;
+    
+    // Second level
+    > * {
+      outline: 3px solid #0f0 !important;
+      
+      // Third level
+      > * {
+        outline: 3px solid #00f !important;
+        
+        // Fourth level
+        > * {
+          outline: 3px solid #ff0 !important;
+          
+          // Fifth level
+          > * {
+            outline: 3px solid #0ff !important;
+            
+            // Sixth level
+            > * {
+              outline: 3px solid #f0f !important;
+              
+              // Seventh level and beyond
+              > * {
+                outline: 3px dashed #888 !important;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Special elements
+  nav {
+    outline: 5px solid #ff9800 !important;
+  }
+  
+  section {
+    outline: 5px solid #4caf50 !important;
+  }
+  
+  header {
+    outline: 5px solid #2196f3 !important;
+  }
+  
+  footer {
+    outline: 5px solid #9c27b0 !important;
+  }
+  
+  // Common layout elements
+  .container {
+    outline: 3px dashed #795548 !important;
+  }
+  
+  .grid {
+    outline: 3px dashed #607d8b !important;
+  }
+  
+  // Components
+  .card {
+    outline: 2px dotted #e91e63 !important;
+  }
+  
+  .button, .btn {
+    outline: 2px dotted #cddc39 !important;
+  }
+  
+  // Forms
+  form {
+    outline: 3px double #9e9e9e !important;
+  }
+  
+  input, textarea, select {
+    outline: 2px dotted #03a9f4 !important;
+  }
+}

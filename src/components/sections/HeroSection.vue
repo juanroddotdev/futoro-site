@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import gsap from 'gsap';
+import heroImage from '@/assets/images/hero-image.jpg';
+import { HeroContent, getRandomHeroContent } from '@/data/heroContent';
 
 onMounted(() => {
   gsap.from('.hero-content > *', {
@@ -11,29 +13,36 @@ onMounted(() => {
     ease: 'power2.out'
   });
 });
+const heroContent = ref<HeroContent>(getRandomHeroContent());
 </script>
 
 <template>
-  <section class="min-h-screen flex items-center relative overflow-hidden">
+  <section class="min-h-screen flex items-center relative overflow-hidden theme-bg--primary">
     <!-- Background Animation -->
-    <div class="absolute inset-0 bg-space">
+    <!-- <div class="absolute inset-0 bg-neutral-gray">
       <div class="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 opacity-50"></div>
       <div class="absolute w-96 h-96 bg-secondary/30 rounded-full filter blur-3xl -top-20 -right-20 animate-pulse"></div>
       <div class="absolute w-96 h-96 bg-primary/30 rounded-full filter blur-3xl -bottom-20 -left-20 animate-pulse"></div>
-    </div>
+    </div> -->
     
-    <div class="section relative z-10">
-      <div class="hero-content max-w-3xl">
-        <h1 class="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-          Designing the Future of Digital
-        </h1>
-        <p class="text-xl md:text-2xl text-gray-300 mb-8">
-          Transform your digital presence with cutting-edge design solutions that push the boundaries of innovation.
-        </p>
-        <div class="flex flex-wrap gap-4">
-          <a href="#contact" class="btn btn-primary">Get Started</a>
-          <a href="#portfolio" class="btn border border-white/20 hover:bg-white/10">View Our Work</a>
-        </div>
+    <div class="section relative z-10 my-40">
+      <h1 class="heading--accent mb-6 headline heading-responsive">{{ heroContent.headline }}</h1>
+      <p class="mb-8 subheadline subheading-responsive heading heading--highlight">
+        {{ heroContent.subheadline }}
+      </p>
+      <div class="flex gap-4">
+        <a 
+          href="#contact" 
+          class="btn-round-large-primary cta"
+        >
+          {{ heroContent.cta }}
+        </a>
+        <a 
+          href="#services" 
+          class="btn-round-large-outline-primary"
+        >
+          Our Services
+        </a>
       </div>
     </div>
   </section>
