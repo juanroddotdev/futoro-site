@@ -2,17 +2,27 @@
 @import '../abstracts/mixins';
 
 .about-section {
-  padding: $spacing-unit * 8 0;
+  position: relative;
+  transform-style: preserve-3d;
+  transform: translateZ(0);
+  
+  @each $theme-name, $theme-map in $themes {
+    .theme-#{$theme-name} & {
+      background-color: map-get($theme-map, 'background');
+    }
+  }
+  
+  box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.15);
 
   .highlights {
     display: grid;
     gap: $spacing-unit * 2;
     margin-bottom: $spacing-unit * 5;
-    padding: 0 $spacing-unit * 2; // Added padding on sides
+    padding: 0 $spacing-unit * 2;
     
     @include respond-to('md') {
       grid-template-columns: repeat(4, 1fr);
-      padding: 0 $spacing-unit * 4; // More padding on larger screens
+      padding: 0 $spacing-unit * 4;
     }
     
     &__card {
@@ -201,4 +211,4 @@
       }
     }
   }
-}
+} // This is the closing bracket for .about-section

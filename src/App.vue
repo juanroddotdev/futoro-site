@@ -6,8 +6,7 @@ import HeroSection from './components/sections/HeroSection.vue';
 import ServicesSection from './components/sections/ServicesSection.vue';
 import TimelineHowItWorks from './components/sections/TimelineHowItWorks.vue';
 import StrugglesOffersTabs from './components/sections/StrugglesOffersTabs.vue';
-// import ContactSection from '@/components/sections/ContactSection.vue';
-import ContactSectionAlt from './components/sections/ContactSectionAlt.vue';
+import ContactSectionV2 from './components/sections/ContactSectionV2.vue';
 import AboutSectionAlt from './components/sections/AboutSectionAlt.vue';
 
 const currentTheme = ref('theme-neon-horizon');
@@ -61,20 +60,20 @@ const handleThemeChange = (newTheme: string) => {
       ]"
     >
       <Navbar />
-      <main>
+      <div class="main-content">
         <HeroSection />
         <StrugglesOffersTabs />
         <ServicesSection />
         <TimelineHowItWorks  />
         <AboutSectionAlt />
-        <ContactSectionAlt />
-      </main>
-      <footer class="footer theme-bg--neutral">
+      </div>
+      <ContactSectionV2 />
+      <footer class="footer">
         <div class="footer-content">
-          <p class="body-text">© {{ new Date().getFullYear() }} Futoro Digital Design Lab. All rights reserved.</p>
+          <p class="body-text text-white">© {{ new Date().getFullYear() }} Futoro Digital Design Lab. All rights reserved.</p>
           <div class="footer-links">
-            <a href="#" class="body-text">Privacy Policy</a>
-            <a href="#" class="body-text">Terms of Service</a>
+            <a href="#" class="body-text text-white hover:text-white/90">Privacy Policy</a>
+            <a href="#" class="body-text text-white hover:text-white/90">Terms of Service</a>
           </div>
         </div>
       </footer>
@@ -87,31 +86,6 @@ const handleThemeChange = (newTheme: string) => {
   </div>
 </template>
 
-<style lang="scss" scoped>
-.footer {
-  @apply py-8 text-center text-gray-400 text-sm;
-
-  &-content {
-    @apply max-w-7xl mx-auto px-4;
-  }
-
-  &-links {
-    @apply mt-4 space-x-4;
-
-    a {
-      @apply hover:text-white transition-colors;
-    }
-  }
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: all 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-  transform: translateY(10px);
-}
+<style lang="scss">
+@import '@/scss/layout/app';
 </style>

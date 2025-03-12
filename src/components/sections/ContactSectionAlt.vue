@@ -20,6 +20,7 @@ onMounted(() => {
     <div class="container">
       <div class="max-w-2xl mx-auto">
         <div class="contact-card">
+          <div class="contact-card-border"></div>
           <div class="contact-content">
             <h2 class="heading heading--accent">Let's Connect</h2>
             <p class="body-text heading--highlight">
@@ -27,15 +28,17 @@ onMounted(() => {
             </p>
 
             <div class="contact-info">
-              <AvailabilityBadge :text="contactInfo.availability" />
-              <p class="contact-info__response">{{ contactInfo.response }}</p>
+              <AvailabilityBadge 
+                :text="contactInfo.availability"
+                :response-time="contactInfo.response"
+              />
               <a :href="`mailto:${contactInfo.email}`" class="contact-info__email">
                 <span v-html="emailIcon" class="email-icon"></span>
                 <span>{{ contactInfo.email }}</span>
               </a>
             </div>
 
-            <a href="mailto:juan@juanrod.dev" class="cta-button">
+            <a :href="`mailto:${contactInfo.email}`" class="cta-button">
               Start Your Project
             </a>
           </div>

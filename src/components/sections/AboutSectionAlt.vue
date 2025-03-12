@@ -42,7 +42,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <section id="about" class="about-section">
+  <section class="about-section relative z-50 bg-background shadow-3d">
     <div class="text-center mb-20">
       <h2 class="heading heading--accent heading-responsive mb-6">About Futoro</h2>
       <div class="max-w-3xl mx-auto">
@@ -80,9 +80,24 @@ onMounted(() => {
 </template>
 
 <style lang="scss" scoped>
+@import '@/scss/abstracts/_variables.scss';
+
 .expertise-grid__card {
   will-change: transform, opacity;
   backface-visibility: hidden;
+}
+
+.about-section {
+  position: relative;
+  transform-style: preserve-3d;
+  transform: translateZ(0);
+  box-shadow: 0 10px 30px 7px rgba(0, 0, 0, 0.4);
+  
+  @each $theme-name, $theme-map in $themes {
+    .theme-#{$theme-name} & {
+      background-color: map-get($theme-map, 'background');
+    }
+  }
 }
 </style>
 
