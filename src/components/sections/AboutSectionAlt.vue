@@ -79,25 +79,7 @@ onMounted(() => {
 
 </template>
 
-<style lang="scss" scoped>
-@import '@/scss/abstracts/_variables.scss';
-
-.expertise-grid__card {
-  will-change: transform, opacity;
-  backface-visibility: hidden;
-}
-
-.about-section {
-  position: relative;
-  transform-style: preserve-3d;
-  transform: translateZ(0);
-  box-shadow: 0 10px 30px 7px rgba(0, 0, 0, 0.4);
-  
-  @each $theme-name, $theme-map in $themes {
-    .theme-#{$theme-name} & {
-      background-color: map-get($theme-map, 'background');
-    }
-  }
-}
+<style lang="scss">
+@import '@/scss/components/about-section';
 </style>
 
