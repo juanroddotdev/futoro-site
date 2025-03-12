@@ -1,0 +1,292 @@
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+@import '../base/typography';
+
+.contact-section {
+  position: relative;
+  overflow: hidden;
+  padding: $spacing-unit * 12 0;
+
+  .container {
+    max-width: $container-max-width;
+    margin: 0 auto;
+    padding: 0 $spacing-unit * 2;
+  }
+
+  .contact-card {
+    position: relative;
+    padding: 2.5rem;
+    /* backdrop-filter: blur(8px); */
+    border-radius: 0.75rem;
+    /* background: rgba(255, 255, 255, 0.02); */
+    overflow: visible;
+    isolation: isolate;
+    z-index: 1;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 0.75rem;
+      border-style: solid;
+      border-width: 2px 2px 0 2px;
+      border-bottom: none;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    &:hover::before {
+      opacity: 1;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 0.75rem;
+      opacity: 0;
+      z-index: -1;
+      filter: blur(8px);
+      transition: opacity 0.3s ease;
+    }
+
+    &:hover::after {
+      opacity: 0.2;
+    }
+
+    // Theme-specific gradients with background color blending
+    .theme-neon-horizon & {
+      &::before {
+        border-image: linear-gradient(
+          180deg,
+          var(--neon-horizon-accent) 0%,
+          var(--neon-horizon-secondary) 50%,
+          #1a1b26 100%
+        ) 1;
+      }
+      &::after {
+        background: linear-gradient(
+          180deg,
+          var(--neon-horizon-accent) 0%,
+          var(--neon-horizon-secondary) 50%,
+          #1a1b26 100%
+        );
+      }
+    }
+
+    .theme-digital-sunset & {
+      &::before {
+        border-image: linear-gradient(
+          180deg,
+          var(--digital-sunset-accent) 0%,
+          var(--digital-sunset-secondary) 50%,
+          #2E3440 100%
+        ) 1;
+      }
+      &::after {
+        background: linear-gradient(
+          180deg,
+          var(--digital-sunset-accent) 0%,
+          var(--digital-sunset-secondary) 50%,
+          #2E3440 100%
+        );
+      }
+    }
+
+    .theme-retro-wave & {
+      &::before {
+        border-image: linear-gradient(
+          180deg,
+          var(--retro-wave-accent) 0%,
+          var(--retro-wave-secondary) 50%,
+          #0f0f17 100%
+        ) 1;
+      }
+      &::after {
+        background: linear-gradient(
+          180deg,
+          var(--retro-wave-accent) 0%,
+          var(--retro-wave-secondary) 50%,
+          #0f0f17 100%
+        );
+      }
+    }
+
+    .theme-pastel-future & {
+      &::before {
+        border-image: linear-gradient(
+          180deg,
+          var(--pastel-future-accent) 0%,
+          var(--pastel-future-secondary) 50%,
+          #f8f9fa 100%
+        ) 1;
+      }
+      &::after {
+        background: linear-gradient(
+          180deg,
+          var(--pastel-future-accent) 0%,
+          var(--pastel-future-secondary) 50%,
+          #f8f9fa 100%
+        );
+      }
+    }
+
+    .contact-content {
+      position: relative;
+      z-index: 2;
+    }
+  }
+
+  .contact-card-border-container {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .contact-card-border {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    .border-path {
+      stroke-width: 4px;
+      vector-effect: non-scaling-stroke;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    // Theme-specific gradient strokes
+    .theme-neon-horizon & .border-path {
+      stroke: url(#contact-border-gradient-neon);
+    }
+    
+    .theme-digital-sunset & .border-path {
+      stroke: url(#contact-border-gradient-sunset);
+    }
+    
+    .theme-retro-wave & .border-path {
+      stroke: url(#contact-border-gradient-retro);
+    }
+    
+    .theme-pastel-future & .border-path {
+      stroke: url(#contact-border-gradient-pastel);
+    }
+  }
+
+  .contact-content {
+    position: relative;
+    z-index: 3;
+    text-align: center;
+
+    .heading {
+      margin-bottom: $spacing-unit * 2;
+    }
+
+    .body-text {
+      font-size: map-get($fontSize, 'lg');
+      margin-bottom: $spacing-unit * 4;
+    }
+  }
+
+  .contact-info {
+    margin-bottom: $spacing-unit * 5;
+    
+    &__email {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: $spacing-unit * 1.5;
+      margin-bottom: $spacing-unit * 3;
+
+      @each $theme-name, $theme-map in $themes {
+        .theme-#{$theme-name} & {
+          color: map-get($theme-map, 'accent');
+
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+
+    &__availability {
+      font-weight: 600;
+      font-size: map-get($fontSize, 'lg');
+      margin-bottom: $spacing-unit;
+    }
+
+    &__response {
+      @each $theme-name, $theme-map in $themes {
+        .theme-#{$theme-name} & {
+          color: map-get($theme-map, 'neutral');
+        }
+      }
+    }
+  }
+
+  .cta-button {
+    display: inline-block;
+    padding: $spacing-unit * 2 $spacing-unit * 4;
+    border-radius: 9999px;
+    font-weight: 600;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    transform: translateY(0);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    // Add pseudo-element for hover effect
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(45deg, transparent 0%, rgba(255,255,255,0.15) 100%);
+      transform: translateX(-100%) skewX(-15deg);
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: -1;
+    }
+
+    @each $theme-name, $theme-map in $themes {
+      .theme-#{$theme-name} & {
+        background-color: map-get($theme-map, 'accent');
+        color: map-get($theme-map, 'neutral');
+
+        &::after {
+          content: '';
+          position: absolute;
+          inset: -2px;
+          background: map-get($theme-map, 'accent');
+          z-index: -2;
+          border-radius: inherit;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+          filter: blur(8px);
+        }
+      }
+    }
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+
+      &::before {
+        transform: translateX(100%) skewX(-15deg);
+      }
+
+      &::after {
+        opacity: 0.4;
+      }
+    }
+
+    &:active {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    }
+  }
+}

@@ -6,7 +6,8 @@ import HeroSection from './components/sections/HeroSection.vue';
 import ServicesSection from './components/sections/ServicesSection.vue';
 import TimelineHowItWorks from './components/sections/TimelineHowItWorks.vue';
 import StrugglesOffersTabs from './components/sections/StrugglesOffersTabs.vue';
-import ContactSection from '@/components/sections/ContactSection.vue';
+// import ContactSection from '@/components/sections/ContactSection.vue';
+import ContactSectionAlt from './components/sections/ContactSectionAlt.vue';
 import AboutSectionAlt from './components/sections/AboutSectionAlt.vue';
 
 const currentTheme = ref('theme-neon-horizon');
@@ -64,11 +65,9 @@ const handleThemeChange = (newTheme: string) => {
         <HeroSection />
         <StrugglesOffersTabs />
         <ServicesSection />
-        <!-- <HowItWorksSection /> -->
         <TimelineHowItWorks  />
         <AboutSectionAlt />
-        <!-- <AboutSection /> -->
-        <ContactSection />
+        <ContactSectionAlt />
       </main>
       <footer class="footer theme-bg--neutral">
         <div class="footer-content">
