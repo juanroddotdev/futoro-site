@@ -1,0 +1,18 @@
+// Main playground styles entry point
+@import 'variables';
+@import 'mixins';
+@import 'utilities';
+@import 'fonts';
+
+// Import all playground components
+@import 'components/hero-section';
+@import 'components/view-toggle';
+
+// Add any global playground styles
+.playground-view {
+  font-family: map-get($playground-fonts, 'primary');
+  
+  * {
+    transition: map-get($playground-transitions, 'default');
+  }
+}

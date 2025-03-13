@@ -9,5 +9,14 @@ export const heroSectionAnimations = {
       stagger: 0.2,
       ease: 'power2.out'
     });
+  },
+  
+  // Add new animation for playground hero
+  playgroundHeroFadeIn: () => {
+    return gsap.from('.playground-hero', {
+      opacity: 0,
+      duration: 1,
+      ease: 'power2.out'
+    });
   }
 };
