@@ -1,14 +1,23 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import Navbar from '@/components/layout/Navbar.vue';
-import ThemeSwitcher from '@/components/ThemeSwitcher.vue';
-import HeroSection from './components/sections/HeroSection.vue';
-import ServicesSection from './components/sections/ServicesSection.vue';
-import TimelineHowItWorks from './components/sections/TimelineHowItWorks.vue';
-import StrugglesOffersTabs from './components/sections/StrugglesOffersTabs.vue';
-import ContactSectionV2 from './components/sections/ContactSectionV2.vue';
-import AboutSectionAlt from './components/sections/AboutSectionAlt.vue';
-// import GlitchingDataParticles from './components/ui/GlitchingDataParticles.vue';
+// import Navbar from '@/components/layout/Navbar.vue';
+// import ThemeSwitcher from '@/components/ThemeSwitcher.vue';
+// import HeroSection from './components/sections/HeroSection.vue';
+// import ServicesSection from './components/sections/ServicesSection.vue';
+// import TimelineHowItWorks from './components/sections/TimelineHowItWorks.vue';
+// import StrugglesOffersTabs from './components/sections/StrugglesOffersTabs.vue';
+// import ContactSectionV2 from './components/sections/ContactSectionV2.vue';
+// import AboutSectionAlt from './components/sections/AboutSectionAlt.vue';
+
+//THE PROCESS VERSION
+
+import Navbar from '@/components/the-process/Navbar.vue';
+import Hero from '@/components/the-process/Hero.vue';
+import StrugglesOffersTabs from '@/components/the-process/StrugglesOffersTabs.vue';
+import ProcessTimeline from '@/components/the-process/ProcessTimeline.vue';
+import ServicesSection from '@/components/the-process/ServicesSection.vue';
+import AboutSection from './components/the-process/AboutSection.vue';
+import ContactSection from '@/components/the-process/ContactSection.vue';
 
 const currentTheme = ref('theme-neon-horizon');
 const isThemeTransitioning = ref(false);
@@ -31,7 +40,7 @@ const handleThemeChange = (newTheme: string) => {
 </script>
 
 <template>
-  <svg width="0" height="0" class="hidden">
+  <!-- <svg width="0" height="0" class="hidden">
     <defs>
       <linearGradient id="accordion-gradient-neon" gradientUnits="userSpaceOnUse">
         <stop offset="0%" stop-color="var(--neon-horizon-secondary)" />
@@ -50,10 +59,33 @@ const handleThemeChange = (newTheme: string) => {
         <stop offset="100%" stop-color="var(--pastel-future-accent)" />
       </linearGradient>
     </defs>
-  </svg>
+  </svg> -->
   <div id="app">
   <!-- <div id="app" class="debug"> -->
-    <div 
+    <div class="app min-h-screen relative the-process">
+      <Navbar />
+      <div class="main-content">
+        <section id="hero">
+          <Hero />
+        </section>
+        <section id="struggles">
+          <StrugglesOffersTabs />
+        </section>
+        <section id="services">
+          <ServicesSection />
+        </section>
+        <section id="timeline">
+          <ProcessTimeline />
+        </section>
+        <section id="about">
+          <AboutSection />
+        </section>
+      </div>
+      <section id="contact">
+        <ContactSection />
+      </section>
+    </div>
+    <!-- <div 
       class="app min-h-screen relative" 
       :class="[
         currentTheme,
@@ -63,8 +95,7 @@ const handleThemeChange = (newTheme: string) => {
       <Navbar />
       <div class="main-content">
         <HeroSection />
-        <!-- <GlitchingDataParticles :current-theme="currentTheme" /> -->
-        <!-- <CodeEvolution /> -->
+        <Hero />
         <StrugglesOffersTabs />
         <ServicesSection />
         <TimelineHowItWorks  />
@@ -85,10 +116,21 @@ const handleThemeChange = (newTheme: string) => {
         v-model:currentTheme="currentTheme"
         @update:currentTheme="handleThemeChange"
       />
-    </div>
+    </div> -->
   </div>
 </template>
 
 <style lang="scss">
 @import '@/scss/layout/app';
+.main-content {
+  position: relative;
+  z-index: 1;
+  background: white;
+  min-height: 100vh;
+  margin-bottom: 100vh; // This creates space for the contact section
+}
+
+.the-process {
+  overflow-x: hidden;
+}
 </style>
