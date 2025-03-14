@@ -25,117 +25,10 @@ let rect: DOMRect;
 let scrollAccordionEl: HTMLElement | null = null;
 
 // Add a function to create height markers
-function createHeightMarkers(container: HTMLElement) {
-  // Remove any existing markers first
-  const existingMarkers = document.querySelectorAll('.scroll-height-marker');
-  existingMarkers.forEach(marker => marker.remove());
-  
-  // Create markers every 200px
-  const containerHeight = container.offsetHeight;
-  const markerInterval = 200;
-  
-  for (let i = 0; i < containerHeight; i += markerInterval) {
-    const marker = document.createElement('div');
-    marker.className = 'scroll-height-marker';
-    marker.style.position = 'absolute';
-    marker.style.right = '0';
-    marker.style.top = `${i}px`;
-    marker.style.width = '50px';
-    marker.style.height = '2px';
-    marker.style.backgroundColor = '#ff5722';
-    marker.style.zIndex = '1000';
-    
-    // Add label
-    const label = document.createElement('span');
-    label.textContent = `${i}px`;
-    label.style.position = 'absolute';
-    label.style.right = '55px';
-    label.style.top = '-10px';
-    label.style.fontSize = '12px';
-    label.style.color = '#ff5722';
-    label.style.fontWeight = 'bold';
-    
-    marker.appendChild(label);
-    container.appendChild(marker);
-  }
-  
-  // Add start and end position markers
-  const startMarker = document.createElement('div');
-  startMarker.className = 'scroll-height-marker start-marker';
-  startMarker.style.position = 'fixed';
-  startMarker.style.right = '0';
-  startMarker.style.top = '10%';
-  startMarker.style.width = '100px';
-  startMarker.style.height = '3px';
-  startMarker.style.backgroundColor = '#4caf50';
-  startMarker.style.zIndex = '1001';
-  
-  const startLabel = document.createElement('span');
-  startLabel.textContent = 'Start Pin';
-  startLabel.style.position = 'absolute';
-  startLabel.style.right = '105px';
-  startLabel.style.top = '-10px';
-  startLabel.style.fontSize = '12px';
-  startLabel.style.color = '#4caf50';
-  startLabel.style.fontWeight = 'bold';
-  
-  startMarker.appendChild(startLabel);
-  document.body.appendChild(startMarker);
-  
-  const endMarker = document.createElement('div');
-  endMarker.className = 'scroll-height-marker end-marker';
-  endMarker.style.position = 'absolute';
-  endMarker.style.right = '0';
-  endMarker.style.top = `${endPosition - startPosition}px`;
-  endMarker.style.width = '100px';
-  endMarker.style.height = '3px';
-  endMarker.style.backgroundColor = '#f44336';
-  endMarker.style.zIndex = '1001';
-  
-  const endLabel = document.createElement('span');
-  endLabel.textContent = 'End Pin';
-  endLabel.style.position = 'absolute';
-  endLabel.style.right = '105px';
-  endLabel.style.top = '-10px';
-  endLabel.style.fontSize = '12px';
-  endLabel.style.color = '#f44336';
-  endLabel.style.fontWeight = 'bold';
-  
-  endMarker.appendChild(endLabel);
-  container.appendChild(endMarker);
-}
+
 
 // Add a function to update the current scroll position marker
-function updateScrollPositionMarker() {
-  // Remove existing scroll position marker
-  const existingMarker = document.querySelector('.current-scroll-marker');
-  if (existingMarker) {
-    existingMarker.remove();
-  }
-  
-  // Create new marker at current scroll position
-  const marker = document.createElement('div');
-  marker.className = 'scroll-height-marker current-scroll-marker';
-  marker.style.position = 'fixed';
-  marker.style.right = '0';
-  marker.style.top = '50%';
-  marker.style.width = '80px';
-  marker.style.height = '3px';
-  marker.style.backgroundColor = '#2196f3';
-  marker.style.zIndex = '1002';
-  
-  const label = document.createElement('span');
-  label.textContent = `Scroll: ${window.scrollY}px`;
-  label.style.position = 'absolute';
-  label.style.right = '85px';
-  label.style.top = '-10px';
-  label.style.fontSize = '12px';
-  label.style.color = '#2196f3';
-  label.style.fontWeight = 'bold';
-  
-  marker.appendChild(label);
-  document.body.appendChild(marker);
-}
+
 
 onMounted(() => {
   if (!accordionsRef.value) return;
@@ -156,8 +49,6 @@ onMounted(() => {
   accordionsRef.value.style.position = 'sticky';
   accordionsRef.value.style.top = '10%';
   
-  // No need for placeholder with sticky positioning
-  
   // Create intersection observer to detect when element enters viewport
   observer = new IntersectionObserver((entries) => {
     if (entries[0].isIntersecting) {
@@ -177,23 +68,17 @@ onMounted(() => {
   
   observer.observe(scrollAccordionEl);
   
-  // No need for resize listener with sticky positioning
-  
-  // Add height markers after setting up the scroll-accordion
-  if (scrollAccordionEl) {
-    createHeightMarkers(scrollAccordionEl);
-  }
-  
   // Initial check
   handleScroll();
+  
 });
 
 function handleScroll() {
   const currentScroll = window.scrollY;
   if (!scrollAccordionEl || !accordionsRef.value) return;
   
-  // Update scroll position marker
-  updateScrollPositionMarker();
+  // Remove the call to updateScrollPositionMarker
+  // updateScrollPositionMarker();
   
   // Calculate scroll progress (0 to 1)
   if (currentScroll >= startPosition && currentScroll <= endPosition) {
@@ -311,9 +196,6 @@ onUnmounted(() => {
     observer.disconnect();
   }
   
-  // Remove all markers
-  const markers = document.querySelectorAll('.scroll-height-marker');
-  markers.forEach(marker => marker.remove());
 });
 </script>
 
@@ -340,7 +222,7 @@ onUnmounted(() => {
 <style scoped>
 .scroll-accordion {
   width: 100%;
-  /* Set both minimum and maximum height to 1350px */
+  /* Set both minimum and maximum height to 2000px */
   min-height: 2000px;
   max-height: 2000px;
   position: relative;
@@ -382,8 +264,8 @@ onUnmounted(() => {
   color: rgba(255, 255, 255, 0.9);
 }
 
-/* Add styles for the markers */
-:deep(.scroll-height-marker) {
+/* Remove the marker styles */
+/* :deep(.scroll-height-marker) {
   pointer-events: none;
-}
+} */
 </style>
