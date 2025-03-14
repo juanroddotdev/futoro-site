@@ -1,201 +1,89 @@
 <script setup lang="ts">
-import { onMounted, ref, onUnmounted } from 'vue';
-
-interface AccordionItem {
-  id: number;
-  title: string;
-  description: string;
-}
+import { onMounted, ref, onUnmounted, reactive } from 'vue';
+import {
+  AccordionItem,
+  ScrollState,
+  Handlers,
+  initAccordionScrollTracking,
+  calculateScrollProgress,
+  calculateAccordionProgress,
+  animateAccordionText,
+  animateAccordionMargin,
+  trackLastAccordionProgress,
+  trackAccordionCompletion,
+  cleanup
+} from '@/utils/scrollAccordion';
 
 defineProps<{
   items: AccordionItem[];
 }>();
 
+// Refs for DOM elements
 const accordionsRef = ref<HTMLElement | null>(null);
 const placeholderRef = ref<HTMLElement | null>(null);
-let observer: IntersectionObserver | null = null;
-let scrollListener: (() => void) | null = null;
-let isPinned = false;
-let startPosition = 0;
-let endPosition = 0;
-let accordionHeight = 0;
-let scrollProgress = 0;
-let resizeListener: (() => void) | null = null;
-let rect: DOMRect;
-let scrollAccordionEl: HTMLElement | null = null;
 
-// Add a function to create height markers
-
-
-// Add a function to update the current scroll position marker
-
-
-onMounted(() => {
-  if (!accordionsRef.value) return;
-  
-  // Remove transition for smoother sticky behavior
-  // accordionsRef.value.style.transition = 'top 0.3s ease';
-  
-  scrollAccordionEl = accordionsRef.value.closest('.scroll-accordion') as HTMLElement;
-  if (!scrollAccordionEl) return;
-  
-  // Get dimensions and positions
-  rect = accordionsRef.value.getBoundingClientRect();
-  startPosition = window.scrollY + rect.top - window.innerHeight * 0.1; // 10% from top
-  endPosition = startPosition + rect.height * 2; // Adjust this multiplier as needed
-  accordionHeight = rect.height;
-  
-  // Apply sticky positioning instead of fixed
-  accordionsRef.value.style.position = 'sticky';
-  accordionsRef.value.style.top = '10%';
-  
-  // Create intersection observer to detect when element enters viewport
-  observer = new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting) {
-      // Add scroll listener when element is in view
-      if (!scrollListener) {
-        scrollListener = handleScroll;
-        window.addEventListener('scroll', scrollListener);
-      }
-    } else {
-      // Remove scroll listener when element is out of view
-      if (scrollListener) {
-        window.removeEventListener('scroll', scrollListener);
-        scrollListener = null;
-      }
-    }
-  }, { threshold: 0.1 });
-  
-  observer.observe(scrollAccordionEl);
-  
-  // Initial check
-  handleScroll();
-  
+// Group related state in a reactive object
+const scrollState = reactive<ScrollState>({
+  startPosition: 0,
+  endPosition: 0,
+  progress: 0,
+  scrollAccordionEl: null,
 });
 
+// Group observers and listeners
+const handlers: Handlers = {
+  observer: null,
+  scrollListener: null,
+  resizeListener: null,
+};
+
+// Handle scroll events
 function handleScroll() {
-  const currentScroll = window.scrollY;
-  if (!scrollAccordionEl || !accordionsRef.value) return;
-  
-  // Remove the call to updateScrollPositionMarker
-  // updateScrollPositionMarker();
+  if (!scrollState.scrollAccordionEl || !accordionsRef.value) return;
   
   // Calculate scroll progress (0 to 1)
-  if (currentScroll >= startPosition && currentScroll <= endPosition) {
-    scrollProgress = (currentScroll - startPosition) / (endPosition - startPosition);
-    animateAccordions(scrollProgress);
-  } else if (currentScroll > endPosition) {
-    // Animation is complete
-    animateAccordions(1);
-  } else {
-    // We're above the start position
-    animateAccordions(0);
-  }
+  scrollState.progress = calculateScrollProgress(scrollState);
+  animateAccordions(scrollState.progress);
 }
 
+// Animate accordions based on scroll progress
 function animateAccordions(progress: number) {
-  if (!scrollAccordionEl) return;
+  if (!scrollState.scrollAccordionEl) return;
   
-  // Get all accordion text elements
-  const textElements = scrollAccordionEl.querySelectorAll('.accordion .text') as NodeListOf<HTMLElement>;
-  const accordionElements = scrollAccordionEl.querySelectorAll('.accordion') as NodeListOf<HTMLElement>;
+  const textElements = scrollState.scrollAccordionEl.querySelectorAll('.accordion .text') as NodeListOf<HTMLElement>;
+  const accordionElements = scrollState.scrollAccordionEl.querySelectorAll('.accordion') as NodeListOf<HTMLElement>;
   const totalAccordions = accordionElements.length;
   
-  // Track if the last accordion is closed
-  let lastAccordionProgress = 0;
-  
-  // Animate text elements (height and opacity)
+  // Animate each accordion
   textElements.forEach((text, index) => {
-    // Calculate individual progress for each accordion
-    // This ensures each accordion gets its own segment of the scroll range
-    const segmentSize = 1 / totalAccordions;
-    const segmentStart = index * segmentSize;
+    const accordionProgress = calculateAccordionProgress(progress, index, totalAccordions);
     
-    // Map the overall progress to this accordion's segment
-    let accordionProgress = 0;
-    if (progress > segmentStart) {
-      accordionProgress = Math.min(1, (progress - segmentStart) / segmentSize);
-    }
+    // Track completion of last accordion
+    trackLastAccordionProgress(text, accordionProgress, index, totalAccordions, progress);
     
-    // Track the last accordion's progress
-    if (index === totalAccordions - 1) {
-      lastAccordionProgress = accordionProgress;
-      
-      // Log when the last accordion is fully closed (progress = 1)
-      if (accordionProgress >= 0.99 && !text.dataset.fullyClosed) {
-        console.log('Last accordion item is now fully closed!', {
-          overallProgress: progress,
-          lastItemProgress: accordionProgress,
-          timestamp: new Date().toISOString()
-        });
-        text.dataset.fullyClosed = 'true';
-      } else if (accordionProgress < 0.99 && text.dataset.fullyClosed) {
-        // Reset the flag if we scroll back up
-        delete text.dataset.fullyClosed;
-      }
-    }
-    
-    // Calculate height (from original to 0)
-    const originalHeight = parseInt(text.dataset.originalHeight || '0');
-    if (!text.dataset.originalHeight && accordionProgress === 0) {
-      text.dataset.originalHeight = `${text.scrollHeight}`;
-    }
-    
-    const height = originalHeight * (1 - accordionProgress);
-    const opacity = 1 - accordionProgress;
-    
-    // Apply styles
-    text.style.height = `${height}px`;
-    text.style.opacity = opacity.toString();
-    text.style.overflow = 'hidden';
-    text.style.paddingBottom = `${(1 - accordionProgress) * 16}px`;
-    
-    // Animate accordion margins
-    const accordion = accordionElements[index];
-    if (accordion) {
-      // Calculate margin (from original 40px to 10px)
-      const marginBottom = 40 - (accordionProgress * 30);
-      
-      // Apply styles
-      accordion.style.marginBottom = `${marginBottom}px`;
-    }
+    // Apply animations
+    animateAccordionText(text, accordionProgress);
+    animateAccordionMargin(accordionElements[index], accordionProgress);
   });
   
-  // Add a custom event when all accordions are closed
-  if (progress >= 0.99 && !scrollAccordionEl.dataset.allClosed) {
-    console.log('All accordion items are now closed!', {
-      progress,
-      timestamp: new Date().toISOString()
-    });
-    
-    // Dispatch a custom event
-    const event = new CustomEvent('accordions-closed', { 
-      detail: { timestamp: new Date().toISOString() } 
-    });
-    scrollAccordionEl.dispatchEvent(event);
-    
-    // Set a flag to prevent multiple logs
-    scrollAccordionEl.dataset.allClosed = 'true';
-  } else if (progress < 0.99 && scrollAccordionEl.dataset.allClosed) {
-    // Reset the flag if we scroll back up
-    delete scrollAccordionEl.dataset.allClosed;
-  }
+  // Track overall animation completion
+  trackAccordionCompletion(scrollState, progress);
 }
 
+// Lifecycle hooks
+onMounted(() => {
+  if (accordionsRef.value && placeholderRef.value) {
+    initAccordionScrollTracking(
+      accordionsRef.value,
+      scrollState,
+      handlers,
+      handleScroll
+    );
+  }
+});
+
 onUnmounted(() => {
-  // Clean up
-  if (scrollListener) {
-    window.removeEventListener('scroll', scrollListener);
-  }
-  
-  if (resizeListener) {
-    window.removeEventListener('resize', resizeListener);
-  }
-  
-  if (observer) {
-    observer.disconnect();
-  }
-  
+  cleanup(handlers);
 });
 </script>
 
