@@ -8,6 +8,7 @@
 @import 'components/hero-section';
 @import 'components/view-toggle';
 @import 'components/card-3d-showcase';
+@import 'components/custom-horizontal-scroll';
 
 // Add any global playground styles
 .playground-view {
@@ -15,5 +16,12 @@
   
   * {
     transition: map-get($playground-transitions, 'default');
+  }
+  
+  .main-content {
+    min-height: 100vh; // Ensure it's at least viewport height
+    height: auto !important; // Override any fixed height
+    overflow: visible !important; // Ensure content isn't cut off
+    position: relative; // For proper positioning of child elements
   }
 }

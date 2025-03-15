@@ -3,9 +3,10 @@ import { ref } from 'vue'
 import HeroSection from '@/components/playground/HeroSection.vue'
 import ThemeSwitcher from '@/components/ThemeSwitcher.vue'
 import Card3DShowcase from '@/components/sections/Card3DShowcase.vue'
-// import ScrollAccordionSection from '@/components/sections/ScrollAccordionSection.vue'
-// import ScrollAccordionTest from '@/components/ui/ScrollAccordionTest.vue'
-import ScrollAccordionVanilla from '@/components/ui/ScrollAccordionVanilla.vue' // Import the vanilla version
+import ScrollAccordionVanilla from '@/components/ui/ScrollAccordionVanilla.vue'
+// import CustomHorizontalScroll from '@/components/playground/CustomHorizontalScroll.vue'
+import CustomHorizontalScrollV2 from '../components/playground/CustomHorizontalScrollV2.vue'
+// import CustomHorizontalScrollReverse from '@/components/playground/CustomHorizontalScrollReverse.vue'
 
 defineProps<{
   currentTheme: string
@@ -41,19 +42,29 @@ const accordionItems = ref([
       />
       <Card3DShowcase :current-theme="currentTheme.replace('theme-', '')" />
       
-      <!-- Add the vanilla scroll accordion component -->
+      
+      <!-- Vanilla scroll accordion component -->
       <div class="py-20 debug">
         <h2 class="text-3xl font-bold text-center mb-10">Vanilla Scroll Accordion</h2>
         <ScrollAccordionVanilla :items="accordionItems" />
       </div>
       
-      <!-- Original test component -->
-      <!-- <div class="py-20">
-        <h2 class="text-3xl font-bold text-center mb-10">Scroll Accordion Test</h2>
-        <ScrollAccordionTest :items="accordionItems" />
+      <!-- Add the CustomHorizontalScroll component -->
+      <!-- <div class="py-20 debug">
+        <h2 class="text-3xl font-bold text-center mb-10">Horizontal Scroll</h2>
+        <CustomHorizontalScroll />
       </div> -->
       
-      <!-- <ScrollAccordionSection /> -->
+      <!-- Add the CustomHorizontalScrollV2 component -->
+      <div class="py-20 debug">
+        <h2 class="text-3xl font-bold text-center mb-10">Horizontal Scroll V2</h2>
+        <CustomHorizontalScrollV2 />
+      </div>
+      
+      <!-- Add the CustomHorizontalScrollReverse component -->
+      <!-- <div class="py-20 debug">
+        <CustomHorizontalScrollReverse />
+      </div> -->
     </div>
   </div>
 </template>

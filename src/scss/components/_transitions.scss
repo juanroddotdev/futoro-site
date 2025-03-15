@@ -58,18 +58,43 @@
     transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     filter: blur(12px);
   }
-  
-  &:hover {
-    transform: translateY(-2px);
-    
-    &::after {
-      opacity: 0.08;
-      background-position: 100% center;
+}
+
+// Add a new class for scroll-based animations
+.horizontal-struggles {
+  .hover-card {
+    // Override hover effects for horizontal scroll cards
+    &:hover {
+      transform: none;
+      
+      &::after {
+        opacity: 0;
+      }
+      
+      &::before {
+        opacity: 0.5;
+        background-position: 0% center;
+      }
     }
     
-    box-shadow: 
-      0 4px 20px -2px rgba(var(--theme-gradient-start-rgb), 0.2),
-      0 8px 32px -4px rgba(var(--theme-gradient-end-rgb), 0.2);
+    // Apply effects to centered cards instead
+    &.active-center {
+      transform: translateY(-2px) scale(1.05);
+      
+      &::after {
+        opacity: 0.08;
+        background-position: 100% center;
+      }
+      
+      &::before {
+        opacity: 1;
+        background-position: 100% center;
+      }
+      
+      box-shadow: 
+        0 4px 20px -2px rgba(var(--theme-gradient-start-rgb), 0.2),
+        0 8px 32px -4px rgba(var(--theme-gradient-end-rgb), 0.2);
+    }
   }
 }
 
