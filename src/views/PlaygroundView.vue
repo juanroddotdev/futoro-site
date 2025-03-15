@@ -7,6 +7,7 @@ import ScrollAccordionVanilla from '@/components/ui/ScrollAccordionVanilla.vue'
 // import CustomHorizontalScroll from '@/components/playground/CustomHorizontalScroll.vue'
 import CustomHorizontalScrollV2 from '../components/playground/CustomHorizontalScrollV2.vue'
 // import CustomHorizontalScrollReverse from '@/components/playground/CustomHorizontalScrollReverse.vue'
+import StrugglesOffersHorizontalScroll from '@/components/sections/StrugglesOffersHorizontalScroll.vue'
 
 defineProps<{
   currentTheme: string
@@ -49,17 +50,17 @@ const accordionItems = ref([
         <ScrollAccordionVanilla :items="accordionItems" />
       </div>
       
-      <!-- Add the CustomHorizontalScroll component -->
-      <!-- <div class="py-20 debug">
-        <h2 class="text-3xl font-bold text-center mb-10">Horizontal Scroll</h2>
-        <CustomHorizontalScroll />
-      </div> -->
+      <!-- Add the StrugglesOffersHorizontalScroll component -->
+      <div class="py-20 debug">
+        <h2 class="text-3xl font-bold text-center mb-10">Struggles & Solutions Toggle</h2>
+        <StrugglesOffersHorizontalScroll />
+      </div>
       
       <!-- Add the CustomHorizontalScrollV2 component -->
-      <div class="py-20 debug">
+      <!-- <div class="py-20 debug">
         <h2 class="text-3xl font-bold text-center mb-10">Horizontal Scroll V2</h2>
         <CustomHorizontalScrollV2 />
-      </div>
+      </div> -->
       
       <!-- Add the CustomHorizontalScrollReverse component -->
       <!-- <div class="py-20 debug">
