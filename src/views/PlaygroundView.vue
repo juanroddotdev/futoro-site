@@ -4,10 +4,16 @@ import HeroSection from '@/components/playground/HeroSection.vue'
 import ThemeSwitcher from '@/components/ThemeSwitcher.vue'
 import Card3DShowcase from '@/components/sections/Card3DShowcase.vue'
 import ScrollAccordionVanilla from '@/components/ui/ScrollAccordionVanilla.vue'
-// import CustomHorizontalScroll from '@/components/playground/CustomHorizontalScroll.vue'
-import CustomHorizontalScrollV2 from '../components/playground/CustomHorizontalScrollV2.vue'
-// import CustomHorizontalScrollReverse from '@/components/playground/CustomHorizontalScrollReverse.vue'
 import StrugglesOffersHorizontalScroll from '@/components/sections/StrugglesOffersHorizontalScroll.vue'
+import AnimatedSplitHeading from '@/components/ui/AnimatedSplitHeading.vue'
+import TextAnimationsDemo from '@/views/TextAnimationsDemo.vue'
+// import CustomHorizontalScrollV2 from '../components/playground/CustomHorizontalScrollV2.vue'
+// Import the horizontal scroll components
+// import HorizontalScrollContainer from '@/components/horizontal-scroll/HorizontalScrollContainer.vue'
+// import ScrollRow from '@/components/horizontal-scroll/ScrollRow.vue'
+// import ScrollItem from '@/components/horizontal-scroll/ScrollItem.vue'
+// import { struggles, solutions } from '@/data/strugglesAndSolutions'
+// import { icons } from '@/utils/icons'
 
 defineProps<{
   currentTheme: string
@@ -27,45 +33,30 @@ const accordionItems = ref([
 </script>
 
 <template>
-  <div 
-    class="playground-view min-h-screen relative" 
-    :class="`theme-${currentTheme.replace('theme-', '')}`"
-  >
-    <ThemeSwitcher 
-      :current-theme="currentTheme"
-      @update:currentTheme="(theme) => emit('update:currentTheme', theme)"
-    />
+  <div class="playground-view min-h-screen relative" :class="`theme-${currentTheme.replace('theme-', '')}`">
+    <ThemeSwitcher :current-theme="currentTheme" @update:currentTheme="(theme) => emit('update:currentTheme', theme)" />
     <div class="main-content">
-      <HeroSection 
-        :current-theme="currentTheme.replace('theme-', '')"
-        :floating="true"
-        :spotlight="true"
-      />
+      <HeroSection :current-theme="currentTheme.replace('theme-', '')" :floating="true" :spotlight="true" />
       <Card3DShowcase :current-theme="currentTheme.replace('theme-', '')" />
-      
-      
+
+
       <!-- Vanilla scroll accordion component -->
-      <div class="py-20 debug">
-        <h2 class="text-3xl font-bold text-center mb-10">Vanilla Scroll Accordion</h2>
+      <div class="py-20">
+        <h2 class="text-3xl font-bold text-center mb-10 theme-text--gradient">Vanilla Scroll Accordion</h2>
         <ScrollAccordionVanilla :items="accordionItems" />
       </div>
-      
-      <!-- Add the StrugglesOffersHorizontalScroll component -->
-      <div class="py-20 debug">
-        <h2 class="text-3xl font-bold text-center mb-10">Struggles & Solutions Toggle</h2>
+
+      <!-- Text Animations Demo Section -->
+      <div class="py-20">
+        <TextAnimationsDemo />
+      </div>
+
+      <!-- StrugglesOffersHorizontalScroll section -->
+      <div class="py-20">
+        <AnimatedSplitHeading firstPart="From Frustration" secondPart="to Fantastic" animation="shake"
+          headingClass="text-3xl font-bold text-center mb-10 gradient-text" />
         <StrugglesOffersHorizontalScroll />
       </div>
-      
-      <!-- Add the CustomHorizontalScrollV2 component -->
-      <!-- <div class="py-20 debug">
-        <h2 class="text-3xl font-bold text-center mb-10">Horizontal Scroll V2</h2>
-        <CustomHorizontalScrollV2 />
-      </div> -->
-      
-      <!-- Add the CustomHorizontalScrollReverse component -->
-      <!-- <div class="py-20 debug">
-        <CustomHorizontalScrollReverse />
-      </div> -->
     </div>
   </div>
 </template>
@@ -75,7 +66,7 @@ const accordionItems = ref([
 
 .playground-view {
   position: relative;
-  
+
   .main-content {
     position: relative;
     z-index: 1;

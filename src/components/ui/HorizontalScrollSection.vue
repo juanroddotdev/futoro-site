@@ -23,6 +23,16 @@ const props = defineProps({
   titleCardText: {
     type: String,
     default: 'Title Card'
+  },
+  // Start first item in the middle of viewport (for normal direction)
+  startInMiddle: {
+    type: Boolean,
+    default: false
+  },
+  // Start title card in the middle of viewport (for reverse direction)
+  startReverseInMiddle: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -61,20 +71,42 @@ const transformStyle = computed(() => {
   let translateX;
   
   if (isReversed.value) {
-    // Reversed: Title card starts at right edge of viewport
-    // Cards overflow to the left (off-screen)
-    const titleWidth = titleCardWidth.value || 300;
-    const initialOffset = viewportWidth - titleWidth;
-    const maxTranslation = totalWidth - viewportWidth;
+    // Reversed: Title card should be in the middle or at right edge
+    // Find the title card element (it's the last child in reversed mode)
+    const titleCardElement = scrollWrapRef.value.querySelector('.title-card');
+    const titleWidth = titleCardElement ? titleCardElement.offsetWidth : 300;
     
-    // Start with title at right edge, other cards off-screen left
-    // As progress increases, move everything right to reveal cards
-    translateX = initialOffset - (maxTranslation * (1 - scrollProgress.value));
+    if (props.startReverseInMiddle) {
+      // Position the title card in the middle when section first appears
+      if (scrollProgress.value === 0) {
+        // Simple centering of the title card
+        translateX = (viewportWidth / 2) - (titleWidth / 2);
+      } else {
+        // As scroll progresses, move from centered position to final position
+        const maxTranslation = totalWidth - viewportWidth;
+        const initialOffset = (viewportWidth / 2) - (titleWidth / 2);
+        translateX = initialOffset - (maxTranslation * scrollProgress.value);
+      }
+    } else {
+      // Original behavior: title card at right edge
+      const initialOffset = viewportWidth - titleWidth;
+      const maxTranslation = totalWidth - viewportWidth;
+      translateX = initialOffset - (maxTranslation * (1 - scrollProgress.value));
+    }
   } else {
-    // Normal: Start from right (0) and move left (negative)
+    // Normal direction logic remains unchanged
     const maxTranslation = -(totalWidth - viewportWidth);
-    translateX = scrollProgress.value * maxTranslation;
+    
+    if (props.startInMiddle && scrollProgress.value === 0) {
+      const firstItemWidth = scrollWrapRef.value.firstElementChild ? 
+        scrollWrapRef.value.firstElementChild.offsetWidth : 300;
+      translateX = (viewportWidth / 2) - (firstItemWidth / 2);
+    } else {
+      translateX = scrollProgress.value * maxTranslation;
+    }
   }
+  console.log('isReversed.value:', isReversed.value)
+  console.log('translateX:', translateX)
   
   return `translateX(${translateX}px)`;
 });
@@ -205,13 +237,19 @@ onBeforeUnmount(() => {
         class="row-container"
         :class="{ 'is-fixed': isFixed }"
       >
-        <h2 v-if="sectionTitle" class="section-title">{{ sectionTitle }}</h2>
+        <!-- <h2 v-if="sectionTitle" class="section-title">{{ sectionTitle }}</h2> -->
         
         <div class="rows-wrapper">
           <div class="row">
             <div 
               class="animation-wrap"
-              :class="isReversed ? 'to-left' : 'to-right'"
+              :class="[
+                isReversed ? 'to-left' : 'to-right', 
+                { 
+                  'start-in-middle': props.startInMiddle && !isReversed,
+                  'start-reverse-in-middle': props.startReverseInMiddle && isReversed
+                }
+              ]"
               ref="scrollWrapRef"
               :style="{ transform: transformStyle }"
             >
@@ -239,7 +277,14 @@ onBeforeUnmount(() => {
               
               <!-- Reversed order (title card on right, items to the left) -->
               <template v-else>
-                <!-- Item cards first in DOM (to the left of title) -->
+                <!-- Title card first in DOM for proper centering -->
+                <div class="item title-card">
+                  <slot name="titleCard">
+                    <h3 class="heading">{{ titleCardText }}</h3>
+                  </slot>
+                </div>
+                
+                <!-- Item cards after title card -->
                 <slot name="items-reversed">
                   <div 
                     v-for="(item, index) in items" 
@@ -250,13 +295,6 @@ onBeforeUnmount(() => {
                     <p v-if="item.description" class="card-description">{{ item.description }}</p>
                   </div>
                 </slot>
-                
-                <!-- Title card last in DOM (rightmost) -->
-                <div class="item title-card">
-                  <slot name="titleCard">
-                    <h3 class="heading">{{ titleCardText }}</h3>
-                  </slot>
-                </div>
               </template>
             </div>
           </div>

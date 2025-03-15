@@ -4,13 +4,6 @@ import HorizontalScrollSection from '@/components/ui/HorizontalScrollSection.vue
 import { struggles, solutions } from '@/data/strugglesAndSolutions';
 import { icons } from '@/utils/icons';
 
-// Toggle between struggles and solutions
-const activeTab = ref('struggles');
-
-// Toggle function
-const toggleTab = () => {
-  activeTab.value = activeTab.value === 'struggles' ? 'solutions' : 'struggles';
-};
 
 // Computed properties for icons
 const getIcon = (type: 'struggle' | 'solution', index: number) => {
@@ -22,50 +15,13 @@ const getIcon = (type: 'struggle' | 'solution', index: number) => {
 
 <template>
   <div class="struggles-offers-horizontal">
-    <!-- Tab toggle button -->
-    <div class="flex justify-center mb-12">
-      <div class="btn-round-pill-container">
-        <div 
-          class="btn-round-pill-slider"
-          :class="{ 'slide-right': activeTab === 'solutions' }"
-        ></div>
-        <!-- Common Hurdles button -->
-        <button 
-          @click="activeTab = 'struggles'"
-          class="btn-round-pill btn-round--medium"
-          :class="{ 'active': activeTab === 'struggles' }"
-        >
-          <span class="inline-flex items-center justify-center">
-            <span 
-              v-html="activeTab === 'solutions' ? icons.happyFaceRight : icons.struggle.poorUX" 
-              class="w-8 h-8 mr-2"
-            ></span>
-            <span>Common Hurdles</span>
-          </span>
-        </button>
-        <!-- Clear Solutions button -->
-        <button 
-          @click="activeTab = 'solutions'"
-          class="btn-round-pill btn-round--medium"
-          :class="{ 'active': activeTab === 'solutions' }"
-        >
-          <span class="inline-flex items-center justify-center">
-            <span 
-              v-html="activeTab === 'struggles' ? icons.sadFaceLeft : icons.happyFace" 
-              class="w-8 h-8 mr-2"
-            ></span>
-            <span>Clear Solutions</span>
-          </span>
-        </button>
-      </div>
-    </div>
-    
+  
     <!-- Struggles Horizontal Scroll -->
-    <div v-if="activeTab === 'struggles'">
+    <div>
       <HorizontalScrollSection
         :items="struggles"
-        sectionTitle="From Frustration to Fantastic: Website Solutions"
         titleCardText="Common Hurdles"
+        :startInMiddle="true"
       >
         <template #titleCard>
           <h3 class="heading-responsive gradient-text">Common Hurdles</h3>
@@ -93,12 +49,12 @@ const getIcon = (type: 'struggle' | 'solution', index: number) => {
     </div>
     
     <!-- Solutions Horizontal Scroll -->
-    <div v-else>
+    <div>
       <HorizontalScrollSection
         :items="solutions"
-        sectionTitle="From Frustration to Fantastic: Website Solutions"
         titleCardText="Clear Solutions"
         initialDirection="reverse"
+        
       >
         <template #titleCard>
           <h3 class="heading-responsive gradient-text">Clear Solutions</h3>

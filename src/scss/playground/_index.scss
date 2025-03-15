@@ -25,3 +25,50 @@
     position: relative; // For proper positioning of child elements
   }
 }
+
+// Animation showcase styles
+.animation-showcase {
+  .animation-card {
+    padding: 3rem;
+    border-radius: 0.5rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    
+    h3 {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+  }
+}
+
+// Enhanced gradient text styles
+.theme-text--gradient {
+  background-size: 200% auto !important;
+  animation: gradient-shift 3s ease infinite alternate !important;
+  font-weight: bold !important;
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% center;
+  }
+  100% {
+    background-position: 100% center;
+  }
+}
+
+// Make animations more pronounced
+.theme-neon-horizon, .theme-digital-sunset, .theme-retro-wave, .theme-pastel-future {
+  .gradient-text {
+    animation: shine 3s linear infinite;
+    background-size: 200% auto !important;
+    font-weight: bold !important;
+    letter-spacing: 0.02em !important;
+  }
+}

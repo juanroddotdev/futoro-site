@@ -77,6 +77,73 @@
       // Reverse direction: items first, title card last
       flex-direction: row;
     }
+    
+    &.start-in-middle {
+      // When we want to start with the first item in the middle
+      // This class will be applied when startInMiddle prop is true
+      margin-left: 0;
+      
+      // Add a transition for smooth movement when scrolling starts
+      transition: transform 0.3s ease-out;
+      
+      // First item styling
+      .item:first-child {
+        // Optional: highlight the first item
+        position: relative;
+        
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: -10px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background-color: rgba(255, 255, 255, 0.5);
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+      }
+      
+      // When scrolling starts, hide the indicator
+      &.scrolling .item:first-child::after {
+        opacity: 0;
+      }
+    }
+    
+    &.start-reverse-in-middle {
+      // When we want to start with the title card in the middle for reverse direction
+      margin-right: 0;
+      
+      // Add a transition for smooth movement when scrolling starts
+      transition: transform 0.3s ease-out;
+      
+      // Title card styling
+      .item.title-card {
+        // Optional: highlight the title card
+        position: relative;
+        
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: -10px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background-color: rgba(255, 255, 255, 0.5);
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+      }
+      
+      // When scrolling starts, hide the indicator
+      &.scrolling .item.title-card::after {
+        opacity: 0;
+      }
+    }
   }
   
   .item {
@@ -136,20 +203,18 @@
 // Add styles for reverse direction
 .horizontal-scroll.reverse {
   .animation-wrap.to-left {
-    // Initial position: title card at right edge of viewport
-    // Other items overflow to the left
+    // Use flexbox order to control visual positioning
     display: flex;
     flex-direction: row;
-    justify-content: flex-end; // Align items to the end (right)
     
-    // Ensure the title card is the last item (rightmost)
+    // Ensure the title card appears visually last (rightmost)
     .item.title-card {
-      order: 1;
+      order: 2;
     }
     
-    // Content cards come before the title card (to the left)
+    // Content cards come before the title card visually
     .item.content-card {
-      order: 0;
+      order: 1;
     }
   }
   
