@@ -9,6 +9,7 @@
 @import 'base/animations';
 @import 'base/utilities';
 
+// Original components
 @import 'components/buttons';
 @import 'components/icons';
 @import 'components/availability-badge';
@@ -22,6 +23,10 @@
 @import 'components/about-section';
 @import 'components/contact-section';
 @import 'components/contact-section-v2';
+@import 'components/horizontal-scroll';
+
+// Playground styles (kept separate)
+@import 'playground/_index';
 
 // Add separators imports
 @import 'separators/code-evolution';

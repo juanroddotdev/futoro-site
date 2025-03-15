@@ -40,4 +40,16 @@
   }
 }
 
+@mixin grid-paper-background(
+  $line-color: rgba(255, 255, 255, 0.1),
+  $line-size: 2px,
+  $cell-size: 80px  // Increased from 40px to 60px
+) {
+  background-image: 
+    linear-gradient(to right, $line-color $line-size, transparent $line-size),
+    linear-gradient(to bottom, $line-color $line-size, transparent $line-size);
+  background-size: $cell-size $cell-size;
+  background-position: center center;
+}
+
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import Navbar from '@/components/layout/Navbar.vue';
+import Footer from '@/components/layout/Footer.vue';
 import ThemeSwitcher from '@/components/ThemeSwitcher.vue';
 import HeroSection from './components/sections/HeroSection.vue';
 import ServicesSection from './components/sections/ServicesSection.vue';
@@ -8,21 +9,31 @@ import TimelineHowItWorks from './components/sections/TimelineHowItWorks.vue';
 import StrugglesOffersTabs from './components/sections/StrugglesOffersTabs.vue';
 import ContactSectionV2 from './components/sections/ContactSectionV2.vue';
 import AboutSectionAlt from './components/sections/AboutSectionAlt.vue';
-// import GlitchingDataParticles from './components/ui/GlitchingDataParticles.vue';
+import GridPaperOverlay from '@/components/export-to-main/gridBackground/GridPaperOverlay.vue';
+// import StrugglesOffersHorizontalScroll from '@/components/export-to-main/strugglesOffersHorizontalScroll/StrugglesOffersHorizontalScroll.vue';
+// import ScrollAccordionVanilla from '@/components/export-to-main/scrollAccordion/ScrollAccordionVanilla.vue';
+
+// // Sample accordion items
+// const accordionItems = ref([
+//   { id: 1, title: 'First Item', description: 'This is the description for the first accordion item.' },
+//   { id: 2, title: 'Second Item', description: 'Here is the second item with its own unique description.' },
+//   { id: 3, title: 'Third Item', description: 'The third item in our accordion list.' },
+//   { id: 4, title: 'Fourth Item', description: 'Our final accordion item with some descriptive text.' },
+// ]);
 
 const currentTheme = ref('theme-neon-horizon');
 const isThemeTransitioning = ref(false);
 
 const handleThemeChange = (newTheme: string) => {
   if (currentTheme.value === newTheme) return;
-  
+
   isThemeTransitioning.value = true;
   document.documentElement.classList.add('theme-transition-active');
-  
+
   setTimeout(() => {
     currentTheme.value = newTheme;
   }, 50);
-  
+
   setTimeout(() => {
     document.documentElement.classList.remove('theme-transition-active');
     isThemeTransitioning.value = false;
@@ -52,39 +63,30 @@ const handleThemeChange = (newTheme: string) => {
     </defs>
   </svg>
   <div id="app">
-  <!-- <div id="app" class="debug"> -->
-    <div 
-      class="app min-h-screen relative" 
-      :class="[
-        currentTheme,
-        { 'theme-transition-active': isThemeTransitioning }
-      ]"
-    >
+    <!-- <div id="app" class="debug"> -->
+    <div class="app min-h-screen relative" :class="[
+      currentTheme,
+      { 'theme-transition-active': isThemeTransitioning }
+    ]">
       <Navbar />
       <div class="main-content">
-        <HeroSection />
-        <!-- <GlitchingDataParticles :current-theme="currentTheme" /> -->
-        <!-- <CodeEvolution /> -->
+        <GridPaperOverlay :theme="currentTheme.replace('theme-', '')" :floating="true" :spotlight="true">
+
+          <HeroSection />
+        </GridPaperOverlay>
+        <!-- <div class="py-20">
+          <h2 class="text-3xl font-bold text-center mb-10">From Frustration to Fantastic</h2>
+          <StrugglesOffersHorizontalScroll />
+        </div> -->
         <StrugglesOffersTabs />
         <ServicesSection />
-        <TimelineHowItWorks  />
+        <TimelineHowItWorks />
         <AboutSectionAlt />
       </div>
       <ContactSectionV2 />
-      <footer class="footer">
-        <div class="footer-content">
-          <p class="body-text text-white">© {{ new Date().getFullYear() }} Futoro Digital Design Lab. All rights reserved.</p>
-          <div class="footer-links">
-            <a href="#" class="body-text text-white hover:text-white/90">Privacy Policy</a>
-            <a href="#" class="body-text text-white hover:text-white/90">Terms of Service</a>
-          </div>
-        </div>
-      </footer>
-      
-      <ThemeSwitcher
-        v-model:currentTheme="currentTheme"
-        @update:currentTheme="handleThemeChange"
-      />
+      <Footer />
+
+      <ThemeSwitcher v-model:currentTheme="currentTheme" @update:currentTheme="handleThemeChange" />
     </div>
   </div>
 </template>

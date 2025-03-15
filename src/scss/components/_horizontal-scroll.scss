@@ -1,0 +1,241 @@
+// Horizontal Scroll Component Styles
+
+.horizontal-scroll {
+  position: relative;
+  min-height: 200vh; // Minimum height to accommodate scrolling
+  overflow-x: hidden; // Prevent horizontal scrollbar
+  z-index: 1; // Ensure proper stacking
+  
+  // Force parent containers to respect the section's height
+  &::after {
+    content: '';
+    display: block;
+    height: 1px; // Minimal height
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    pointer-events: none; // Don't interfere with interactions
+  }
+  
+  .container {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+  
+  .section-title {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2.5rem;
+    font-weight: 700;
+  }
+  
+  .row-container {
+    position: relative;
+    padding: 2rem 0;
+    height: 100vh; // Full viewport height
+    width: 100%;
+    overflow: hidden;
+    
+    &.is-fixed {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background-color: var(--theme-background, #ffffff);
+    }
+  }
+  
+  .rows-wrapper {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; // Center vertically
+  }
+  
+  .row {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .animation-wrap {
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: max-content; // Allow content to determine width
+    
+    &.to-right {
+      // Normal direction: title card first, items to the right
+      flex-direction: row;
+    }
+    
+    &.to-left {
+      // Reverse direction: items first, title card last
+      flex-direction: row;
+    }
+    
+    &.start-in-middle {
+      // When we want to start with the first item in the middle
+      // This class will be applied when startInMiddle prop is true
+      margin-left: 0;
+      
+      // Add a transition for smooth movement when scrolling starts
+      transition: transform 0.3s ease-out;
+      
+      // First item styling
+      .item:first-child {
+        // Optional: highlight the first item
+        position: relative;
+        
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: -10px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background-color: rgba(255, 255, 255, 0.5);
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+      }
+      
+      // When scrolling starts, hide the indicator
+      &.scrolling .item:first-child::after {
+        opacity: 0;
+      }
+    }
+    
+    &.start-reverse-in-middle {
+      // When we want to start with the title card in the middle for reverse direction
+      margin-right: 0;
+      
+      // Add a transition for smooth movement when scrolling starts
+      transition: transform 0.3s ease-out;
+      
+      // Title card styling
+      .item.title-card {
+        // Optional: highlight the title card
+        position: relative;
+        
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: -10px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background-color: rgba(255, 255, 255, 0.5);
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+      }
+      
+      // When scrolling starts, hide the indicator
+      &.scrolling .item.title-card::after {
+        opacity: 0;
+      }
+    }
+  }
+  
+  .item {
+    flex: 0 0 auto;
+    padding: 2rem;
+    margin: 0 1rem;
+    min-width: 300px;
+    max-width: 400px;
+    border-radius: 0.5rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    
+    &.title-card {
+      background-color: rgba(100, 100, 255, 0.1);
+    }
+    
+    &.content-card {
+      background-color: rgba(100, 255, 100, 0.1);
+      
+      &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      }
+    }
+  }
+  
+  // Add styles for when the section is complete
+  &.section-complete {
+    .row-container {
+      position: absolute;
+      bottom: 0;
+      top: auto;
+    }
+  }
+  
+  // Direction toggle button
+  .direction-toggle {
+    position: fixed;
+    top: 2rem;
+    right: 1rem;
+    z-index: 101;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    background-color: var(--primary-color, #42b883);
+    color: white;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    
+    &:hover {
+      background-color: var(--primary-color-dark, #3a9d74);
+    }
+  }
+}
+
+// Add styles for reverse direction
+.horizontal-scroll.reverse {
+  .animation-wrap.to-left {
+    // Use flexbox order to control visual positioning
+    display: flex;
+    flex-direction: row;
+    
+    // Ensure the title card appears visually last (rightmost)
+    .item.title-card {
+      order: 2;
+    }
+    
+    // Content cards come before the title card visually
+    .item.content-card {
+      order: 1;
+    }
+  }
+  
+  // Ensure the row has enough width
+  .row {
+    width: 100%;
+    overflow: visible;
+  }
+  
+  // Make sure the animation wrap has enough width
+  .animation-wrap {
+    width: max-content;
+    min-width: 200%;  // Ensure it's wider than the viewport
+  }
+}
+
+// Add styles for parent containers
+:root {
+  --horizontal-scroll-height: 200vh; // Default value
+}
+
+.main-content {
+  min-height: var(--horizontal-scroll-height, 200vh);
+}
