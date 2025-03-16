@@ -109,47 +109,4 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-.scroll-accordion {
-  width: 100%;
-  /* Set both minimum and maximum height to 2000px */
-  min-height: 2500px;
-  max-height: 2500px;
-  position: relative;
-}
-
-.placeholder {
-  /* Invisible placeholder that maintains space in document flow */
-  visibility: hidden;
-}
-
-.accordions {
-  padding: 2rem;
-  width: 100%;
-  max-width: 800px;
-  max-width: fit-content;
-  margin: 0 auto;
-  margin-inline: auto;
-  /* Add transform-origin to ensure smooth transitions */
-  transform-origin: center top;
-}
-
-.accordion {
-  margin-bottom: 40px;
-  background: linear-gradient(200deg, rgb(29, 145, 252) 13.57%, rgb(90, 54, 192) 98.38%);
-  border-radius: 15px;
-  overflow: hidden;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-}
-
-.title {
-  font-weight: bold;
-  padding: 1rem;
-  color: white;
-}
-
-.text {
-  padding: 1rem;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.9);
-}
 </style>

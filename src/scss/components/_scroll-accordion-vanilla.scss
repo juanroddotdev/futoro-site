@@ -1,0 +1,110 @@
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+// Scroll Accordion Vanilla Component Styles
+.scroll-accordion {
+  width: 100%;
+  min-height: 2500px;
+  max-height: 2500px;
+  position: relative;
+  
+  .placeholder {
+    visibility: hidden;
+  }
+  
+  .accordions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    transform-origin: center top;
+  }
+  
+  .accordion {
+    width: max(50vw, 280px);
+    margin-bottom: 40px;
+    padding: 25px 30px 10px;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 30px 30px -10px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    
+    // Theme-specific styling for accordions using modulo for infinite items
+    @each $theme-name, $theme-map in $themes {
+      .theme-#{$theme-name} & {
+        // Use nth-child with modulo to create repeating pattern for any number of items
+        &:nth-child(4n+1) {
+          background: linear-gradient(
+            200deg, 
+            map-get($theme-map, 'primary'), 
+            map-get($theme-map, 'secondary')
+          );
+        }
+        
+        &:nth-child(4n+2) {
+          background: linear-gradient(
+            200deg, 
+            map-get($theme-map, 'secondary'), 
+            map-get($theme-map, 'accent')
+          );
+        }
+        
+        &:nth-child(4n+3) {
+          background: linear-gradient(
+            200deg, 
+            map-get($theme-map, 'accent'), 
+            map-get($theme-map, 'primary')
+          );
+        }
+        
+        &:nth-child(4n+4) {
+          background: linear-gradient(
+            200deg, 
+            if($theme-name == 'retro-wave', 
+               map-get($theme-map, 'highlight'), 
+               map-get($theme-map, 'accent')),
+            map-get($theme-map, 'secondary')
+          );
+        }
+      }
+    }
+    
+    .title {
+      font-size: max(2vw, 24px);
+      font-weight: bold;
+      line-height: 1.1;
+      padding-bottom: 0.4em;
+      color: rgb(255, 255, 255);
+      text-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+    }
+    
+    .text {
+      font-size: max(1vw, 15px);
+      line-height: 1.4;
+      overflow: hidden;
+      padding-bottom: 20px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+  }
+  
+  // Special handling for Pastel Future theme (light theme)
+  .theme-pastel-future & .accordion {
+    .title, .text {
+      color: rgba(0, 0, 0, 0.8);
+      text-shadow: 0 1px 1px rgba(255, 255, 255, 0.2);
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .accordion {
+      padding: 15px 20px 8px;
+      
+      .title {
+        font-size: 20px;
+      }
+    }
+  }
+}
