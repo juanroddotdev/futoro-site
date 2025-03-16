@@ -6,7 +6,7 @@
         <div class="cards-container" id="hurdlesContainer">
           <!-- Title card -->
           <div class="card title-card">
-            <h2 class="section-title">Common Hurdles</h2>
+            <h2 class="section-title text-gradient">Common Hurdles</h2>
           </div>
           <div class="card" v-for="i in 5" :key="`hurdle-${i}`">
             <h3>Hurdle {{ i }}</h3>
@@ -27,7 +27,7 @@
           </div>
           <!-- Title card moved to the beginning -->
           <div class="card title-card">
-            <h2 class="section-title">Clear Solutions</h2>
+            <h2 class="section-title text-gradient">Clear Solutions</h2>
           </div>
         </div>
       </div>
@@ -175,8 +175,9 @@ onMounted(() => {
           justify-content: center;
           align-items: center;
           min-height: 200px;
-          background: linear-gradient(135deg, #6e8efb 0%, #a777e3 100%);
-          color: white;
+          background: transparent;
+          box-shadow: none;
+          border: none;
           
           .section-title {
             margin: 0;
