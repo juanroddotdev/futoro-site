@@ -1,5 +1,8 @@
 <template>
-  <div class="animated-text-container" ref="containerRef">
+  <div 
+    ref="containerRef" 
+    :class="['animated-text-container', { 'initially-hidden': initiallyHidden }]"
+  >
     <span v-if="firstPart" ref="firstPartRef" :class="{ 'theme-text--gradient': useGradient }">{{ firstPart }}</span>
     <span v-if="secondPart" ref="secondPartRef" :class="{ 'theme-text--gradient': useGradient }">{{ secondPart }}</span>
     <span v-if="suffix" ref="suffixRef" :class="{ 'theme-text--gradient': useGradient }">{{ suffix }}</span>
@@ -7,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick, watch } from 'vue';
+import { ref, onMounted, nextTick, watch, onUnmounted } from 'vue';
 import { textAnimations } from './textAnimations';
 import gsap from 'gsap';
 
@@ -48,6 +51,21 @@ const props = defineProps({
   resetKey: {
     type: Number,
     default: 0
+  },
+  // New prop
+  triggerOnVisible: {
+    type: Boolean,
+    default: true
+  },
+  // New prop
+  restartOnVisible: {
+    type: Boolean,
+    default: true
+  },
+  // Add initiallyHidden prop
+  initiallyHidden: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -55,11 +73,18 @@ const containerRef = ref<HTMLElement | null>(null);
 const firstPartRef = ref<HTMLElement | null>(null);
 const secondPartRef = ref<HTMLElement | null>(null);
 const suffixRef = ref<HTMLElement | null>(null);
+const hasAnimated = ref(false);
+let observer: IntersectionObserver | null = null;
 
 const initAnimation = async () => {
   await nextTick();
   
   if (containerRef.value) {
+    // Add animated class to make it visible if initially hidden
+    if (props.initiallyHidden) {
+      containerRef.value.classList.add('animated');
+    }
+    
     // Create an array of all elements that should be animated
     const elements = [
       firstPartRef.value,
@@ -85,6 +110,41 @@ const initAnimation = async () => {
       delay: props.delay,
       ease: props.ease
     });
+    
+    hasAnimated.value = true;
+  }
+};
+
+const setupObserver = () => {
+  // Clean up any existing observer
+  if (observer) {
+    observer.disconnect();
+  }
+  
+  // Create new observer
+  observer = new IntersectionObserver((entries) => {
+    const [entry] = entries;
+    
+    if (entry.isIntersecting) {
+      // If element is visible
+      if (!hasAnimated.value || props.restartOnVisible) {
+        initAnimation();
+        
+        // If we don't want to restart, disconnect after first animation
+        if (!props.restartOnVisible) {
+          observer?.disconnect();
+        }
+      }
+    } else {
+      // Element is not visible, reset hasAnimated if restartOnVisible is true
+      if (props.restartOnVisible) {
+        hasAnimated.value = false;
+      }
+    }
+  }, { threshold: 0.2 }); // Trigger when 20% visible
+  
+  if (containerRef.value) {
+    observer.observe(containerRef.value);
   }
 };
 
@@ -100,7 +160,19 @@ onMounted(() => {
     suffixRef.value.setAttribute('data-original-text', props.suffix);
   }
   
-  initAnimation();
+  if (props.triggerOnVisible) {
+    setupObserver();
+  } else {
+    // Trigger animation immediately
+    initAnimation();
+  }
+});
+
+// Clean up observer on component unmount
+onUnmounted(() => {
+  if (observer) {
+    observer.disconnect();
+  }
 });
 
 // Watch for resetKey changes to restart animation
@@ -117,5 +189,16 @@ watch(() => props.resetKey, initAnimation);
   align-items: center;
   justify-content: center;
   width: 100%;
+}
+
+.initially-hidden {
+  opacity: 0;
+  visibility: hidden;
+  
+  &.animated {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease;
+  }
 }
 </style>

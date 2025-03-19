@@ -1,17 +1,7 @@
 <template>
-  <div class="progressive-reveal overflow-visible"> <!-- Ensure overflow is visible -->
-    <div class="py-20">
-      <!-- <h2 class="text-3xl font-bold text-center my-16 gradient-text">From Frustration to Fantastic</h2> -->
-      <AnimatedText 
-        class="text-3xl font-bold text-center my-16 gradient-text"
-        firstPart="From Frustration" 
-        secondPart="To Fantastic" 
-        suffix="Website Solutions" 
-        animation="split"
-        :useGradient="true"
-        :duration="3"
-        :initiallyHidden="true"
-      />
+  <div class="progressive-reveal">
+    <div class="py-20 debug">
+      <h1 class="heading-responsive gradient-text text-center mb-40">From Frustration to Fantastic: Website Solutions</h1>
     </div>
     <!-- Hurdles Section -->
     <section class="reveal-section hurdles-section" id="hurdlesSection">
@@ -19,17 +9,11 @@
         <div class="cards-container" id="hurdlesContainer">
           <!-- Title card -->
           <div class="card title-card">
-            <h2 class="section-title gradient-text">Common Hurdles</h2>
+            <h2 class="section-title theme-text--gradient">Common Hurdles</h2>
           </div>
-          <div 
-            class="card struggle-card group hover-card p-6 relative overflow-hidden"
-            v-for="struggle in struggles" 
-            :key="`hurdle-${struggle.id}`"
-          >
-            <div class="relative z-10">
-              <h3 class="text-md font-semibold gradient-text mb-3">{{ struggle.title }}</h3>
-              <p class="theme-text--neutral">{{ struggle.description }}</p>
-            </div>
+          <div class="card" v-for="struggle in struggles" :key="`hurdle-${struggle.id}`">
+            <h3 class="text-md font-semibold gradient-text mb-3">{{ struggle.title }}</h3>
+            <p class="theme-text--neutral">{{ struggle.description }}</p>
           </div>
         </div>
       </div>
@@ -39,19 +23,13 @@
     <section class="reveal-section solutions-section" id="solutionsSection">
       <div class="sticky-container">
         <div class="cards-container" id="solutionsContainer">
-          <div 
-            class="card solution-card group hover-card p-6 relative overflow-hidden"
-            v-for="solution in solutions" 
-            :key="`solution-${solution.id}`"
-          >
-            <div class="relative z-10">
-              <h3 class="text-md font-semibold gradient-text mb-3">{{ solution.title }}</h3>
-              <p class="theme-text--neutral">{{ solution.description }}</p>
-            </div>
+          <div class="card" v-for="solution in solutions" :key="`solution-${solution.id}`">
+            <h3 class="text-md font-semibold gradient-text mb-3">{{ solution.title }}</h3>
+            <p class="theme-text--neutral">{{ solution.description }}</p>
           </div>
           <!-- Title card moved to the beginning -->
           <div class="card title-card">
-            <h2 class="section-title gradient-text">Clear Solutions</h2>
+            <h2 class="section-title theme-text--gradient">Clear Solutions</h2>
           </div>
         </div>
       </div>
@@ -60,10 +38,8 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import { struggles, solutions } from '@/data/strugglesAndSolutions';
-import AnimatedText from '../export-to-main/animatedText/AnimatedText.vue';
-
 
 onMounted(() => {
   // Elements
@@ -108,19 +84,12 @@ onMounted(() => {
   const handleScroll = () => {
     // Handle Hurdles section
     if (document.body.classList.contains('hurdles-active')) {
-      if (!hurdlesSection) return;
       const hurdlesRect = hurdlesSection.getBoundingClientRect();
       const hurdlesProgress = Math.min(1, Math.max(0, 
         -hurdlesRect.top / (hurdlesSection.offsetHeight - window.innerHeight)
       ));
-       // Calculate initial offset (same as in CSS)
-      //  const initialOffset = window.innerWidth - 350;
-      //   // Start from the initial offset and move left as progress increases
-      // const hurdlesTransform = initialOffset + (hurdlesProgress * hurdlesScrollWidth);
-      // hurdlesContainer.style.transform = `translateX(-${hurdlesTransform}px)`;
-
-       /// previous vvv
-      // // Apply transform to hurdles container (right to left)
+      
+      // Apply transform to hurdles container (right to left)
       const hurdlesTransform = hurdlesProgress * hurdlesScrollWidth;
       hurdlesContainer.style.transform = `translateX(-${hurdlesTransform}px)`;
     }
@@ -151,9 +120,6 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/scss/abstracts/variables';
-@import '@/scss/components/buttons-round';
-
 .progressive-reveal {
   position: relative;
   
@@ -192,8 +158,6 @@ onMounted(() => {
         padding: 1.5rem;
         border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        will-change: transform, opacity;
-        backface-visibility: hidden;
         
         h3 {
           font-size: 1.5rem;
@@ -225,17 +189,12 @@ onMounted(() => {
   
   .hurdles-section {
     .cards-container {
-      // // Start with all cards visible on the right
+      // Start with all cards visible on the right
       transform: translateX(0);
-
-      ////NEWWWWWW TESTTTT
-      // Start with all cards off-screen to the right
-      // transform: translateX(calc(100vw - 350px)); // Show just the title card initially
-      
-      // // Add this to ensure the title card is visible at the start
-      // .title-card {
-      //   margin-right: 2rem; // Add some space between title and first card
-      // }
+    }
+    
+    .card:not(.title-card) {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     }
   }
   
@@ -244,39 +203,10 @@ onMounted(() => {
       // Start with all cards off-screen to the right
       transform: translateX(calc(100% - 350px)); // Show just the title card initially
     }
+    
+    .card:not(.title-card) {
+      background: linear-gradient(135deg, #e0f7fa 0%, #80deea 100%);
+    }
   }
-}
-
-// Card icon styles from StrugglesOffersTabs.vue
-.hover-card span svg {
-  @apply w-32 h-32;
-}
-
-.icon-imprint svg {
-  filter: opacity(0.4) drop-shadow(0 1px 1px rgba(255, 255, 255, 0.1)) drop-shadow(0 -1px 1px rgba(0, 0, 0, 0.2));
-}
-
-/* Theme-specific icon styles */
-:deep(.theme-neon-horizon), :deep(.theme-digital-sunset), :deep(.theme-retro-wave) {
-  .icon-imprint svg {
-    filter: opacity(0.3)
-      drop-shadow(0 1px 1px rgba(255, 255, 255, 0.15))
-      drop-shadow(0 -1px 1px rgba(0, 0, 0, 0.3))
-      drop-shadow(0 0 2px rgba(255, 255, 255, 0.1));
-  }
-}
-
-:deep(.theme-pastel-future) {
-  .icon-imprint svg {
-    filter: opacity(0.15)
-      drop-shadow(0 1px 1px rgba(255, 255, 255, 0.2))
-      drop-shadow(0 -1px 1px rgba(0, 0, 0, 0.1));
-  }
-}
-
-.struggle-card,
-.solution-card {
-  will-change: transform, opacity;
-  backface-visibility: hidden;
 }
 </style>

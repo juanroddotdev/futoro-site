@@ -6,23 +6,11 @@ import ThemeSwitcher from '@/components/ThemeSwitcher.vue';
 import HeroSection from './components/sections/HeroSection.vue';
 import ServicesSection from './components/sections/ServicesSection.vue';
 import TimelineHowItWorks from './components/sections/TimelineHowItWorks.vue';
-import StrugglesOffersTabs from './components/sections/StrugglesOffersTabs.vue';
 import ContactSectionV2 from './components/sections/ContactSectionV2.vue';
 import AboutSectionAlt from './components/sections/AboutSectionAlt.vue';
 import GridPaperOverlay from '@/components/export-to-main/gridBackground/GridPaperOverlay.vue';
-import StrugglesOffersHorizontalScroll from '@/components/export-to-main/strugglesOffersHorizontalScroll/StrugglesOffersHorizontalScroll.vue';
-// import ScrollAccordionVanilla from '@/components/export-to-main/scrollAccordion/ScrollAccordionVanilla.vue';
 import VanillaVersion from '@/components/test-progressive-reveal/VanillaVersion.vue';
-// OR
-// import GsapVersion from '@/components/test-progressive-reveal/GsapVersion.vue';
 
-// // Sample accordion items
-// const accordionItems = ref([
-//   { id: 1, title: 'First Item', description: 'This is the description for the first accordion item.' },
-//   { id: 2, title: 'Second Item', description: 'Here is the second item with its own unique description.' },
-//   { id: 3, title: 'Third Item', description: 'The third item in our accordion list.' },
-//   { id: 4, title: 'Fourth Item', description: 'Our final accordion item with some descriptive text.' },
-// ]);
 
 const currentTheme = ref('theme-neon-horizon');
 const isThemeTransitioning = ref(false);
@@ -77,14 +65,7 @@ const handleThemeChange = (newTheme: string) => {
 
           <HeroSection />
         </GridPaperOverlay>
-        <!-- <div class="py-20 debug">
-          <h2 class="text-3xl font-bold text-center mb-10">From Frustration to Fantastic</h2>
-          <StrugglesOffersHorizontalScroll />
-        </div> -->
-        <!-- <StrugglesOffersTabs /> -->
         <VanillaVersion />
-        <!-- OR -->
-        <!-- <GsapVersion /> -->
         <ServicesSection />
         <TimelineHowItWorks />
         <AboutSectionAlt />

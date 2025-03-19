@@ -82,6 +82,7 @@ body {
 @each $name, $size in $fontSize {
   .text-#{$name} {
     font-size: $size;
+    line-height: normal !important;
   }
 }
 
