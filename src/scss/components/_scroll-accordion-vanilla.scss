@@ -34,6 +34,20 @@
     @include themed-gradient-border-card(15px, 0.3s, 'top');
     &.hover-card-themed {
       border-radius: 0;
+      /* &::before {
+        // Remove mask properties that create the hollow effect
+        -webkit-mask: none;
+        mask: none;
+        -webkit-mask-composite: initial;
+        mask-composite: initial;
+        padding: 0;
+        
+        // Add solid border properties
+        border: 2px solid;
+        border-image-slice: 1;
+        border-width: 2px;
+        border-image-source: var(--card-gradient-extended);
+      } */
       &::after {
         background: transparent;
       }
