@@ -40,28 +40,28 @@
 }
 
 // Card hover effect with gradient border and glow
-.hover-card {
-  @include transition-base;
-  @include gradient-border;
-  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  
-  &::after {  // Keep only the glow effect
-    content: '';
-    position: absolute;
-    inset: -2px;
-    border-radius: 0.75rem;
-    background: var(--card-gradient-extended);
-    background-size: 200% auto;
-    background-position: 0% center;
-    opacity: 0;
-    z-index: -1;
-    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    filter: blur(12px);
-  }
-}
+// .hover-card {
+//   @include transition-base;
+//   @include gradient-border;
+//   transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+//   
+//   &::after {  // Keep only the glow effect
+//     content: '';
+//     position: absolute;
+//     inset: -2px;
+//     border-radius: 0.75rem;
+//     background: var(--card-gradient-extended);
+//     background-size: 200% auto;
+//     background-position: 0% center;
+//     opacity: 0;
+//     z-index: -1;
+//     transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+//     filter: blur(12px);
+//   }
+// }
 
 // Add a new class for scroll-based animations
-.horizontal-struggles {
+/* .horizontal-struggles {
   .hover-card {
     // Override hover effects for horizontal scroll cards
     &:hover {
@@ -96,7 +96,7 @@
         0 8px 32px -4px rgba(var(--theme-gradient-end-rgb), 0.2);
     }
   }
-}
+} */
 
 // Make sure we have the gradient variables defined
 :root {
@@ -224,4 +224,66 @@
       #6A5ACD 100%
     );
   }
+}
+
+// Using the theme-specific-looping-gradients mixin for hover-card
+.hover-card-themed {
+  @include transition-base;
+  position: relative;
+  background: transparent;
+  border-radius: 0.75rem;
+  isolation: isolate;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  // Gradient border
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0px;
+    border-radius: 0.75rem;
+    padding: 2px;
+    background-size: 200% auto;
+    background-position: 0% center;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, 
+                  linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, 
+          linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude; 
+    opacity: 0.5;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  // Glow effect
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 0.75rem;
+    background-size: 200% auto;
+    background-position: 0% center;
+    opacity: 0;
+    z-index: -1;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: blur(12px);
+  }
+  
+  // Hover effects
+  &:hover {
+    transform: translateY(-2px);
+    
+    &::before {
+      opacity: 1;
+      background-position: 100% center;
+    }
+    
+    &::after {
+      opacity: 0.08;
+      background-position: 100% center;
+    }
+  }
+  
+  // Apply theme-specific gradients to both the border and glow
+  @include theme-specific-looping-gradients('&::before', 'to right', 'background', 0);
+  @include theme-specific-looping-gradients('&::after', 'to right', 'background', 0);
 }

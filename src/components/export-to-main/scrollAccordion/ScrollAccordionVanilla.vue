@@ -95,7 +95,7 @@ onUnmounted(() => {
       <div 
         v-for="item in items" 
         :key="item.id" 
-        class="accordion"
+        class="accordion hover-card-themed"
       >
         <div class="title">
           {{ item.title }}

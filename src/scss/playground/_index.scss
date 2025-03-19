@@ -49,26 +49,12 @@
 
 // Enhanced gradient text styles
 .theme-text--gradient {
-  background-size: 200% auto !important;
-  animation: gradient-shift 3s ease infinite alternate !important;
-  font-weight: bold !important;
-}
-
-@keyframes gradient-shift {
-  0% {
-    background-position: 0% center;
-  }
-  100% {
-    background-position: 100% center;
-  }
+  @include animated-gradient-text(3s, 'horizontal');
 }
 
 // Make animations more pronounced
 .theme-neon-horizon, .theme-digital-sunset, .theme-retro-wave, .theme-pastel-future {
   .gradient-text {
-    animation: shine 3s linear infinite;
-    background-size: 200% auto !important;
-    font-weight: bold !important;
-    letter-spacing: 0.02em !important;
+    @include animated-gradient-text(3s, 'shine');
   }
 }

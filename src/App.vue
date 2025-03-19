@@ -62,13 +62,12 @@ const handleThemeChange = (newTheme: string) => {
       <Navbar />
       <div class="main-content">
         <GridPaperOverlay :theme="currentTheme.replace('theme-', '')" :floating="true" :spotlight="true">
-
           <HeroSection />
         </GridPaperOverlay>
-        <VanillaVersion />
-        <ServicesSection />
-        <TimelineHowItWorks />
-        <AboutSectionAlt />
+          <VanillaVersion />
+          <ServicesSection />
+          <TimelineHowItWorks />
+          <AboutSectionAlt />
       </div>
       <ContactSectionV2 />
       <Footer />

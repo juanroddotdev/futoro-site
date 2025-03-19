@@ -68,7 +68,7 @@ watch(activeTab, (newTab) => {
           <div 
             v-for="(struggle, index) in struggles" 
             :key="struggle.id"
-            class="struggle-card group hover-card p-6 relative overflow-hidden"
+            class="struggle-card group hover-card-themed p-6 relative overflow-hidden"
           >
             <span 
               class="absolute right-0 bottom-0 w-32 h-32 flex items-center justify-center transform translate-x-6 translate-y-6 theme-text--secondary icon-imprint"
@@ -92,7 +92,7 @@ watch(activeTab, (newTab) => {
           <div 
             v-for="(solution, index) in solutions" 
             :key="solution.id"
-            class="solution-card group hover-card p-6 relative overflow-hidden"
+            class="solution-card group hover-card-themed p-6 relative overflow-hidden"
           >
             <span 
               class="absolute right-0 bottom-0 w-32 h-32 flex items-center justify-center transform translate-x-6 translate-y-6 theme-text--secondary icon-imprint"
@@ -124,7 +124,7 @@ watch(activeTab, (newTab) => {
 }
 
 // Card icon styles
-.hover-card span svg {
+.hover-card-themed span svg {
   @apply w-32 h-32;
 }
 

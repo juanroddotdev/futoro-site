@@ -14,6 +14,8 @@ npm install gsap@^3.12.5
 
 ## Usage
 
+### Local Import
+
 ```vue
 <template>
   <AnimatedText 
@@ -25,6 +27,40 @@ npm install gsap@^3.12.5
 
 <script setup>
 import AnimatedText from '@/components/text/AnimatedText.vue';
+</script>
+```
+
+### Global Registration
+
+To avoid importing the component in every file, you can register it globally in your main.ts/main.js file:
+
+```typescript
+// src/main.ts
+import { createApp } from 'vue'
+import App from './App.vue'
+import AnimatedText from '@/components/text/AnimatedText.vue'
+
+const app = createApp(App)
+
+// Register AnimatedText as a global component
+app.component('AnimatedText', AnimatedText)
+
+app.mount('#app')
+```
+
+After registering it globally, you can use it in any component without importing it:
+
+```vue
+<template>
+  <AnimatedText 
+    firstPart="Hello" 
+    secondPart="World" 
+    animation="typewriter"
+  />
+</template>
+
+<script setup>
+// No need to import AnimatedText
 </script>
 ```
 
@@ -52,6 +88,9 @@ import AnimatedText from '@/components/text/AnimatedText.vue';
 | delay | Number | 0 | Animation delay |
 | ease | String | 'power2.out' | GSAP easing function |
 | resetKey | Number | 0 | Change to restart animation |
+| triggerOnVisible | Boolean | true | Trigger animation when element becomes visible |
+| restartOnVisible | Boolean | true | Restart animation when element becomes visible again |
+| initiallyHidden | Boolean | false | Start with elements hidden before animation |
 
 ## Resetting Animations
 

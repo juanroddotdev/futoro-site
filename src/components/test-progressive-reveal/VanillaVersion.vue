@@ -22,7 +22,7 @@
             <h2 class="section-title gradient-text">Common Hurdles</h2>
           </div>
           <div 
-            class="card struggle-card group hover-card p-6 relative overflow-hidden"
+            class="card struggle-card group hover-card-themed p-6 relative overflow-hidden"
             v-for="struggle in struggles" 
             :key="`hurdle-${struggle.id}`"
           >
@@ -40,7 +40,7 @@
       <div class="sticky-container">
         <div class="cards-container" id="solutionsContainer">
           <div 
-            class="card solution-card group hover-card p-6 relative overflow-hidden"
+            class="card solution-card group hover-card-themed p-6 relative overflow-hidden"
             v-for="solution in solutions" 
             :key="`solution-${solution.id}`"
           >
@@ -62,7 +62,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue';
 import { struggles, solutions } from '@/data/strugglesAndSolutions';
-import AnimatedText from '../export-to-main/animatedText/AnimatedText.vue';
 
 
 onMounted(() => {

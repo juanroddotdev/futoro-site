@@ -65,7 +65,7 @@ const props = defineProps({
   // Add initiallyHidden prop
   initiallyHidden: {
     type: Boolean,
-    default: false
+    default: true
   }
 });
 
