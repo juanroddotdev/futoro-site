@@ -73,12 +73,12 @@ onMounted(() => {
   const solutionsContainer = document.getElementById('solutionsContainer');
   
   // Calculate total scrollable width for each container
-  const getScrollableWidth = (container) => {
+  const getScrollableWidth = (container: HTMLElement) => {
     return container.scrollWidth - window.innerWidth + 100; // Adding padding
   };
   
-  const hurdlesScrollWidth = getScrollableWidth(hurdlesContainer);
-  const solutionsScrollWidth = getScrollableWidth(solutionsContainer);
+  const hurdlesScrollWidth = hurdlesContainer ? getScrollableWidth(hurdlesContainer) : 0;
+  const solutionsScrollWidth = solutionsContainer ? getScrollableWidth(solutionsContainer) : 0;
   
   // Intersection Observers
   const hurdlesObserver = new IntersectionObserver((entries) => {
@@ -101,8 +101,12 @@ onMounted(() => {
     }
   }, { threshold: 0.1 });
   
-  hurdlesObserver.observe(hurdlesSection);
-  solutionsObserver.observe(solutionsSection);
+  if (hurdlesSection) {
+    hurdlesObserver.observe(hurdlesSection);
+  }
+  if (solutionsSection) {
+    solutionsObserver.observe(solutionsSection);
+  }
   
   // Scroll handler
   const handleScroll = () => {
@@ -113,20 +117,17 @@ onMounted(() => {
       const hurdlesProgress = Math.min(1, Math.max(0, 
         -hurdlesRect.top / (hurdlesSection.offsetHeight - window.innerHeight)
       ));
-       // Calculate initial offset (same as in CSS)
-      //  const initialOffset = window.innerWidth - 350;
-      //   // Start from the initial offset and move left as progress increases
-      // const hurdlesTransform = initialOffset + (hurdlesProgress * hurdlesScrollWidth);
-      // hurdlesContainer.style.transform = `translateX(-${hurdlesTransform}px)`;
-
-       /// previous vvv
+      
       // // Apply transform to hurdles container (right to left)
       const hurdlesTransform = hurdlesProgress * hurdlesScrollWidth;
-      hurdlesContainer.style.transform = `translateX(-${hurdlesTransform}px)`;
+      if (hurdlesContainer) {
+        hurdlesContainer.style.transform = `translateX(-${hurdlesTransform}px)`;
+      }
     }
     
     // Handle Solutions section
     if (document.body.classList.contains('solutions-active')) {
+      if (!solutionsSection) return;
       const solutionsRect = solutionsSection.getBoundingClientRect();
       const solutionsProgress = Math.min(1, Math.max(0, 
         -solutionsRect.top / (solutionsSection.offsetHeight - window.innerHeight)
@@ -135,7 +136,9 @@ onMounted(() => {
       // Apply transform to solutions container (right to left)
       // Reverse the direction for solutions to make title card lead
       const solutionsTransform = (1 - solutionsProgress) * solutionsScrollWidth;
-      solutionsContainer.style.transform = `translateX(-${solutionsTransform}px)`;
+      if (solutionsContainer) {
+        solutionsContainer.style.transform = `translateX(-${solutionsTransform}px)`;
+      }
     }
   };
   
@@ -181,7 +184,7 @@ onMounted(() => {
     .cards-container {
       display: flex;
       gap: 2rem;
-      transition: transform 0.1s ease-out;
+      // transition: transform 0.1s ease-out;
       padding: 0 2rem;
       align-items: center;
       height: 100%;
@@ -231,6 +234,7 @@ onMounted(() => {
       ////NEWWWWWW TESTTTT
       // Start with all cards off-screen to the right
       // transform: translateX(calc(100vw - 350px)); // Show just the title card initially
+      transition: transform 0.1s ease-out;
       
       // // Add this to ensure the title card is visible at the start
       // .title-card {
@@ -243,6 +247,7 @@ onMounted(() => {
     .cards-container {
       // Start with all cards off-screen to the right
       transform: translateX(calc(100% - 350px)); // Show just the title card initially
+      transition: transform 0.1s ease-out;
     }
   }
 }
