@@ -1,8 +1,9 @@
+@use 'sass:map';
 @import 'variables';
 
 // Responsive mixins
 @mixin playground-responsive($breakpoint) {
-  @if map-has-key($playground-breakpoints, $breakpoint) {
+  @if map.has-key($playground-breakpoints, $breakpoint) {
     @media (min-width: map-get($playground-breakpoints, $breakpoint)) {
       @content;
     }

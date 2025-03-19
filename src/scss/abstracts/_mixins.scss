@@ -1,6 +1,10 @@
+@use "sass:map";
+
+// Or alternatively, you can use @import instead:
+// @import "sass:map";
 
 @mixin respond-to($breakpoint) {
-  @media (min-width: map-get($breakpoints, $breakpoint)) {
+  @media (min-width: map.get($breakpoints, $breakpoint)) {
     & {
       @content;
     }
