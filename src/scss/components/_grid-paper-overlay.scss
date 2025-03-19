@@ -1,0 +1,335 @@
+// Import required mixins and variables
+@import '@/scss/abstracts/variables';
+@import '@/scss/abstracts/mixins';
+@import '@/scss/patterns/background-patterns';
+// Import pattern mixins
+@import '../mixins/patterns';
+
+// Add the floating animation
+@keyframes grid-float {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 20px 20px; // Matches our grid size for smooth loop
+  }
+}
+
+// Add fade animation
+@keyframes grid-fade {
+  0%, 100% { opacity: var(--min-opacity, 0.1); }
+  50% { opacity: var(--max-opacity, 0.3); }
+}
+
+.grid-paper-overlay {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  
+  // Base pseudo-element for all patterns
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  // Make sure content is above the background
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+// Add fade animation
+@keyframes grid-fade {
+  0%, 100% { opacity: var(--min-opacity, 0.1); }
+  50% { opacity: var(--max-opacity, 0.3); }
+}
+
+.grid-paper-overlay {
+  position: relative;
+  isolation: isolate;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    // Remove default opacity here - let intensity modifiers handle it
+  }
+
+  // Apply different patterns
+  &.pattern-grid::before {
+    @include grid-pattern(rgba(255, 255, 255, 0.2), 1.5px, 20px);
+  }
+
+  &.pattern-dots::before {
+    @include dots-pattern(rgba(255, 255, 255, 0.1), 2px, 20px);
+  }
+
+  &.pattern-diagonal-lines::before {
+    @include diagonal-lines-pattern(rgba(255, 255, 255, 0.1), 1px, 10px);
+  }
+
+  &.pattern-diamonds::before {
+    @include diamonds-pattern(rgba(255, 255, 255, 0.1), 1px, 20px);
+  }
+
+  &.pattern-hexagons::before {
+    @include hexagons-pattern(rgba(255, 255, 255, 0.1), 1px, 30px);
+  }
+
+  &.pattern-checkerboard::before {
+    @include checkerboard-pattern(rgba(255, 255, 255, 0.05), transparent, 20px);
+  }
+
+  &.pattern-stripes::before {
+    @include stripes-pattern(rgba(255, 255, 255, 0.1), 2px, 10px);
+  }
+
+  &.pattern-circuit::before {
+    @include circuit-pattern(rgba(255, 255, 255, 0.1), 1px, 40px);
+  }
+
+  &.pattern-blueprint::before {
+    @include blueprint-pattern(rgba(100, 160, 255, 0.1), 20px, 1px);
+  }
+
+  > * {
+    position: relative;
+    z-index: 2;
+  }
+
+  // Add floating modifier
+  &--floating {
+    &::before {
+      animation: grid-float 3s linear infinite;
+    }
+  }
+
+  // Add fade modifier
+  &--fade {
+    &::before {
+      --min-opacity: 0.1;
+      --max-opacity: 0.3;
+      animation: grid-fade 4s ease-in-out infinite;
+    }
+  }
+
+  // Intensity modifiers - these should be the ONLY place opacity is set
+  &--intensity-low::before {
+    opacity: 0.35 !important; // Use !important to override theme opacities
+  }
+
+  &--intensity-medium::before {
+    opacity: 0.55 !important;
+  }
+
+  &--intensity-high::before {
+    opacity: 0.85 !important;
+  }
+
+  // Spotlight size modifiers
+  &--spotlight-size-small {
+    &.grid-paper-overlay--spotlight-top-left::before,
+    &.grid-paper-overlay--spotlight-top-right::before,
+    &.grid-paper-overlay--spotlight-bottom-left::before,
+    &.grid-paper-overlay--spotlight-bottom-right::before {
+      mask-image: radial-gradient(
+        circle at var(--spotlight-position, 20% 20%),
+        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 0.8) 10%,
+        rgba(0, 0, 0, 0) 30%
+      );
+      -webkit-mask-image: radial-gradient(
+        circle at var(--spotlight-position, 20% 20%),
+        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 0.8) 10%,
+        rgba(0, 0, 0, 0) 30%
+      );
+    }
+  }
+
+  &--spotlight-size-large {
+    &.grid-paper-overlay--spotlight-top-left::before,
+    &.grid-paper-overlay--spotlight-top-right::before,
+    &.grid-paper-overlay--spotlight-bottom-left::before,
+    &.grid-paper-overlay--spotlight-bottom-right::before {
+      mask-image: radial-gradient(
+        circle at var(--spotlight-position, 20% 20%),
+        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 0.8) 30%,
+        rgba(0, 0, 0, 0) 70%
+      );
+      -webkit-mask-image: radial-gradient(
+        circle at var(--spotlight-position, 20% 20%),
+        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 0.8) 30%,
+        rgba(0, 0, 0, 0) 70%
+      );
+    }
+  }
+
+  // Corner-specific spotlight modifiers
+  &--spotlight-top-left::before {
+    --spotlight-position: 20% 20%;
+    mask-image: radial-gradient(
+      circle at 20% 20%,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 0.8) 20%,
+      rgba(0, 0, 0, 0) 50%
+    );
+    -webkit-mask-image: radial-gradient(
+      circle at 20% 20%,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 0.8) 20%,
+      rgba(0, 0, 0, 0) 50%
+    );
+  }
+
+  &--spotlight-top-right::before {
+    --spotlight-position: 80% 20%;
+    mask-image: radial-gradient(
+      circle at 80% 20%,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 0.8) 20%,
+      rgba(0, 0, 0, 0) 50%
+    );
+    -webkit-mask-image: radial-gradient(
+      circle at 80% 20%,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 0.8) 20%,
+      rgba(0, 0, 0, 0) 50%
+    );
+  }
+
+  &--spotlight-bottom-left::before {
+    --spotlight-position: 20% 80%;
+    mask-image: radial-gradient(
+      circle at 20% 80%,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 0.8) 20%,
+      rgba(0, 0, 0, 0) 50%
+    );
+    -webkit-mask-image: radial-gradient(
+      circle at 20% 80%,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 0.8) 20%,
+      rgba(0, 0, 0, 0) 50%
+    );
+  }
+
+  &--spotlight-bottom-right::before {
+    --spotlight-position: 80% 80%;
+    mask-image: radial-gradient(
+      circle at 80% 80%,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 0.8) 20%,
+      rgba(0, 0, 0, 0) 50%
+    );
+    -webkit-mask-image: radial-gradient(
+      circle at 80% 80%,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 0.8) 20%,
+      rgba(0, 0, 0, 0) 50%
+    );
+  }
+
+  // Theme-specific pattern styles using theme map
+  @each $theme-name, $theme-map in $themes {
+    .theme-#{$theme-name} & {
+      // Base theme styles for the overlay
+      &::before {
+        @if $theme-name == 'pastel-future' {
+          mix-blend-mode: multiply;
+        } @else {
+          background-color: map-get($theme-map, 'background');
+        }
+      }
+      
+      // Pattern classes with higher specificity inside theme context
+      &.pattern-grid::before {
+        @if $theme-name == 'pastel-future' {
+          @include grid-pattern(rgba(0, 0, 0, 0.1), 2px, 40px);
+        } @else {
+          @include grid-pattern(rgba(255, 255, 255, 1), 1px, 20px);
+        }
+      }
+      
+      &.pattern-dots::before {
+        @if $theme-name == 'pastel-future' {
+          @include dots-pattern(rgba(0, 0, 0, 0.1), 3px, 30px);
+        } @else {
+          @include dots-pattern(rgba(255, 255, 255, 1), 2px, 20px);
+        }
+      }
+      
+      &.pattern-checkerboard::before {
+        @if $theme-name == 'pastel-future' {
+          @include checkerboard-pattern(rgba(0, 0, 0, 0.05), transparent, 20px);
+        } @else {
+          @include checkerboard-pattern(rgba(255, 255, 255, 0.1), transparent, 20px);
+        }
+      }
+      
+      // Make sure all other patterns are defined similarly
+      &.pattern-diagonal-lines::before,
+      &.pattern-diamonds::before,
+      &.pattern-hexagons::before,
+      &.pattern-stripes::before,
+      &.pattern-circuit::before,
+      &.pattern-blueprint::before {
+        // Ensure these have appropriate styles for each theme
+      }
+    }
+  }
+}
+
+// Pattern-specific styles
+.grid-paper-overlay {
+  // Pattern classes
+  &.pattern-grid::before {
+    @include grid-pattern(rgba(255, 255, 255, 1), 1px, 20px);
+  }
+  
+  &.pattern-dots::before {
+    @include dots-pattern(rgba(255, 255, 255, 1), 2px, 20px);
+  }
+  
+  &.pattern-diagonal-lines::before {
+    @include diagonal-lines-pattern(rgba(255, 255, 255, 1), 1px, 20px);
+  }
+  
+  &.pattern-diamonds::before {
+    @include diamonds-pattern(rgba(255, 255, 255, 1), 1px, 30px);
+  }
+  
+  &.pattern-hexagons::before {
+    @include hexagons-pattern(rgba(255, 255, 255, 1), 1px, 30px);
+  }
+  
+  &.pattern-checkerboard::before {
+    @include checkerboard-pattern(rgba(255, 255, 255, 0.1), transparent, 20px);
+  }
+  
+  &.pattern-stripes::before {
+    @include stripes-pattern(rgba(255, 255, 255, 1), 1px, 20px);
+  }
+  
+  &.pattern-circuit::before {
+    @include circuit-pattern(rgba(255, 255, 255, 1), 1px, 40px);
+  }
+  
+  &.pattern-blueprint::before {
+    @include blueprint-pattern(rgba(255, 255, 255, 1), 1px, 30px);
+  }
+}

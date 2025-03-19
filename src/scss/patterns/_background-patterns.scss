@@ -1,0 +1,125 @@
+// Grid pattern (classic graph paper)
+@mixin grid-pattern(
+  $line-color: rgba(255, 255, 255, 0.1),
+  $line-size: 1px,
+  $cell-size: 40px
+) {
+  background-image: 
+    linear-gradient(to right, $line-color $line-size, transparent $line-size),
+    linear-gradient(to bottom, $line-color $line-size, transparent $line-size);
+  background-size: $cell-size $cell-size;
+  background-position: center center;
+}
+
+// Dots pattern
+@mixin dots-pattern(
+  $dot-color: rgba(255, 255, 255, 0.1),
+  $dot-size: 2px,
+  $spacing: 20px
+) {
+  background-image: radial-gradient($dot-color $dot-size, transparent $dot-size);
+  background-size: $spacing $spacing;
+  background-position: 0 0;
+}
+
+// Diagonal lines pattern
+@mixin diagonal-lines-pattern(
+  $line-color: rgba(255, 255, 255, 0.1),
+  $line-size: 1px,
+  $spacing: 10px
+) {
+  background-image: repeating-linear-gradient(
+    45deg,
+    $line-color,
+    $line-color $line-size,
+    transparent $line-size,
+    transparent $spacing
+  );
+}
+
+// Diamonds pattern
+@mixin diamonds-pattern(
+  $line-color: rgba(255, 255, 255, 0.1),
+  $line-size: 1px,
+  $size: 20px
+) {
+  background-image: 
+    linear-gradient(45deg, $line-color $line-size, transparent $line-size),
+    linear-gradient(-45deg, $line-color $line-size, transparent $line-size);
+  background-size: $size $size;
+}
+
+// Hexagons pattern
+@mixin hexagons-pattern(
+  $hex-color: rgba(255, 255, 255, 0.1),
+  $hex-size: 50px
+) {
+  background-color: transparent;
+  background-image: 
+    radial-gradient($hex-color 15%, transparent 16%),
+    radial-gradient($hex-color 15%, transparent 16%);
+  background-size: $hex-size $hex-size;
+  background-position: 0 0, $hex-size/2 $hex-size/2;
+}
+
+// Checkerboard pattern
+@mixin checkerboard-pattern(
+  $color1: rgba(255, 255, 255, 0.05),
+  $color2: transparent,
+  $size: 40px
+) {
+  background-image: 
+    linear-gradient(45deg, $color1 25%, transparent 25%),
+    linear-gradient(-45deg, $color1 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, $color1 75%),
+    linear-gradient(-45deg, transparent 75%, $color1 75%);
+  background-size: $size $size;
+  background-position: 0 0, 0 $size/2, $size/2 -$size/2, -$size/2 0;
+}
+
+// Stripes pattern
+@mixin stripes-pattern(
+  $stripe-color: rgba(255, 255, 255, 0.1),
+  $stripe-width: 5px,
+  $stripe-gap: 10px
+) {
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent $stripe-gap,
+    $stripe-color $stripe-gap,
+    $stripe-color $stripe-gap + $stripe-width
+  );
+}
+
+// Circuit pattern
+@mixin circuit-pattern(
+  $line-color: rgba(255, 255, 255, 0.1),
+  $dot-color: rgba(255, 255, 255, 0.2),
+  $size: 40px
+) {
+  background-color: transparent;
+  background-image: 
+    linear-gradient($line-color 1px, transparent 1px),
+    linear-gradient(90deg, $line-color 1px, transparent 1px),
+    linear-gradient(135deg, $line-color 1px, transparent 1px),
+    linear-gradient(45deg, $line-color 1px, transparent 1px),
+    radial-gradient($dot-color 2px, transparent 2px);
+  background-size: $size $size, $size $size, $size*2 $size*2, $size*2 $size*2, $size $size;
+  background-position: 0 0, 0 0, 0 0, 0 0, $size/2 $size/2;
+}
+
+// Blueprint pattern
+@mixin blueprint-pattern(
+  $line-color: rgba(100, 160, 255, 0.1),
+  $grid-size: 40px,
+  $dot-size: 2px
+) {
+  background-color: transparent;
+  background-image: 
+    linear-gradient($line-color 1px, transparent 1px),
+    linear-gradient(90deg, $line-color 1px, transparent 1px),
+    radial-gradient($line-color $dot-size, transparent $dot-size);
+  background-size: $grid-size $grid-size, $grid-size $grid-size, $grid-size $grid-size;
+  background-position: -0.5px -0.5px, -0.5px -0.5px, $grid-size/2 $grid-size/2;
+}

@@ -26,19 +26,24 @@ const themes = [
 
 const showThemes = ref(false);
 
-const props = defineProps<{
-  currentTheme: string
-}>();
+// Combine all props into a single defineProps call
+const props = defineProps({
+  currentTheme: String,
+  hideToggleButton: {
+    type: Boolean,
+    default: false
+  }
+});
 
 const currentThemeGradient = computed(() => {
   return themes.find(theme => theme.name === props.currentTheme)?.gradient || themes[0].gradient;
 });
 
-const emit = defineEmits<{
-  (e: 'update:currentTheme', value: string): void
-}>();
+const emit = defineEmits(['update:theme', 'update:currentTheme']);
 
 const setTheme = (themeName: string) => {
+  // Emit both events for compatibility
+  emit('update:theme', themeName);
   emit('update:currentTheme', themeName);
   showThemes.value = false;
 };
@@ -51,6 +56,7 @@ const toggleThemeList = () => {
 <template>
   <div class="theme-switcher">
     <button 
+      v-if="!hideToggleButton"
       @click="toggleThemeList"
       class="theme-toggle-btn"
       :class="{ 'active': showThemes }"
@@ -65,7 +71,7 @@ const toggleThemeList = () => {
 
     <div 
       class="theme-list-container"
-      :class="{ 'hidden': !showThemes }"
+      :class="{ 'hidden': !showThemes && !hideToggleButton }"
     >
       <div class="theme-list">
         <button
@@ -77,7 +83,7 @@ const toggleThemeList = () => {
         >
           <div class="flex items-center gap-3">
             <div 
-              v-if="currentTheme === theme.name"
+              v-if="props.currentTheme === theme.name || props.currentTheme === theme.name.replace('theme-', '') || `theme-${props.currentTheme}` === theme.name"
               class="active-indicator"
             ></div>
             <span>{{ theme.label }}</span>
