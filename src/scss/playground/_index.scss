@@ -1,0 +1,60 @@
+// Main playground styles entry point
+@import 'variables';
+@import 'mixins';
+@import 'utilities';
+@import 'fonts';
+
+// Import all playground components
+@import 'components/hero-section';
+@import 'components/view-toggle';
+@import 'components/card-3d-showcase';
+@import 'components/custom-horizontal-scroll';
+
+// Add any global playground styles
+.playground-view {
+  font-family: map-get($playground-fonts, 'primary');
+  
+  * {
+    transition: map-get($playground-transitions, 'default');
+  }
+  
+  .main-content {
+    min-height: 100vh; // Ensure it's at least viewport height
+    height: auto !important; // Override any fixed height
+    overflow: visible !important; // Ensure content isn't cut off
+    position: relative; // For proper positioning of child elements
+  }
+}
+
+// Animation showcase styles
+.animation-showcase {
+  .animation-card {
+    padding: 3rem;
+    border-radius: 0.5rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    
+    h3 {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+  }
+}
+
+// Enhanced gradient text styles
+.theme-text--gradient {
+  @include animated-gradient-text(3s, 'horizontal');
+}
+
+// Make animations more pronounced
+.theme-neon-horizon, .theme-digital-sunset, .theme-retro-wave, .theme-pastel-future {
+  .gradient-text {
+    @include animated-gradient-text(3s, 'shine');
+  }
+}

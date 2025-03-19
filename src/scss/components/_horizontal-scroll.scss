@@ -1,0 +1,115 @@
+// Horizontal Scroll Component Styles
+
+.horizontal-scroll {
+  position: relative;
+  min-height: 200vh; // Minimum height to accommodate scrolling
+  overflow-x: hidden; // Prevent horizontal scrollbar
+  z-index: 1; // Ensure proper stacking
+  
+  // Force parent containers to respect the section's height
+  &::after {
+    content: '';
+    display: block;
+    height: 1px; // Minimal height
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    pointer-events: none; // Don't interfere with interactions
+  }
+  
+  .container {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+  
+  .section-title {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2.5rem;
+    font-weight: 700;
+  }
+}
+
+// Add these styles to ensure proper sticky behavior
+body.horizontal-scroll-active {
+  // Optional: add styles when a horizontal scroll section is active
+  overflow-x: hidden; // Prevent horizontal scrollbar on body
+  
+  .horizontal-scroll-section .container {
+    // Force hardware acceleration for smoother animations
+    transform: translateZ(0);
+    will-change: transform;
+  }
+}
+
+// Ensure the sticky container works properly
+.horizontal-scroll-section {
+  // Create a stacking context
+  isolation: isolate;
+  
+  // Ensure the section has enough height for scrolling
+  min-height: 300vh;
+  
+  // Force the browser to create a new stacking context
+  z-index: 1;
+  
+  .container {
+    // Improve sticky positioning
+    position: -webkit-sticky; // For Safari
+    position: sticky;
+    top: 0;
+    
+    // Ensure it has a background to cover content underneath
+    background-color: var(--theme-background, #ffffff);
+    
+    // Add these properties to fix Safari issues
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+  }
+  
+  .animation-wrap {
+    // Ensure items are properly spaced
+    display: flex;
+    align-items: center;
+    padding: 0 5vw; // Add padding on sides
+    
+    // Make sure it's wide enough for all items
+    min-width: max-content;
+    
+    // Add transition for smoother scrolling
+    transition: transform 0.1s ease-out;
+  }
+  
+  .item {
+    // Set consistent sizing for items
+    flex: 0 0 auto;
+    min-width: 300px;
+    max-width: 80vw;
+    margin: 0 1rem;
+    
+    // Add visual focus effect
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-5px);
+    }
+  }
+}
+
+// Add responsive adjustments
+@media (max-width: 768px) {
+  .horizontal-scroll-section {
+    .animation-wrap {
+      padding: 0 2vw;
+    }
+    
+    .item {
+      min-width: 250px;
+      margin: 0 0.5rem;
+    }
+  }
+}

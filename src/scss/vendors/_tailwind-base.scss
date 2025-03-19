@@ -1,0 +1,9 @@
+@layer base {
+  // Tailwind base styles
+  @tailwind base;
+  
+  // Your base styles that should override Tailwind
+  html {
+    @apply antialiased;
+  }
+}

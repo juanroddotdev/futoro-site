@@ -1,7 +1,11 @@
-// Main file that imports all other files
+// Import Tailwind base styles first
+@import 'vendors/tailwind-base';
+
+// Then import abstracts
 @import 'abstracts/variables';
 @import 'abstracts/mixins';
 
+// Then your custom base styles
 @import 'base/reset';
 @import 'base/fonts';
 @import 'base/typography';
@@ -9,6 +13,10 @@
 @import 'base/animations';
 @import 'base/utilities';
 
+// Import Tailwind components
+@import 'vendors/tailwind-components-utilities';
+
+// Then your custom components
 @import 'components/buttons';
 @import 'components/icons';
 @import 'components/availability-badge';
@@ -16,21 +24,28 @@
 @import 'components/form';
 @import 'components/transitions';
 @import 'components/headings';
+@import 'components/custom-headings';
 @import 'components/accordion';
 @import 'components/timeline';
 @import 'components/theme-switcher';
 @import 'components/about-section';
 @import 'components/contact-section';
 @import 'components/contact-section-v2';
+@import 'components/horizontal-scroll';
+@import 'components/navbar';
+@import 'components/services-section'; 
 
-// Add separators imports
+// Playground styles
+@import 'playground/_index';
+
+// Separators
 @import 'separators/code-evolution';
 
+// Layout and themes
 @import 'layout/grid';
 @import 'layout/app';
-
 @import 'themes/neutral';
 @import 'themes/theme-classes';
 
-// Vendors (Tailwind last)
-@import 'vendors/tailwind';
+// Import component styles
+@import 'components/scroll-accordion-vanilla';

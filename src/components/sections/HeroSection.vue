@@ -12,7 +12,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="min-h-screen flex items-center relative overflow-hidden theme-bg--primary">
+  <section class="min-h-screen flex items-center relative overflow-hidden theme-bg--primary mx-auto px-4 md:px-8 h-full">
     <div class="section relative z-10 my-40 hero-content">
       <h1 class="heading--accent mb-6 headline heading-responsive">{{ heroContent.headline }}</h1>
       <p class="mb-8 subheadline subheading-responsive heading heading--highlight">

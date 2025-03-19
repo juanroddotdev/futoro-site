@@ -40,4 +40,267 @@
   }
 }
 
+@mixin animated-gradient-text($duration: 3s, $direction: 'horizontal') {
+  background-size: 200% auto !important;
+  color: transparent !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  display: inline-block;
+  
+  @if $direction == 'horizontal' {
+    animation: gradient-shift $duration ease infinite alternate !important;
+    
+    @keyframes gradient-shift {
+      0% {
+        background-position: 0% center;
+      }
+      100% {
+        background-position: 100% center;
+      }
+    }
+  } @else if $direction == 'shine' {
+    animation: shine $duration linear infinite;
+    
+    @keyframes shine {
+      0% {
+        background-position: 0% center;
+      }
+      100% {
+        background-position: 200% center;
+      }
+    }
+  }
+  
+  font-weight: bold !important;
+  letter-spacing: 0.02em !important;
+}
+
+@mixin grid-paper-background(
+  $line-color: rgba(255, 255, 255, 0.1),
+  $line-size: 2px,
+  $cell-size: 80px  // Increased from 40px to 60px
+) {
+  background-image: 
+    linear-gradient(to right, $line-color $line-size, transparent $line-size),
+    linear-gradient(to bottom, $line-color $line-size, transparent $line-size);
+  background-size: $cell-size $cell-size;
+  background-position: center center;
+}
+
+@mixin theme-based-gradient-variations($selector: '&') {
+  @each $theme-name, $theme-map in $themes {
+    .theme-#{$theme-name} & #{$selector} {
+      &:nth-child(4n+1) {
+        background: linear-gradient(
+          200deg, 
+          map-get($theme-map, 'primary'), 
+          map-get($theme-map, 'secondary')
+        );
+      }
+      
+      &:nth-child(4n+2) {
+        background: linear-gradient(
+          200deg, 
+          map-get($theme-map, 'secondary'), 
+          map-get($theme-map, 'accent')
+        );
+      }
+      
+      &:nth-child(4n+3) {
+        background: linear-gradient(
+          200deg, 
+          map-get($theme-map, 'accent'), 
+          map-get($theme-map, 'primary')
+        );
+      }
+      
+      &:nth-child(4n+4) {
+        background: linear-gradient(
+          200deg, 
+          if($theme-name == 'retro-wave', 
+             map-get($theme-map, 'highlight'), 
+             map-get($theme-map, 'accent')),
+          map-get($theme-map, 'secondary')
+        );
+      }
+    }
+  }
+}
+
+// Base mixin for gradient borders
+@mixin gradient-border-base($border-width: 2px, $borders: 'all', $border-radius: 0.75rem) {
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    
+    // Border side selection
+    @if $borders == 'all' {
+      inset: 0;
+      padding: $border-width;
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+    } @else if $borders == 'top' {
+      top: 0;
+      left: 0;
+      right: 0;
+      height: $border-width;
+    } @else if $borders == 'right' {
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: $border-width;
+    } @else if $borders == 'bottom' {
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: $border-width;
+    } @else if $borders == 'left' {
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: $border-width;
+    } @else if $borders == 'horizontal' {
+      top: 0;
+      left: 0;
+      right: 0;
+      height: $border-width;
+      &:after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: $border-width;
+      }
+    } @else if $borders == 'vertical' {
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: $border-width;
+      &:after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: $border-width;
+      }
+    }
+    
+    border-radius: $border-radius;
+    background-size: 200% auto;
+    pointer-events: none;
+  }
+}
+
+@mixin animated-gradient-border($duration: 3s, $border-width: 2px, $direction: 'horizontal') {
+  @include gradient-border-base($border-width, 'all');
+  
+  &::before {
+    background-size: 200% auto;
+    
+    @if $direction == 'horizontal' {
+      animation: border-gradient-shift $duration ease infinite alternate;
+    } @else if $direction == 'shine' {
+      animation: border-shine $duration linear infinite;
+    }
+  }
+}
+
+// Three-color looping gradient mixin for theme-specific gradients
+@mixin theme-specific-looping-gradients($element: '&', $direction: 'to right', $property: 'background-image', $position: 0) {
+  .theme-neon-horizon #{$element} {
+    #{$property}: linear-gradient(
+      #{$direction},
+      map-get(map-get($themes, 'neon-horizon'), 'secondary') #{$position + '%'},
+      map-get(map-get($themes, 'neon-horizon'), 'accent') 50%,
+      map-get(map-get($themes, 'neon-horizon'), 'secondary') 100%
+    );
+  }
+  
+  .theme-digital-sunset #{$element} {
+    #{$property}: linear-gradient(
+      #{$direction},
+      map-get(map-get($themes, 'digital-sunset'), 'secondary') #{$position + '%'},
+      map-get(map-get($themes, 'digital-sunset'), 'accent') 50%,
+      map-get(map-get($themes, 'digital-sunset'), 'secondary') 100%
+    );
+  }
+  
+  .theme-retro-wave #{$element} {
+    #{$property}: linear-gradient(
+      #{$direction},
+      map-get(map-get($themes, 'retro-wave'), 'accent') #{$position + '%'},
+      map-get(map-get($themes, 'retro-wave'), 'highlight') 50%,
+      map-get(map-get($themes, 'retro-wave'), 'accent') 100%
+    );
+  }
+  
+  .theme-pastel-future #{$element} {
+    #{$property}: linear-gradient(
+      #{$direction},
+      map-get(map-get($themes, 'pastel-future'), 'secondary') #{$position + '%'},
+      map-get(map-get($themes, 'pastel-future'), 'accent') 50%,
+      map-get(map-get($themes, 'pastel-future'), 'secondary') 100%
+    );
+  }
+}
+
+// Enhanced hover-card mixin that uses theme variables
+@mixin themed-gradient-border-card($border-radius: 0.75rem, $transition-speed: 0.6s, $borders: 'all') {
+  @include gradient-border-base(2px, $borders, $border-radius);
+  background: transparent;
+  isolation: isolate;
+  transition: all $transition-speed cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &::before {
+    background-position: 0% center;
+    opacity: 0.5;
+    transition: all $transition-speed cubic-bezier(0.4, 0, 0.2, 1);
+    
+    // Apply theme-specific gradients to the border
+    @include theme-specific-looping-gradients('&', 'to right', 'background', 0);
+  }
+  
+  // Glow effect - only for 'all' borders
+  @if $borders == 'all' {
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: $border-radius;
+      background-size: 200% auto;
+      background-position: 0% center;
+      opacity: 0;
+      z-index: -1;
+      transition: all $transition-speed cubic-bezier(0.4, 0, 0.2, 1);
+      filter: blur(12px);
+      
+      // Apply theme-specific gradients to the glow
+      @include theme-specific-looping-gradients('&', 'to right', 'background', 0);
+    }
+  }
+  
+  // Hover effects
+  &:hover {
+    transform: translateY(-2px);
+    
+    &::before {
+      opacity: 1;
+      background-position: 100% center;
+    }
+    
+    @if $borders == 'all' {
+      &::after {
+        opacity: 0.08;
+        background-position: 100% center;
+      }
+    }
+  }
+}
+
 

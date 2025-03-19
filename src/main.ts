@@ -1,5 +1,12 @@
+
 import { createApp } from 'vue'
 import './style.scss'
 import App from './App.vue'
+import AnimatedText from '@/components/export-to-main/animatedText/AnimatedText.vue'
 
-createApp(App).mount('#app')
+const app = createApp(App)
+
+// Register AnimatedText as a global component
+app.component('AnimatedText', AnimatedText)
+
+app.mount('#app')

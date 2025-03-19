@@ -1,0 +1,91 @@
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+// Scroll Accordion Vanilla Component Styles
+.scroll-accordion {
+  width: 100%;
+  min-height: 2500px;
+  max-height: 2500px;
+  position: relative;
+  
+  .placeholder {
+    visibility: hidden;
+  }
+  
+  .accordions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    transform-origin: center top;
+  }
+  
+  .accordion {
+    width: max(50vw, 280px);
+    margin-bottom: 40px;
+    padding: 25px 30px 10px;
+    /* border-radius: 15px; */
+    overflow: hidden;
+    /* box-shadow: 0 30px 30px -10px rgba(0, 0, 0, 0.3); */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    @include themed-gradient-border-card(15px, 0.3s, 'top');
+    &.hover-card-themed {
+      border-radius: 0;
+      &::after {
+        background: transparent;
+      }
+    }
+    
+    // Apply theme-based gradient variations
+    /* @include theme-based-gradient-variations(); */
+    
+    .title {
+      font-size: max(2vw, 24px);
+      font-weight: bold;
+      line-height: 1.1;
+      padding-bottom: 0.4em;
+      text-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+      /* border-top: 2px solid; */
+      
+      // Apply animated gradient text to titles
+      @include animated-gradient-text(4s, 'horizontal');
+      @include animated-gradient-border(6s, 3px, 'shine');
+      
+      // Theme-specific gradient backgrounds for the text
+      @include theme-specific-looping-gradients('&', 'to right', 'background-image', 0);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      display: inline-block;
+    }
+    
+    .text {
+      font-size: max(1vw, 15px);
+      line-height: 1.4;
+      overflow: hidden;
+      padding-bottom: 20px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+  }
+  
+  // Special handling for Pastel Future theme (light theme)
+  .theme-pastel-future & .accordion {
+    .title, .text {
+      color: rgba(0, 0, 0, 0.8);
+      text-shadow: 0 1px 1px rgba(255, 255, 255, 0.2);
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .accordion {
+      padding: 15px 20px 8px;
+      
+      .title {
+        font-size: 20px;
+      }
+    }
+  }
+}

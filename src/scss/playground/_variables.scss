@@ -1,0 +1,84 @@
+// Import main variables for colors and typography
+@import '../abstracts/variables';
+@import '../base/typography';
+
+// Playground Theme Maps
+$playground-themes: (
+  'neon-horizon': (
+    'bg': #1a1b26,
+    'primary': $neon-horizon-primary,
+    'secondary': $neon-horizon-secondary,
+    'accent': $neon-horizon-accent,
+    'neutral': $neon-horizon-neutral,
+    'gradient': (
+      'start': #1a1b26,
+      'middle': #2E3440,
+      'end': #A3BE8C
+    )
+  ),
+  'digital-sunset': (
+    'bg': #2E3440,
+    'primary': $digital-sunset-primary,
+    'secondary': $digital-sunset-secondary,
+    'accent': $digital-sunset-accent,
+    'neutral': $digital-sunset-neutral,
+    'gradient': (
+      'start': #2E3440,
+      'middle': #4C566A,
+      'end': #B48EAD
+    )
+  ),
+  'retro-wave': (
+    'bg': #0f0f17,
+    'primary': $retro-wave-primary,
+    'secondary': $retro-wave-secondary-start,
+    'accent': $retro-wave-accent,
+    'neutral': $retro-wave-neutral,
+    'gradient': (
+      'start': #0f0f17,
+      'middle': #1A1A1A,
+      'end': #FF4081
+    )
+  ),
+  'pastel-future': (
+    'bg': #f8f9fa,
+    'primary': $pastel-future-primary,
+    'secondary': $pastel-future-secondary,
+    'accent': $pastel-future-accent,
+    'neutral': $pastel-future-neutral,
+    'gradient': (
+      'start': #f8f9fa,
+      'middle': #6A5ACD,
+      'end': #98FB98
+    )
+  )
+);
+
+// Spacing
+$playground-spacing: (
+  'xs': 0.5rem,
+  'sm': 1rem,
+  'md': 1.5rem,
+  'lg': 2rem,
+  'xl': 2.5rem
+);
+
+// Typography
+$playground-fonts: (
+  'primary': ('Geist', sans-serif),
+  'secondary': ('Space Grotesk', sans-serif)
+);
+
+// Transitions
+$playground-transitions: (
+  'default': all 0.3s ease,
+  'smooth': all 0.6s cubic-bezier(0.4, 0, 0.2, 1)
+);
+
+// Breakpoints (keeping consistent with main site)
+$playground-breakpoints: (
+  'sm': 640px,
+  'md': 768px,
+  'lg': 1024px,
+  'xl': 1280px
+);
