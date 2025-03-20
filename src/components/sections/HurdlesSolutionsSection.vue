@@ -50,6 +50,7 @@
         <!-- Add ember effect for "Frustration" word -->
         <EmberEffect 
           :targetElement="frustrationElement" 
+          effectType="rain"
           :particleCount="20"
           :duration="2.5"
           :colors="['#ff4500', '#ff7800', '#ffaa33', '#ffcc00']"
@@ -132,16 +133,16 @@ const documentBody = ref(document.body);
 const reversedSolutions = computed(() => [...solutions].reverse());
 
 // Reference to the split text component
-const splitTextRef = ref(null);
-const frustrationElement = ref(null);
+const splitTextRef = ref<{ $el: HTMLElement } | null>(null);
+const frustrationElement = ref<HTMLElement | null>(null);
 
 // Add a flag to track if animation has started
 const animationStarted = ref(false);
 
 // Add debug refs to track timing
-const animationStartTime = ref(null);
-const wordEffectStartTime = ref(null);
-const emberStartTime = ref(null);
+const animationStartTime = ref<number | null>(null);
+const wordEffectStartTime = ref<number | null>(null);
+const emberStartTime = ref<number | null>(null);
 
 // Reactive state for scroll animations
 const state = reactive({
@@ -270,7 +271,7 @@ const handleWordEffectComplete = () => {
     const wordElements = document.querySelectorAll('.word-effect');
     wordElements.forEach(el => {
       if (el.textContent === 'Frustration') {
-        frustrationElement.value = el;
+        frustrationElement.value = el as HTMLElement;
       }
     });
   });
@@ -289,7 +290,7 @@ const handleAnimationStart = () => {
       const wordElements = firstPartElement.querySelectorAll('span');
       wordElements.forEach(el => {
         if (el.textContent === 'Frustration') {
-          frustrationElement.value = el;
+          frustrationElement.value = el as HTMLElement;
         }
       });
     }
@@ -301,7 +302,7 @@ const handleWordEffectStart = () => {
   wordEffectStartTime.value = Date.now();
   console.log('Word effect started at:', new Date().toISOString());
   console.log('Time between animation and word effect:', 
-    (wordEffectStartTime.value - animationStartTime.value) / 1000, 'seconds');
+    (wordEffectStartTime.value - (animationStartTime.value || 0)) / 1000, 'seconds');
     
   // Find the "Frustration" word element immediately when word effect starts
   nextTick(() => {
@@ -318,7 +319,7 @@ const handleWordEffectStart = () => {
       wordElements.forEach(el => {
         if (el.textContent === 'Frustration') {
           console.log('Found frustration element at:', new Date().toISOString());
-          frustrationElement.value = el;
+          frustrationElement.value = el as HTMLElement;
           console.log('Set frustrationElement.value at:', new Date().toISOString());
         }
       });
