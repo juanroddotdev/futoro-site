@@ -98,9 +98,9 @@ watch(effectivePattern, (newPattern) => {
       }
     ]"
   >
-    <div class="debug-info" style="position: absolute; top: 5px; left: 5px; font-size: 10px; color: white; background: rgba(0,0,0,0.5); padding: 5px; z-index: 100;">
+    <!-- <div class="debug-info" style="position: absolute; top: 5px; left: 5px; font-size: 10px; color: white; background: rgba(0,0,0,0.5); padding: 5px; z-index: 100;">
       Pattern: {{ effectivePattern }}
-    </div>
+    </div> -->
     <slot></slot>
   </div>
 </template>
