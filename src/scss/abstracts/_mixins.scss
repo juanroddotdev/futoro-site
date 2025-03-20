@@ -303,4 +303,29 @@
   }
 }
 
+// Tapered blur effect mixin
+@mixin tapered-blur($blur-amount: 5px, $inset: -20px, $center-opacity: 1, $mid-opacity: 0.8, $edge-opacity: 0) {
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    inset: $inset;
+    backdrop-filter: blur($blur-amount);
+    z-index: -1;
+    mask-image: radial-gradient(
+      ellipse at center,
+      rgba(0, 0, 0, $center-opacity) 40%,
+      rgba(0, 0, 0, $mid-opacity) 60%,
+      rgba(0, 0, 0, $edge-opacity) 80%
+    );
+    -webkit-mask-image: radial-gradient(
+      ellipse at center,
+      rgba(0, 0, 0, $center-opacity) 40%,
+      rgba(0, 0, 0, $mid-opacity) 60%,
+      rgba(0, 0, 0, $edge-opacity) 80%
+    );
+  }
+}
+
 

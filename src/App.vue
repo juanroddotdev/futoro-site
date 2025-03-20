@@ -9,7 +9,7 @@ import TimelineHowItWorks from './components/sections/TimelineHowItWorks.vue';
 import ContactSectionV2 from './components/sections/ContactSectionV2.vue';
 import AboutSectionAlt from './components/sections/AboutSectionAlt.vue';
 import GridPaperOverlay from '@/components/export-to-main/gridBackground/GridPaperOverlay.vue';
-import VanillaVersion from '@/components/test-progressive-reveal/VanillaVersion.vue';
+import HurdlesSolutionsSection from '@/components/sections/HurdlesSolutionsSection.vue';
 
 
 const currentTheme = ref('theme-neon-horizon');
@@ -64,7 +64,7 @@ const handleThemeChange = (newTheme: string) => {
         <GridPaperOverlay :theme="currentTheme.replace('theme-', '')" :floating="true" :spotlight="true">
           <HeroSection />
         </GridPaperOverlay>
-          <VanillaVersion />
+          <HurdlesSolutionsSection />
           <ServicesSection />
           <TimelineHowItWorks />
           <AboutSectionAlt />

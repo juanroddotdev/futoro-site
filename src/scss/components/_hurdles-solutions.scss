@@ -1,0 +1,161 @@
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+@mixin tapered-blur($blur-radius, $inset) {
+  // Create a pseudo-element with tapered blur effect
+  &::before {
+    content: '';
+    position: absolute;
+    inset: $inset; // Extend beyond the container
+    backdrop-filter: blur($blur-radius);
+    z-index: -1;
+    mask-image: radial-gradient(ellipse at center,
+        rgba(0, 0, 0, 1) 40%,
+        rgba(0, 0, 0, 0.8) 60%,
+        rgba(0, 0, 0, 0) 80%);
+    -webkit-mask-image: radial-gradient(ellipse at center,
+        rgba(0, 0, 0, 1) 40%,
+        rgba(0, 0, 0, 0.8) 60%,
+        rgba(0, 0, 0, 0) 80%);
+  }
+}
+
+.progressive-reveal {
+  position: relative;
+
+  .reveal-section {
+    position: relative;
+    height: 300vh; // Tall enough for scrolling
+
+    .sticky-container {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      width: 100%;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 2rem;
+
+      .header-container {
+        position: absolute;
+        z-index: 1;
+        padding: 4px 20px;
+        
+        // Use the tapered-blur mixin
+        @include tapered-blur(5px, -20px);
+
+        &--hurdles {
+          bottom: 110px;
+          margin-inline: 0 50px;
+          right: 50px;
+        }
+      }
+    }
+
+    .section-title {
+      font-size: 4.5rem;
+      margin-block: 0;
+      text-align: center;
+    }
+
+    .cards-container {
+      display: flex;
+      gap: 2rem;
+      padding: 0 2rem;
+      align-items: center;
+      height: 100%;
+
+      .card {
+        flex: 0 0 auto;
+        max-width: 340px;
+        height: 380px;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        will-change: transform, opacity;
+        backface-visibility: hidden;
+
+        h3 {
+          font-size: 1.5rem;
+          margin-bottom: 0;
+          margin-top: 0;
+        }
+
+        p {
+          font-size: 1.2rem;
+          line-height: 1.5;
+        }
+
+        &.title-card {
+          width: 350px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 200px;
+          background: transparent;
+          box-shadow: none;
+          border: none;
+          opacity: 0;
+
+          .section-title {
+            margin: 0;
+          }
+        }
+      }
+    }
+  }
+
+  .hurdles-section {
+    .cards-container {
+      transform: translateX(0);
+      transition: transform 0.1s ease-out;
+    }
+  }
+
+  .solutions-section {
+    .card.title-card {
+      display: flex;
+      justify-content: flex-end;
+
+      .section-title {
+        margin-inline: 0 50px;
+      }
+    }
+
+    .cards-container {
+      transform: translateX(calc(100% - 350px)); // Show just the title card initially
+      transition: transform 0.1s ease-out;
+    }
+  }
+}
+
+// Card icon styles
+.hover-card span svg {
+  @apply w-32 h-32;
+}
+
+.icon-imprint svg {
+  filter: opacity(0.4) drop-shadow(0 1px 1px rgba(255, 255, 255, 0.1)) drop-shadow(0 -1px 1px rgba(0, 0, 0, 0.2));
+}
+
+/* Theme-specific icon styles */
+.theme-neon-horizon,
+.theme-digital-sunset,
+.theme-retro-wave {
+  .icon-imprint svg {
+    filter: opacity(0.3) drop-shadow(0 1px 1px rgba(255, 255, 255, 0.15)) drop-shadow(0 -1px 1px rgba(0, 0, 0, 0.3)) drop-shadow(0 0 2px rgba(255, 255, 255, 0.1));
+  }
+}
+
+.theme-pastel-future {
+  .icon-imprint svg {
+    filter: opacity(0.15) drop-shadow(0 1px 1px rgba(255, 255, 255, 0.2)) drop-shadow(0 -1px 1px rgba(0, 0, 0, 0.1));
+  }
+}
+
+.struggle-card,
+.solution-card {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
