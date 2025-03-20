@@ -8,7 +8,7 @@ import ServicesSection from './components/sections/ServicesSection.vue';
 import TimelineHowItWorks from './components/sections/TimelineHowItWorks.vue';
 import ContactSectionV2 from './components/sections/ContactSectionV2.vue';
 import AboutSectionAlt from './components/sections/AboutSectionAlt.vue';
-import GridPaperOverlay from '@/components/export-to-main/gridBackground/GridPaperOverlay.vue';
+// import GridPaperOverlay from '@/components/export-to-main/gridBackground/GridPaperOverlay.vue';
 import HurdlesSolutionsSection from '@/components/sections/HurdlesSolutionsSection.vue';
 
 

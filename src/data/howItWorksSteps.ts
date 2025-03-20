@@ -123,12 +123,13 @@ export const steps = [
   }
 ]
 
-// Type definition for steps
+// Create a unified interface that works for both data structures
 export interface ProcessStep {
     id: number;
-    title: string;
-    description: string;
+    step?: string;  // Optional for alternativeSteps
+    title?: string; // Optional for defaultSteps
     icon: string;
+    description: string[] | string;
 }
 
 // Export the type of steps array for type safety

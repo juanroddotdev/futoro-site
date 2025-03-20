@@ -5,8 +5,17 @@ import { TextPlugin } from 'gsap/TextPlugin';
 gsap.registerPlugin(TextPlugin);
 
 export type TextAnimationType = 
-  'split' | 'fade' | 'typewriter' | 'bounce' | 'rotate' | 
-  'glitch' | 'shake' | 'scramble' | 'fadeUp';
+  | 'split' 
+  | 'fade' 
+  | 'typewriter' 
+  | 'bounce' 
+  | 'rotate' 
+  | 'glitch' 
+  | 'shake' 
+  | 'scramble' 
+  | 'fadeUp'
+  | 'slideInLeft'
+  | 'slideInRight';
 
 export interface TextAnimationOptions {
   duration?: number;
@@ -234,6 +243,38 @@ export const textAnimations = {
     
     return tl;
   },
+
+  // Slide in from left animation
+  slideInLeft: (tl: gsap.core.Timeline, elements: HTMLElement[], options?: TextAnimationOptions) => {
+    elements.forEach(el => gsap.set(el, { x: -100, opacity: 0 }));
+    
+    elements.forEach((el, index) => {
+      tl.to(el, { 
+        x: 0, 
+        opacity: 1, 
+        duration: options?.duration || 0.7,
+        ease: options?.ease || "power2.out"
+      }, index > 0 ? '<0.15' : undefined);
+    });
+    
+    return tl;
+  },
+
+  // Slide in from right animation
+  slideInRight: (tl: gsap.core.Timeline, elements: HTMLElement[], options?: TextAnimationOptions) => {
+    elements.forEach(el => gsap.set(el, { x: 100, opacity: 0 }));
+    
+    elements.forEach((el, index) => {
+      tl.to(el, { 
+        x: 0, 
+        opacity: 1, 
+        duration: options?.duration || 0.7,
+        ease: options?.ease || "power2.out"
+      }, index > 0 ? '<0.15' : undefined);
+    });
+    
+    return tl;
+  },
   
   // Apply animation based on type
   applyAnimation: (
@@ -263,6 +304,10 @@ export const textAnimations = {
         return textAnimations.scramble(tl, elements, options);
       case 'fadeUp':
         return textAnimations.fadeUp(tl, elements, options);
+      case 'slideInLeft':
+        return textAnimations.slideInLeft(tl, elements, options);
+      case 'slideInRight':
+        return textAnimations.slideInRight(tl, elements, options);
       default:
         return textAnimations.fade(tl, elements, options);
     }

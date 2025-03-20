@@ -1,19 +1,44 @@
 <template>
   <div class="progressive-reveal overflow-visible"> <!-- Ensure overflow is visible -->
-    <!-- Add DelayTest component at the top -->
 
     <div class="py-20">
-      <AnimatedText class="text-3xl font-bold text-center gradient-text" firstPart="From Frustration"
-        secondPart="To Fantastic" animation="split" :useGradient="true" :delay="8" :duration="3"
-        :initiallyHidden="true" />
-      <AnimatedText class="text-3xl font-bold text-center gradient-text" firstPart="Website Solutions"
-        animation="fadeUp" :useGradient="true" :duration="3" :initiallyHidden="true" />
+      <AnimatedText class="text-3xl font-bold text-center gradient-text my-10" firstPart="Website Solutions"
+      animation="fadeUp" :useGradient="true" :duration="3" :initiallyHidden="true" />
+      <div class="relative">
+        <AnimatedText 
+          ref="splitTextRef"
+          class="text-3xl font-bold text-center gradient-text" 
+          firstPart="From Frustration"
+          secondPart="To Fantastic" 
+          animation="split" 
+          :useGradient="true" 
+          :delay="3" 
+          :duration="3"
+          :initiallyHidden="true"
+          :wordEffects="true"
+          :wordTargets="['Frustration', 'Fantastic']"
+          :wordEffectTypes="['highlight']"
+          :wordEffectStyles="[
+            { intensity: 13, iterations: 4 },
+            { height: 15, ease: 'elastic.out(1, 0.2)' }
+          ]"
+          :wordEffectDuration="2"
+          :wordEffectDelay=".3"
+          @word-effect-complete="handleWordEffectComplete"
+        />
+      </div>
     </div>
     <!-- Hurdles Section -->
     <section class="reveal-section hurdles-section" id="hurdlesSection">
       <div class="sticky-container">
         <div class="header-container header-container--hurdles">
-          <h2 class="section-title gradient-text">Common Hurdles</h2>
+          <AnimatedText 
+            class="section-title gradient-text"
+            firstPart="Common Hurdles"  
+            animation="slideInRight"
+            :useGradient="true" :duration="3" :initiallyHidden="true"
+          />
+          <!-- <h2 class="section-title gradient-text">Common Hurdles</h2> -->
         </div>
         <div class="cards-container" id="hurdlesContainer">
           <div class="card title-card">
@@ -33,12 +58,18 @@
     <!-- Solutions Section -->
     <section class="reveal-section solutions-section" id="solutionsSection">
       <div class="sticky-container">
-        <div class="header-container header-container--hurdles">
-          <h2 class="section-title gradient-text">Clear Solutions</h2>
+        <div class="header-container header-container--solutions">
+          <AnimatedText 
+            class="section-title gradient-text"
+            firstPart="Clear Solutions"  
+            animation="slideInLeft"
+            :useGradient="true" :duration="3" :initiallyHidden="true"
+          />
+          <!-- <h2 class="section-title gradient-text">Clear Solutions</h2> -->
         </div>
         <div class="cards-container" id="solutionsContainer">
           <div class="card solution-card group hover-card-themed p-6 relative overflow-hidden"
-            v-for="solution in solutions" :key="`solution-${solution.id}`">
+            v-for="solution in reversedSolutions" :key="`solution-${solution.id}`">
             <div class="relative z-10">
               <h3 class="text-md font-semibold gradient-text mb-3">{{ solution.title }}</h3>
               <p class="theme-text--neutral">{{ solution.description }}</p>
@@ -55,98 +86,157 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue';
+import { onMounted, onUnmounted, computed, ref, reactive } from 'vue';
 import { struggles, solutions } from '@/data/strugglesAndSolutions';
-import AnimatedText from '@/components/export-to-main/animatedText/AnimatedText.vue';
+import { useScrollAnimation } from '@/composables/useScrollAnimation';
+import gsap from 'gsap'; // Add this import for GSAP
+
+// Computed property to reverse the solutions array
+const reversedSolutions = computed(() => [...solutions].reverse());
+
+// Reference to the split text component
+const splitTextRef = ref(null);
+
+// Reactive state for scroll animations
+const state = reactive({
+  hurdlesScrollWidth: 0,
+  solutionsScrollWidth: 0,
+  elements: {
+    hurdlesSection: null as HTMLElement | null,
+    solutionsSection: null as HTMLElement | null,
+    hurdlesContainer: null as HTMLElement | null,
+    solutionsContainer: null as HTMLElement | null
+  }
+});
+
+// Extract scroll animation logic to a composable
+const { setupScrollObservers, cleanupScrollObservers } = useScrollAnimation({
+  onScroll: handleScroll,
+  threshold: 0.1
+});
+
+// Calculate scrollable width for a container
+function getScrollableWidth(container: HTMLElement): number {
+  return container.scrollWidth - window.innerWidth + 100; // Adding padding
+}
+
+// Handle scroll events for both sections
+function handleScroll() {
+  handleHurdlesScroll();
+  handleSolutionsScroll();
+}
+
+// Handle hurdles section scroll
+function handleHurdlesScroll() {
+  const { hurdlesSection, hurdlesContainer } = state.elements;
+  
+  if (!document.body.classList.contains('hurdles-active') || !hurdlesSection || !hurdlesContainer) return;
+  
+  const hurdlesRect = hurdlesSection.getBoundingClientRect();
+  const hurdlesProgress = Math.min(1, Math.max(0,
+    -hurdlesRect.top / (hurdlesSection.offsetHeight - window.innerHeight)
+  ));
+
+  // Apply transform to hurdles container (right to left)
+  const hurdlesTransform = hurdlesProgress * state.hurdlesScrollWidth;
+  hurdlesContainer.style.transform = `translateX(-${hurdlesTransform}px)`;
+}
+
+// Handle solutions section scroll
+function handleSolutionsScroll() {
+  const { solutionsSection, solutionsContainer } = state.elements;
+  
+  if (!document.body.classList.contains('solutions-active') || !solutionsSection || !solutionsContainer) return;
+  
+  const solutionsRect = solutionsSection.getBoundingClientRect();
+  const solutionsProgress = Math.min(1, Math.max(0,
+    -solutionsRect.top / (solutionsSection.offsetHeight - window.innerHeight)
+  ));
+
+  // Apply transform to solutions container (reversed direction)
+  const solutionsTransform = (1 - solutionsProgress) * state.solutionsScrollWidth;
+  solutionsContainer.style.transform = `translateX(-${solutionsTransform}px)`;
+}
 
 onMounted(() => {
-  // Elements
-  const hurdlesSection = document.getElementById('hurdlesSection');
-  const solutionsSection = document.getElementById('solutionsSection');
-  const hurdlesContainer = document.getElementById('hurdlesContainer');
-  const solutionsContainer = document.getElementById('solutionsContainer');
-
-  // Calculate total scrollable width for each container
-  const getScrollableWidth = (container: HTMLElement) => {
-    return container.scrollWidth - window.innerWidth + 100; // Adding padding
-  };
-
-  const hurdlesScrollWidth = hurdlesContainer ? getScrollableWidth(hurdlesContainer) : 0;
-  const solutionsScrollWidth = solutionsContainer ? getScrollableWidth(solutionsContainer) : 0;
-
-  // Intersection Observers
-  const hurdlesObserver = new IntersectionObserver((entries) => {
-    const [entry] = entries;
-    if (entry.isIntersecting) {
-      document.body.classList.add('hurdles-active');
-      document.body.classList.remove('solutions-active');
-    } else {
-      document.body.classList.remove('hurdles-active');
+   // Test GSAP
+   const testEl = document.createElement('div');
+  testEl.textContent = 'Test';
+  document.body.appendChild(testEl);
+  gsap.to(testEl, {
+    x: 100,
+    duration: 1,
+    onComplete: () => {
+      console.log('GSAP test animation complete');
+      testEl.remove();
     }
-  }, { threshold: 0.1 });
-
-  const solutionsObserver = new IntersectionObserver((entries) => {
-    const [entry] = entries;
-    if (entry.isIntersecting) {
-      document.body.classList.add('solutions-active');
-      document.body.classList.remove('hurdles-active');
-    } else {
-      document.body.classList.remove('solutions-active');
-    }
-  }, { threshold: 0.1 });
-
-  if (hurdlesSection) {
-    hurdlesObserver.observe(hurdlesSection);
-  }
-  if (solutionsSection) {
-    solutionsObserver.observe(solutionsSection);
-  }
-
-  // Scroll handler
-  const handleScroll = () => {
-    // Handle Hurdles section
-    if (document.body.classList.contains('hurdles-active')) {
-      if (!hurdlesSection) return;
-      const hurdlesRect = hurdlesSection.getBoundingClientRect();
-      const hurdlesProgress = Math.min(1, Math.max(0,
-        -hurdlesRect.top / (hurdlesSection.offsetHeight - window.innerHeight)
-      ));
-
-      // Apply transform to hurdles container (right to left)
-      const hurdlesTransform = hurdlesProgress * hurdlesScrollWidth;
-      if (hurdlesContainer) {
-        hurdlesContainer.style.transform = `translateX(-${hurdlesTransform}px)`;
-      }
-    }
-
-    // Handle Solutions section
-    if (document.body.classList.contains('solutions-active')) {
-      if (!solutionsSection) return;
-      const solutionsRect = solutionsSection.getBoundingClientRect();
-      const solutionsProgress = Math.min(1, Math.max(0,
-        -solutionsRect.top / (solutionsSection.offsetHeight - window.innerHeight)
-      ));
-
-      // Apply transform to solutions container (right to left)
-      // Reverse the direction for solutions to make title card lead
-      const solutionsTransform = (1 - solutionsProgress) * solutionsScrollWidth;
-      if (solutionsContainer) {
-        solutionsContainer.style.transform = `translateX(-${solutionsTransform}px)`;
-      }
-    }
-  };
-
-  window.addEventListener('scroll', handleScroll);
-
-  // Cleanup
-  onUnmounted(() => {
-    window.removeEventListener('scroll', handleScroll);
-    hurdlesObserver.disconnect();
-    solutionsObserver.disconnect();
   });
+  // Get elements
+  state.elements.hurdlesSection = document.getElementById('hurdlesSection');
+  state.elements.solutionsSection = document.getElementById('solutionsSection');
+  state.elements.hurdlesContainer = document.getElementById('hurdlesContainer');
+  state.elements.solutionsContainer = document.getElementById('solutionsContainer');
+
+  // Calculate scrollable widths
+  if (state.elements.hurdlesContainer) {
+    state.hurdlesScrollWidth = getScrollableWidth(state.elements.hurdlesContainer);
+  }
+  
+  if (state.elements.solutionsContainer) {
+    state.solutionsScrollWidth = getScrollableWidth(state.elements.solutionsContainer);
+  }
+
+  // Set up observers and scroll handler
+  setupScrollObservers(state.elements.hurdlesSection, state.elements.solutionsSection);
+  window.addEventListener('scroll', handleScroll);
+  
+  // Initial calculation
+  handleScroll();
+  
+  // Handle window resize
+  window.addEventListener('resize', handleResize);
 });
+
+// Recalculate on window resize
+function handleResize() {
+  if (state.elements.hurdlesContainer) {
+    state.hurdlesScrollWidth = getScrollableWidth(state.elements.hurdlesContainer);
+  }
+  
+  if (state.elements.solutionsContainer) {
+    state.solutionsScrollWidth = getScrollableWidth(state.elements.solutionsContainer);
+  }
+  
+  // Update transforms
+  handleScroll();
+}
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll);
+  window.removeEventListener('resize', handleResize);
+  cleanupScrollObservers();
+});
+
+// Optional handler for word effect completion
+function handleWordEffectComplete() {
+  console.log('Word effects completed!');
+}
 </script>
 
-<style lang="scss" scoped>
-// 
+<style scoped>
+.keyword {
+  display: inline-block;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  transition: background-image 0.5s ease;
+}
+
+.keyword-frustration {
+  /* Default style before animation */
+}
+
+.keyword-fantastic {
+  /* Default style before animation */
+}
 </style>
