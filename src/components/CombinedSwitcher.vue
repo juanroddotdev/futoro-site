@@ -155,44 +155,56 @@ const updateFade = (fade: boolean) => updateSetting('fade', fade);
 
 <template>
   <div class="combined-switcher">
+    
     <button 
       @click="togglePanel" 
       class="toggle-button"
       :class="{ 'active': isPanelOpen }"
-    >
+      v-show="!isPanelOpen"
+      >
       <svg class="spiral-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path d="M12,1C5.9,1,1,5.9,1,12s4.9,11,11,11s11-4.9,11-11S18.1,1,12,1z M12,21c-5,0-9-4-9-9s4-9,9-9s9,4,9,9S17,21,12,21z" />
         <path d="M12,7c-2.8,0-5,2.2-5,5s2.2,5,5,5s5-2.2,5-5S14.8,7,12,7z M12,15c-1.7,0-3-1.3-3-3s1.3-3,3-3s3,1.3,3,3S13.7,15,12,15z" />
         <path d="M12,11c-0.6,0-1,0.4-1,1s0.4,1,1,1s1-0.4,1-1S12.6,11,12,11z" />
       </svg>
     </button>
-    
     <div class="pill-container" :class="{ 'expanded': isPanelOpen }">
       <button 
-        @click="activateThemePanel" 
-        class="pill-button"
-        :class="{ 'active': activePanel === 'theme' }"
+      @click="activateThemePanel" 
+      class="pill-button"
+      :class="{ 'active': activePanel === 'theme' }"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="8" r="4"/>
-          <circle cx="8" cy="16" r="4"/>
-          <circle cx="16" cy="16" r="4"/>
-        </svg>
-      </button>
-      
-      <button 
-        @click="activateGridPanel" 
-        class="pill-button"
-        :class="{ 'active': activePanel === 'grid' }"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-          <line x1="3" y1="9" x2="21" y2="9"></line>
-          <line x1="3" y1="15" x2="21" y2="15"></line>
-          <line x1="9" y1="3" x2="9" y2="21"></line>
-          <line x1="15" y1="3" x2="15" y2="21"></line>
-        </svg>
-      </button>
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="8" r="4"/>
+        <circle cx="8" cy="16" r="4"/>
+        <circle cx="16" cy="16" r="4"/>
+      </svg>
+    </button>
+    
+    <button 
+    @click="activateGridPanel" 
+    class="pill-button"
+    :class="{ 'active': activePanel === 'grid' }"
+    >
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+      <line x1="3" y1="9" x2="21" y2="9"></line>
+      <line x1="3" y1="15" x2="21" y2="15"></line>
+      <line x1="9" y1="3" x2="9" y2="21"></line>
+      <line x1="15" y1="3" x2="15" y2="21"></line>
+    </svg>
+  </button>
+  <button 
+    @click="togglePanel" 
+    class="toggle-button"
+    :class="{ 'active': isPanelOpen }"
+  >
+    <svg class="spiral-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12,1C5.9,1,1,5.9,1,12s4.9,11,11,11s11-4.9,11-11S18.1,1,12,1z M12,21c-5,0-9-4-9-9s4-9,9-9s9,4,9,9S17,21,12,21z" />
+      <path d="M12,7c-2.8,0-5,2.2-5,5s2.2,5,5,5s5-2.2,5-5S14.8,7,12,7z M12,15c-1.7,0-3-1.3-3-3s1.3-3,3-3s3,1.3,3,3S13.7,15,12,15z" />
+      <path d="M12,11c-0.6,0-1,0.4-1,1s0.4,1,1,1s1-0.4,1-1S12.6,11,12,11z" />
+    </svg>
+  </button>
     </div>
     
     <div class="panel theme-panel" :class="{ 'expanded': isPanelOpen && activePanel === 'theme' }">
@@ -324,9 +336,10 @@ const updateFade = (fade: boolean) => updateSetting('fade', fade);
   overflow: hidden;
   
   &.expanded {
-    width: 110px;
+    width: 140px;
     opacity: 1;
     visibility: visible;
+    align-items: center;
   }
 }
 
