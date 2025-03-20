@@ -11,7 +11,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, nextTick, watch, onUnmounted } from 'vue';
-import { textAnimations } from './textAnimations';
+import { textAnimations, type TextAnimationType } from './textAnimations';
 import gsap from 'gsap';
 
 const props = defineProps({
@@ -32,8 +32,8 @@ const props = defineProps({
     default: false
   },
   animation: {
-    type: String,
-    default: 'fade'
+    type: String as () => TextAnimationType,
+    default: 'fade' as TextAnimationType
   },
   duration: {
     type: Number,
@@ -105,11 +105,13 @@ const initAnimation = async () => {
     });
     
     // Apply animation with options
-    textAnimations.applyAnimation(props.animation, elements, {
+    textAnimations.applyAnimation(props.animation as TextAnimationType, elements, {
       duration: props.duration,
       delay: props.delay,
       ease: props.ease
     });
+    // Add this console log to verify the delay value
+console.log(`Animation started with delay: ${props.delay}`);
     
     hasAnimated.value = true;
   }

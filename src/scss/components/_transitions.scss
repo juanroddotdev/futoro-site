@@ -8,7 +8,6 @@
 // Gradient border mixin with enhanced animation
 @mixin gradient-border {
   position: relative;
-  /* background: rgba(255, 255, 255, 0.05); */
   background: transparent;
   border-radius: 0.75rem;
   isolation: isolate;
@@ -39,64 +38,6 @@
   }
 }
 
-// Card hover effect with gradient border and glow
-// .hover-card {
-//   @include transition-base;
-//   @include gradient-border;
-//   transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-//   
-//   &::after {  // Keep only the glow effect
-//     content: '';
-//     position: absolute;
-//     inset: -2px;
-//     border-radius: 0.75rem;
-//     background: var(--card-gradient-extended);
-//     background-size: 200% auto;
-//     background-position: 0% center;
-//     opacity: 0;
-//     z-index: -1;
-//     transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-//     filter: blur(12px);
-//   }
-// }
-
-// Add a new class for scroll-based animations
-/* .horizontal-struggles {
-  .hover-card {
-    // Override hover effects for horizontal scroll cards
-    &:hover {
-      transform: none;
-      
-      &::after {
-        opacity: 0;
-      }
-      
-      &::before {
-        opacity: 0.5;
-        background-position: 0% center;
-      }
-    }
-    
-    // Apply effects to centered cards instead
-    &.active-center {
-      transform: translateY(-2px) scale(1.05);
-      
-      &::after {
-        opacity: 0.08;
-        background-position: 100% center;
-      }
-      
-      &::before {
-        opacity: 1;
-        background-position: 100% center;
-      }
-      
-      box-shadow: 
-        0 4px 20px -2px rgba(var(--theme-gradient-start-rgb), 0.2),
-        0 8px 32px -4px rgba(var(--theme-gradient-end-rgb), 0.2);
-    }
-  }
-} */
 
 // Make sure we have the gradient variables defined
 :root {
@@ -234,6 +175,13 @@
   border-radius: 0.75rem;
   isolation: isolate;
   transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* &:not(.accordion)::before{
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, 
+                  linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, 
+          linear-gradient(#fff 0 0);
+  } */
   
   // Gradient border
   &::before {

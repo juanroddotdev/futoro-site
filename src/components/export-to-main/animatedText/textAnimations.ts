@@ -6,7 +6,7 @@ gsap.registerPlugin(TextPlugin);
 
 export type TextAnimationType = 
   'split' | 'fade' | 'typewriter' | 'bounce' | 'rotate' | 
-  'glitch' | 'shake' | 'scramble';
+  'glitch' | 'shake' | 'scramble' | 'fadeUp';
 
 export interface TextAnimationOptions {
   duration?: number;
@@ -40,6 +40,12 @@ export const textAnimations = {
   // Fade animation
   fade: (tl: gsap.core.Timeline, elements: HTMLElement[], options?: TextAnimationOptions) => {
     elements.forEach(el => gsap.set(el, { opacity: 0 }));
+    
+    // Apply the delay to the timeline, not individual animations
+    const delay = options?.delay || 0;
+    if (delay > 0) {
+      tl.delay(delay);
+    }
     
     elements.forEach((el, index) => {
       tl.to(el, { 
@@ -212,6 +218,22 @@ export const textAnimations = {
     
     return tl;
   },
+
+  // Fade up animation
+  fadeUp: (tl: gsap.core.Timeline, elements: HTMLElement[], options?: TextAnimationOptions) => {
+    elements.forEach(el => gsap.set(el, { y: 30, opacity: 0 }));
+    
+    elements.forEach((el, index) => {
+      tl.to(el, { 
+        y: 0, 
+        opacity: 1, 
+        duration: options?.duration || 0.7,
+        ease: options?.ease || "power2.out"
+      }, index > 0 ? '<0.15' : undefined);
+    });
+    
+    return tl;
+  },
   
   // Apply animation based on type
   applyAnimation: (
@@ -239,6 +261,8 @@ export const textAnimations = {
         return textAnimations.shake(tl, elements, options);
       case 'scramble':
         return textAnimations.scramble(tl, elements, options);
+      case 'fadeUp':
+        return textAnimations.fadeUp(tl, elements, options);
       default:
         return textAnimations.fade(tl, elements, options);
     }

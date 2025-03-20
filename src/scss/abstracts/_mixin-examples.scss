@@ -1,0 +1,271 @@
+/**
+ * Mixin Examples
+ * This file provides examples of how to use the custom mixins in the project
+ */
+
+// Import the mixins
+@import 'mixins';
+@import 'variables';
+
+// ==========================================================================
+// Responsive Mixins
+// ==========================================================================
+
+/**
+ * @mixin respond-to($breakpoint)
+ * Creates media queries based on predefined breakpoints
+ */
+.responsive-example {
+  width: 100%;
+  
+  // Adjust styles at medium breakpoint
+  @include respond-to('md') {
+    width: 75%;
+  }
+  
+  // Adjust styles at large breakpoint
+  @include respond-to('lg') {
+    width: 50%;
+  }
+}
+
+// ==========================================================================
+// Layout Mixins
+// ==========================================================================
+
+/**
+ * @mixin flex-center
+ * Centers content using flexbox
+ */
+.flex-center-example {
+  @include flex-center;
+  height: 200px;
+}
+
+/**
+ * @mixin flex-between
+ * Spaces content evenly with flexbox
+ */
+.flex-between-example {
+  @include flex-between;
+  height: 100px;
+}
+
+/**
+ * @mixin section-padding
+ * Applies responsive padding to sections
+ */
+.section-padding-example {
+  @include section-padding;
+}
+
+// ==========================================================================
+// Gradient Mixins
+// ==========================================================================
+
+/**
+ * @mixin gradient-text($start-color, $end-color)
+ * Creates gradient text with hover animation
+ */
+.gradient-text-example {
+  @include gradient-text(#ff00cc, #3333ff);
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+/**
+ * @mixin theme-based-gradient-variations($selector)
+ * Applies different gradients based on theme
+ */
+.gradient-cards {
+  .card {
+    @include theme-based-gradient-variations('.card');
+    padding: 20px;
+    border-radius: 8px;
+  }
+}
+
+/**
+ * @mixin gradient-border-base($border-width, $borders, $border-radius)
+ * Creates a gradient border
+ */
+.gradient-border-example {
+  @include gradient-border-base(2px, 'all', 0.75rem);
+  padding: 20px;
+}
+
+/**
+ * @mixin theme-specific-looping-gradients($element, $direction, $property, $position)
+ * Creates theme-specific looping gradients
+ */
+.looping-gradient-example {
+  @include theme-specific-looping-gradients('&', 'to right', 'background-image', 0);
+  height: 100px;
+  border-radius: 8px;
+}
+
+/**
+ * @mixin themed-gradient-border-card($border-radius, $transition-speed, $borders)
+ * Creates a card with themed gradient border and hover effects
+ */
+.gradient-border-card-example {
+  @include themed-gradient-border-card(0.75rem, 0.6s, 'all');
+  padding: 20px;
+  height: 200px;
+}
+
+// ==========================================================================
+// Blur Effect Mixins
+// ==========================================================================
+
+/**
+ * @mixin tapered-blur($blur-amount, $inset, $center-opacity, $mid-opacity, $edge-opacity)
+ * Creates a blur effect that tapers off at the edges
+ */
+
+// Example 1: Basic usage
+.tapered-blur-basic {
+  position: relative;
+  padding: 20px;
+  @include tapered-blur(5px, -20px);
+}
+
+// Example 2: Stronger blur with larger area
+.tapered-blur-strong {
+  position: relative;
+  padding: 20px;
+  @include tapered-blur(10px, -30px);
+}
+
+// Example 3: Subtle blur with smaller area
+.tapered-blur-subtle {
+  position: relative;
+  padding: 20px;
+  @include tapered-blur(3px, -10px);
+}
+
+// Example 4: Asymmetrical blur (more on the bottom)
+.tapered-blur-asymmetric {
+  position: relative;
+  padding: 20px;
+  @include tapered-blur(5px, -10px -20px -40px -20px);
+}
+
+// Example 5: Card with blur effect
+.card-with-blur {
+  position: relative;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 20px;
+  
+  // Apply the blur effect
+  @include tapered-blur(5px, -15px);
+  
+  // Additional styling
+  h3 {
+    margin-top: 0;
+  }
+}
+
+// Example 6: Modal with blur effect
+.modal-with-blur {
+  position: relative;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 30px;
+  
+  // Apply the blur effect
+  @include tapered-blur(8px, -25px);
+  
+  // Additional styling
+  .modal-content {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+// ==========================================================================
+// Playground Mixins
+// ==========================================================================
+
+/**
+ * @mixin playground-responsive($breakpoint)
+ * Responsive mixins for playground components
+ */
+.playground-responsive-example {
+  width: 100%;
+  
+  @include playground-responsive('tablet') {
+    width: 80%;
+  }
+  
+  @include playground-responsive('desktop') {
+    width: 60%;
+  }
+}
+
+/**
+ * @mixin playground-element
+ * Styles for playground elements
+ */
+.playground-element-example {
+  @include playground-element;
+  margin: 20px;
+}
+
+/**
+ * @mixin grid-paper-background($line-color, $line-size, $cell-size)
+ * Creates a grid paper background
+ */
+.grid-paper-example {
+  @include grid-paper-background(rgba(255, 255, 255, 0.1), 1px, 40px);
+  height: 200px;
+}
+
+// ==========================================================================
+// Theme Mixins
+// ==========================================================================
+
+/**
+ * @mixin themed()
+ * Applies styles based on the current theme
+ */
+.themed-example {
+  @include themed() {
+    color: map-get($theme-map, 'primary');
+    background: map-get($theme-map, 'secondary');
+  }
+}
+
+// ==========================================================================
+// Usage Examples in HTML
+// ==========================================================================
+
+/**
+ * Usage in HTML:
+ * 
+ * <div class="card-with-blur">
+ *   <h3>Card Title</h3>
+ *   <p>Card content goes here...</p>
+ * </div>
+ * 
+ * <div class="modal-with-blur">
+ *   <div class="modal-content">
+ *     <h2>Modal Title</h2>
+ *     <p>Modal content goes here...</p>
+ *   </div>
+ * </div>
+ * 
+ * <div class="gradient-text-example">
+ *   Gradient Text Example
+ * </div>
+ * 
+ * <div class="gradient-border-card-example">
+ *   <h3>Card with Gradient Border</h3>
+ *   <p>Hover to see the effect</p>
+ * </div>
+ * 
+ * <div class="grid-paper-example">
+ *   Grid Paper Background
+ * </div>
+ */
