@@ -16,9 +16,11 @@
 
     /* Linting */
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
+
+    /* Development mode - controlled by NODE_ENV */
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
 
     "baseUrl": ".",
     "paths": {

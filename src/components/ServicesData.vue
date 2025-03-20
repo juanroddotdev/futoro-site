@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { services } from '@/data/services';
-import ScrollAccordionVanilla from '@/components/export-to-main/scrollAccordion/ScrollAccordionVanilla.vue';
+import ScrollAccordionVanilla from '@/components/ui/ScrollAccordionVanilla.vue';
 </script>
 
 <template>

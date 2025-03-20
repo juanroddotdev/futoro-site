@@ -73,7 +73,7 @@ onMounted(() => {
 
             <h3 class="timeline-title text-lg font-semibold mb-4 theme-text--gradient"
                 :class="index % 2 === 0 ? 'gradient-normal' : 'gradient-reverse'"
-            >{{ step.step }}</h3>
+            >{{ step.step || step.title }}</h3>
             <ul class="space-y-2" :class="index % 2 === 1 ? 'pl-4' : 'pl-4'">
               <li v-for="(bullet, bulletIndex) in step.description" 
                   :key="bulletIndex"

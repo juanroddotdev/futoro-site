@@ -1,31 +1,20 @@
 @import '../abstracts/variables';
 @import '../abstracts/mixins';
 
-@mixin tapered-blur($blur-radius, $inset) {
-  // Create a pseudo-element with tapered blur effect
-  &::before {
-    content: '';
-    position: absolute;
-    inset: $inset; // Extend beyond the container
-    backdrop-filter: blur($blur-radius);
-    z-index: -1;
-    mask-image: radial-gradient(ellipse at center,
-        rgba(0, 0, 0, 1) 40%,
-        rgba(0, 0, 0, 0.8) 60%,
-        rgba(0, 0, 0, 0) 80%);
-    -webkit-mask-image: radial-gradient(ellipse at center,
-        rgba(0, 0, 0, 1) 40%,
-        rgba(0, 0, 0, 0.8) 60%,
-        rgba(0, 0, 0, 0) 80%);
-  }
-}
+// Hurdles and Solutions Component Styles
 
 .progressive-reveal {
   position: relative;
+  margin-top: 200px;
 
   .reveal-section {
     position: relative;
     height: 300vh; // Tall enough for scrolling
+       // Add a small top margin to the solutions section to prevent the jump
+       &.solutions-section {
+        margin-top: -20vh; // Negative margin to create overlap
+        padding-top: 20vh; // Padding to compensate for the negative margin
+      }
 
     .sticky-container {
       position: sticky;
@@ -36,19 +25,26 @@
       display: flex;
       flex-direction: column;
       padding: 2rem;
+      // Add a transition to smooth out any remaining jumps
+      transition: transform 0.1s ease-out;
 
       .header-container {
         position: absolute;
         z-index: 1;
         padding: 4px 20px;
+        bottom:  220px;
         
         // Use the tapered-blur mixin
         @include tapered-blur(5px, -20px);
 
         &--hurdles {
-          bottom: 110px;
           margin-inline: 0 50px;
           right: 50px;
+        }
+        &--solutions {
+          /* right: 0; */
+          margin-inline: 0 50px;
+          left: 50px;
         }
       }
     }

@@ -120,7 +120,13 @@
 
 /**
  * @mixin tapered-blur($blur-amount, $inset, $center-opacity, $mid-opacity, $edge-opacity)
- * Creates a blur effect that tapers off at the edges
+ * Creates a blur effect that tapers off at the edges using a radial gradient mask
+ * 
+ * @param {Length} $blur-amount - Amount of blur to apply (default: 5px)
+ * @param {Length|List} $inset - How far to extend the blur effect beyond container (default: -20px)
+ * @param {Number} $center-opacity - Opacity at the center of the gradient (default: 1)
+ * @param {Number} $mid-opacity - Opacity at the middle of the gradient (default: 0.8)
+ * @param {Number} $edge-opacity - Opacity at the edge of the gradient (default: 0)
  */
 
 // Example 1: Basic usage
@@ -151,7 +157,14 @@
   @include tapered-blur(5px, -10px -20px -40px -20px);
 }
 
-// Example 5: Card with blur effect
+// Example 5: Custom opacity values for more control
+.tapered-blur-custom-opacity {
+  position: relative;
+  padding: 20px;
+  @include tapered-blur(5px, -15px, 0.9, 0.6, 0.1);
+}
+
+// Example 6: Card with blur effect
 .card-with-blur {
   position: relative;
   background: rgba(255, 255, 255, 0.1);
@@ -167,7 +180,7 @@
   }
 }
 
-// Example 6: Modal with blur effect
+// Example 7: Modal with blur effect
 .modal-with-blur {
   position: relative;
   background: rgba(255, 255, 255, 0.05);
