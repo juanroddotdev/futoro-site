@@ -34,8 +34,12 @@
     @include themed-gradient-border-card(15px, 0.3s, 'top');
     &.hover-card-themed {
       border-radius: 0;
+      &::before {
+        -webkit-mask: none;
+        mask: none;
+      }
       &::after {
-        /* background: transparent; */
+        background: transparent;
       }
     }
     

@@ -359,14 +359,6 @@ const emberDelay = computed(() => {
   transition: background-image 0.5s ease;
 }
 
-.keyword-frustration {
-  /* Default style before animation */
-}
-
-.keyword-fantastic {
-  /* Default style before animation */
-}
-
 .word-effect {
   position: relative; /* Add this to make positioning work */
 }
