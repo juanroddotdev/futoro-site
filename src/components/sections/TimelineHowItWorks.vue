@@ -2,6 +2,7 @@
 import { onMounted, computed } from "vue";
 import { timelineAnimations } from "@/animations/timelineHowItWorks";
 import { steps as defaultSteps, alternativeSteps, type ProcessSteps } from "@/data/howItWorksSteps";
+// import TextureText from '@/components/ui/TextureText.vue';
 
 interface Props {
   useAlternative?: boolean;
@@ -93,8 +94,8 @@ onMounted(() => {
       </div>
     </div>
 
-    <div class="flex justify-center mt-24 relative">
-      <!-- <div class="absolute left-1/2 transform -translate-x-1/2 -top-4 w-1 h-4 timeline-connector"></div> -->
+    <div class="flex justify-center mt-24 relative touch-circle--container">
+    
       <button 
         type="button"
         class="touch-circle-btn btn-round--outline-secondary"
@@ -122,6 +123,7 @@ onMounted(() => {
         <div class="hover-text">Let's Get Started</div>
       </button>
     </div>
+    <!-- <TextureText text="Your Text" /> -->
   </section>
 </template>
 
@@ -181,6 +183,26 @@ onMounted(() => {
     transform: translate(var(--x), var(--y)) translateY(-10px);
   }
 }
+.touch-circle--container {
+  position: relative;
+  border: 1px solid pink;
+  &:hover {
+    .default-text {
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 0;
+    }
+    
+    .floating-text {
+      animation: suckToCenter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; // Increased from 0.4s to 0.8s
+    }
+    
+    .hover-text {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+      transition-delay: 0.4s; // Increased from 0.2s to 0.4s
+    }
+  }
+}
 
 .touch-circle-btn {
   position: relative;
@@ -211,22 +233,22 @@ onMounted(() => {
     transform-origin: center center;
   }
   
-  &:hover {
-    .default-text {
-      transform: translate(-50%, -50%) scale(0);
-      opacity: 0;
-    }
+  // &:hover {
+  //   .default-text {
+  //     transform: translate(-50%, -50%) scale(0);
+  //     opacity: 0;
+  //   }
     
-    .floating-text {
-      animation: suckToCenter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; // Increased from 0.4s to 0.8s
-    }
+  //   .floating-text {
+  //     animation: suckToCenter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; // Increased from 0.4s to 0.8s
+  //   }
     
-    .hover-text {
-      transform: translate(-50%, -50%) scale(1);
-      opacity: 1;
-      transition-delay: 0.4s; // Increased from 0.2s to 0.4s
-    }
-  }
+  //   .hover-text {
+  //     transform: translate(-50%, -50%) scale(1);
+  //     opacity: 1;
+  //     transition-delay: 0.4s; // Increased from 0.2s to 0.4s
+  //   }
+  // }
 }
 
 @keyframes suckToCenter {
