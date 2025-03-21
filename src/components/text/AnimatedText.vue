@@ -97,7 +97,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['animation-complete', 'word-effect-complete']);
+const emit = defineEmits(['animation-complete', 'word-effect-start', 'word-effect-complete', 'animation-start']);
 
 const containerRef = ref<HTMLElement | null>(null);
 const firstPartRef = ref<HTMLElement | null>(null);
@@ -113,12 +113,18 @@ const applyWordEffects = () => {
     return;
   }
   
+  // Emit that word effects are starting
+  emit('word-effect-start');
+  
   // Process each element to find and wrap target words
   const elements = [
     firstPartRef.value,
     secondPartRef.value,
     suffixRef.value
   ].filter(Boolean) as HTMLElement[];
+  
+  // Store original styles for each word element to restore later
+  const originalStyles = new Map();
   
   elements.forEach((element) => {
     if (!element) return;
@@ -131,10 +137,14 @@ const applyWordEffects = () => {
       if (typeof word !== 'string' || !originalText.includes(word)) return;
       
       const effectType = props.wordEffectTypes[wordIndex] || 'highlight';
-      const wordClass = `word-effect word-${effectType} word-index-${wordIndex}`;
+      const effectStyle = props.wordEffectStyles[wordIndex] || {};
+      const gradientClass = effectStyle.gradientClass || 'gradient-text';
+      
+      const wordClass = `word-effect word-${effectType} word-index-${wordIndex} ${gradientClass}`;
+      
       newHTML = newHTML.replace(
         new RegExp(`\\b${word}\\b`, 'g'), // Use word boundary for exact match
-        `<span class="${wordClass}">${word}</span>`
+        `<span class="${wordClass}" data-word-index="${wordIndex}">${word}</span>`
       );
     });
     
@@ -151,13 +161,32 @@ const applyWordEffects = () => {
     return;
   }
   
-  console.log('Found word elements:', wordElements.length); // Debug log
-  
+  // Apply default transition to all word elements for smoother animations
+  wordElements.forEach(el => {
+    // Add a smooth transition with longer duration
+    (el as HTMLElement).style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+  });
+
   // Create animation timeline with the effect delay
   const tl = gsap.timeline({
     delay: props.wordEffectDelay,
     onComplete: () => {
-      console.log('Word effects complete'); // Debug log
+      // Remove custom styles when animation completes
+      wordElements.forEach(el => {
+        const wordIndex = parseInt(el.getAttribute('data-word-index') || '0');
+        const effectStyle = props.wordEffectStyles[wordIndex] || {};
+        
+        // Remove transition along with other custom styles
+        (el as HTMLElement).style.transition = '';
+        
+        if (effectStyle.customStyles) {
+          // Restore original styles
+          Object.keys(effectStyle.customStyles).forEach(prop => {
+            (el as HTMLElement).style[prop as any] = '';
+          });
+        }
+      });
+      
       emit('word-effect-complete');
     }
   });
@@ -166,7 +195,7 @@ const applyWordEffects = () => {
   Array.from(wordElements).forEach((el, index) => {
     const classList = Array.from(el.classList);
     let effectType = 'highlight'; // Default
-    let wordIndex = index;
+    let wordIndex = parseInt(el.getAttribute('data-word-index') || '0');
     
     // Find the effect type from class
     const effectClass = classList.find(cls => 
@@ -179,32 +208,29 @@ const applyWordEffects = () => {
       effectType = effectClass.replace('word-', '');
     }
     
-    // Get the word index from class
-    const indexClass = classList.find(cls => cls.startsWith('word-index-'));
-    if (indexClass) {
-      wordIndex = parseInt(indexClass.replace('word-index-', ''));
-    }
-    
     const effectStyle = props.wordEffectStyles[wordIndex] || {};
     
-    console.log(`Applying ${effectType} effect to word ${wordIndex}`); // Debug log
+    // Apply custom styles if provided
+    if (effectStyle.customStyles) {
+      Object.entries(effectStyle.customStyles).forEach(([prop, value]) => {
+        (el as HTMLElement).style[prop as any] = value as string;
+      });
+    }
     
     // Apply the appropriate effect
     switch (effectType) {
       case 'highlight':
-        applyHighlightEffect(tl, el, effectStyle, wordIndex);
+        applyHighlightEffect(tl, el as HTMLElement, effectStyle, wordIndex);
         break;
       case 'bounce':
-        applyBounceEffect(tl, el, effectStyle, wordIndex);
+        applyBounceEffect(tl, el as HTMLElement, effectStyle, wordIndex);
         break;
       case 'shake':
-        applyShakeEffect(tl, el, effectStyle, wordIndex);
+        applyShakeEffect(tl, el as HTMLElement, effectStyle, wordIndex);
         break;
       case 'squeeze':
-        applySqueezeEffect(tl, el, effectStyle, wordIndex);
+        applySqueezeEffect(tl, el as HTMLElement, effectStyle, wordIndex);
         break;
-      default:
-        console.log(`Unknown effect type: ${effectType}`); // Debug log
     }
   });
   
@@ -213,34 +239,30 @@ const applyWordEffects = () => {
 };
 
 // Individual effect functions
-const applyHighlightEffect = (tl, el, gradient, index) => {
-  const defaultGradient = 'linear-gradient(90deg, #64B5F6, #81C784, #4ECDC4, #7000FF)';
-  const effectGradient = gradient || defaultGradient;
+const applyHighlightEffect = (tl, el, effectStyle, wordIndex) => {
+  const iterations = effectStyle?.iterations || 2;
   
+  // Animate the gradient position back and forth
+  for (let i = 0; i < iterations; i++) {
+    tl.to(el, {
+      backgroundPosition: '100% center',
+      duration: props.wordEffectDuration / (iterations * 2),
+      ease: 'sine.inOut'
+    }, i * props.wordEffectDuration / iterations);
+    
+    tl.to(el, {
+      backgroundPosition: '0% center',
+      duration: props.wordEffectDuration / (iterations * 2),
+      ease: 'sine.inOut'
+    }, (props.wordEffectDuration / (iterations * 2)) + (i * props.wordEffectDuration / iterations));
+  }
+  
+  // Return to original styling but keep the gradient
   tl.to(el, {
-    backgroundImage: effectGradient,
-    backgroundSize: '200% auto',
-    backgroundClip: 'text',
-    webkitBackgroundClip: 'text',
-    color: 'transparent',
+    backgroundPosition: '50% center',
     duration: 0.5,
     ease: 'power2.inOut'
-  }, 0);
-  
-  // Animate gradient position
-  tl.to(el, {
-    backgroundPosition: '100% center',
-    duration: props.wordEffectDuration,
-    ease: 'none'
-  }, 0.5);
-  
-  // Return to original styling
-  tl.to(el, {
-    backgroundImage: '',
-    color: '',
-    duration: 0.5,
-    ease: 'power2.inOut'
-  }, props.wordEffectDuration + 0.5);
+  }, props.wordEffectDuration);
 };
 
 const applyBounceEffect = (tl, el, params, index) => {
@@ -325,65 +347,68 @@ const applySqueezeEffect = (tl, el, params, index) => {
   }, index * 0.1 + 0.3);
 };
 
-const runAnimation = async () => {
+const runAnimation = () => {
+  // Emit that animation is starting
+  emit('animation-start');
+  
   if (!containerRef.value) return;
   
-  await nextTick();
-  
-  if (containerRef.value) {
-    // Add animated class to make it visible if initially hidden
-    if (props.initiallyHidden) {
-      containerRef.value.classList.add('animated');
-    }
-    
-    // Create an array of all elements that should be animated
-    const elements = [
-      firstPartRef.value,
-      secondPartRef.value,
-      suffixRef.value
-    ].filter(Boolean) as HTMLElement[];
-    
-    // Store original text for each element
-    elements.forEach(el => {
-      if (el && !el.getAttribute('data-original-text')) {
-        el.setAttribute('data-original-text', el.textContent || '');
+  nextTick().then(() => {
+    if (containerRef.value) {
+      // Add animated class to make it visible if initially hidden
+      if (props.initiallyHidden) {
+        containerRef.value.classList.add('animated');
       }
-    });
-    
-    // Kill any existing animations
-    elements.forEach(el => {
-      if (el) gsap.killTweensOf(el);
-    });
-    
-    // Create a timeline for the animation
-    const tl = gsap.timeline({
-      defaults: {
-        ease: props.ease,
-        duration: props.duration
-      },
-      delay: props.delay,
-      onComplete: () => {
-        // If word effects are enabled, do that next
-        if (props.wordEffects) {
-          setTimeout(() => {
-            applyWordEffects();
-          }, 100); // Small delay to ensure DOM is ready
-        } else {
-          // Otherwise, just emit completion
-          emit('animation-complete');
+      
+      // Create an array of all elements that should be animated
+      const elements = [
+        firstPartRef.value,
+        secondPartRef.value,
+        suffixRef.value
+      ].filter(Boolean) as HTMLElement[];
+      
+      // Store original text for each element
+      elements.forEach(el => {
+        if (el && !el.getAttribute('data-original-text')) {
+          el.setAttribute('data-original-text', el.textContent || '');
         }
-      }
-    });
-    
-    // Apply animation with options
-    textAnimations.applyAnimation(props.animation as TextAnimationType, elements, {
-      duration: props.duration,
-      delay: props.delay,
-      ease: props.ease
-    });
-    
-    hasAnimated.value = true;
-  }
+      });
+      
+      // Kill any existing animations
+      elements.forEach(el => {
+        if (el) gsap.killTweensOf(el);
+      });
+      
+      // Create a timeline for the animation
+      const tl = gsap.timeline({
+        defaults: {
+          ease: props.ease,
+          duration: props.duration
+        },
+        delay: props.delay,
+        onComplete: () => {
+          // If word effects are enabled, do that next
+          if (props.wordEffects) {
+            setTimeout(() => {
+              applyWordEffects();
+            }, 100); // Small delay to ensure DOM is ready
+          } else {
+            // Otherwise, just emit completion
+            emit('animation-complete');
+          }
+        }
+      });
+      
+      // Apply animation with options
+      textAnimations.applyAnimation(props.animation as TextAnimationType, elements, {
+        duration: props.duration,
+        delay: props.delay,
+        ease: props.ease
+      });
+      
+      hasAnimated.value = true;
+    }
+  });
 };
 
 const setupObserver = () => {
