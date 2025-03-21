@@ -50,7 +50,7 @@
         <!-- Add ember effect for "Frustration" word -->
         <EmberEffect 
           :targetElement="frustrationElement" 
-          effectType="rain"
+          effectType="ember"
           :particleCount="20"
           :duration="2.5"
           :colors="['#ff4500', '#ff7800', '#ffaa33', '#ffcc00']"

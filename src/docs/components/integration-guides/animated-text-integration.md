@@ -1,5 +1,9 @@
 # Text Animation Components Integration Guide
 
+## Overview
+
+The `AnimatedText` component provides dynamic text animations with support for multiple animation types, word-level effects, and highlighting. It's designed to create engaging text transitions and effects with minimal configuration.
+
 ## Files to Copy
 
 1. Copy `textAnimations.ts` to `src/animations/text/textAnimations.ts`
@@ -100,6 +104,37 @@ After registering it globally, you can use it in any component without importing
 | highlightDuration | Number | 2 | Duration of the highlight animation |
 | highlightDelay | Number | 1 | Delay before starting the highlight animation |
 
+## Configuration Object Pattern (New)
+
+Based on the refactoring options, you can now use the configuration object pattern for a cleaner API:
+
+```vue
+<template>
+  <AnimatedText 
+    :content="{
+      firstPart: 'Hello',
+      secondPart: 'World',
+      suffix: '!'
+    }"
+    :animation="{
+      type: 'split',
+      duration: 2,
+      delay: 1,
+      ease: 'power3.out'
+    }"
+    :highlighting="{
+      enabled: true,
+      keywords: ['Hello'],
+      gradients: ['linear-gradient(90deg, #FF4500, #FF7F50, #FFAA33, #FFD700)'],
+      delay: 0.5,
+      duration: 1.5
+    }"
+  />
+</template>
+```
+
+This pattern organizes related props into logical groups, making the component more readable and maintainable.
+
 ## Word Effects
 
 The `AnimatedText` component supports word-level animations through the following props:
@@ -125,34 +160,34 @@ Each effect type accepts different style parameters:
 #### highlight
 ```js
 {
-  gradientClass: 'gradient-theme-fire', // CSS class for gradient (e.g., 'gradient-theme-fire', 'gradient-theme-cool')
-  iterations: 2 // Number of times to animate the gradient (default: 2)
+  gradientClass: 'gradient-theme-fire', // CSS class for gradient
+  iterations: 2 // Number of times to animate the gradient
 }
 ```
 
 #### bounce
 ```js
 {
-  height: 20, // Bounce height in pixels (default: 20)
-  ease: 'elastic.out(1, 0.3)' // GSAP easing function (default: 'elastic.out(1, 0.3)')
+  height: 20, // Bounce height in pixels
+  ease: 'elastic.out(1, 0.3)' // GSAP easing function
 }
 ```
 
 #### shake
 ```js
 {
-  intensity: 5, // Shake intensity in pixels (default: 5)
-  iterations: 2, // Number of shakes (default: 2)
-  ease: 'power2.inOut' // GSAP easing function (default: 'power2.inOut')
+  intensity: 5, // Shake intensity in pixels
+  iterations: 2, // Number of shakes
+  ease: 'power2.inOut' // GSAP easing function
 }
 ```
 
 #### squeeze
 ```js
 {
-  scale: 0.8, // Minimum scale value (default: 0.8)
-  iterations: 1, // Number of squeeze cycles (default: 1)
-  ease: 'power1.inOut' // GSAP easing function (default: 'power1.inOut')
+  scale: 0.8, // Minimum scale value
+  iterations: 1, // Number of squeeze cycles
+  ease: 'power1.inOut' // GSAP easing function
 }
 ```
 
@@ -174,41 +209,6 @@ For advanced use cases, you can add custom CSS properties to any effect through 
   }
 }
 ```
-
-This allows you to apply any CSS property to the word during its animation. Custom styles are applied at the beginning of the animation and removed when the animation completes.
-
-Example with custom styles:
-
-```vue
-<AnimatedText
-  firstPart="Custom Styled"
-  secondPart="Animation"
-  :wordEffects="true"
-  :wordTargets="['Custom', 'Animation']"
-  :wordEffectTypes="['bounce', 'highlight']"
-  :wordEffectStyles="[
-    { 
-      height: 15,
-      ease: 'elastic.out(1, 0.2)',
-      customStyles: {
-        fontWeight: 'bold',
-        letterSpacing: '2px',
-        color: '#FF5500'
-      }
-    },
-    { 
-      gradientClass: 'gradient-theme-cool',
-      iterations: 2,
-      customStyles: {
-        fontStyle: 'italic',
-        textDecoration: 'underline'
-      }
-    }
-  ]"
-/>
-```
-
-> **Note**: Custom styles should be used sparingly as they may conflict with theme styles or affect performance. For most cases, the built-in effect parameters should be sufficient.
 
 ### Example Usage
 
@@ -235,23 +235,6 @@ Example with custom styles:
 />
 ```
 
-### 🚨 Documentation Improvements Needed 🚨
-
-The following improvements should be made to this section:
-
-1. **Add Visual Examples**: Create GIFs/videos showing each effect with different parameters
-2. **Create Interactive Demo**: Develop a simple playground for testing effect combinations
-3. **Add Preset Combinations**: Document 3-5 preset effect combinations that work well together
-4. **Clarify Theme Integration**: Explain how gradient classes relate to the theming system
-5. **Include Performance Notes**: Document performance considerations for multiple effects
-6. **Add Timing Guidance**: Provide optimal timing values for different effect combinations
-7. **Document Accessibility**: Include information about respecting reduced motion preferences
-8. **Add Troubleshooting**: Create a section for common issues and solutions
-9. **Consider API Refactoring**: Evaluate implementing the Configuration Object Pattern
-10. **Document Mobile Behavior**: Add notes about effects on mobile devices
-
-These improvements will make the word effects feature more accessible and easier to implement correctly.
-
 ## Resetting Animations
 
 To reset an animation, change the `resetKey` prop:
@@ -277,3 +260,111 @@ function resetAnimation() {
   <button @click="resetAnimation">Reset</button>
 </template>
 ```
+
+## Events
+
+The component emits the following events:
+
+- `animation-complete`: Fired when the main animation completes
+- `word-effects-complete`: Fired when word-level effects complete
+- `all-animations-complete`: Fired when all animations (main + word effects) complete
+
+## Accessibility
+
+The component respects the user's `prefers-reduced-motion` setting. When this preference is enabled, animations will be simplified or disabled to prevent motion sickness.
+
+## Performance Tips
+
+- Use simpler animations like `fade` or `fadeUp` for frequently animated elements
+- Limit the number of simultaneous animations on a page
+- For word effects, target only a few key words rather than every word
+- Consider using `triggerOnVisible` to only animate elements when they enter the viewport
+
+## Examples
+
+### Hero Section
+
+```vue
+<template>
+  <div class="hero">
+    <AnimatedText
+      firstPart="Transform Your"
+      secondPart="Digital Experience"
+      animation="split"
+      :duration="1.5"
+      :useGradient="true"
+    />
+  </div>
+</template>
+```
+
+### Feature List
+
+```vue
+<template>
+  <div class="features">
+    <AnimatedText
+      firstPart="Key Features"
+      animation="fadeUp"
+      :triggerOnVisible="true"
+    />
+    
+    <div v-for="(feature, index) in features" :key="index" class="feature">
+      <AnimatedText
+        :firstPart="feature.title"
+        animation="slideInLeft"
+        :delay="index * 0.2"
+        :triggerOnVisible="true"
+      />
+    </div>
+  </div>
+</template>
+```
+
+### Interactive Example
+
+```vue
+<template>
+  <div class="interactive-demo">
+    <div class="controls">
+      <select v-model="selectedAnimation">
+        <option v-for="anim in animations" :key="anim" :value="anim">
+          {{ anim }}
+        </option>
+      </select>
+      <button @click="resetKey++">Reset Animation</button>
+    </div>
+    
+    <AnimatedText
+      firstPart="This is an"
+      secondPart="interactive demo"
+      :animation="selectedAnimation"
+      :resetKey="resetKey"
+      @animation-complete="animationCompleted = true"
+    />
+    
+    <div v-if="animationCompleted" class="completion-message">
+      Animation completed!
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+
+const animations = [
+  'fade', 'split', 'typewriter', 'bounce', 'rotate', 
+  'glitch', 'shake', 'scramble', 'fadeUp', 
+  'slideInLeft', 'slideInRight'
+];
+const selectedAnimation = ref('fade');
+const resetKey = ref(0);
+const animationCompleted = ref(false);
+
+watch(resetKey, () => {
+  animationCompleted.value = false;
+});
+</script>
+```
+
+
