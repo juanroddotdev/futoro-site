@@ -1,62 +1,32 @@
 <template>
   <div class="progressive-reveal overflow-visible"> <!-- Ensure overflow is visible -->
-
     <WebsiteSolutionsHeader />
 
     <!-- Hurdles Section -->
-    <section class="reveal-section hurdles-section" id="hurdlesSection">
-      <div class="sticky-container">
-        <div class="header-container header-container--hurdles">
-          <AnimatedText 
-            class="section-title gradient-text"
-            firstPart="Common Hurdles"  
-            animation="slideInRight"
-            :useGradient="true" :duration="3" :initiallyHidden="true"
-          />
-          
-        </div>
-        <div class="cards-container" id="hurdlesContainer">
-          <div class="card title-card">
-            <!-- placeholder card -->
-          </div>
-          <div class="card struggle-card group hover-card-themed p-6 relative overflow-hidden"
-            v-for="struggle in struggles" :key="`hurdle-${struggle.id}`">
-            <div class="relative z-10">
-              <h3 class="text-md font-semibold gradient-text mb-3">{{ struggle.title }}</h3>
-              <p class="theme-text--neutral">{{ struggle.description }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+    <ScrollableCardsSection
+      sectionId="hurdlesSection"
+      containerId="hurdlesContainer"
+      title="Common Hurdles"
+      :items="struggles"
+      sectionClass="hurdles-section"
+      cardClass="struggle-card"
+      headerContainerClass="header-container--hurdles"
+      titleAnimation="slideInRight"
+      :reverseLayout="false"
+    />
 
     <!-- Solutions Section -->
-    <section class="reveal-section solutions-section" id="solutionsSection">
-      <div class="sticky-container">
-        <div class="header-container header-container--solutions">
-          <AnimatedText 
-            class="section-title gradient-text"
-            firstPart="Clear Solutions"  
-            animation="slideInLeft"
-            :useGradient="true" :duration="3" :initiallyHidden="true"
-          />
-          <!-- <h2 class="section-title gradient-text">Clear Solutions</h2> -->
-        </div>
-        <div class="cards-container" id="solutionsContainer">
-          <div class="card solution-card group hover-card-themed p-6 relative overflow-hidden"
-            v-for="solution in reversedSolutions" :key="`solution-${solution.id}`">
-            <div class="relative z-10">
-              <h3 class="text-md font-semibold gradient-text mb-3">{{ solution.title }}</h3>
-              <p class="theme-text--neutral">{{ solution.description }}</p>
-            </div>
-          </div>
-          <!-- Title card moved to the beginning -->
-          <div class="card title-card">
-            <!-- placeholder card -->
-          </div>
-        </div>
-      </div>
-    </section>
+    <ScrollableCardsSection
+      sectionId="solutionsSection"
+      containerId="solutionsContainer"
+      title="Clear Solutions"
+      :items="reversedSolutions"
+      sectionClass="solutions-section"
+      cardClass="solution-card"
+      headerContainerClass="header-container--solutions"
+      titleAnimation="slideInLeft"
+      :reverseLayout="true"
+    />
   </div>
 </template>
 
@@ -66,6 +36,7 @@ import { struggles, solutions } from '@/data/strugglesAndSolutions';
 import { useScrollAnimation } from '@/composables/useScrollAnimation';
 import gsap from 'gsap';
 import WebsiteSolutionsHeader from '@/components/sections/WebsiteSolutionsHeader.vue';
+import ScrollableCardsSection from '@/components/sections/ScrollableCardsSection.vue';
 
 const documentBody = ref(document.body);
 
@@ -146,6 +117,7 @@ onMounted(() => {
       testEl.remove();
     }
   });
+  
   // Get elements
   state.elements.hurdlesSection = document.getElementById('hurdlesSection');
   state.elements.solutionsSection = document.getElementById('solutionsSection');
@@ -191,8 +163,6 @@ onUnmounted(() => {
   window.removeEventListener('resize', handleResize);
   cleanupScrollObservers();
 });
-
-
 </script>
 
 <style scoped>
