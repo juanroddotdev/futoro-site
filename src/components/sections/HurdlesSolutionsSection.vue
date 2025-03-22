@@ -1,68 +1,8 @@
 <template>
   <div class="progressive-reveal overflow-visible"> <!-- Ensure overflow is visible -->
 
-    <div class="py-20">
-      <AnimatedText class="text-3xl font-bold text-center gradient-text my-10" firstPart="Website Solutions"
-      animation="fadeUp" :useGradient="true" :duration="3" :initiallyHidden="true" />
-      <div class="relative">
-        <AnimatedText 
-          ref="splitTextRef"
-          class="text-3xl font-bold text-center gradient-text" 
-          firstPart="From Frustration"
-          secondPart="To Fantastic" 
-          animation="split" 
-          :useGradient="true" 
-          :delay="3" 
-          :duration="3"
-          :initiallyHidden="true"
-          :wordEffects="true"
-          :wordTargets="['Frustration', 'Fantastic']"
-          :wordEffectTypes="['highlight', 'highlight']"
-          :wordEffectStyles="[
-            { 
-              gradientClass: 'gradient-theme-fire',
-              iterations: 3,
-              customStyles: {
-                transform: 'scale(1.05)',
-                display: 'inline-block',
-                position: 'relative',
-                transition: 'all 1s cubic-bezier(0.34, 1.56, 0.64, 1)'
-              }
-            },
-            { 
-              gradientClass: 'gradient-theme-cool',
-              iterations: 3,
-              customStyles: {
-                transform: 'scale(1.05)',
-                display: 'inline-block',
-                position: 'relative',
-                transition: 'all 1s cubic-bezier(0.34, 1.56, 0.64, 1)'
-              }
-            }
-          ]"
-          :wordEffectDuration="2"
-          :wordEffectDelay=".3"
-          @animation-start="handleAnimationStart"
-          @word-effect-start="handleWordEffectStart"
-          @word-effect-complete="handleWordEffectComplete"
-        />
-        
-        <!-- Add ember effect for "Frustration" word -->
-        <EmberEffect 
-          :targetElement="frustrationElement" 
-          effectType="ember"
-          :particleCount="20"
-          :duration="2.5"
-          :colors="['#ff4500', '#ff7800', '#ffaa33', '#ffcc00']"
-          :relativeToParent="true"
-          :startDelay="emberDelay"
-          :active="frustrationElement !== null"
-          @ember-start="handleEmberStart"
-        />
-        <!-- Add ember effect that's always running but initially invisible -->
-  
-      </div>
-    </div>
+    <WebsiteSolutionsHeader />
+
     <!-- Hurdles Section -->
     <section class="reveal-section hurdles-section" id="hurdlesSection">
       <div class="sticky-container">
@@ -121,28 +61,16 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, computed, ref, reactive, nextTick } from 'vue';
+import { onMounted, onUnmounted, computed, ref, reactive } from 'vue';
 import { struggles, solutions } from '@/data/strugglesAndSolutions';
 import { useScrollAnimation } from '@/composables/useScrollAnimation';
 import gsap from 'gsap';
-import EmberEffect from '@/components/effects/EmberEffect.vue';
+import WebsiteSolutionsHeader from '@/components/sections/WebsiteSolutionsHeader.vue';
 
 const documentBody = ref(document.body);
 
 // Computed property to reverse the solutions array
 const reversedSolutions = computed(() => [...solutions].reverse());
-
-// Reference to the split text component
-const splitTextRef = ref<{ $el: HTMLElement } | null>(null);
-const frustrationElement = ref<HTMLElement | null>(null);
-
-// Add a flag to track if animation has started
-const animationStarted = ref(false);
-
-// Add debug refs to track timing
-const animationStartTime = ref<number | null>(null);
-const wordEffectStartTime = ref<number | null>(null);
-const emberStartTime = ref<number | null>(null);
 
 // Reactive state for scroll animations
 const state = reactive({
@@ -206,8 +134,8 @@ function handleSolutionsScroll() {
 }
 
 onMounted(() => {
-   // Test GSAP
-   const testEl = document.createElement('div');
+  // Test GSAP
+  const testEl = document.createElement('div');
   testEl.textContent = 'Test';
   document.body.appendChild(testEl);
   gsap.to(testEl, {
@@ -264,90 +192,7 @@ onUnmounted(() => {
   cleanupScrollObservers();
 });
 
-// Handle word effect complete event
-const handleWordEffectComplete = () => {
-  nextTick(() => {
-    // Find the "Frustration" word element after effects are applied
-    const wordElements = document.querySelectorAll('.word-effect');
-    wordElements.forEach(el => {
-      if (el.textContent === 'Frustration') {
-        frustrationElement.value = el as HTMLElement;
-      }
-    });
-  });
-};
 
-// Add a new handler for animation start
-const handleAnimationStart = () => {
-  animationStarted.value = true;
-  animationStartTime.value = Date.now();
-  console.log('Animation started at:', new Date().toISOString());
-  
-  // Find the "Frustration" word element immediately
-  nextTick(() => {
-    const firstPartElement = splitTextRef.value?.$el.querySelector('.first-part');
-    if (firstPartElement) {
-      const wordElements = firstPartElement.querySelectorAll('span');
-      wordElements.forEach(el => {
-        if (el.textContent === 'Frustration') {
-          frustrationElement.value = el as HTMLElement;
-        }
-      });
-    }
-  });
-};
-
-// Add a handler for word effect start
-const handleWordEffectStart = () => {
-  wordEffectStartTime.value = Date.now();
-  console.log('Word effect started at:', new Date().toISOString());
-  console.log('Time between animation and word effect:', 
-    (wordEffectStartTime.value - (animationStartTime.value || 0)) / 1000, 'seconds');
-    
-  // Find the "Frustration" word element immediately when word effect starts
-  nextTick(() => {
-    const firstPartElement = splitTextRef.value?.$el.querySelector('.first-part');
-    if (firstPartElement) {
-      // Try to find the word-effect element first
-      let wordElements = firstPartElement.querySelectorAll('.word-effect');
-      
-      // If no word-effect elements yet, look for any span containing "Frustration"
-      if (wordElements.length === 0) {
-        wordElements = firstPartElement.querySelectorAll('span');
-      }
-      
-      wordElements.forEach(el => {
-        if (el.textContent === 'Frustration') {
-          console.log('Found frustration element at:', new Date().toISOString());
-          frustrationElement.value = el as HTMLElement;
-          console.log('Set frustrationElement.value at:', new Date().toISOString());
-        }
-      });
-    }
-  });
-};
-
-// Add a handler for ember effect start
-const handleEmberStart = () => {
-  emberStartTime.value = Date.now();
-  console.log('Ember effect started at:', new Date().toISOString());
-  
-  if (animationStartTime.value) {
-    console.log('Time between animation and ember start:', 
-      (emberStartTime.value - animationStartTime.value) / 1000, 'seconds');
-  }
-  
-  if (wordEffectStartTime.value) {
-    console.log('Time between word effect and ember start:', 
-      (emberStartTime.value - wordEffectStartTime.value) / 1000, 'seconds');
-  }
-};
-
-// Update the emberDelay computed property to use a fixed value that matches the word effect
-const emberDelay = computed(() => {
-  // Small delay after word effect for visual separation
-  return 0.1;
-});
 </script>
 
 <style scoped>
