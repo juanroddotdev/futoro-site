@@ -31,62 +31,62 @@ const props = withDefaults(defineProps<Props>(), {
 });
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 .chat-section {
-  margin-bottom: 2rem;
-  
-  &__title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    
-    &.gradient-text {
-      background: linear-gradient(90deg, #3498db, #8e44ad);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-  }
+  padding: 1rem;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.chat-section__title {
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  font-weight: 600;
 }
 
 .narrative-steps {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
 }
 
 .message {
-  position: relative;
+  max-width: 80%;
   padding: 0.75rem 1rem;
   border-radius: 1rem;
-  max-width: 80%;
-  line-height: 1.4;
-  
-  &__time {
-    display: block;
-    font-size: 0.7rem;
-    opacity: 0.7;
-    margin-top: 0.25rem;
-    text-align: right;
-  }
-  
-  &--sent {
-    align-self: flex-end;
-    background-color: #dcf8c6;
-    border-bottom-right-radius: 0.25rem;
-  }
-  
-  &--received {
-    align-self: flex-start;
-    background-color: #ffffff;
-    border-bottom-left-radius: 0.25rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  }
+  margin-bottom: 0.75rem;
+  position: relative;
+  word-break: break-word;
+  opacity: 1; /* Ensure messages are visible by default */
+  transform: translateY(0); /* Reset any transform */
+}
+
+.message--sent {
+  align-self: flex-end;
+  background-color: #0084ff;
+  color: white;
+  border-bottom-right-radius: 0.25rem;
+}
+
+.message--received {
+  align-self: flex-start;
+  background-color: #f1f0f0;
+  color: #333;
+  border-bottom-left-radius: 0.25rem;
 }
 
 .client-indicator {
+  display: block;
+  font-size: 0.75rem;
+  margin-bottom: 0.25rem;
   font-weight: 600;
-  color: #3498db;
-  margin-right: 0.5rem;
-  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.message__time {
+  display: block;
+  font-size: 0.7rem;
+  margin-top: 0.25rem;
+  opacity: 0.7;
+  text-align: right;
 }
 </style>

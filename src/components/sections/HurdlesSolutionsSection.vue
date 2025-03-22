@@ -1,13 +1,14 @@
 <template>
   <div class="progressive-reveal overflow-visible">
     <!-- First ClientConversationSection before the header -->
-    <ClientConversationSection 
+     <SimpleScrollChatDemo />
+    <!-- <ClientConversationSection 
       conversationType="vision" 
       sectionTitle="From Vision to Reality"
       sectionId="vision-intro"
       tiltDirection="left"
-      sectionHeight="150vh"
-    />
+      sectionHeight="250vh"
+    /> -->
 
     <!-- Use the extracted component -->
     <FrustrationToFantasticHeader />
@@ -102,6 +103,8 @@ import { struggles, solutions } from '@/data/strugglesAndSolutions';
 import { useScrollAnimation } from '@/composables/useScrollAnimation';
 import FrustrationToFantasticHeader from '@/components/sections/FrustrationToFantasticHeader.vue';
 import ClientConversationSection from '@/components/sections/ClientConversationSection.vue';
+// import SimpleScrollChat from '../scroll/SimpleScrollChat.vue';
+import SimpleScrollChatDemo from '../scroll/SimpleScrollChatDemo.vue';
 
 // Computed property to reverse the solutions array
 const reversedSolutions = computed(() => [...solutions].reverse());
