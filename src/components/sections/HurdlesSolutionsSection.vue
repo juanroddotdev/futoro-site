@@ -1,14 +1,25 @@
 <template>
   <div class="progressive-reveal overflow-visible">
     <!-- First ClientConversationSection before the header -->
+    <!-- <PhoneViewportMask 
+        :width="width"
+        :height="height"
+        :borderRadius="borderRadius"
+        :notchWidth="notchWidth"
+        :notchHeight="notchHeight"
+        :opacity="opacity"
+        :blur="blur"
+        :animated="animated"
+      >
      <SimpleScrollChatDemo />
-    <!-- <ClientConversationSection 
+     </PhoneViewportMask> -->
+    <ClientConversationSection 
       conversationType="vision" 
       sectionTitle="From Vision to Reality"
       sectionId="vision-intro"
       tiltDirection="left"
       sectionHeight="250vh"
-    /> -->
+    />
 
     <!-- Use the extracted component -->
     <FrustrationToFantasticHeader />
@@ -105,6 +116,16 @@ import FrustrationToFantasticHeader from '@/components/sections/FrustrationToFan
 import ClientConversationSection from '@/components/sections/ClientConversationSection.vue';
 // import SimpleScrollChat from '../scroll/SimpleScrollChat.vue';
 import SimpleScrollChatDemo from '../scroll/SimpleScrollChatDemo.vue';
+import PhoneViewportMask from '@/components/ui/PhoneViewportMask.vue';
+
+const width = ref(320);
+const height = ref(650);
+const borderRadius = ref(30);
+const notchWidth = ref(80);
+const notchHeight = ref(15);
+const opacity = ref(0.8);
+const blur = ref(0);
+const animated = ref(true);
 
 // Computed property to reverse the solutions array
 const reversedSolutions = computed(() => [...solutions].reverse());

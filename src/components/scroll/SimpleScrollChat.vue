@@ -1,5 +1,5 @@
 <template>
-  <section :id="sectionId" ref="sectionRef" class="scroll-chat-section">
+  <section :id="sectionId" ref="sectionRef" class="scroll-chat-section debug">
     <div class="messages-list" ref="messagesRef">
       <div 
         v-for="(message, index) in messages" 
