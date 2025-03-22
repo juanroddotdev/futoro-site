@@ -1,25 +1,9 @@
 <template>
-  <div class="progressive-reveal overflow-visible">
-    <!-- First ClientConversationSection before the header -->
-    <ClientConversationSection 
-      conversationType="vision" 
-      sectionTitle="From Vision to Reality"
-      sectionId="vision-intro"
-      tiltDirection="left"
-      sectionHeight="150vh"
-    />
+  <div class="progressive-reveal overflow-visible"> <!-- Ensure overflow is visible -->
+    <ClientConversationSection />
 
     <!-- Use the extracted component -->
     <FrustrationToFantasticHeader />
-
-    <!-- Second ClientConversationSection after the header -->
-    <!-- <ClientConversationSection 
-      conversationType="frustration" 
-      sectionTitle="Common Frustrations"
-      sectionId="frustration-intro"
-      tiltDirection="right"
-      sectionHeight="150vh"
-    /> -->
 
     <!-- Hurdles Section -->
     <section class="reveal-section hurdles-section" id="hurdlesSection">
@@ -48,15 +32,6 @@
       </div>
     </section>
 
-    <!-- Third ClientConversationSection after hurdles section -->
-    <!-- <ClientConversationSection 
-      conversationType="approach" 
-      sectionTitle="A Personal Approach"
-      sectionId="approach-intro"
-      tiltDirection="left"
-      sectionHeight="150vh"
-    /> -->
-
     <!-- Solutions Section -->
     <section class="reveal-section solutions-section" id="solutionsSection">
       <div class="sticky-container">
@@ -84,15 +59,6 @@
         </div>
       </div>
     </section>
-
-    <!-- Fourth ClientConversationSection after solutions section -->
-    <!-- <ClientConversationSection 
-      conversationType="process" 
-      sectionTitle="Our Collaboration Process"
-      sectionId="process-intro"
-      tiltDirection="right"
-      sectionHeight="150vh"
-    /> -->
   </div>
 </template>
 
