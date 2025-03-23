@@ -63,9 +63,6 @@ const handleThemeChange = (newTheme: string) => {
           <HeroSection />
 
         </GridPaperOverlay>
-        <FloatingPhone :tilt-x="-15" :tilt-y="25">
-  <!-- Any content you want to display inside the phone -->
-</FloatingPhone>
         <HurdlesSolutionsSection />
         <ServicesSection />
         <TimelineHowItWorks />

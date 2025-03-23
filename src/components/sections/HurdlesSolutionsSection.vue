@@ -1,11 +1,15 @@
 <template>
   <div class="progressive-reveal overflow-visible">
     <!-- First ClientConversationSection before the header -->
-
-    <PhoneConversationPushUp 
+    <PhoneConversationPushUpFloating 
       :messages="convertStepsToMessages(getVisionToRealitySteps())" 
       section-id="vision"
-      :show-typing-for="[0, 1]" />
+      :show-typing-for="[0, 1]"
+    />
+    <!-- <PhoneConversationPushUp 
+      :messages="convertStepsToMessages(getVisionToRealitySteps())" 
+      section-id="vision"
+      :show-typing-for="[0, 1]" /> -->
 
     <!-- Use the extracted component -->
     <FrustrationToFantasticHeader />
@@ -91,7 +95,8 @@ import { onMounted, onUnmounted, computed, ref, reactive } from 'vue';
 import { struggles, solutions } from '@/data/strugglesAndSolutions';
 import { useScrollAnimation } from '@/composables/useScrollAnimation';
 import FrustrationToFantasticHeader from '@/components/sections/FrustrationToFantasticHeader.vue';
-import PhoneConversationPushUp from '@/components/PhoneConversationPushUp.vue';
+// import PhoneConversationPushUp from '@/components/PhoneConversationPushUp.vue';
+import PhoneConversationPushUpFloating from '@/components/PhoneConversationPushUpFloating.vue';
 import {
   convertStepsToMessages,
   getVisionToRealitySteps,
