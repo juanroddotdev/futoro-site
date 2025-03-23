@@ -10,23 +10,30 @@
           <div class="debug-marker bottom">Bottom of messages area</div>
           
           <div class="messages-wrapper">
-            <div
-              v-for="(message, index) in messages"
-              :key="index"
-              :class="[
-                'message',
-                message.type === 'sent' || message.type === 'step' ? 'sent' : 'received',
-                `message-${index}`,
-                index === 0 ? 'first-message' : ''
-              ]"
-            >
-              <div class="message-content">
-                {{ message.text }}
+            <template v-for="(message, index) in messages" :key="index">
+              <!-- Optional typing indicator -->
+              <TypingIndicator 
+                v-if="showTypingFor.includes(index)"
+                :is-sent="message.type === 'sent' || message.type === 'step'"
+                :class="`typing-indicator-${index}`"
+              />
+              
+              <div
+                :class="[
+                  'message',
+                  message.type === 'sent' || message.type === 'step' ? 'sent' : 'received',
+                  `message-${index}`,
+                  index === 0 ? 'first-message' : ''
+                ]"
+              >
+                <div class="message-content">
+                  {{ message.text }}
+                </div>
+                <div v-if="message.time" class="message-time">
+                  {{ message.time }}
+                </div>
               </div>
-              <div v-if="message.time" class="message-time">
-                {{ message.time }}
-              </div>
-            </div>
+            </template>
           </div>
         </div>
         <div class="message-input-container">
@@ -58,15 +65,20 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 import type { ChatMessage } from '../data/chatSections';
+import TypingIndicator from './TypingIndicator.vue';
 
 gsap.registerPlugin(ScrollTrigger);
 
 interface Props {
   messages: ChatMessage[];
   sectionId: string;
+  showTypingFor?: number[]; // Array of message indices that should show typing
 }
 
 const props = defineProps<Props>();
+
+// Default to showing typing for all messages if not specified
+const showTypingFor = props.showTypingFor ?? props.messages.map((_, i) => i);
 
 const containerRef = ref<HTMLElement | null>(null);
 const phoneRef = ref<HTMLElement | null>(null);
@@ -80,24 +92,20 @@ onMounted(() => {
 
   if (!phone || !container || !messagesContainer) return;
 
-  // First, set all messages to visible but positioned at the bottom
-  gsap.set('.message', { 
-    opacity: 0,
-    y: 20,
-  });
-
   timeline = gsap.timeline({
     scrollTrigger: {
       trigger: container,
       start: 'top top',
-      end: 'bottom bottom',
+      end: '+=150%', // Increase scroll distance
       pin: phone,
       scrub: 1,
       pinSpacing: true,
       onUpdate: (self) => {
-        if (self.progress > 0.15) { // Start scrolling after messages have appeared
+        // Start scrolling after first message appears
+        if (self.progress > 0.1) {
           const maxScroll = messagesContainer.scrollHeight - messagesContainer.clientHeight;
-          const scrollProgress = (self.progress - 0.15) / 0.7; // Adjust for the initial delay
+          // Adjust the scroll progress calculation
+          const scrollProgress = (self.progress - 0.1) / 0.8; // Use more of the scroll range
           const scrollPosition = maxScroll * Math.min(scrollProgress, 1);
           messagesContainer.scrollTop = scrollPosition;
         }
@@ -105,17 +113,40 @@ onMounted(() => {
     },
   });
 
-  // Animate messages appearing from bottom
+  // Adjust timing of message animations
   props.messages.forEach((_, index) => {
-    timeline.to(
-      `.message-${index}`,
-      { 
-        opacity: 1, 
-        y: 0,
-        duration: 0.3,
-      },
-      index * 0.3
-    );
+    if (showTypingFor.includes(index)) {
+      timeline
+        .fromTo(`.typing-indicator-${index}`,
+          { opacity: 0, y: 10 },
+          { opacity: 1, y: 0, duration: 0.1 }
+        )
+        .to({}, { duration: 0.2 })
+        .to(`.typing-indicator-${index}`, { 
+          opacity: 0,
+          duration: 0.1
+        });
+    }
+    
+    timeline
+      .fromTo(`.message-${index}`,
+        { opacity: 0, y: 10 },
+        { 
+          opacity: 1, 
+          y: 0, 
+          duration: 0.1,
+          onComplete: () => {
+            // Ensure message is in view
+            if (messagesContainer) {
+              const messageEl = messagesContainer.querySelector(`.message-${index}`);
+              if (messageEl) {
+                messageEl.scrollIntoView({ behavior: 'smooth', block: 'end' });
+              }
+            }
+          }
+        }
+      )
+      .to({}, { duration: 0.2 }); // Slightly longer pause between messages
   });
 });
 
@@ -181,11 +212,11 @@ onUnmounted(() => {
 }
 
 .messages-wrapper {
-  margin-top: auto;
+  margin-top: 70%; /* Push messages down */
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  gap: 8px;
+  gap: 12px; /* Increased gap for better readability */
+  min-height: min-content;
 }
 
 .message {
@@ -195,10 +226,10 @@ onUnmounted(() => {
   margin-bottom: 0;
 }
 
-/* Ensure the last message has space before the input */
+/* Add bottom padding to ensure last message is visible */
 .messages-wrapper::after {
   content: '';
-  padding-bottom: 8px;
+  padding-bottom: 20px;
 }
 
 .message-content {

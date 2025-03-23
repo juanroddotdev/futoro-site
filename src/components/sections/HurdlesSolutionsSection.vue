@@ -1,29 +1,11 @@
 <template>
   <div class="progressive-reveal overflow-visible">
     <!-- First ClientConversationSection before the header -->
-    <!-- <PhoneViewportMask 
-        :width="width"
-        :height="height"
-        :borderRadius="borderRadius"
-        :notchWidth="notchWidth"
-        :notchHeight="notchHeight"
-        :opacity="opacity"
-        :blur="blur"
-        :animated="animated"
-      >
-     <SimpleScrollChatDemo />
-     </PhoneViewportMask> -->
-    <!-- <ClientConversationSection 
-      conversationType="vision" 
-      sectionTitle="From Vision to Reality"
-      sectionId="vision-intro"
-      tiltDirection="left"
-      sectionHeight="250vh"
-    /> -->
-    <PhoneConversation
-      :messages="convertStepsToMessages(getVisionToRealitySteps())"
+
+    <PhoneConversationPushUp 
+      :messages="convertStepsToMessages(getVisionToRealitySteps())" 
       section-id="vision"
-    />
+      :show-typing-for="[0, 1]" />
 
     <!-- Use the extracted component -->
     <FrustrationToFantasticHeader />
@@ -41,13 +23,9 @@
     <section class="reveal-section hurdles-section" id="hurdlesSection">
       <div class="sticky-container">
         <div class="header-container header-container--hurdles">
-          <AnimatedText 
-            class="section-title gradient-text"
-            firstPart="Common Hurdles"  
-            animation="slideInRight"
-            :useGradient="true" :duration="3" :initiallyHidden="true"
-          />
-          
+          <AnimatedText class="section-title gradient-text" firstPart="Common Hurdles" animation="slideInRight"
+            :useGradient="true" :duration="3" :initiallyHidden="true" />
+
         </div>
         <div class="cards-container" id="hurdlesContainer">
           <div class="card title-card">
@@ -77,12 +55,8 @@
     <section class="reveal-section solutions-section" id="solutionsSection">
       <div class="sticky-container">
         <div class="header-container header-container--solutions">
-          <AnimatedText 
-            class="section-title gradient-text"
-            firstPart="Clear Solutions"  
-            animation="slideInLeft"
-            :useGradient="true" :duration="3" :initiallyHidden="true"
-          />
+          <AnimatedText class="section-title gradient-text" firstPart="Clear Solutions" animation="slideInLeft"
+            :useGradient="true" :duration="3" :initiallyHidden="true" />
           <!-- <h2 class="section-title gradient-text">Clear Solutions</h2> -->
         </div>
         <div class="cards-container" id="solutionsContainer">
@@ -117,12 +91,8 @@ import { onMounted, onUnmounted, computed, ref, reactive } from 'vue';
 import { struggles, solutions } from '@/data/strugglesAndSolutions';
 import { useScrollAnimation } from '@/composables/useScrollAnimation';
 import FrustrationToFantasticHeader from '@/components/sections/FrustrationToFantasticHeader.vue';
-import ClientConversationSection from '@/components/sections/ClientConversationSection.vue';
-// import SimpleScrollChat from '../scroll/SimpleScrollChat.vue';
-import SimpleScrollChatDemo from '../scroll/SimpleScrollChatDemo.vue';
-import PhoneViewportMask from '@/components/ui/PhoneViewportMask.vue';
-import PhoneConversation from '@/components/PhoneConversation.vue';
-import { 
+import PhoneConversationPushUp from '@/components/PhoneConversationPushUp.vue';
+import {
   convertStepsToMessages,
   getVisionToRealitySteps,
   getCommonFrustrationsSteps,
@@ -130,14 +100,6 @@ import {
   getCollaborationProcessSteps
 } from '@/data/chatSections';
 
-const width = ref(320);
-const height = ref(650);
-const borderRadius = ref(30);
-const notchWidth = ref(80);
-const notchHeight = ref(15);
-const opacity = ref(0.8);
-const blur = ref(0);
-const animated = ref(true);
 
 // Computed property to reverse the solutions array
 const reversedSolutions = computed(() => [...solutions].reverse());
@@ -174,9 +136,9 @@ function handleScroll() {
 // Handle hurdles section scroll
 function handleHurdlesScroll() {
   const { hurdlesSection, hurdlesContainer } = state.elements;
-  
+
   if (!document.body.classList.contains('hurdles-active') || !hurdlesSection || !hurdlesContainer) return;
-  
+
   const hurdlesRect = hurdlesSection.getBoundingClientRect();
   const hurdlesProgress = Math.min(1, Math.max(0,
     -hurdlesRect.top / (hurdlesSection.offsetHeight - window.innerHeight)
@@ -190,9 +152,9 @@ function handleHurdlesScroll() {
 // Handle solutions section scroll
 function handleSolutionsScroll() {
   const { solutionsSection, solutionsContainer } = state.elements;
-  
+
   if (!document.body.classList.contains('solutions-active') || !solutionsSection || !solutionsContainer) return;
-  
+
   const solutionsRect = solutionsSection.getBoundingClientRect();
   const solutionsProgress = Math.min(1, Math.max(0,
     -solutionsRect.top / (solutionsSection.offsetHeight - window.innerHeight)
@@ -214,14 +176,14 @@ onMounted(() => {
   if (state.elements.hurdlesContainer) {
     state.hurdlesScrollWidth = getScrollableWidth(state.elements.hurdlesContainer);
   }
-  
+
   if (state.elements.solutionsContainer) {
     state.solutionsScrollWidth = getScrollableWidth(state.elements.solutionsContainer);
   }
 
   // Set up observers and scroll handler
   setupScrollObservers(state.elements.hurdlesSection, state.elements.solutionsSection);
-  
+
   // Add a manual scroll handler to ensure animations work
   window.addEventListener('scroll', handleScroll);
 });
@@ -242,6 +204,7 @@ onUnmounted(() => {
 }
 
 .word-effect {
-  position: relative; /* Add this to make positioning work */
+  position: relative;
+  /* Add this to make positioning work */
 }
 </style>
