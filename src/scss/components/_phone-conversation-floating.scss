@@ -1,0 +1,163 @@
+@import '../abstracts/variables';
+
+.container {
+  padding: 40px;
+}
+
+.messages-container {
+  height: calc(100% - 60px);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.message-group {
+  position: absolute;
+  bottom: 80px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  will-change: transform;
+  margin-bottom: 16px;
+}
+
+.typing-container {
+  position: absolute;
+  bottom: 80px;
+  left: 20px;
+  right: 20px;
+  opacity: 0;
+}
+
+.message {
+  max-width: 80%;
+  padding-bottom: 8px;
+  
+  &.sent {
+    margin-left: auto;
+    margin-right: 0;
+  }
+  
+  &.received {
+    margin-right: auto;
+    margin-left: 0;
+  }
+  
+  &-content {
+    padding: 12px 16px;
+    border-radius: 20px;
+    font-size: 16px;
+    line-height: 1.4;
+  }
+}
+
+// Theme-specific message styling with gradients
+@each $theme-name, $theme-map in $themes {
+  .theme-#{$theme-name} {
+    .sent .message-content {
+      background: linear-gradient(
+        135deg, 
+        map-get($theme-map, 'accent'),
+        if($theme-name == 'retro-wave',
+           map-get($theme-map, 'highlight'),
+           darken(map-get($theme-map, 'accent'), 10%))
+      );
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+    
+    .received .message-content {
+      background: if($theme-name == 'pastel-future',
+        linear-gradient(135deg, #e5e5ea, darken(#e5e5ea, 10%)),
+        linear-gradient(
+          135deg,
+          map-get($theme-map, 'secondary'),
+          darken(map-get($theme-map, 'secondary'), 10%)
+        )
+      );
+      color: if($theme-name == 'pastel-future', black, white);
+      border-bottom-left-radius: 4px;
+    }
+    
+    .message-input-container {
+      background: rgba(map-get($theme-map, 'background'), 0.9);
+      backdrop-filter: blur(10px);
+    }
+    
+    .input-wrapper {
+      background: if($theme-name == 'pastel-future', 
+                   white, 
+                   rgba(map-get($theme-map, 'background'), 0.6));
+      border: 1px solid rgba(map-get($theme-map, 'neutral'), 0.2);
+    }
+    
+    .message-input {
+      color: if($theme-name == 'pastel-future', black, white);
+    }
+    
+    .placeholder {
+      color: if($theme-name == 'pastel-future', 
+               #8e8e93, 
+               rgba(map-get($theme-map, 'neutral'), 0.7));
+    }
+  }
+}
+
+// Default styling (fallback) with gradients
+.sent .message-content {
+  background: linear-gradient(135deg, #007AFF, darken(#007AFF, 10%));
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.received .message-content {
+  background: linear-gradient(135deg, #e5e5ea, darken(#e5e5ea, 10%));
+  color: black;
+  border-bottom-left-radius: 4px;
+}
+
+.message-input-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 10px 20px;
+  background: rgba(245, 245, 245, 0.9);
+  backdrop-filter: blur(10px);
+}
+
+.input-wrapper {
+  background: white;
+  border-radius: 20px;
+  padding: 8px 15px;
+}
+
+.message-input {
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.placeholder {
+  color: #8e8e93;
+  span.futoro {
+    font-style: italic;
+    font-size: 12px;
+  }
+}
+
+:deep(.typing-indicator) {
+  width: fit-content;
+  opacity: 1 !important;
+  
+  &.sent {
+    margin-left: auto;
+    margin-right: 0;
+  }
+  
+  &.received {
+    margin-right: auto;
+    margin-left: 0;
+  }
+}
