@@ -1,5 +1,9 @@
 <template>
   <div class="progressive-reveal overflow-visible"> <!-- Ensure overflow is visible -->
+    <PhoneSection
+      :messages="getVisionToRealitySteps()" 
+      sectionId="vision"
+      :showTypingFor="[0, 1, 2]" />
     <WebsiteSolutionsHeader />
 
     <!-- Hurdles Section -->
@@ -37,8 +41,14 @@ import { useScrollAnimation } from '@/composables/useScrollAnimation';
 import gsap from 'gsap';
 import WebsiteSolutionsHeader from '@/components/sections/WebsiteSolutionsHeader.vue';
 import ScrollableCardsSection from '@/components/sections/ScrollableCardsSection.vue';
+import PhoneSection from '@/components/PhoneSection.vue';
+import {
+  getVisionToRealitySteps,
+  getCommonFrustrationsSteps,
+  getPersonalApproachSteps,
+  getCollaborationProcessSteps
+} from '@/data/chatSections';
 
-const documentBody = ref(document.body);
 
 // Computed property to reverse the solutions array
 const reversedSolutions = computed(() => [...solutions].reverse());

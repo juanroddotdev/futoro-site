@@ -1,0 +1,196 @@
+.floating-container {
+  perspective: 2000px;
+  padding: clamp(20px, 5vw, 60px);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-phone {
+  position: relative;
+  width: min(375px, 90vw);
+  height: min(812px, 80vh);
+  aspect-ratio: 375 / 812;
+  margin: 0 auto;
+  transform-style: preserve-3d;
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Phone frame/casing */
+.phone-frame {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: #1a1a1a;
+  border-radius: min(52px, 13.8vw);
+  transform-style: preserve-3d;
+  overflow: hidden;
+  
+  /* Bezel shine effect */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.1) 100%
+    );
+    border-radius: min(52px, 13.8vw);
+    z-index: 1;
+  }
+}
+
+/* Side buttons */
+.volume-up,
+.volume-down,
+.power-button {
+  position: absolute;
+  width: min(4px, 1.1vw);
+  border-radius: min(2px, 0.5vw);
+  background: #2a2a2a;
+  z-index: 2;
+}
+
+.volume-up {
+  height: min(40px, 10.6vw);
+  left: min(-2px, -0.5vw);
+  top: min(120px, 32vw);
+}
+
+.volume-down {
+  height: min(40px, 10.6vw);
+  left: min(-2px, -0.5vw);
+  top: min(180px, 48vw);
+}
+
+.power-button {
+  height: min(60px, 16vw);
+  right: min(-2px, -0.5vw);
+  top: min(140px, 37.3vw);
+}
+
+.phone-inner {
+  position: absolute;
+  top: min(12px, 3.2vw);
+  left: min(12px, 3.2vw);
+  right: min(12px, 3.2vw);
+  bottom: min(12px, 3.2vw);
+  background: #f5f5f5;
+  border-radius: min(44px, 11.7vw);
+  overflow: hidden;
+  transform: translateZ(1px);
+  transform-style: preserve-3d;
+}
+
+/* Phone shadow */
+.phone-shadow {
+  position: absolute;
+  width: 90%;
+  height: min(20px, 5.3vw);
+  bottom: min(-50px, -13.3vw);
+  left: 5%;
+  background: rgba(0, 0, 0, 0.2);
+  filter: blur(min(20px, 5.3vw));
+  border-radius: 50%;
+  transform: rotateX(90deg) translateZ(-20px);
+  animation: shadow 6s ease-in-out infinite;
+}
+
+.status-bar {
+  position: relative;
+  height: min(47px, 12.5vw);
+  background: #f5f5f5;
+  z-index: 10;
+  border-top-left-radius: min(44px, 11.7vw);
+  border-top-right-radius: min(44px, 11.7vw);
+}
+
+.notch {
+  position: absolute;
+  width: 50%;
+  height: min(30px, 8vw);
+  background: black;
+  left: 50%;
+  transform: translateX(-50%);
+  border-bottom-left-radius: min(24px, 6.4vw);
+  border-bottom-right-radius: min(24px, 6.4vw);
+}
+
+.notch-content {
+  width: 100%;
+  height: 100%;
+  background: #f5f5f5;
+  margin-top: 1px;
+  border-bottom-left-radius: min(20px, 5.3vw);
+  border-bottom-right-radius: min(20px, 5.3vw);
+}
+
+.status-bar-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: min(14px, 3.7vw) min(20px, 5.3vw);
+  color: black;
+  font-size: min(14px, 3.7vw);
+  font-weight: 600;
+}
+
+.right-items {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.content {
+  height: calc(100% - min(47px, 12.5vw));
+  background: #f5f5f5;
+  position: relative;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: 
+      rotateX(var(--tilt-x)) 
+      rotateY(var(--tilt-y)) 
+      translateZ(0) 
+      translateY(0);
+  }
+  50% {
+    transform: 
+      rotateX(var(--tilt-x-hover)) 
+      rotateY(var(--tilt-y-hover)) 
+      translateZ(30px) 
+      translateY(-15px);
+  }
+}
+
+@keyframes shadow {
+  0%, 100% {
+    transform: rotateX(90deg) translateZ(-20px) scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: rotateX(90deg) translateZ(-20px) scale(0.85);
+    opacity: 0.2;
+  }
+}
+
+/* Media query for very tall screens */
+@media (min-aspect-ratio: 1/1.2) {
+  .floating-phone {
+    height: 80vh;
+    width: calc(80vh * 375 / 812);
+  }
+}
+
+/* Media query for very wide screens */
+@media (min-width: 1400px) {
+  .floating-phone {
+    width: 375px;
+    height: 812px;
+  }
+}

@@ -1,0 +1,115 @@
+@import '../abstracts/variables';
+
+.typing-indicator {
+  max-width: 80%;
+  position: relative;
+  margin-right: auto;
+  
+  &.sent {
+    margin-left: auto;
+    margin-right: 0;
+    display: flex;
+    justify-content: end;
+  }
+  
+  .typing-animation {
+    padding: 8px 12px;
+    border-radius: 16px;
+    background: #e5e5ea;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 40px;
+    
+    span {
+      width: 4px;
+      height: 4px;
+      background: #8e8e93;
+      border-radius: 50%;
+      animation: typing 0.6s infinite;
+      display: inline-block;
+      
+      &:nth-child(2) {
+        animation-delay: 0.1s;
+      }
+      
+      &:nth-child(3) {
+        animation-delay: 0.2s;
+      }
+    }
+  }
+  
+  &.sent .typing-animation {
+    background: #007AFF;
+    
+    span {
+      background: rgba(255, 255, 255, 0.7);
+    }
+  }
+}
+
+@keyframes typing {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+// Theme-specific styling
+@each $theme-name, $theme-map in $themes {
+  .theme-#{$theme-name} .typing-indicator {
+    .typing-animation {
+      // Apply gradient to received typing indicators
+      background: if($theme-name == 'pastel-future',
+                    linear-gradient(
+                      to right,
+                      #e5e5ea 0%,
+                      darken(#e5e5ea, 10%) 100%
+                    ),
+                    linear-gradient(
+                      to right,
+                      map-get($theme-map, 'secondary') 0%,
+                      darken(map-get($theme-map, 'secondary'), 10%) 100%
+                    ));
+      
+      span {
+        background: if($theme-name == 'pastel-future', 
+                     #8e8e93, 
+                     rgba(map-get($theme-map, 'neutral'), 0.7));
+      }
+    }
+    
+    &.sent .typing-animation {
+      // Gradient for sent typing indicators
+      background: linear-gradient(
+        to right,
+        map-get($theme-map, 'accent') 0%,
+        map-get($theme-map, 'secondary') 100%
+      );
+      
+      span {
+        background: rgba(255, 255, 255, 0.7);
+      }
+    }
+  }
+}
+
+// Add animation for gradient to both sent and received typing indicators
+.typing-indicator .typing-animation {
+  background-size: 200% auto;
+  animation: gradient-shift 3s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% center;
+  }
+  50% {
+    background-position: 100% center;
+  }
+  100% {
+    background-position: 0% center;
+  }
+}
