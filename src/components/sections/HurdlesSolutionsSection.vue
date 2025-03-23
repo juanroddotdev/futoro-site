@@ -1,10 +1,22 @@
 <template>
   <div class="progressive-reveal overflow-visible"> <!-- Ensure overflow is visible -->
-    <PhoneSection
-      :messages="getVisionToRealitySteps()" 
+    <!-- <PhoneSection
+      :messages="getInitialConversation()" 
       sectionId="vision"
-      :showTypingFor="[0, 1, 2]" />
+      :showTypingFor="[0, 1]"
+      :tilt-x="8"
+      :tilt-y="-20"
+      position="right"
+    /> -->
     <WebsiteSolutionsHeader />
+    <PhoneSection
+      :messages="getHurdlesIntroduction()" 
+      sectionId="hurdles"
+      :showTypingFor="[0, 1]"
+      :tilt-x="8"
+      :tilt-y="20"
+      position="left"
+    />
 
     <!-- Hurdles Section -->
     <ScrollableCardsSection
@@ -17,6 +29,14 @@
       headerContainerClass="header-container--hurdles"
       titleAnimation="slideInRight"
       :reverseLayout="false"
+    />
+    <PhoneSection
+      :messages="getTransitionToSolutions()" 
+      sectionId="solutions"
+      :showTypingFor="[0, 1]"
+      :tilt-x="8"
+      :tilt-y="-20"
+      position="center"
     />
 
     <!-- Solutions Section -->
@@ -31,6 +51,15 @@
       titleAnimation="slideInLeft"
       :reverseLayout="true"
     />
+    <PhoneSection
+      :messages="getFinalConversation()" 
+      sectionId="final"
+      :showTypingFor="[0, 1]" 
+      :tilt-x="8"
+      :tilt-y="20"
+      position="center"
+    />
+    
   </div>
 </template>
 
@@ -46,7 +75,11 @@ import {
   getVisionToRealitySteps,
   getCommonFrustrationsSteps,
   getPersonalApproachSteps,
-  getCollaborationProcessSteps
+  getCollaborationProcessSteps,
+  getInitialConversation,
+  getHurdlesIntroduction,
+  getTransitionToSolutions,
+  getFinalConversation
 } from '@/data/chatSections';
 
 

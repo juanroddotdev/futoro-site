@@ -1,14 +1,15 @@
 
 import { createApp } from 'vue'
 import './style.scss'
-import App from './App.vue'
-
+import AppWithRouter from './AppWithRouter.vue'
+import router from './router'
 import globalComponents from './plugins/globalComponents'
 
-const app = createApp(App)
+const app = createApp(AppWithRouter)
 
-// Register AnimatedText as a global component
-// Use the global components plugin
+// Register global components
 app.use(globalComponents)
+// Use the router
+app.use(router)
 
 app.mount('#app')

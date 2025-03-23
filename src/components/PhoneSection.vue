@@ -1,9 +1,9 @@
 <template>
-  <div ref="containerRef" class="container" :id="sectionId">
+  <div ref="containerRef" class="container debug" :id="sectionId" :class="position">
     <FloatingPhone 
       ref="floatingPhoneRef"
-      :tilt-x="8"
-      :tilt-y="-20"
+      :tilt-x="tiltX"
+      :tilt-y="tiltY"
     >
       <div ref="messagesRef" class="messages-container">
         <template v-for="(message, idx) in messages" :key="`typing-${idx}`">
@@ -48,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 import TypingIndicator from './TypingIndicator.vue';
@@ -65,9 +65,29 @@ interface Props {
   messages: Message[];
   sectionId: string;
   showTypingFor: number[];
+  tiltX?: number;
+  tiltY?: number;
+  position?: 'left' | 'center' | 'right';
+  pinSettings?: {
+    enabled?: boolean;
+    start?: string;
+    end?: string;
+    pinSpacing?: boolean;
+    anticipatePin?: number;
+  };
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  tiltX: 8,
+  tiltY: -20,
+  position: 'center',
+  pinSettings: () => ({
+    enabled: true,
+    start: 'top top',
+    pinSpacing: true,
+    anticipatePin: 1
+  })
+});
 
 const containerRef = ref<HTMLElement | null>(null);
 const floatingPhoneRef = ref<InstanceType<typeof FloatingPhone> | null>(null);
@@ -75,47 +95,59 @@ const messagesRef = ref<HTMLElement | null>(null);
 
 let timeline: gsap.core.Timeline;
 
+const scrollPosition = ref(0);
+const isVisible = ref(false);
+
 onMounted(() => {
   const container = containerRef.value;
   const floatingPhone = floatingPhoneRef.value?.$el;
 
   if (!floatingPhone || !container) return;
 
-  // Initial state with force3D for better performance
-  gsap.set('.message-group', { 
-    opacity: 0, 
-    y: 0,
-    force3D: true 
-  });
-  gsap.set('.typing-container', { 
-    opacity: 0, 
-    y: 0,
-    force3D: true 
-  });
+  // Reset function to set initial state
+  const resetState = () => {
+    gsap.set('.message-group', { 
+      opacity: 0, 
+      y: 0,
+      force3D: true 
+    });
+    gsap.set('.typing-container', { 
+      opacity: 0, 
+      y: 0,
+      force3D: true 
+    });
+  };
 
+  // Initial reset
+  resetState();
+
+  // Create timeline with ScrollTrigger
   timeline = gsap.timeline({
     scrollTrigger: {
       trigger: container,
-      start: 'top top',
-      end: `+=${props.messages.length * 50}%`,
-      pin: floatingPhone,
+      start: props.pinSettings.start,
+      end: props.pinSettings.end || `+=${props.messages.length * 50}%`,
       scrub: 0.5,
-      pinSpacing: true,
-      anticipatePin: 1,
-      fastScrollEnd: true,
-      preventOverlaps: true,
-      invalidateOnRefresh: true,
-    },
+      // Only pin if enabled
+      pin: props.pinSettings.enabled,
+      pinSpacing: props.pinSettings.enabled ? props.pinSettings.pinSpacing : false,
+      anticipatePin: props.pinSettings.enabled ? props.pinSettings.anticipatePin : 0,
+      onEnter: resetState,
+      onEnterBack: resetState,
+    }
   });
+
+  // Modify selectors to be scoped to this section
+  const sectionSelector = `#${props.sectionId}`;
 
   const MESSAGE_OFFSET = 100;
 
   props.messages.forEach((_, idx) => {
-    const currentGroup = `.message-group-${idx + 1}`;
+    const currentGroup = `${sectionSelector} .message-group-${idx + 1}`;
     if (idx > 0) {
       const previousGroups = props.messages
         .slice(0, idx)
-        .map((_, i) => `.message-group-${i + 1}`);
+        .map((_, i) => `${sectionSelector} .message-group-${i + 1}`);
       
       timeline.to(previousGroups, {
         y: `-=${MESSAGE_OFFSET}`,
@@ -129,7 +161,7 @@ onMounted(() => {
     }
 
     if (props.showTypingFor.includes(idx)) {
-      const typingContainer = `.typing-container-${idx + 1}`;
+      const typingContainer = `${sectionSelector} .typing-container-${idx + 1}`;
       
       timeline
         .to(typingContainer, { 
@@ -145,17 +177,82 @@ onMounted(() => {
         });
     }
 
-    timeline
-      .to(currentGroup, { 
-        opacity: 1,
-        duration: 0.2,
-        ease: "power1.out"
-      })
-      .to({}, { duration: 0.3 });
+    timeline.to(currentGroup, { 
+      opacity: 1,
+      duration: 0.2,
+      ease: "power1.out"
+    })
+    .to({}, { duration: 0.3 });
   });
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        isVisible.value = true;
+        scrollPosition.value = 0;  // Reset scroll position
+        // Reset any other state specific to this section
+      } else {
+        isVisible.value = false;
+      }
+    });
+  }, {
+    threshold: 0.1
+  });
+
+  if (containerRef.value) {
+    observer.observe(containerRef.value);
+  }
+
+  return () => observer.disconnect();
+});
+
+onUnmounted(() => {
+  // Clean up ScrollTrigger
+  if (timeline) {
+    timeline.scrollTrigger?.kill();
+    timeline.kill();
+  }
 });
 </script>
 
-<style lang="scss">
-// @import '../scss/components/phone-conversation-floating';
+<style lang="scss" scoped>
+.container {
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  position: relative;
+
+  &.left {
+    justify-content: flex-start;
+    
+    :deep(.floating-container) {
+      margin: 0;
+      position: absolute;
+      left: 0;
+      transform: translateX(-25%);
+    }
+  }
+
+  &.right {
+    justify-content: flex-end;
+    
+    :deep(.floating-container) {
+      margin: 0;
+      position: absolute;
+      right: 0;
+      transform: translateX(25%);
+    }
+  }
+
+  &.center {
+    justify-content: center;
+    padding: 0 40px;
+    
+    :deep(.floating-container) {
+      margin: 0 auto;
+    }
+  }
+}
 </style> 
