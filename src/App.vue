@@ -9,7 +9,7 @@ import TimelineHowItWorks from './components/sections/TimelineHowItWorks.vue';
 import ContactSectionV2 from './components/sections/ContactSectionV2.vue';
 import AboutSectionAlt from './components/sections/AboutSectionAlt.vue';
 import HurdlesSolutionsSection from '@/components/sections/HurdlesSolutionsSection.vue';
-
+import FloatingPhone from '@/components/FloatingPhone.vue';
 const currentTheme = ref('theme-neon-horizon');
 const isThemeTransitioning = ref(false);
 
@@ -61,7 +61,11 @@ const handleThemeChange = (newTheme: string) => {
       <div class="main-content">
         <GridPaperOverlay :theme="currentTheme.replace('theme-', '')" :floating="true" :spotlight="true">
           <HeroSection />
+
         </GridPaperOverlay>
+        <FloatingPhone :tilt-x="-15" :tilt-y="25">
+  <!-- Any content you want to display inside the phone -->
+</FloatingPhone>
         <HurdlesSolutionsSection />
         <ServicesSection />
         <TimelineHowItWorks />

@@ -184,16 +184,16 @@ const handleMouseLeave = () => {
   }
   
   // Theme integration
-  @each $theme-name, $theme-map in $themes {
-    &.theme-#{$theme-name} {
-      .card-3d__link {
-        background-color: rgba(map-get($theme-map, 'accent'), 0.8);
+  // @each $theme-name, $theme-map in $themes {
+  //   &.theme-#{$theme-name} {
+  //     .card-3d__link {
+  //       background-color: rgba(map-get($theme-map, 'accent'), 0.8);
         
-        &:hover {
-          background-color: rgba(map-get($theme-map, 'accent'), 1);
-        }
-      }
-    }
-  }
+  //       &:hover {
+  //         background-color: rgba(map-get($theme-map, 'accent'), 1);
+  //       }
+  //     }
+  //   }
+  // }
 }
 </style>
