@@ -13,12 +13,16 @@
       >
      <SimpleScrollChatDemo />
      </PhoneViewportMask> -->
-    <ClientConversationSection 
+    <!-- <ClientConversationSection 
       conversationType="vision" 
       sectionTitle="From Vision to Reality"
       sectionId="vision-intro"
       tiltDirection="left"
       sectionHeight="250vh"
+    /> -->
+    <PhoneConversation
+      :messages="convertStepsToMessages(getVisionToRealitySteps())"
+      section-id="vision"
     />
 
     <!-- Use the extracted component -->
@@ -117,6 +121,14 @@ import ClientConversationSection from '@/components/sections/ClientConversationS
 // import SimpleScrollChat from '../scroll/SimpleScrollChat.vue';
 import SimpleScrollChatDemo from '../scroll/SimpleScrollChatDemo.vue';
 import PhoneViewportMask from '@/components/ui/PhoneViewportMask.vue';
+import PhoneConversation from '@/components/PhoneConversation.vue';
+import { 
+  convertStepsToMessages,
+  getVisionToRealitySteps,
+  getCommonFrustrationsSteps,
+  getPersonalApproachSteps,
+  getCollaborationProcessSteps
+} from '@/data/chatSections';
 
 const width = ref(320);
 const height = ref(650);
