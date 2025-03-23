@@ -44,6 +44,14 @@ function handleScroll() {
   
   // Calculate scroll progress (0 to 1)
   scrollState.progress = calculateScrollProgress(scrollState);
+  
+  console.log('Scroll state updated:', {
+    progress: scrollState.progress,
+    startPosition: scrollState.startPosition,
+    endPosition: scrollState.endPosition,
+    currentScroll: window.scrollY
+  });
+  
   animateAccordions(scrollState.progress);
 }
 

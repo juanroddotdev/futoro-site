@@ -1,0 +1,40 @@
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+.hero-section {
+  min-height: 150vh;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--theme-bg-primary); // Use CSS variable instead of @apply
+}
+
+.hero-content {
+  position: absolute;
+  top: 25vh;
+  left: 10vw;
+  max-width: 50%;
+
+}
+
+.hero-phone {
+  position: absolute;
+  top: 40vh;
+  right: 0;
+  width: 45%;
+  
+  .container {
+    padding: 0;
+    min-height: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-content {
+    left: 5vw;
+    max-width: 90%;
+  }
+
+  .hero-phone {
+    display: none;
+  }
+} 

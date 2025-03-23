@@ -24,24 +24,54 @@ export interface ScrollState extends BaseScrollState {
 export type Handlers = ScrollHandlers;
 
 export function initAccordionScrollTracking(
-  accordionsRef: HTMLElement,
+  accordionsEl: HTMLElement,
   scrollState: ScrollState,
   handlers: Handlers,
   handleScroll: () => void
 ) {
-  if (!accordionsRef) return;
-  
-  scrollState.scrollAccordionEl = accordionsRef.closest('.scroll-accordion') as HTMLElement;
-  if (!scrollState.scrollAccordionEl) return;
-  
-  // Use the generic scroll tracking utility with accordion-specific element
-  initScrollTracking(
-    accordionsRef,
-    scrollState,
-    handlers,
-    handleScroll,
-    { topOffset: 0.1, heightMultiplier: 2 }
-  );
+  // Set up intersection observer to initialize only when in view
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        console.log('Accordion section entering viewport');
+        
+        // Initialize only when entering viewport
+        scrollState.scrollAccordionEl = accordionsEl;
+        
+        const textElements = accordionsEl.querySelectorAll('.accordion .text') as NodeListOf<HTMLElement>;
+        
+        // Reset and store initial states
+        textElements.forEach((text, index) => {
+          text.dataset.originalHeight = `${text.scrollHeight}`;
+          text.style.height = 'auto';
+          text.style.opacity = '1';
+          
+          console.log(`Text element ${index} initialized on viewport entry:`, {
+            originalHeight: text.dataset.originalHeight,
+            currentHeight: text.style.height,
+            opacity: text.style.opacity
+          });
+        });
+
+        // Initialize scroll tracking
+        initScrollTracking(
+          accordionsEl,
+          scrollState,
+          handlers,
+          handleScroll,
+          { topOffset: 0.1, heightMultiplier: 2 }
+        );
+
+        // Disconnect observer after initialization
+        observer.disconnect();
+      }
+    });
+  }, {
+    threshold: 0.1
+  });
+
+  // Start observing
+  observer.observe(accordionsEl);
 }
 
 export function calculateAccordionProgress(
@@ -52,26 +82,38 @@ export function calculateAccordionProgress(
   const segmentSize = 1 / totalAccordions;
   const segmentStart = index * segmentSize;
   
-  // Map the overall progress to this accordion's segment
-  if (overallProgress > segmentStart) {
-    return Math.min(1, (overallProgress - segmentStart) / segmentSize);
-  }
-  return 0;
+  const progress = overallProgress > segmentStart 
+    ? Math.min(1, (overallProgress - segmentStart) / segmentSize)
+    : 0;
+
+  console.log(`Accordion ${index} progress:`, {
+    overallProgress,
+    segmentSize,
+    segmentStart,
+    progress
+  });
+  
+  return progress;
 }
 
 export function animateAccordionText(
   element: HTMLElement, 
   progress: number
 ) {
-  // Store original height if not already stored
-  if (!element.dataset.originalHeight && progress === 0) {
-    element.dataset.originalHeight = `${element.scrollHeight}`;
-  }
-  
+  // Get stored original height
   const originalHeight = parseInt(element.dataset.originalHeight || '0');
+  
+  // Calculate new dimensions
   const height = originalHeight * (1 - progress);
   const opacity = 1 - progress;
   
+  console.log('Animating accordion text:', {
+    originalHeight,
+    calculatedHeight: height,
+    progress,
+    opacity
+  });
+
   // Apply styles
   element.style.height = `${height}px`;
   element.style.opacity = opacity.toString();

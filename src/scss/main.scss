@@ -38,7 +38,8 @@
 @import 'components/floating-phone';
 @import 'components/phone-conversation-floating';
 @import 'components/typing-indicator';
-
+@import 'components/hero-section-with-phone';
+@import 'components/scroll-accordion-vanilla';
 // Playground styles
 @import 'playground/_index';
 
@@ -52,4 +53,3 @@
 @import 'themes/theme-classes';
 
 // Import component styles
-@import 'components/scroll-accordion-vanilla';
