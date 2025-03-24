@@ -1,5 +1,5 @@
 <template>
-  <div ref="containerRef" class="container debug" :id="sectionId" :class="position">
+  <div ref="containerRef" class="container" :id="sectionId" :class="position">
     <FloatingPhone 
       ref="floatingPhoneRef"
       :tilt-x="tiltX"
