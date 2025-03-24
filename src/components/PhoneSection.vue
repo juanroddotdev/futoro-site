@@ -48,11 +48,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 import TypingIndicator from './TypingIndicator.vue';
 import FloatingPhone from './FloatingPhone.vue';
+import { useScrollDebugger } from '@/composables/useScrollDebugger';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -89,9 +90,28 @@ const props = withDefaults(defineProps<Props>(), {
   })
 });
 
+// Add debugging AFTER props are defined
 const containerRef = ref<HTMLElement | null>(null);
 const floatingPhoneRef = ref<InstanceType<typeof FloatingPhone> | null>(null);
 const messagesRef = ref<HTMLElement | null>(null);
+
+/* ===== SCROLL DEBUGGING START ===== */
+// Initialize the scroll debugger with the containerRef
+const { debugAnimation, elementRef } = useScrollDebugger({
+  sectionId: `phone-section-${props.sectionId}`,
+  enabled: true,
+  observeElement: true // Enable observation
+});
+/* ===== SCROLL DEBUGGING END ===== */
+
+// Connect the elementRef to containerRef
+// This ensures the scroll debugger has access to the element
+watch(containerRef, (newValue) => {
+  if (newValue) {
+    elementRef.value = newValue;
+    debugAnimation.info('init', 'Container ref connected to scroll debugger');
+  }
+}, { immediate: true });
 
 let timeline: gsap.core.Timeline;
 
@@ -99,11 +119,50 @@ const scrollPosition = ref(0);
 const isVisible = ref(false);
 
 onMounted(() => {
+  debugAnimation.info('init', 'PhoneSection mounted', {
+    sectionId: props.sectionId,
+    messages: props.messages.length,
+    position: props.position
+  });
+  
   const container = containerRef.value;
-  const floatingPhone = floatingPhoneRef.value?.$el;
-
-  if (!floatingPhone || !container) return;
-
+  if (!container) {
+    debugAnimation.error('init', 'Container ref is null');
+    return;
+  }
+  
+  // Log the container element details
+  debugAnimation.info('init', 'Container element details', {
+    id: container.id,
+    className: container.className,
+    isVisible: container.offsetParent !== null,
+    dimensions: {
+      width: container.offsetWidth,
+      height: container.offsetHeight
+    }
+  });
+  
+  // Check if the container is actually in the DOM
+  if (document.getElementById(container.id) === null) {
+    debugAnimation.error('init', 'Container element not found in DOM');
+  }
+  
+  // Check if the floating phone ref exists
+  if (!floatingPhoneRef.value) {
+    debugAnimation.error('init', 'FloatingPhone ref is null');
+  } else {
+    debugAnimation.info('init', 'FloatingPhone ref exists');
+  }
+  
+  // Check if the messages ref exists
+  if (!messagesRef.value) {
+    debugAnimation.error('init', 'Messages ref is null');
+  } else {
+    debugAnimation.info('init', 'Messages ref exists');
+  }
+  
+  debugAnimation.info('init', 'Container found, initializing');
+  
   // Reset function to set initial state
   const resetState = () => {
     gsap.set('.message-group', { 
@@ -132,10 +191,18 @@ onMounted(() => {
       pin: props.pinSettings.enabled,
       pinSpacing: props.pinSettings.enabled ? props.pinSettings.pinSpacing : false,
       anticipatePin: props.pinSettings.enabled ? props.pinSettings.anticipatePin : 0,
-      onEnter: resetState,
-      onEnterBack: resetState,
+      onEnter: () => {
+        debugAnimation.info('scroll', 'ScrollTrigger onEnter');
+        resetState();
+      },
+      onEnterBack: () => {
+        debugAnimation.info('scroll', 'ScrollTrigger onEnterBack');
+        resetState();
+      },
     }
   });
+  
+  debugAnimation.info('init', 'ScrollTrigger timeline created');
 
   // Modify selectors to be scoped to this section
   const sectionSelector = `#${props.sectionId}`;

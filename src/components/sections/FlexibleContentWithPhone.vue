@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { onMounted, ref, computed, defineExpose } from 'vue';
+import { onMounted, ref, computed, defineExpose, nextTick, onUnmounted } from 'vue';
 import { heroSectionAnimations } from '@/animations/heroSection';
 import PhoneSection from '@/components/PhoneSection.vue';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 
+// Import debug utilities - can be commented out or removed when not debugging
+import { useFlexibleContentDebug } from '@/debug/FlexibleContentWithPhoneDebug';
+
 gsap.registerPlugin(ScrollTrigger);
 
+// Component props definition
 interface Props {
   // Make primaryCta optional
   primaryCta?: {
@@ -57,21 +61,12 @@ const sectionRef = ref<HTMLElement | null>(null);
 const contentRef = ref<HTMLElement | null>(null);
 const isVisible = ref(false);
 const animationStarted = ref(false);
+const phoneAreaRef = ref<HTMLElement | null>(null);
 
-
-onMounted(() => {
-
-  
-  // If not initially hidden, start animations immediately
-  if (!props.initiallyHidden) {
-    startAnimations();
-  }
-});
-
-// Create a method to start animations that can be called externally
+// Component methods
 const startAnimations = () => {
   if (animationStarted.value) {
-    return; // Prevent multiple starts
+    return;
   }
   
   const contentArea = contentRef.value;
@@ -81,40 +76,64 @@ const startAnimations = () => {
     return;
   }
   
-  // Set initial state - hide both elements
-  gsap.set(contentArea, { 
-    autoAlpha: 0,
-    y: 30
-  });
-  
-  gsap.set(phoneArea, { 
-    autoAlpha: 0,
-    y: 30
-  });
-  
-  // Create timeline for sequential animation
-  const tl = gsap.timeline({
-    delay: props.animation.delay || 0
-  });
-  
-  // Always animate content first
-  tl.to(contentArea, {
-    autoAlpha: 1,
-    y: 0,
-    duration: props.animation.duration,
-    ease: "power2.out"
-  });
-  
-  // Add phone with specific delay
-  tl.to(phoneArea, {
-    autoAlpha: 1,
-    y: 0,
-    duration: props.animation.duration,
-    ease: "power2.out"
-  }, `+=${props.animation.phoneDelay}`);
+  // Ensure everything is visible
+  contentArea.style.opacity = '1';
+  (phoneArea as HTMLElement).style.opacity = '1';
+  (phoneArea as HTMLElement).style.display = 'block';
   
   animationStarted.value = true;
 };
+
+// DEBUGGING CONFIGURATION
+// All debug-related configuration in one place
+const debugConfig = import.meta.env.DEV ? {
+  // Component references needed for debugging
+  refs: {
+    sectionRef,
+    contentRef, 
+    phoneAreaRef
+  },
+  // Component state
+  state: {
+    animationStarted
+  },
+  // Component methods that debug needs to access
+  methods: {
+    startAnimations
+  },
+  // Props to track
+  props: props,
+  // Optional configuration
+  options: {
+    enabled: true
+  }
+} : null;
+
+// Initialize debugger only if configuration exists
+const debug = debugConfig ? useFlexibleContentDebug(debugConfig) : null;
+
+// Component lifecycle hooks
+onMounted(() => {
+  // Initialize debugger if available
+  debug?.init();
+  
+  // Set up phone area reference
+  nextTick(() => {
+    phoneAreaRef.value = sectionRef.value?.querySelector('.phone-area') as HTMLElement;
+  });
+  
+  // If not initially hidden, start animations immediately
+  if (!props.initiallyHidden) {
+    startAnimations();
+    // Track animation if debug is available
+    debug?.trackAnimation('completed');
+  }
+});
+
+onUnmounted(() => {
+  // Clean up debugger if available
+  debug?.cleanup();
+});
 
 // Expose the startAnimations method and animation props to parent components
 defineExpose({
@@ -213,11 +232,11 @@ const wrapperHeight = computed(() => {
     z-index: 2;
     
     .content-area {
-      visibility: hidden; /* Initially hidden */
+      opacity: 1; /* Make visible by default */
     }
     
     .phone-area {
-      visibility: hidden; /* Initially hidden */
+      opacity: 1; /* Make visible by default */
     }
     
     &.content-left {

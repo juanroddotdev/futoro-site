@@ -70,6 +70,7 @@
 <script setup lang="ts">
 import { ref, nextTick } from 'vue';
 import EmberEffect from '@/components/effects/EmberEffect.vue';
+import { getTimestampForLog, formatElapsedTime } from '@/utils/timestamp';
 
 // Reference to the split text component
 const splitTextRef = ref<{ $el: HTMLElement } | null>(null);
@@ -90,7 +91,7 @@ const emberDelay = ref(0.5);
 const handleAnimationStart = () => {
   animationStarted.value = true;
   animationStartTime.value = Date.now();
-  console.log('Animation started at:', new Date().toISOString());
+  // console.log('Animation started at:', new Date().toISOString());
   
   // Find the "Frustration" word element immediately
   nextTick(() => {
@@ -108,15 +109,20 @@ const handleAnimationStart = () => {
 
 const handleWordEffectStart = () => {
   wordEffectStartTime.value = Date.now();
-  console.log('Word effect started at:', new Date().toISOString());
+  // console.log('Word effect started at:', new Date().toISOString());
 };
 
 const handleWordEffectComplete = () => {
-  console.log('Word effect completed at:', new Date().toISOString());
+  // console.log('Word effect completed at:', new Date().toISOString());
 };
 
 const handleEmberStart = () => {
   emberStartTime.value = Date.now();
-  console.log('Ember effect started at:', new Date().toISOString());
+  console.log('Ember effect started at:', getTimestampForLog());
+};
+
+const handleEmberEnd = () => {
+  const endTime = Date.now();
+  console.log('Ember effect ended. Duration:', emberStartTime.value ? formatElapsedTime(emberStartTime.value, endTime) : 'unknown');
 };
 </script>

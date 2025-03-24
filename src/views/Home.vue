@@ -7,26 +7,42 @@
     
     <!-- Lazy load all other sections -->
     <LazySection id="hurdles-solutions" @visible="onSectionVisible('hurdles-solutions')">
-      <template #content>
-        <HurdlesSolutionsSection />
+      <!-- Use the default slot instead of a named slot -->
+      <HurdlesSolutionsSection />
+      
+      <!-- Add a placeholder if needed -->
+      <template #placeholder>
+        <div class="section-placeholder">Loading...</div>
       </template>
     </LazySection>
     
+    <!-- Services section - use default slot instead of content slot -->
     <LazySection id="services" @visible="onSectionVisible('services')">
-      <template #content>
-        <ServicesSection />
+      <!-- Remove the template #content wrapper -->
+      <ServicesSection />
+      
+      <template #placeholder>
+        <div class="section-placeholder">Loading...</div>
       </template>
     </LazySection>
     
+    <!-- Timeline section - use default slot instead of content slot -->
     <LazySection id="timeline" @visible="onSectionVisible('timeline')">
-      <template #content>
-        <TimelineHowItWorks />
+      <!-- Remove the template #content wrapper -->
+      <TimelineHowItWorks />
+      
+      <template #placeholder>
+        <div class="section-placeholder">Loading...</div>
       </template>
     </LazySection>
     
+    <!-- About section - use default slot instead of content slot -->
     <LazySection id="about" @visible="onSectionVisible('about')">
-      <template #content>
-        <AboutSectionAlt />
+      <!-- Remove the template #content wrapper -->
+      <AboutSectionAlt />
+      
+      <template #placeholder>
+        <div class="section-placeholder">Loading...</div>
       </template>
     </LazySection>
   </div>

@@ -1,5 +1,6 @@
-import { onMounted, onUnmounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
 import scrollDebugger from '@/utils/scroll/debug/ScrollDebugger';
+import { formatDuration } from '@/utils/timestamp';
 
 export interface UseScrollDebuggerOptions {
   sectionId: string;
@@ -24,29 +25,49 @@ export function useScrollDebugger(options: UseScrollDebuggerOptions) {
   onMounted(() => {
     if (!enabled) return;
     
-    console.log(`[ScrollDebugger] 🚀 Initializing for section: ${sectionId}`);
+    const timeSincePageLoad = scrollDebugger.getTimeSincePageLoad();
+    console.log(`[ScrollDebugger] 🚀 Initializing for section: ${sectionId} (${timeSincePageLoad} since page load)`);
     
     scrollDebugger.registerSection(sectionId);
     
-    if (observeElement && elementRef.value) {
-      observer = new IntersectionObserver((entries) => {
-        const [entry] = entries;
-        
-        if (entry.isIntersecting && !isVisible.value) {
-          isVisible.value = true;
-          console.log(`[ScrollDebugger] 👁️✨ Section visible: ${sectionId}`);
-          scrollDebugger.sectionVisible(sectionId, {
-            intersectionRatio: entry.intersectionRatio,
-            boundingClientRect: entry.boundingClientRect
-          });
+    // Create a watcher for the elementRef that will set up the observer when it becomes available
+    if (observeElement) {
+      const setupObserver = () => {
+        if (!elementRef.value) {
+          console.warn(`[ScrollDebugger] ⚠️ Element ref not available for section: ${sectionId}`);
+          return false;
         }
-      }, {
-        threshold
-      });
+        
+        observer = new IntersectionObserver((entries) => {
+          const [entry] = entries;
+          
+          if (entry.isIntersecting && !isVisible.value) {
+            isVisible.value = true;
+            const currentTimeSincePageLoad = scrollDebugger.getTimeSincePageLoad();
+            console.log(`[ScrollDebugger] 👁️✨ Section visible: ${sectionId} (${currentTimeSincePageLoad} since page load)`);
+            scrollDebugger.sectionVisible(sectionId, {
+              intersectionRatio: entry.intersectionRatio,
+              boundingClientRect: entry.boundingClientRect,
+              timeSincePageLoad: currentTimeSincePageLoad
+            });
+          }
+        }, {
+          threshold
+        });
+        
+        observer.observe(elementRef.value);
+        return true;
+      };
       
-      observer.observe(elementRef.value);
-    } else {
-      console.warn(`[ScrollDebugger] ⚠️ Element ref not available for section: ${sectionId}`);
+      // Try to set up immediately if element is available
+      if (!setupObserver()) {
+        // If not available, set up a watcher to try again when it becomes available
+        watch(elementRef, (newValue) => {
+          if (newValue) {
+            setupObserver();
+          }
+        });
+      }
     }
   });
   
@@ -56,36 +77,42 @@ export function useScrollDebugger(options: UseScrollDebuggerOptions) {
     }
   });
   
-  // Helper functions for component animations
+  // Helper functions to log animation events
   const debugAnimation = {
-    triggered: (componentId: string, details?: any) => {
-      console.log(`[ScrollDebugger] 🎯 Animation triggered: ${sectionId}/${componentId}`);
-      scrollDebugger.animationTriggered(sectionId, componentId, details);
+    trigger: (componentId: string, details?: any) => {
+      if (!enabled) return;
+      scrollDebugger.animationTriggered(sectionId, componentId, {
+        ...details,
+        timeSincePageLoad: scrollDebugger.getTimeSincePageLoad()
+      });
     },
-    
-    started: (componentId: string, details?: any) => {
-      console.log(`[ScrollDebugger] 🚀 Animation started: ${sectionId}/${componentId}`);
-      scrollDebugger.animationStarted(sectionId, componentId, details);
+    start: (componentId: string, details?: any) => {
+      if (!enabled) return;
+      scrollDebugger.animationStarted(sectionId, componentId, {
+        ...details,
+        timeSincePageLoad: scrollDebugger.getTimeSincePageLoad()
+      });
     },
-    
-    completed: (componentId: string, details?: any) => {
-      console.log(`[ScrollDebugger] 🎉 Animation completed: ${sectionId}/${componentId}`);
-      scrollDebugger.animationCompleted(sectionId, componentId, details);
+    complete: (componentId: string, details?: any) => {
+      if (!enabled) return;
+      scrollDebugger.animationCompleted(sectionId, componentId, {
+        ...details,
+        timeSincePageLoad: scrollDebugger.getTimeSincePageLoad()
+      });
     },
-    
-    info: (componentId: string, message: string, details?: any) => {
-      console.log(`[ScrollDebugger] 🧠 Info: ${sectionId}/${componentId} - ${message}`);
-      scrollDebugger.log('info', sectionId, componentId, message, details);
-    },
-    
     error: (componentId: string, message: string, details?: any) => {
-      console.error(`[ScrollDebugger] 🔥 Error: ${sectionId}/${componentId} - ${message}`);
-      scrollDebugger.log('error', sectionId, componentId, message, details);
+      if (!enabled) return;
+      scrollDebugger.logError(sectionId, componentId, message, {
+        ...details,
+        timeSincePageLoad: scrollDebugger.getTimeSincePageLoad()
+      });
     },
-    
-    registerComponent: (componentId: string) => {
-      console.log(`[ScrollDebugger] 📝 Registering component: ${sectionId}/${componentId}`);
-      scrollDebugger.registerComponent(sectionId, componentId);
+    info: (componentId: string, message: string, details?: any) => {
+      if (!enabled) return;
+      scrollDebugger.logInfo(sectionId, componentId, message, {
+        ...details,
+        timeSincePageLoad: scrollDebugger.getTimeSincePageLoad()
+      });
     }
   };
   

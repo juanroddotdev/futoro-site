@@ -19,6 +19,7 @@
       <template #headline>
         <WebsiteSolutionsHeader />
       </template>
+      
     </FlexibleContentWithPhone>
 
     <!-- Hurdles Section -->
@@ -85,13 +86,6 @@ import {
 } from '@/data/chatSections';
 import ScrollDebugger from '@/utils/scroll/debug/ScrollDebugger';
 
-// Set up scroll debugger
-const { elementRef: sectionContainerRef, isVisible: sectionVisible, debugAnimation } = 
-  useScrollDebugger({ 
-    sectionId: 'hurdles-solutions-section',
-    enabled: true, // Explicitly enable debugging
-    threshold: 0.1
-  });
 
 // Define the handleResize function
 function handleResize() {
@@ -100,28 +94,15 @@ function handleResize() {
     initializeElements();
   });
   
-  debugAnimation.info('global', 'Window resized - recalculating dimensions');
 }
 
 // Register components we want to track
 onMounted(() => {
-  // Enable ScrollDebugger globally
-  ScrollDebugger.setEnabled(true);
-  ScrollDebugger.registerSection('hurdles-solutions-section');
-  debugAnimation.registerComponent('flexible-content');
-  debugAnimation.registerComponent('hurdles-section');
-  debugAnimation.registerComponent('solutions-section');
-  
-  // Log something to verify the debugger is working
-  debugAnimation.info('global', 'ScrollDebugger initialized in HurdlesSolutionsSection');
   
   // Initialize elements after a short delay to ensure DOM is updated
   nextTick(() => {
     initializeElements();
   });
-  
-  // Handle window resize
-  window.addEventListener('resize', handleResize);
 });
 
 // Computed property to reverse the solutions array
@@ -142,7 +123,8 @@ const state = reactive({
 // Refs for intersection observer
 const flexibleContentRef = ref<ComponentPublicInstance<{}, { 
   startAnimations: () => void,
-  animation?: { phoneDelay?: number | string }
+  animation?: { phoneDelay?: number | string },
+  initiallyHidden?: boolean
 }>>();
 
 // Extract scroll animation logic to a composable
@@ -151,29 +133,6 @@ const { setupScrollObservers, cleanupScrollObservers } = useScrollAnimation({
   threshold: 0.1
 });
 
-// Watch for section visibility and trigger animations
-watch(sectionVisible, (isVisible) => {
-  if (isVisible) {
-    // Trigger animations for all components
-    if (flexibleContentRef.value) {
-      debugAnimation.triggered('flexible-content', {
-        phoneDelay: flexibleContentRef.value?.animation?.phoneDelay || 'default'
-      });
-      
-      // Start the animations
-      flexibleContentRef.value.startAnimations();
-      
-      debugAnimation.started('flexible-content');
-      
-      // For demo purposes, simulate animation completion after delay
-      setTimeout(() => {
-        debugAnimation.completed('flexible-content');
-      }, 1000);
-    } else {
-      debugAnimation.error('flexible-content', 'flexibleContentRef is not available');
-    }
-  }
-});
 
 // Calculate scrollable width for a container
 function getScrollableWidth(container: HTMLElement): number {
@@ -201,12 +160,7 @@ function handleHurdlesScroll() {
   const hurdlesTransform = hurdlesProgress * state.hurdlesScrollWidth;
   hurdlesContainer.style.transform = `translateX(-${hurdlesTransform}px)`;
   
-  // Log progress with debugger
-  if (hurdlesProgress > 0 && hurdlesProgress < 1) {
-    debugAnimation.info('hurdles-section', `Scroll progress: ${hurdlesProgress.toFixed(2)}`, {
-      transform: hurdlesTransform
-    });
-  }
+
 }
 
 // Handle solutions section scroll
@@ -224,16 +178,10 @@ function handleSolutionsScroll() {
   const solutionsTransform = (1 - solutionsProgress) * state.solutionsScrollWidth;
   solutionsContainer.style.transform = `translateX(-${solutionsTransform}px)`;
   
-  // Log progress with debugger
-  if (solutionsProgress > 0 && solutionsProgress < 1) {
-    debugAnimation.info('solutions-section', `Scroll progress: ${solutionsProgress.toFixed(2)}`, {
-      transform: solutionsTransform
-    });
-  }
+ 
 }
 
 function initializeElements() {
-  debugAnimation.info('global', 'Initializing elements');
   
   // Get elements
   state.elements.hurdlesSection = document.getElementById('hurdlesSection');
@@ -244,18 +192,12 @@ function initializeElements() {
   // Calculate scrollable widths
   if (state.elements.hurdlesContainer) {
     state.hurdlesScrollWidth = getScrollableWidth(state.elements.hurdlesContainer);
-    debugAnimation.info('hurdles-section', 'Calculated scroll width', { width: state.hurdlesScrollWidth });
-  } else {
-    debugAnimation.error('hurdles-section', 'hurdlesContainer not found');
-  }
   
+  }
   if (state.elements.solutionsContainer) {
     state.solutionsScrollWidth = getScrollableWidth(state.elements.solutionsContainer);
-    debugAnimation.info('solutions-section', 'Calculated scroll width', { width: state.solutionsScrollWidth });
-  } else {
-    debugAnimation.error('solutions-section', 'solutionsContainer not found');
-  }
 
+  } 
   // Set up observers and scroll handler
   if (state.elements.hurdlesSection && state.elements.solutionsSection) {
     setupScrollObservers(state.elements.hurdlesSection, state.elements.solutionsSection);
@@ -263,17 +205,15 @@ function initializeElements() {
     
     // Initial calculation
     handleScroll();
-  } else {
-    debugAnimation.error('global', 'Failed to set up observers - sections not found');
-  }
+  } 
 }
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll);
   window.removeEventListener('resize', handleResize);
   cleanupScrollObservers();
-  debugAnimation.info('global', 'Component unmounted');
 });
+
 </script>
 
 <style lang="scss" scoped>

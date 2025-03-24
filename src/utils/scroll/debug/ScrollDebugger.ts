@@ -3,6 +3,8 @@
  * A standalone utility for debugging scroll-based animations
  */
 
+import { formatDuration, getTimestampForLog } from '../../../utils/timestamp';
+
 export interface ScrollDebuggerOptions {
   enabled?: boolean;
   logPrefix?: string;
@@ -11,6 +13,7 @@ export interface ScrollDebuggerOptions {
   exportLogs?: boolean;
   filterSectionIds?: string[];
   verbose?: boolean;
+  logAbsoluteTime?: boolean; // Add option to log absolute timestamps
 }
 
 export interface AnimationEvent {
@@ -26,6 +29,7 @@ export class ScrollDebugger {
   private options: Required<ScrollDebuggerOptions>;
   private events: AnimationEvent[] = [];
   private startTime: number;
+  private pageLoadTime: string;
   private sections: Map<string, { 
     visible: boolean, 
     visibleTimestamp?: number,
@@ -41,6 +45,7 @@ export class ScrollDebugger {
   
   constructor(options: ScrollDebuggerOptions = {}) {
     this.startTime = performance.now();
+    this.pageLoadTime = getTimestampForLog();
     this.options = {
       enabled: true,
       logPrefix: '🔍 ScrollDebugger',
@@ -49,10 +54,24 @@ export class ScrollDebugger {
       exportLogs: false,
       filterSectionIds: [],
       verbose: false,
+      logAbsoluteTime: true,
       ...options
     };
     
-    this.log('info', 'global', undefined, 'ScrollDebugger initialized', { options: this.options });
+    this.log('info', 'global', undefined, 'ScrollDebugger initialized', { 
+      options: this.options,
+      pageLoadTime: this.pageLoadTime
+    });
+  }
+  
+  // Add a method to get page load time
+  getPageLoadTime(): string {
+    return this.pageLoadTime;
+  }
+  
+  // Add a method to get time since page load
+  getTimeSincePageLoad(): string {
+    return formatDuration(performance.now() - this.startTime, true);
   }
   
   /**
@@ -336,7 +355,10 @@ export class ScrollDebugger {
       componentId,
       timestamp: now,
       message,
-      details
+      details: {
+        ...details,
+        absoluteTime: this.options.logAbsoluteTime ? getTimestampForLog() : undefined
+      }
     };
     
     this.events.push(event);
@@ -349,6 +371,10 @@ export class ScrollDebugger {
       if (this.options.logTimestamps) {
         const timeFromStart = this.getTimeFromStart(now);
         logMessage += ` [+${timeFromStart}]`;
+      }
+      
+      if (this.options.logAbsoluteTime) {
+        logMessage += ` [${getTimestampForLog()}]`;
       }
       
       logMessage += ` ${this.getIconForType(type)} ${message}`;
