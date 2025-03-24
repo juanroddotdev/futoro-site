@@ -69,9 +69,16 @@ export function createComponentDebugger(options: ComponentDebugOptions) {
   
   // Track element visibility and attributes
   const trackElement = (elementId: string, config: any) => {
-    const element = config.ref.value;
-    if (!element) {
-      ScrollDebugger.logError(sectionId, componentName, `Element not found: ${elementId}`);
+    // Get the actual DOM element, handling both direct DOM elements and Vue component instances
+    let element = config.ref.value;
+    
+    // If this is a Vue component instance, try to get its $el property
+    if (element && element.$el) {
+      element = element.$el;
+    }
+    
+    if (!element || !(element instanceof Element)) {
+      ScrollDebugger.logError(sectionId, componentName, `Element not found or not a valid DOM element: ${elementId}`);
       return;
     }
     

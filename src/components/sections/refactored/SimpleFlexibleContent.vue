@@ -28,8 +28,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, defineExpose } from 'vue';
+import { ref, computed } from 'vue';
 import PhoneSection from '@/components/PhoneSection.vue';
+import { calculateContainerHeight } from '@/utils/containerHeightUtils';
 
 // Component props definition
 interface Props {
@@ -49,6 +50,8 @@ interface Props {
   tiltY?: number;
   sectionId?: string;
   customClass?: string;
+  containerHeight?: string;
+  heightMultiplier?: number;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -57,7 +60,18 @@ const props = withDefaults(defineProps<Props>(), {
   tiltX: 8,
   tiltY: -20,
   sectionId: 'flexible-section',
-  customClass: ''
+  customClass: '',
+  containerHeight: '',
+  heightMultiplier: 1
+});
+
+const computedContainerHeight = computed(() => {
+  if (props.containerHeight) {
+    return props.containerHeight;
+  }
+  return calculateContainerHeight(props.messages.length, {
+    heightMultiplier: props.heightMultiplier
+  });
 });
 
 // Destructure props for easier template access

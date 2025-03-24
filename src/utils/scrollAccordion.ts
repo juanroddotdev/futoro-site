@@ -33,7 +33,6 @@ export function initAccordionScrollTracking(
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        console.log('Accordion section entering viewport');
         
         // Initialize only when entering viewport
         scrollState.scrollAccordionEl = accordionsEl;
@@ -45,12 +44,6 @@ export function initAccordionScrollTracking(
           text.dataset.originalHeight = `${text.scrollHeight}`;
           text.style.height = 'auto';
           text.style.opacity = '1';
-          
-          console.log(`Text element ${index} initialized on viewport entry:`, {
-            originalHeight: text.dataset.originalHeight,
-            currentHeight: text.style.height,
-            opacity: text.style.opacity
-          });
         });
 
         // Initialize scroll tracking
@@ -85,13 +78,6 @@ export function calculateAccordionProgress(
   const progress = overallProgress > segmentStart 
     ? Math.min(1, (overallProgress - segmentStart) / segmentSize)
     : 0;
-
-  console.log(`Accordion ${index} progress:`, {
-    overallProgress,
-    segmentSize,
-    segmentStart,
-    progress
-  });
   
   return progress;
 }
@@ -106,13 +92,6 @@ export function animateAccordionText(
   // Calculate new dimensions
   const height = originalHeight * (1 - progress);
   const opacity = 1 - progress;
-  
-  console.log('Animating accordion text:', {
-    originalHeight,
-    calculatedHeight: height,
-    progress,
-    opacity
-  });
 
   // Apply styles
   element.style.height = `${height}px`;
@@ -141,11 +120,6 @@ export function trackLastAccordionProgress(
 ) {
   if (index === total - 1) {
     if (progress >= 0.99 && !element.dataset.fullyClosed) {
-      console.log('Last accordion item is now fully closed!', {
-        overallProgress,
-        lastItemProgress: progress,
-        timestamp: new Date().toISOString()
-      });
       element.dataset.fullyClosed = 'true';
     } else if (progress < 0.99 && element.dataset.fullyClosed) {
       delete element.dataset.fullyClosed;

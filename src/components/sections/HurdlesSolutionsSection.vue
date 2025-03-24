@@ -137,7 +137,7 @@
       containerId="solutionsContainer"
       title="Clear Solutions"
       :items="reversedSolutions"
-      sectionClass="solutions-section"
+      sectionClass="solutions-section sticky-version"
       cardClass="solution-card"
       headerContainerClass="header-container--solutions"
       titleAnimation="slideInLeft"

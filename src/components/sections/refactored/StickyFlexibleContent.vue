@@ -1,6 +1,6 @@
 <template>
   <StickySectionContainer 
-    :height="containerHeight"
+    :height="computedContainerHeight"
     position="top"
     :offset="0"
     :zIndex="2"
@@ -36,9 +36,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import StickySectionContainer from '@/components/ui/containers/StickySectionContainer.vue';
 import SimpleFlexibleContent from './SimpleFlexibleContent.vue';
+import { calculateContainerHeight } from '@/utils/containerHeightUtils';
 
 // Component props definition
 interface Props {
@@ -60,6 +61,7 @@ interface Props {
   containerHeight?: string;
   debug?: boolean;
   customClass?: string;
+  startAtBeginning?: boolean; // New prop to control starting position
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -70,7 +72,8 @@ const props = withDefaults(defineProps<Props>(), {
   sectionId: 'flexible-section',
   containerHeight: '300vh',
   debug: false,
-  customClass: ''
+  customClass: '',
+  startAtBeginning: true // Default to true to show first message
 });
 
 // Reference to the flexible content component
@@ -79,6 +82,16 @@ const flexibleContentRef = ref(null);
 // Expose methods from the child component
 defineExpose({
   focusContent: () => flexibleContentRef.value?.focusContent()
+});
+
+const computedContainerHeight = computed(() => {
+  if (props.containerHeight) {
+    return props.containerHeight;
+  }
+  return calculateContainerHeight(props.messages.length, {
+    itemHeight: 50, // Adjust as needed for message height
+    heightMultiplier: 1.3
+  });
 });
 </script>
 

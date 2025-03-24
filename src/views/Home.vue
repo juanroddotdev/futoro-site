@@ -6,7 +6,7 @@
     </div>
     
     <!-- Use the new NewStickyHeroSection -->
-    <NewStickyHeroSection :current-theme="currentTheme" :debug="true" />
+    <!-- <NewStickyHeroSection :current-theme="currentTheme" :debug="true" /> -->
     
     <!-- Lazy load all other sections -->
     <LazySection id="hurdles-solutions" @visible="onSectionVisible('hurdles-solutions')">
@@ -53,7 +53,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import NewStickyHeroSection from '@/components/sections/NewStickyHeroSection.vue';
+// import NewStickyHeroSection from '@/components/sections/NewStickyHeroSection.vue';
 import HurdlesSolutionsSection from '@/components/sections/HurdlesSolutionsSection.vue';
 import ServicesSection from '@/components/sections/ServicesSection.vue';
 import TimelineHowItWorks from '@/components/sections/TimelineHowItWorks.vue';

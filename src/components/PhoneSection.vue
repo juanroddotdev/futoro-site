@@ -1,49 +1,51 @@
 <template>
   <div ref="containerRef" class="container" :id="sectionId" :class="position">
-    <FloatingPhone 
-      ref="floatingPhoneRef"
-      :tilt-x="tiltX"
-      :tilt-y="tiltY"
-    >
-      <div ref="messagesRef" class="messages-container">
-        <template v-for="(message, idx) in messages" :key="`typing-${idx}`">
-          <div 
-            v-if="showTypingFor.includes(idx)"
-            :class="`typing-container typing-container-${idx + 1}`"
-          >
-            <TypingIndicator 
-              :class="`typing-indicator-${idx + 1}`"
-              :is-sent="message.type === 'sent'"
-            />
-          </div>
-        </template>
-
-        <template v-for="(message, idx) in messages" :key="`message-${idx}`">
-          <div 
-            :class="`message-group message-group-${idx + 1}`"
-          >
+    <div ref="phoneContainerRef">
+      <FloatingPhone 
+        ref="floatingPhoneRef"
+        :tilt-x="tiltX"
+        :tilt-y="tiltY"
+      >
+        <div ref="messagesRef" class="messages-container">
+          <template v-for="(message, idx) in messages" :key="`typing-${idx}`">
             <div 
-              class="message"
-              :class="[
-                message.type === 'sent'  ? 'sent' : 'received',
-                `message-${idx + 1}`
-              ]"
+              v-if="showTypingFor.includes(idx)"
+              :class="`typing-container typing-container-${idx + 1}`"
             >
-              <div class="message-content">
-                {{ message.text }}
+              <TypingIndicator 
+                :class="`typing-indicator-${idx + 1}`"
+                :is-sent="message.type === 'sent'"
+              />
+            </div>
+          </template>
+
+          <template v-for="(message, idx) in messages" :key="`message-${idx}`">
+            <div 
+              :class="`message-group message-group-${idx + 1}`"
+            >
+              <div 
+                class="message"
+                :class="[
+                  message.type === 'sent'  ? 'sent' : 'received',
+                  `message-${idx + 1}`
+                ]"
+              >
+                <div class="message-content">
+                  {{ message.text }}
+                </div>
               </div>
             </div>
-          </div>
-        </template>
-      </div>
-      <div class="message-input-container">
-        <div class="input-wrapper">
-          <div class="message-input">
-            <span class="placeholder"><span class="futoro">futoro</span>Message</span>
+          </template>
+        </div>
+        <div class="message-input-container">
+          <div class="input-wrapper">
+            <div class="message-input">
+              <span class="placeholder"><span class="futoro">futoro</span>Message</span>
+            </div>
           </div>
         </div>
-      </div>
-    </FloatingPhone>
+      </FloatingPhone>
+    </div>
   </div>
 </template>
 
@@ -53,7 +55,6 @@ import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 import TypingIndicator from './TypingIndicator.vue';
 import FloatingPhone from './FloatingPhone.vue';
-import { useScrollDebugger } from '@/composables/useScrollDebugger';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -79,122 +80,56 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  tiltX: 8,
-  tiltY: -20,
-  position: 'center',
+  tiltX: 0,
+  tiltY: 0,
+  position: 'right',
   pinSettings: () => ({
     enabled: true,
     start: 'top top',
+    end: 'bottom bottom',
     pinSpacing: true,
     anticipatePin: 1
   })
 });
 
-// Add debugging AFTER props are defined
 const containerRef = ref<HTMLElement | null>(null);
 const floatingPhoneRef = ref<InstanceType<typeof FloatingPhone> | null>(null);
 const messagesRef = ref<HTMLElement | null>(null);
+const phoneContainerRef = ref<HTMLElement | null>(null);
 
-/* ===== SCROLL DEBUGGING START ===== */
-// Initialize the scroll debugger with the containerRef
-const { debugAnimation, elementRef } = useScrollDebugger({
-  sectionId: `phone-section-${props.sectionId}`,
-  enabled: true,
-  observeElement: true // Enable observation
-});
-/* ===== SCROLL DEBUGGING END ===== */
-
-onMounted(() => {
-  console.log(`[PhoneSection] Component mounted with sectionId: ${props.sectionId}`);
-  
-  // Ensure containerRef is set
-  nextTick(() => {
-    // Connect the elementRef to containerRef
-    if (containerRef.value) {
-      elementRef.value = containerRef.value;
-      debugAnimation.info('init', 'Container ref connected to scroll debugger');
-    } else {
-      console.error(`[PhoneSection] Container ref not available for section: ${props.sectionId}`);
-    }
-  });
-});
-
-// Connect the elementRef to containerRef
-// This ensures the scroll debugger has access to the element
-watch(containerRef, (newValue) => {
-  if (newValue) {
-    elementRef.value = newValue;
-    debugAnimation.info('init', 'Container ref connected to scroll debugger');
-  }
-}, { immediate: true });
-
+// First, declare the timeline variable
 let timeline: gsap.core.Timeline;
 
 const scrollPosition = ref(0);
 const isVisible = ref(false);
 
-onMounted(() => {
-  debugAnimation.info('init', 'PhoneSection mounted', {
-    sectionId: props.sectionId,
-    messages: props.messages.length,
-    position: props.position
-  });
-  
+// Define setupScrollAnimation function
+const setupScrollAnimation = () => {
   const container = containerRef.value;
   if (!container) {
-    debugAnimation.error('init', 'Container ref is null');
     return;
   }
-  
-  // Log the container element details
-  debugAnimation.info('init', 'Container element details', {
-    id: container.id,
-    className: container.className,
-    isVisible: container.offsetParent !== null,
-    dimensions: {
-      width: container.offsetWidth,
-      height: container.offsetHeight
-    }
-  });
-  
-  // Check if the container is actually in the DOM
-  if (document.getElementById(container.id) === null) {
-    debugAnimation.error('init', 'Container element not found in DOM');
-  }
-  
-  // Check if the floating phone ref exists
-  if (!floatingPhoneRef.value) {
-    debugAnimation.error('init', 'FloatingPhone ref is null');
-  } else {
-    debugAnimation.info('init', 'FloatingPhone ref exists');
-  }
-  
-  // Check if the messages ref exists
-  if (!messagesRef.value) {
-    debugAnimation.error('init', 'Messages ref is null');
-  } else {
-    debugAnimation.info('init', 'Messages ref exists');
-  }
-  
-  debugAnimation.info('init', 'Container found, initializing');
-  
-  // Reset function to set initial state
+
+  // Reset function to set initial state - make sure ALL messages are hidden initially
   const resetState = () => {
-    gsap.set('.message-group', { 
+    // Hide all messages initially - use more specific selectors
+    const sectionSelector = `#${props.sectionId}`;
+    
+    // Hide all message groups
+    gsap.set(`${sectionSelector} .message-group`, { 
       opacity: 0, 
-      y: 0,
+      y: 20,
       force3D: true 
     });
-    gsap.set('.typing-container', { 
+    
+    // Hide all typing containers
+    gsap.set(`${sectionSelector} .typing-container`, { 
       opacity: 0, 
-      y: 0,
+      y: 20,
       force3D: true 
     });
   };
-
-  // Initial reset
-  resetState();
-
+  
   // Create timeline with ScrollTrigger
   timeline = gsap.timeline({
     scrollTrigger: {
@@ -202,25 +137,35 @@ onMounted(() => {
       start: props.pinSettings.start,
       end: props.pinSettings.end || `+=${props.messages.length * 50}%`,
       scrub: 0.5,
-      // Only pin if enabled
       pin: props.pinSettings.enabled,
       pinSpacing: props.pinSettings.enabled ? props.pinSettings.pinSpacing : false,
       anticipatePin: props.pinSettings.enabled ? props.pinSettings.anticipatePin : 0,
+      // markers: import.meta.env.DEV, // Add markers in dev mode for debugging
       onEnter: () => {
-        debugAnimation.info('scroll', 'ScrollTrigger onEnter');
-        resetState();
+        // Show first message only when scrolling begins
+        if (props.messages.length > 0) {
+          const sectionSelector = `#${props.sectionId}`;
+          const firstGroup = `${sectionSelector} .message-group-1`;
+          gsap.to(firstGroup, { opacity: 1, y: 0, duration: 0.3 });
+        }
       },
       onEnterBack: () => {
-        debugAnimation.info('scroll', 'ScrollTrigger onEnterBack');
         resetState();
+        // Show first message when scrolling back into view
+        if (props.messages.length > 0) {
+          const sectionSelector = `#${props.sectionId}`;
+          const firstGroup = `${sectionSelector} .message-group-1`;
+          gsap.to(firstGroup, { opacity: 1, y: 0, duration: 0.3 });
+        }
       },
+      immediateRender: true
     }
   });
   
-  debugAnimation.info('init', 'ScrollTrigger timeline created');
-
   // Modify selectors to be scoped to this section
   const sectionSelector = `#${props.sectionId}`;
+  
+  // Don't show first message immediately - wait for scroll to begin
 
   const MESSAGE_OFFSET = 100;
 
@@ -272,7 +217,6 @@ onMounted(() => {
       if (entry.isIntersecting) {
         isVisible.value = true;
         scrollPosition.value = 0;  // Reset scroll position
-        // Reset any other state specific to this section
       } else {
         isVisible.value = false;
       }
@@ -286,6 +230,27 @@ onMounted(() => {
   }
 
   return () => observer.disconnect();
+};
+
+onMounted(() => {
+  // Hide all messages immediately on mount, before any animations
+  const sectionSelector = `#${props.sectionId}`;
+  gsap.set(`${sectionSelector} .message-group`, { 
+    opacity: 0, 
+    y: 20,
+    force3D: true 
+  });
+  
+  gsap.set(`${sectionSelector} .typing-container`, { 
+    opacity: 0, 
+    y: 20,
+    force3D: true 
+  });
+  
+  // Then continue with setup
+  nextTick(() => {
+    setupScrollAnimation();
+  });
 });
 
 onUnmounted(() => {

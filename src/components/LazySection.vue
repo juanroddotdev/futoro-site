@@ -106,6 +106,7 @@ onUnmounted(() => {
   width: 100%;
   min-height: 100px; /* Ensure minimum height */
   display: block;
+  z-index: 2;
 }
 
 .lazy-section-placeholder {

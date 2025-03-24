@@ -6,57 +6,68 @@
     </div>
     
     <!-- Hero Section -->
-    <StickyFlexibleContent
-      :messages="heroMessages"
-      :showTypingFor="[0, 1]"
-      :tilt-x="8" 
-      :tilt-y="-20" 
-      layout="content-left"
-      phonePosition="right"
-      sectionId="hero-section"
-      containerHeight="400vh"
-      :debug="false"
-      customClass="dark-theme"
-    >
-    <template #headline>
-      <h1 class="heading--accent mb-6 headline heading-responsive">
-        {{ heroContent.headline }}
-      </h1>
-    </template>
-    <template #subheadline>
-      <p class="mb-8 subheadline subheading-responsive heading heading--highlight">
-        {{ heroContent.subheadline }}
-      </p>
-      <div class="flex gap-4">
-        <a href="#contact" class="btn-round-large-primary cta">
-          {{ heroContent.cta }}
-        </a>
-        <a href="#services" class="btn-round-large-outline-primary">
-          Our Services
-        </a>
-      </div>
-    </template>
-    </StickyFlexibleContent>
+    <HeroSection 
+      :heroContent="heroContent"
+    />
+    
+    <!-- Hurdles and Solutions Section -->
+    <LazySection id="hurdles-solutions" @visible="onSectionVisible('hurdles-solutions')">
+      <HurdlesSolutionsSection />
+      
+      <template #placeholder>
+        <div class="section-placeholder">Loading...</div>
+      </template>
+    </LazySection>
+
+    <!-- Services section - use default slot instead of content slot -->
+    <LazySection id="services" @visible="onSectionVisible('services')">
+      <ServicesSection />
+      
+      <template #placeholder>
+        <div class="section-placeholder">Loading...</div>
+      </template>
+    </LazySection>
+    <!-- Timeline section - use default slot instead of content slot -->
+    <LazySection id="timeline" @visible="onSectionVisible('timeline')">
+      <!-- Remove the template #content wrapper -->
+      <TimelineHowItWorks />
+      
+      <template #placeholder>
+        <div class="section-placeholder">Loading...</div>
+      </template>
+    </LazySection>
     
     <!-- We'll add more sections as we go -->
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import StickyFlexibleContent from '@/components/sections/StickyFlexibleContent.vue';
+import { ref, onMounted, computed } from 'vue';
+import HeroSection from '@/components/sections/refactored/HeroSection.vue';
+import HurdlesSolutionsSection from '@/components/sections/refactored/HurdlesSolutionsSection.vue';
+import LazySection from '@/components/LazySection.vue';
+import TimelineHowItWorks from '@/components/sections/TimelineHowItWorks.vue';
+import ServicesSection from '@/components/sections/refactored/ServicesSection.vue';
 import { useTheme } from '@/composables/useTheme';
-import { getInitialConversation } from '@/data/chatSections';
+import { useSectionLoader } from '@/composables/useSectionLoader';
 import { HeroContent, getRandomHeroContent } from '@/data/heroContent';
+
 const heroContent = ref<HeroContent>(getRandomHeroContent());
 
 // Get the global theme
 const { currentTheme } = useTheme();
 
-// Sample messages for the hero section
-const heroMessages = getInitialConversation();
+// Use the section loader
+const sectionLoader = useSectionLoader();
 
-// We'll add more data and functionality as we rebuild each section
+
+// Handle section visibility
+function onSectionVisible(sectionId: string) {
+
+  sectionLoader.markSectionLoaded(sectionId);
+  sectionLoader.markSectionVisible(sectionId);
+}
+
 </script>
 
 <style lang="scss">
