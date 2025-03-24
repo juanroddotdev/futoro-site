@@ -1,5 +1,5 @@
 <template>
-  <div class="progressive-reveal overflow-visible"> <!-- Ensure overflow is visible -->
+  <div class="progressive-reveal overflow-visible" ref="sectionContainerRef"> <!-- Added ref here -->
     <!-- <PhoneSection
       :messages="getInitialConversation()" 
       sectionId="vision"
@@ -18,11 +18,11 @@
       layout="content-right"
       :animation="{
         contentFirst: true, // Content appears first
-        delay: 3, // 3 second delay before phone appears
-        duration: 0.7 // Animation duration
+        duration: 0.7, // Animation duration
+        phoneDelay: 1
       }"
-        :initiallyHidden="true" 
-        ref="flexibleContentRef"
+      :initiallyHidden="true" 
+      ref="flexibleContentRef"
     >
       <template #headline>
         <WebsiteSolutionsHeader />
@@ -85,6 +85,7 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, computed, ref, reactive } from 'vue';
+import type { ComponentPublicInstance } from 'vue';
 import { struggles, solutions } from '@/data/strugglesAndSolutions';
 import { useScrollAnimation } from '@/composables/useScrollAnimation';
 import gsap from 'gsap';
@@ -119,10 +120,21 @@ const state = reactive({
   }
 });
 
+// Add timestamp utility function
+const getTimestamp = () => {
+  const now = new Date();
+  const time = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3 });
+  return `[${time}]`;
+};
+
+// Track page load time
+const pageLoadTime = performance.now();
+console.log(`${getTimestamp()} 📄 Page load started (t=0ms)`);
+
 // Refs for intersection observer
 const mainSectionRef = ref(null);
 const sectionContainerRef = ref(null);
-const flexibleContentRef = ref(null);
+const flexibleContentRef = ref<ComponentPublicInstance<{}, { startAnimations: () => void }>>();
 const sectionVisible = ref(false);
 
 // Extract scroll animation logic to a composable
@@ -175,29 +187,70 @@ function handleSolutionsScroll() {
 }
 
 onMounted(() => {
+  const mountTime = performance.now() - pageLoadTime;
+  console.log(`${getTimestamp()} 🔄 Component mounted (t=${mountTime.toFixed(0)}ms)`);
+  
   // Set up intersection observer for the main section
   if (sectionContainerRef.value) {
+    console.log(`${getTimestamp()} 🔍 Setting up intersection observer for HurdlesSolutionsSection`);
+    
+    // Check if element is already in viewport on page load
+    const rect = sectionContainerRef.value.getBoundingClientRect();
+    const isInitiallyVisible = (
+      rect.top >= 0 &&
+      rect.left >= 0 &&
+      rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+      rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+    );
+    
+    console.log(`${getTimestamp()} 📏 Initial visibility check: ${isInitiallyVisible} (t=${(performance.now() - pageLoadTime).toFixed(0)}ms)`);
+    
+    // If already visible on page load, trigger animations immediately
+    if (isInitiallyVisible && !sectionVisible.value) {
+      sectionVisible.value = true;
+      console.log(`${getTimestamp()} 🔍 HurdlesSolutionsSection is initially visible in viewport (t=${(performance.now() - pageLoadTime).toFixed(0)}ms)`);
+      
+      // Trigger animations for all components
+      if (flexibleContentRef.value) {
+        console.log(`${getTimestamp()} 📱 Starting phone animations immediately (t=${(performance.now() - pageLoadTime).toFixed(0)}ms)`);
+        flexibleContentRef.value.startAnimations();
+      } else {
+        console.error(`${getTimestamp()} ❌ flexibleContentRef is not available (t=${(performance.now() - pageLoadTime).toFixed(0)}ms)`);
+      }
+    }
+    
+    // Set up observer for scrolling into view later
     const observer = new IntersectionObserver((entries) => {
       const [entry] = entries;
+      const observerTime = performance.now() - pageLoadTime;
+      
+      console.log(`${getTimestamp()} 👁️ Intersection detected (t=${observerTime.toFixed(0)}ms), isIntersecting: ${entry.isIntersecting}`);
+      
       if (entry.isIntersecting && !sectionVisible.value) {
         sectionVisible.value = true;
-        console.log('Section is now visible!');
+        console.log(`${getTimestamp()} 🔍 HurdlesSolutionsSection is now visible in viewport (t=${observerTime.toFixed(0)}ms)`);
         
         // Trigger animations for all components
         if (flexibleContentRef.value) {
+          console.log(`${getTimestamp()} 📱 Starting phone animations with delay: ${
+            flexibleContentRef.value.$props?.animation?.phoneDelay || 'default'} (t=${observerTime.toFixed(0)}ms)`);
           flexibleContentRef.value.startAnimations();
+        } else {
+          console.error(`${getTimestamp()} ❌ flexibleContentRef is not available (t=${observerTime.toFixed(0)}ms)`);
         }
-        
-        // You can add similar calls to other components
         
         // Remove the observer once triggered
         observer.disconnect();
+        console.log(`${getTimestamp()} 👁️ Intersection observer disconnected (t=${observerTime.toFixed(0)}ms)`);
       }
     }, {
       threshold: 0.1 // Trigger when 10% of the element is visible
     });
     
     observer.observe(sectionContainerRef.value);
+    console.log(`${getTimestamp()} 👀 Now observing section container (t=${(performance.now() - pageLoadTime).toFixed(0)}ms)`);
+  } else {
+    console.error(`${getTimestamp()} ❌ sectionContainerRef is not available (t=${(performance.now() - pageLoadTime).toFixed(0)}ms)`);
   }
   
   // Test GSAP

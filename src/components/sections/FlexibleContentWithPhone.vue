@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue';
+import { onMounted, ref, computed, defineExpose } from 'vue';
 import { heroSectionAnimations } from '@/animations/heroSection';
 import PhoneSection from '@/components/PhoneSection.vue';
 import gsap from 'gsap';
@@ -31,7 +31,9 @@ interface Props {
     contentFirst?: boolean;
     delay?: number;
     duration?: number;
+    phoneDelay?: number; // Add specific delay for phone
   };
+  initiallyHidden?: boolean; // Add this prop
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -44,30 +46,78 @@ const props = withDefaults(defineProps<Props>(), {
   wrapperHeightMultiplier: 50,
   animation: () => ({
     contentFirst: true,
-    delay: 0.3,
-    duration: 0.8
-  })
+    duration: 0.8,
+    phoneDelay: 1.0 // Default phone delay (in seconds)
+  }),
+  initiallyHidden: false
 });
 
+// Add refs for visibility tracking
 const sectionRef = ref<HTMLElement | null>(null);
 const contentRef = ref<HTMLElement | null>(null);
+const isVisible = ref(false);
+const animationStarted = ref(false);
 
-// Calculate wrapper height based on messages
-const wrapperHeight = computed(() => {
-  const baseHeight = 100; // Base viewport height
-  return `${baseHeight + (props.messages.length * props.wrapperHeightMultiplier)}vh`;
-});
+// Add timestamp utility function
+const getTimestamp = () => {
+  const now = new Date();
+  const time = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3 });
+  return `[${time}]`;
+};
+
+// Track component load time
+const componentLoadTime = performance.now();
 
 onMounted(() => {
-  if (!sectionRef.value || !contentRef.value) return;
-
-  // Get references to content and phone areas
-  const contentArea = contentRef.value;
-  const phoneArea = sectionRef.value.querySelector('.phone-area');
+  console.log(`${getTimestamp()} 🔄 FlexibleContentWithPhone mounted (t=${(performance.now() - componentLoadTime).toFixed(0)}ms)`);
   
-  if (!contentArea || !phoneArea) return;
+  // Check if elements are available on mount
+  const contentArea = contentRef.value;
+  const phoneArea = sectionRef.value?.querySelector('.phone-area');
+  
+  console.log(`${getTimestamp()} 📊 Elements on mount:`, {
+    contentRef: !!contentRef.value,
+    sectionRef: !!sectionRef.value,
+    contentArea: !!contentArea,
+    phoneArea: !!phoneArea,
+    initiallyHidden: props.initiallyHidden
+  });
+  
+  // If not initially hidden, start animations immediately
+  if (!props.initiallyHidden) {
+    console.log(`${getTimestamp()} 🚀 Auto-starting animations (initiallyHidden=false)`);
+    startAnimations();
+  }
+});
+
+// Create a method to start animations that can be called externally
+const startAnimations = () => {
+  const startTime = performance.now() - componentLoadTime;
+  console.log(`${getTimestamp()} 🚀 startAnimations called in FlexibleContentWithPhone (t=${startTime.toFixed(0)}ms)`);
+  
+  if (animationStarted.value) {
+    console.log(`${getTimestamp()} ⚠️ Animation already started, returning early (t=${startTime.toFixed(0)}ms)`);
+    return; // Prevent multiple starts
+  }
+  
+  const contentArea = contentRef.value;
+  const phoneArea = sectionRef.value?.querySelector('.phone-area');
+  
+  console.log(`${getTimestamp()} 📊 Animation elements:`, {
+    contentArea: !!contentArea,
+    phoneArea: !!phoneArea,
+    delay: props.animation.delay || 0,
+    phoneDelay: props.animation.phoneDelay,
+    time: `${startTime.toFixed(0)}ms`
+  });
+  
+  if (!contentArea || !phoneArea) {
+    console.error(`${getTimestamp()} ❌ Missing required elements for animation (t=${startTime.toFixed(0)}ms)`);
+    return;
+  }
   
   // Set initial state - hide both elements
+  console.log(`${getTimestamp()} 🎬 Setting initial animation state (t=${startTime.toFixed(0)}ms)`);
   gsap.set(contentArea, { 
     autoAlpha: 0,
     y: 30
@@ -78,29 +128,46 @@ onMounted(() => {
     y: 30
   });
   
-  // Determine animation sequence based on contentFirst prop
-  const firstElement = props.animation.contentFirst ? contentArea : phoneArea;
-  const secondElement = props.animation.contentFirst ? phoneArea : contentArea;
-  
   // Create timeline for sequential animation
-  const tl = gsap.timeline();
-  
-  // Animate first element
-  tl.to(firstElement, {
-    autoAlpha: 1,
-    y: 0,
-    duration: props.animation.duration,
-    ease: "power2.out"
+  const tl = gsap.timeline({
+    delay: props.animation.delay || 0,
+    onStart: () => console.log(`${getTimestamp()} ⏱️ Animation timeline started (t=${(performance.now() - componentLoadTime).toFixed(0)}ms)`),
+    onComplete: () => console.log(`${getTimestamp()} ✅ Animation timeline completed (t=${(performance.now() - componentLoadTime).toFixed(0)}ms)`)
   });
   
-  // Animate second element with delay
-  tl.to(secondElement, {
+  // Always animate content first
+  tl.to(contentArea, {
     autoAlpha: 1,
     y: 0,
     duration: props.animation.duration,
-    delay: props.animation.delay,
-    ease: "power2.out"
-  }, "+="+props.animation.delay); // Add the delay parameter here
+    ease: "power2.out",
+    onStart: () => console.log(`${getTimestamp()} 📄 Content animation started (t=${(performance.now() - componentLoadTime).toFixed(0)}ms)`),
+    onComplete: () => console.log(`${getTimestamp()} 📄 Content animation completed (t=${(performance.now() - componentLoadTime).toFixed(0)}ms)`)
+  });
+  
+  // Add phone with specific delay
+  tl.to(phoneArea, {
+    autoAlpha: 1,
+    y: 0,
+    duration: props.animation.duration,
+    ease: "power2.out",
+    onStart: () => console.log(`${getTimestamp()} 📱 Phone animation started after delay: ${props.animation.phoneDelay} (t=${(performance.now() - componentLoadTime).toFixed(0)}ms)`),
+    onComplete: () => console.log(`${getTimestamp()} 📱 Phone animation completed (t=${(performance.now() - componentLoadTime).toFixed(0)}ms)`)
+  }, `+=${props.animation.phoneDelay}`);
+  
+  animationStarted.value = true;
+  console.log(`${getTimestamp()} 🏁 Animation sequence initialized (t=${(performance.now() - componentLoadTime).toFixed(0)}ms)`);
+};
+
+// Expose the startAnimations method to parent components
+defineExpose({
+  startAnimations
+});
+
+// Calculate wrapper height based on messages
+const wrapperHeight = computed(() => {
+  const baseHeight = 100; // Base viewport height
+  return `${baseHeight + (props.messages.length * props.wrapperHeightMultiplier)}vh`;
 });
 </script>
 
@@ -115,7 +182,7 @@ onMounted(() => {
       ]"
     >
       <div class="flexible-grid" :class="layout">
-        <div class="content-area hero-content" ref="contentRef">
+        <div class="content-area" ref="contentRef">
           <!-- Only show headline area if slot content is provided -->
           <div class="headline-area mb-6" v-if="$slots.headline">
             <slot name="headline"></slot>
@@ -156,7 +223,8 @@ onMounted(() => {
             :position="phonePosition"
             class="section-phone"
             :pin-settings="{
-              enabled: false // Disable phone's own pinning since parent is pinned
+              enabled: false, // Disable phone's own pinning since parent is pinned
+              start: 'top 30%',
             }"
           />
         </div>
