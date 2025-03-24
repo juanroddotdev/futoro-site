@@ -17,7 +17,56 @@
       ref="flexibleContentRef"
     >
       <template #headline>
-        <WebsiteSolutionsHeader />
+        <AnimatedText 
+      class="text-3xl font-bold text-center gradient-text mb-40" 
+      firstPart="Website Solutions"
+      animation="fadeUp" 
+      :useGradient="true" 
+      :duration="3" 
+      :initiallyHidden="true" 
+    />
+        <!-- <WebsiteSolutionsHeader ref="fromFrustrationRef" /> -->
+      </template>
+      <template #subheadline>
+        <AnimatedText 
+        ref="splitTextRef"
+        class="text-3xl font-bold text-center gradient-text" 
+        firstPart="From Frustration"
+        animation="slideInRight" 
+        :useGradient="true" 
+        :delay="3" 
+        :duration="3"
+        :initiallyHidden="true"
+        :wordEffects="true"
+        :wordTargets="['Frustration']"
+        :wordEffectTypes="['highlight']"
+        :wordEffectStyles="[
+          { 
+            gradientClass: 'gradient-theme-fire',
+            iterations: 3,
+            customStyles: {
+              transform: 'scale(1.05)',
+              display: 'inline-block',
+              position: 'relative',
+              transition: 'all 1s cubic-bezier(0.34, 1.56, 0.64, 1)'
+            }
+          }
+        ]"
+        :wordEffectDuration="2"
+        :wordEffectDelay=".3"
+      />
+       <!-- Add ember effect for "Frustration" word -->
+       <EmberEffect 
+        :targetElement="frustrationElement" 
+        effectType="ember"
+        :particleCount="20"
+        :duration="2.5"
+        :colors="['#ff4500', '#ff7800', '#ffaa33', '#ffcc00']"
+        :relativeToParent="true"
+        :startDelay="emberDelay"
+        :active="frustrationElement !== null"
+        @ember-start="handleEmberStart"
+      />
       </template>
       
     </FlexibleContentWithPhone>
@@ -34,14 +83,53 @@
       titleAnimation="slideInRight"
       :reverseLayout="false"
     />
-    <PhoneSection
-      :messages="getTransitionToSolutions()" 
-      sectionId="solutions"
+    <FlexibleContentWithPhone
+      phonePosition="right"
+      :messages="getTransitionToSolutions()"
       :showTypingFor="[0, 1]"
       :tilt-x="8"
       :tilt-y="-20"
-      position="center"
-    />
+      sectionId="solutions"
+      layout="content-left"
+      :animation="{
+        contentFirst: true,
+        duration: 0.7,
+        phoneDelay: 1
+      }"
+      :initiallyHidden="true" 
+      ref="flexibleContentRef"
+    >
+      <template #subheadline>
+        <AnimatedText 
+        ref="toFantasticRef"
+        class="text-3xl font-bold text-center gradient-text" 
+        firstPart="To Fantastic" 
+        animation="slideInLeft" 
+        :useGradient="true" 
+        :delay="3" 
+        :duration="3"
+        :initiallyHidden="true"
+        :wordEffects="true"
+        :wordTargets="['Fantastic']"
+        :wordEffectTypes="['highlight']"
+        :wordEffectStyles="[
+          { 
+            gradientClass: 'gradient-theme-cool',
+            iterations: 3,
+            customStyles: {
+              transform: 'scale(1.05)',
+              display: 'inline-block',
+              position: 'relative',
+              transition: 'all 1s cubic-bezier(0.34, 1.56, 0.64, 1)'
+            }
+          }
+        ]"
+        :wordEffectDuration="2"
+        :wordEffectDelay=".3"
+      />
+      </template>
+      
+    </FlexibleContentWithPhone>
 
     <!-- Solutions Section -->
     <ScrollableCardsSection
@@ -55,14 +143,14 @@
       titleAnimation="slideInLeft"
       :reverseLayout="true"
     />
-    <PhoneSection
+    <!-- <PhoneSection
       :messages="getFinalConversation()" 
       sectionId="final"
       :showTypingFor="[0, 1]" 
       :tilt-x="8"
       :tilt-y="20"
       position="center"
-    />
+    /> -->
     
   </div>
 </template>
@@ -72,21 +160,22 @@ import { onMounted, onUnmounted, computed, ref, reactive, watch, nextTick } from
 import type { ComponentPublicInstance } from 'vue';
 import { struggles, solutions } from '@/data/strugglesAndSolutions';
 import { useScrollAnimation } from '@/composables/useScrollAnimation';
-import { useScrollDebugger } from '@/composables/useScrollDebugger';
-import gsap from 'gsap';
 import WebsiteSolutionsHeader from '@/components/sections/WebsiteSolutionsHeader.vue';
 import ScrollableCardsSection from '@/components/sections/ScrollableCardsSection.vue';
-import PhoneSection from '@/components/PhoneSection.vue';
 import FlexibleContentWithPhone from '@/components/sections/FlexibleContentWithPhone.vue';
+import EmberEffect from '@/components/effects/EmberEffect.vue';
 import {
   getInitialConversation,
   getHurdlesIntroduction,
   getTransitionToSolutions,
   getFinalConversation
 } from '@/data/chatSections';
-import ScrollDebugger from '@/utils/scroll/debug/ScrollDebugger';
+import { getTimestampForLog, formatElapsedTime } from '@/utils/timestamp';
 
-
+const frustrationElement = ref<HTMLElement | null>(null);
+// Computed value for ember delay
+const emberDelay = ref(0.5);
+const emberStartTime = ref<number | null>(null);
 // Define the handleResize function
 function handleResize() {
   // Recalculate dimensions on window resize
@@ -133,6 +222,11 @@ const { setupScrollObservers, cleanupScrollObservers } = useScrollAnimation({
   threshold: 0.1
 });
 
+
+const handleEmberStart = () => {
+  emberStartTime.value = Date.now();
+  console.log('Ember effect started at:', getTimestampForLog());
+};
 
 // Calculate scrollable width for a container
 function getScrollableWidth(container: HTMLElement): number {

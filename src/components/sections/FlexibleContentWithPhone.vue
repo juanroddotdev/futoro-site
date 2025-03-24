@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { onMounted, ref, computed, defineExpose, nextTick, onUnmounted } from 'vue';
-import { heroSectionAnimations } from '@/animations/heroSection';
 import PhoneSection from '@/components/PhoneSection.vue';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
@@ -149,7 +148,7 @@ const wrapperHeight = computed(() => {
 </script>
 
 <template>
-  <div class="flexible-wrapper" :style="stickySection ? { height: wrapperHeight } : {}">
+  <div class="flexible-wrapper debug" :style="stickySection ? { height: wrapperHeight } : {}">
     <section 
       ref="sectionRef" 
       class="flexible-section" 
@@ -159,37 +158,37 @@ const wrapperHeight = computed(() => {
       ]"
     >
       <div class="flexible-grid" :class="layout">
-        <div class="content-area" ref="contentRef">
-          <!-- Only show headline area if slot content is provided -->
-          <div class="headline-area mb-6" v-if="$slots.headline">
-            <slot name="headline"></slot>
-          </div>
-          
-          <!-- Only show subheadline area if slot content is provided -->
-          <div class="subheadline-area mb-8" v-if="$slots.subheadline">
-            <slot name="subheadline"></slot>
-          </div>
-          
-          <!-- Only show CTA area if at least one CTA is provided -->
-          <div class="cta-area" v-if="primaryCta || secondaryCta">
-            <div class="flex gap-4">
-              <a 
-                v-if="primaryCta"
-                :href="primaryCta.link" 
-                class="btn-round-large-primary cta"
-              >
-                {{ primaryCta.text }}
-              </a>
-              <a 
-                v-if="secondaryCta"
-                :href="secondaryCta.link" 
-                class="btn-round-large-outline-primary"
-              >
-                {{ secondaryCta.text }}
-              </a>
-            </div>
+        <!-- Headline area (spans full width in default layout) -->
+        <div class="headline-area" v-if="$slots.headline">
+          <slot name="headline"></slot>
+        </div>
+        
+        <!-- Subheadline area -->
+        <div class="subheadline-area" v-if="$slots.subheadline">
+          <slot name="subheadline"></slot>
+        </div>
+        
+        <!-- CTA area -->
+        <div class="cta-area" v-if="primaryCta || secondaryCta">
+          <div class="flex gap-4">
+            <a 
+              v-if="primaryCta"
+              :href="primaryCta.link" 
+              class="btn-round-large-primary cta"
+            >
+              {{ primaryCta.text }}
+            </a>
+            <a 
+              v-if="secondaryCta"
+              :href="secondaryCta.link" 
+              class="btn-round-large-outline-primary"
+            >
+              {{ secondaryCta.text }}
+            </a>
           </div>
         </div>
+        
+        <!-- Phone area -->
         <div class="phone-area">
           <PhoneSection
             :messages="messages" 
@@ -226,88 +225,95 @@ const wrapperHeight = computed(() => {
   
   .flexible-grid {
     display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto 1fr;
     min-height: 100vh;
     padding: 2rem;
     position: relative;
     z-index: 2;
     
-    .content-area {
-      opacity: 1; /* Make visible by default */
+    // Default layout (content-left)
+    .headline-area {
+      grid-column: 1 / -1;
+      grid-row: 1 / 2;
+      padding: 1rem 1rem 0.5rem 1rem;
+      opacity: 1;
+      position: relative;
+      z-index: 3;
+    }
+    
+    .subheadline-area {
+      grid-column: 1 / 2;
+      grid-row: 2 / 3;
+      padding: 0.5rem 1rem;
+      opacity: 1;
+      position: relative;
+      z-index: 3;
+    }
+    
+    .cta-area {
+      grid-column: 1 / 2;
+      grid-row: 3 / 4;
+      padding: 1rem;
+      opacity: 1;
+      position: relative;
+      z-index: 3;
     }
     
     .phone-area {
-      opacity: 1; /* Make visible by default */
-    }
-    
-    &.content-left {
-      grid-template-columns: 1fr 1fr;
-      grid-template-areas: 
-        "content phone";
-      
-      .content-area {
-        grid-area: content;
-        padding-right: 2rem;
-      }
-      
-      .phone-area {
-        grid-area: phone;
-      }
-    }
-    
-    &.content-right {
-      grid-template-columns: 1fr 1fr;
-      grid-template-areas: 
-        "phone content";
-      
-      .content-area {
-        grid-area: content;
-        padding-left: 2rem;
-      }
-      
-      .phone-area {
-        grid-area: phone;
-      }
-    }
-    
-    &.content-top {
-      grid-template-rows: auto 1fr;
-      grid-template-areas: 
-        "content"
-        "phone";
-      
-      .content-area {
-        grid-area: content;
-        padding-bottom: 2rem;
-      }
-      
-      .phone-area {
-        grid-area: phone;
-        display: flex;
-        justify-content: center;
-      }
-    }
-    
-    .content-area {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      
-      .headline-area, 
-      .subheadline-area, 
-      .cta-area {
-        position: relative;
-        z-index: 3;
-        padding: 1rem;
-      }
-    }
-    
-    .phone-area {
+      grid-column: 2 / -1;
+      grid-row: 2 / -1;
+      padding: 1rem;
       align-self: center;
       position: relative;
+      opacity: 1;
       
       .container {
         min-height: unset;
         padding-top: 0;
+      }
+    }
+    
+    // Content right layout
+    &.content-right {
+      .subheadline-area {
+        grid-column: 2 / -1;
+      }
+      
+      .cta-area {
+        grid-column: 2 / -1;
+      }
+      
+      .phone-area {
+        grid-column: 1 / 2;
+      }
+    }
+    
+    // Content top layout
+    &.content-top {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto auto 1fr;
+      
+      .headline-area {
+        grid-column: 1 / -1;
+        grid-row: 1 / 2;
+      }
+      
+      .subheadline-area {
+        grid-column: 1 / -1;
+        grid-row: 2 / 3;
+      }
+      
+      .cta-area {
+        grid-column: 1 / -1;
+        grid-row: 3 / 4;
+      }
+      
+      .phone-area {
+        grid-column: 1 / -1;
+        grid-row: 4 / 5;
+        display: flex;
+        justify-content: center;
       }
     }
   }
@@ -317,20 +323,27 @@ const wrapperHeight = computed(() => {
 @media (max-width: 768px) {
   .flexible-section {
     .flexible-grid {
-      &.content-left,
-      &.content-right {
-        grid-template-columns: 1fr;
-        grid-template-areas: 
-          "content"
-          "phone";
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto auto 1fr;
+      
+      .headline-area {
+        grid-column: 1 / -1;
+        grid-row: 1 / 2;
       }
       
-      .content-area {
-        padding: 1rem;
+      .subheadline-area {
+        grid-column: 1 / -1;
+        grid-row: 2 / 3;
+      }
+      
+      .cta-area {
+        grid-column: 1 / -1;
+        grid-row: 3 / 4;
       }
       
       .phone-area {
-        padding: 1rem;
+        grid-column: 1 / -1;
+        grid-row: 4 / 5;
         justify-content: center;
         display: flex;
       }

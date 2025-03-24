@@ -2,7 +2,8 @@
   <div class="main-content">
     <!-- Hero section is always visible immediately -->
     <GridPaperOverlay :theme="currentTheme.replace('theme-', '')" :floating="true" :spotlight="true">
-      <HeroSectionWithPhone :current-theme="currentTheme" />
+      <!-- <HeroSectionWithPhone :current-theme="currentTheme" /> -->
+      <HeroSection :current-theme="currentTheme" />
     </GridPaperOverlay>
     
     <!-- Lazy load all other sections -->
@@ -50,6 +51,7 @@
 
 <script setup lang="ts">
 import HeroSectionWithPhone from '@/components/sections/HeroSectionWithPhone.vue';
+import HeroSection from '@/components/sections/HeroSection.vue';
 import HurdlesSolutionsSection from '@/components/sections/HurdlesSolutionsSection.vue';
 import ServicesSection from '@/components/sections/ServicesSection.vue';
 import TimelineHowItWorks from '@/components/sections/TimelineHowItWorks.vue';
