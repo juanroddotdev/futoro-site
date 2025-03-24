@@ -48,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 import TypingIndicator from './TypingIndicator.vue';
@@ -103,6 +103,21 @@ const { debugAnimation, elementRef } = useScrollDebugger({
   observeElement: true // Enable observation
 });
 /* ===== SCROLL DEBUGGING END ===== */
+
+onMounted(() => {
+  console.log(`[PhoneSection] Component mounted with sectionId: ${props.sectionId}`);
+  
+  // Ensure containerRef is set
+  nextTick(() => {
+    // Connect the elementRef to containerRef
+    if (containerRef.value) {
+      elementRef.value = containerRef.value;
+      debugAnimation.info('init', 'Container ref connected to scroll debugger');
+    } else {
+      console.error(`[PhoneSection] Container ref not available for section: ${props.sectionId}`);
+    }
+  });
+});
 
 // Connect the elementRef to containerRef
 // This ensures the scroll debugger has access to the element

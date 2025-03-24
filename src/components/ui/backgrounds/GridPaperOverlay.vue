@@ -3,7 +3,8 @@ defineProps<{
   theme?: string,
   floating?: boolean,
   spotlight?: boolean,
-  spotlightPosition?: string
+  spotlightPosition?: string,
+  fixed?: boolean
 }>();
 </script>
 
@@ -14,7 +15,8 @@ defineProps<{
       theme ? `theme-${theme}` : '',
       { 
         'grid-paper-overlay--floating': floating,
-        'grid-paper-overlay--spotlight': spotlight
+        'grid-paper-overlay--spotlight': spotlight,
+        'grid-paper-overlay--fixed': fixed
       }
     ]"
   >
@@ -39,6 +41,17 @@ defineProps<{
 .grid-paper-overlay {
   position: relative;
   isolation: isolate;
+  height: 100%; /* Ensure it fills its container */
+
+  /* When used as a fixed background */
+  &--fixed {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
 
   &::before {
     content: '';
