@@ -2,7 +2,15 @@
   <div class="main-content">
     <GridPaperOverlay :theme="currentTheme.replace('theme-', '')" :floating="true" :spotlight="true">
       <HeroSectionWithPhone :current-theme="currentTheme" />
+      <!-- <HeroSection :current-theme="currentTheme" /> -->
     </GridPaperOverlay>
+    <!-- <PhoneSection 
+      :messages="getInitialConversation()" 
+      sectionId="hero-phone"
+      :showTypingFor="[0, 1]"
+      :tilt-x="8"
+      :tilt-y="-20"
+    /> -->
     <HurdlesSolutionsSection />
     <ServicesSection />
     <TimelineHowItWorks />

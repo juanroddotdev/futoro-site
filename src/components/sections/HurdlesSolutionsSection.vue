@@ -8,15 +8,35 @@
       :tilt-y="-20"
       position="right"
     /> -->
-    <WebsiteSolutionsHeader />
-    <PhoneSection
+    <FlexibleContentWithPhone
+      phonePosition="left"
+      :messages="getHurdlesIntroduction()"
+      :showTypingFor="[0, 1]"
+      :tilt-x="8"
+      :tilt-y="20"
+      sectionId="hurdles"
+      layout="content-right"
+      :animation="{
+        contentFirst: true, // Content appears first
+        delay: 3, // 3 second delay before phone appears
+        duration: 0.7 // Animation duration
+      }"
+        :initiallyHidden="true" 
+        ref="flexibleContentRef"
+    >
+      <template #headline>
+        <WebsiteSolutionsHeader />
+      </template>
+    </FlexibleContentWithPhone>
+    <!-- <WebsiteSolutionsHeader /> -->
+    <!-- <PhoneSection
       :messages="getHurdlesIntroduction()" 
       sectionId="hurdles"
       :showTypingFor="[0, 1]"
       :tilt-x="8"
       :tilt-y="20"
       position="left"
-    />
+    /> -->
 
     <!-- Hurdles Section -->
     <ScrollableCardsSection
@@ -71,6 +91,7 @@ import gsap from 'gsap';
 import WebsiteSolutionsHeader from '@/components/sections/WebsiteSolutionsHeader.vue';
 import ScrollableCardsSection from '@/components/sections/ScrollableCardsSection.vue';
 import PhoneSection from '@/components/PhoneSection.vue';
+import FlexibleContentWithPhone from '@/components/sections/FlexibleContentWithPhone.vue';
 import {
   getVisionToRealitySteps,
   getCommonFrustrationsSteps,
@@ -97,6 +118,12 @@ const state = reactive({
     solutionsContainer: null as HTMLElement | null
   }
 });
+
+// Refs for intersection observer
+const mainSectionRef = ref(null);
+const sectionContainerRef = ref(null);
+const flexibleContentRef = ref(null);
+const sectionVisible = ref(false);
 
 // Extract scroll animation logic to a composable
 const { setupScrollObservers, cleanupScrollObservers } = useScrollAnimation({
@@ -148,6 +175,31 @@ function handleSolutionsScroll() {
 }
 
 onMounted(() => {
+  // Set up intersection observer for the main section
+  if (sectionContainerRef.value) {
+    const observer = new IntersectionObserver((entries) => {
+      const [entry] = entries;
+      if (entry.isIntersecting && !sectionVisible.value) {
+        sectionVisible.value = true;
+        console.log('Section is now visible!');
+        
+        // Trigger animations for all components
+        if (flexibleContentRef.value) {
+          flexibleContentRef.value.startAnimations();
+        }
+        
+        // You can add similar calls to other components
+        
+        // Remove the observer once triggered
+        observer.disconnect();
+      }
+    }, {
+      threshold: 0.1 // Trigger when 10% of the element is visible
+    });
+    
+    observer.observe(sectionContainerRef.value);
+  }
+  
   // Test GSAP
   const testEl = document.createElement('div');
   testEl.textContent = 'Test';
@@ -208,16 +260,10 @@ onUnmounted(() => {
 });
 </script>
 
-<style scoped>
-.keyword {
-  display: inline-block;
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  transition: background-image 0.5s ease;
-}
-
-.word-effect {
-  position: relative; /* Add this to make positioning work */
+<style lang="scss" scoped>
+.section-container {
+  border: 2px solid red; /* Visible border to help with debugging */
+  min-height: 100vh; /* Ensure it's tall enough to trigger properly */
+  opacity: 1; /* The container itself is visible */
 }
 </style>
