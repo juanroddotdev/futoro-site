@@ -64,6 +64,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
+import { getCurrentTime } from '@/utils/timestamp';
 
 interface Props {
   tiltX?: number;
@@ -75,21 +76,12 @@ const props = withDefaults(defineProps<Props>(), {
   tiltY: -15   // Default Y rotation
 });
 
-// Time formatting function
-function formatTime(date: Date): string {
-  return date.toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true
-  }).replace(/\s/g, '').toLowerCase();
-}
-
-const currentTime = ref(formatTime(new Date()));
+const currentTime = ref(getCurrentTime());
 let timeInterval: number | null = null;
 
 onMounted(() => {
   timeInterval = window.setInterval(() => {
-    currentTime.value = formatTime(new Date());
+    currentTime.value = getCurrentTime();
   }, 60000);
 });
 

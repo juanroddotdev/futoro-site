@@ -97,7 +97,7 @@ onMounted(() => {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto auto 1fr;
-    gap: 2rem;
+    // gap: 2rem;
     min-height: 100vh;
     padding: 2rem;
     position: relative;
@@ -106,28 +106,31 @@ onMounted(() => {
     .headline-area {
       grid-column: 1 / -1;
       grid-row: 1 / 2;
-      background: rgba(255,255,255,0.1);
-      padding: 1rem;
+      // background: rgba(255,255,255,0.1);
+      padding: 1rem 1rem 0 1rem;
+      .headline {
+        margin-bottom: 0;
+      }
     }
     
     .subheadline-area {
       grid-column: 1 / 2;
       grid-row: 2 / 3;
-      background: rgba(255,255,255,0.1);
-      padding: 1rem;
+      // background: rgba(255,255,255,0.1);
+      padding: 0 1rem;
     }
     
     .cta-area {
       grid-column: 1 / 2;
       grid-row: 3 / 4;
-      background: rgba(255,255,255,0.1);
+      // background: rgba(255,255,255,0.1);
       padding: 1rem;
     }
     
     .phone-area {
       grid-column: 2 / -1;
       grid-row: 2 / -1;
-      background: rgba(255,255,255,0.1);
+      // background: rgba(255,255,255,0.1);
       padding: 1rem;
       align-self: start;
       position: relative;

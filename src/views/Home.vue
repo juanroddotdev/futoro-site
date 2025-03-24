@@ -1,30 +1,75 @@
 <template>
   <div class="main-content">
+    <!-- Hero section is always visible immediately -->
     <GridPaperOverlay :theme="currentTheme.replace('theme-', '')" :floating="true" :spotlight="true">
       <HeroSectionWithPhone :current-theme="currentTheme" />
     </GridPaperOverlay>
-    <HurdlesSolutionsSection />
-    <ServicesSection />
-    <TimelineHowItWorks />
-    <AboutSectionAlt />
+    
+    <!-- Lazy load all other sections -->
+    <LazySection id="hurdles-solutions" @visible="onSectionVisible('hurdles-solutions')">
+      <!-- Use the default slot instead of a named slot -->
+      <HurdlesSolutionsSection />
+      
+      <!-- Add a placeholder if needed -->
+      <template #placeholder>
+        <div class="section-placeholder">Loading...</div>
+      </template>
+    </LazySection>
+    
+    <!-- Services section - use default slot instead of content slot -->
+    <LazySection id="services" @visible="onSectionVisible('services')">
+      <!-- Remove the template #content wrapper -->
+      <ServicesSection />
+      
+      <template #placeholder>
+        <div class="section-placeholder">Loading...</div>
+      </template>
+    </LazySection>
+    
+    <!-- Timeline section - use default slot instead of content slot -->
+    <LazySection id="timeline" @visible="onSectionVisible('timeline')">
+      <!-- Remove the template #content wrapper -->
+      <TimelineHowItWorks />
+      
+      <template #placeholder>
+        <div class="section-placeholder">Loading...</div>
+      </template>
+    </LazySection>
+    
+    <!-- About section - use default slot instead of content slot -->
+    <LazySection id="about" @visible="onSectionVisible('about')">
+      <!-- Remove the template #content wrapper -->
+      <AboutSectionAlt />
+      
+      <template #placeholder>
+        <div class="section-placeholder">Loading...</div>
+      </template>
+    </LazySection>
   </div>
 </template>
 
 <script setup lang="ts">
-import HeroSection from '@/components/sections/HeroSection.vue';
 import HeroSectionWithPhone from '@/components/sections/HeroSectionWithPhone.vue';
+import HurdlesSolutionsSection from '@/components/sections/HurdlesSolutionsSection.vue';
 import ServicesSection from '@/components/sections/ServicesSection.vue';
 import TimelineHowItWorks from '@/components/sections/TimelineHowItWorks.vue';
 import AboutSectionAlt from '@/components/sections/AboutSectionAlt.vue';
-import HurdlesSolutionsSection from '@/components/sections/HurdlesSolutionsSection.vue';
-import PhoneSection from '@/components/PhoneSection.vue';
-import {
-  getInitialConversation,
-} from '@/data/chatSections';
+import LazySection from '@/components/LazySection.vue';
+import { useSectionLoader } from '@/composables/useSectionLoader';
+import { useTheme } from '@/composables/useTheme';
 
-defineProps<{
-  currentTheme: string
-}>();
+// Get the global theme
+const { currentTheme } = useTheme();
+
+// Use the section loader
+const sectionLoader = useSectionLoader();
+
+// Handle section visibility
+function onSectionVisible(sectionId: string) {
+  console.log(`[Home] Section ${sectionId} is now visible`);
+  sectionLoader.markSectionLoaded(sectionId);
+  sectionLoader.markSectionVisible(sectionId);
+}
 </script>
 
 <style lang="scss">

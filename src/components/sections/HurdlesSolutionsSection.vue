@@ -1,22 +1,26 @@
 <template>
-  <div class="progressive-reveal overflow-visible"> <!-- Ensure overflow is visible -->
-    <!-- <PhoneSection
-      :messages="getInitialConversation()" 
-      sectionId="vision"
-      :showTypingFor="[0, 1]"
-      :tilt-x="8"
-      :tilt-y="-20"
-      position="right"
-    /> -->
-    <WebsiteSolutionsHeader />
-    <PhoneSection
-      :messages="getHurdlesIntroduction()" 
-      sectionId="hurdles"
+  <div class="progressive-reveal overflow-visible" ref="sectionContainerRef">
+    <FlexibleContentWithPhone
+      phonePosition="left"
+      :messages="getHurdlesIntroduction()"
       :showTypingFor="[0, 1]"
       :tilt-x="8"
       :tilt-y="20"
-      position="left"
-    />
+      sectionId="hurdles"
+      layout="content-right"
+      :animation="{
+        contentFirst: true,
+        duration: 0.7,
+        phoneDelay: 1
+      }"
+      :initiallyHidden="true" 
+      ref="flexibleContentRef"
+    >
+      <template #headline>
+        <WebsiteSolutionsHeader />
+      </template>
+      
+    </FlexibleContentWithPhone>
 
     <!-- Hurdles Section -->
     <ScrollableCardsSection
@@ -64,24 +68,42 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, computed, ref, reactive } from 'vue';
+import { onMounted, onUnmounted, computed, ref, reactive, watch, nextTick } from 'vue';
+import type { ComponentPublicInstance } from 'vue';
 import { struggles, solutions } from '@/data/strugglesAndSolutions';
 import { useScrollAnimation } from '@/composables/useScrollAnimation';
+import { useScrollDebugger } from '@/composables/useScrollDebugger';
 import gsap from 'gsap';
 import WebsiteSolutionsHeader from '@/components/sections/WebsiteSolutionsHeader.vue';
 import ScrollableCardsSection from '@/components/sections/ScrollableCardsSection.vue';
 import PhoneSection from '@/components/PhoneSection.vue';
+import FlexibleContentWithPhone from '@/components/sections/FlexibleContentWithPhone.vue';
 import {
-  getVisionToRealitySteps,
-  getCommonFrustrationsSteps,
-  getPersonalApproachSteps,
-  getCollaborationProcessSteps,
   getInitialConversation,
   getHurdlesIntroduction,
   getTransitionToSolutions,
   getFinalConversation
 } from '@/data/chatSections';
+import ScrollDebugger from '@/utils/scroll/debug/ScrollDebugger';
 
+
+// Define the handleResize function
+function handleResize() {
+  // Recalculate dimensions on window resize
+  nextTick(() => {
+    initializeElements();
+  });
+  
+}
+
+// Register components we want to track
+onMounted(() => {
+  
+  // Initialize elements after a short delay to ensure DOM is updated
+  nextTick(() => {
+    initializeElements();
+  });
+});
 
 // Computed property to reverse the solutions array
 const reversedSolutions = computed(() => [...solutions].reverse());
@@ -98,11 +120,19 @@ const state = reactive({
   }
 });
 
+// Refs for intersection observer
+const flexibleContentRef = ref<ComponentPublicInstance<{}, { 
+  startAnimations: () => void,
+  animation?: { phoneDelay?: number | string },
+  initiallyHidden?: boolean
+}>>();
+
 // Extract scroll animation logic to a composable
 const { setupScrollObservers, cleanupScrollObservers } = useScrollAnimation({
   onScroll: handleScroll,
   threshold: 0.1
 });
+
 
 // Calculate scrollable width for a container
 function getScrollableWidth(container: HTMLElement): number {
@@ -129,6 +159,8 @@ function handleHurdlesScroll() {
   // Apply transform to hurdles container (right to left)
   const hurdlesTransform = hurdlesProgress * state.hurdlesScrollWidth;
   hurdlesContainer.style.transform = `translateX(-${hurdlesTransform}px)`;
+  
+
 }
 
 // Handle solutions section scroll
@@ -145,21 +177,11 @@ function handleSolutionsScroll() {
   // Apply transform to solutions container (reversed direction)
   const solutionsTransform = (1 - solutionsProgress) * state.solutionsScrollWidth;
   solutionsContainer.style.transform = `translateX(-${solutionsTransform}px)`;
+  
+ 
 }
 
-onMounted(() => {
-  // Test GSAP
-  const testEl = document.createElement('div');
-  testEl.textContent = 'Test';
-  document.body.appendChild(testEl);
-  gsap.to(testEl, {
-    x: 100,
-    duration: 1,
-    onComplete: () => {
-      console.log('GSAP test animation complete');
-      testEl.remove();
-    }
-  });
+function initializeElements() {
   
   // Get elements
   state.elements.hurdlesSection = document.getElementById('hurdlesSection');
@@ -170,35 +192,20 @@ onMounted(() => {
   // Calculate scrollable widths
   if (state.elements.hurdlesContainer) {
     state.hurdlesScrollWidth = getScrollableWidth(state.elements.hurdlesContainer);
-  }
   
+  }
   if (state.elements.solutionsContainer) {
     state.solutionsScrollWidth = getScrollableWidth(state.elements.solutionsContainer);
-  }
 
+  } 
   // Set up observers and scroll handler
-  setupScrollObservers(state.elements.hurdlesSection, state.elements.solutionsSection);
-  window.addEventListener('scroll', handleScroll);
-  
-  // Initial calculation
-  handleScroll();
-  
-  // Handle window resize
-  window.addEventListener('resize', handleResize);
-});
-
-// Recalculate on window resize
-function handleResize() {
-  if (state.elements.hurdlesContainer) {
-    state.hurdlesScrollWidth = getScrollableWidth(state.elements.hurdlesContainer);
-  }
-  
-  if (state.elements.solutionsContainer) {
-    state.solutionsScrollWidth = getScrollableWidth(state.elements.solutionsContainer);
-  }
-  
-  // Update transforms
-  handleScroll();
+  if (state.elements.hurdlesSection && state.elements.solutionsSection) {
+    setupScrollObservers(state.elements.hurdlesSection, state.elements.solutionsSection);
+    window.addEventListener('scroll', handleScroll);
+    
+    // Initial calculation
+    handleScroll();
+  } 
 }
 
 onUnmounted(() => {
@@ -206,18 +213,13 @@ onUnmounted(() => {
   window.removeEventListener('resize', handleResize);
   cleanupScrollObservers();
 });
+
 </script>
 
-<style scoped>
-.keyword {
-  display: inline-block;
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  transition: background-image 0.5s ease;
-}
-
-.word-effect {
-  position: relative; /* Add this to make positioning work */
+<style lang="scss" scoped>
+.section-container {
+  border: 2px solid red; /* Visible border to help with debugging */
+  min-height: 100vh; /* Ensure it's tall enough to trigger properly */
+  opacity: 1; /* The container itself is visible */
 }
 </style>
