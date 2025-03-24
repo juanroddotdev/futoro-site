@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useTheme } from '@/composables/useTheme';
 
 const themes = [
   { 
@@ -25,21 +26,14 @@ const themes = [
 ];
 
 const showThemes = ref(false);
-
-const props = defineProps<{
-  currentTheme: string
-}>();
+const { currentTheme, handleThemeChange } = useTheme();
 
 const currentThemeGradient = computed(() => {
-  return themes.find(theme => theme.name === props.currentTheme)?.gradient || themes[0].gradient;
+  return themes.find(theme => theme.name === currentTheme.value)?.gradient || themes[0].gradient;
 });
 
-const emit = defineEmits<{
-  (e: 'update:currentTheme', value: string): void
-}>();
-
 const setTheme = (themeName: string) => {
-  emit('update:currentTheme', themeName);
+  handleThemeChange(themeName);
   showThemes.value = false;
 };
 

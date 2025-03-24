@@ -32,30 +32,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import Navbar from '@/components/layout/Navbar.vue';
 import Footer from '@/components/layout/Footer.vue';
 import ContactSectionV2 from './components/sections/ContactSectionV2.vue';
 import ThemeSwitcher from '@/components/ThemeSwitcher.vue';
+import { useTheme } from '@/composables/useTheme';
 
 const route = useRoute();
-const currentTheme = ref('theme-neon-horizon');
-const isThemeTransitioning = ref(false);
-
-const handleThemeChange = (newTheme: string) => {
-  if (currentTheme.value === newTheme) return;
-
-  isThemeTransitioning.value = true;
-  document.documentElement.classList.add('theme-transition-active');
-
-  setTimeout(() => {
-    currentTheme.value = newTheme;
-  }, 50);
-
-  setTimeout(() => {
-    document.documentElement.classList.remove('theme-transition-active');
-    isThemeTransitioning.value = false;
-  }, 800);
-};
+const { currentTheme, isThemeTransitioning, handleThemeChange } = useTheme();
 </script>

@@ -1,38 +1,59 @@
 <template>
   <div class="main-content">
+    <!-- Hero section is always visible immediately -->
     <GridPaperOverlay :theme="currentTheme.replace('theme-', '')" :floating="true" :spotlight="true">
       <HeroSectionWithPhone :current-theme="currentTheme" />
-      <!-- <HeroSection :current-theme="currentTheme" /> -->
     </GridPaperOverlay>
-    <!-- <PhoneSection 
-      :messages="getInitialConversation()" 
-      sectionId="hero-phone"
-      :showTypingFor="[0, 1]"
-      :tilt-x="8"
-      :tilt-y="-20"
-    /> -->
-    <HurdlesSolutionsSection />
-    <ServicesSection />
-    <TimelineHowItWorks />
-    <AboutSectionAlt />
+    
+    <!-- Lazy load all other sections -->
+    <LazySection id="hurdles-solutions" @visible="onSectionVisible('hurdles-solutions')">
+      <template #content>
+        <HurdlesSolutionsSection />
+      </template>
+    </LazySection>
+    
+    <LazySection id="services" @visible="onSectionVisible('services')">
+      <template #content>
+        <ServicesSection />
+      </template>
+    </LazySection>
+    
+    <LazySection id="timeline" @visible="onSectionVisible('timeline')">
+      <template #content>
+        <TimelineHowItWorks />
+      </template>
+    </LazySection>
+    
+    <LazySection id="about" @visible="onSectionVisible('about')">
+      <template #content>
+        <AboutSectionAlt />
+      </template>
+    </LazySection>
   </div>
 </template>
 
 <script setup lang="ts">
-import HeroSection from '@/components/sections/HeroSection.vue';
 import HeroSectionWithPhone from '@/components/sections/HeroSectionWithPhone.vue';
+import HurdlesSolutionsSection from '@/components/sections/HurdlesSolutionsSection.vue';
 import ServicesSection from '@/components/sections/ServicesSection.vue';
 import TimelineHowItWorks from '@/components/sections/TimelineHowItWorks.vue';
 import AboutSectionAlt from '@/components/sections/AboutSectionAlt.vue';
-import HurdlesSolutionsSection from '@/components/sections/HurdlesSolutionsSection.vue';
-import PhoneSection from '@/components/PhoneSection.vue';
-import {
-  getInitialConversation,
-} from '@/data/chatSections';
+import LazySection from '@/components/LazySection.vue';
+import { useSectionLoader } from '@/composables/useSectionLoader';
+import { useTheme } from '@/composables/useTheme';
 
-defineProps<{
-  currentTheme: string
-}>();
+// Get the global theme
+const { currentTheme } = useTheme();
+
+// Use the section loader
+const sectionLoader = useSectionLoader();
+
+// Handle section visibility
+function onSectionVisible(sectionId: string) {
+  console.log(`[Home] Section ${sectionId} is now visible`);
+  sectionLoader.markSectionLoaded(sectionId);
+  sectionLoader.markSectionVisible(sectionId);
+}
 </script>
 
 <style lang="scss">

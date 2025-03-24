@@ -58,66 +58,30 @@ const contentRef = ref<HTMLElement | null>(null);
 const isVisible = ref(false);
 const animationStarted = ref(false);
 
-// Add timestamp utility function
-const getTimestamp = () => {
-  const now = new Date();
-  const time = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3 });
-  return `[${time}]`;
-};
-
-// Track component load time
-const componentLoadTime = performance.now();
 
 onMounted(() => {
-  console.log(`${getTimestamp()} 🔄 FlexibleContentWithPhone mounted (t=${(performance.now() - componentLoadTime).toFixed(0)}ms)`);
-  
-  // Check if elements are available on mount
-  const contentArea = contentRef.value;
-  const phoneArea = sectionRef.value?.querySelector('.phone-area');
-  
-  console.log(`${getTimestamp()} 📊 Elements on mount:`, {
-    contentRef: !!contentRef.value,
-    sectionRef: !!sectionRef.value,
-    contentArea: !!contentArea,
-    phoneArea: !!phoneArea,
-    initiallyHidden: props.initiallyHidden
-  });
+
   
   // If not initially hidden, start animations immediately
   if (!props.initiallyHidden) {
-    console.log(`${getTimestamp()} 🚀 Auto-starting animations (initiallyHidden=false)`);
     startAnimations();
   }
 });
 
 // Create a method to start animations that can be called externally
 const startAnimations = () => {
-  const startTime = performance.now() - componentLoadTime;
-  console.log(`${getTimestamp()} 🚀 startAnimations called in FlexibleContentWithPhone (t=${startTime.toFixed(0)}ms)`);
-  
   if (animationStarted.value) {
-    console.log(`${getTimestamp()} ⚠️ Animation already started, returning early (t=${startTime.toFixed(0)}ms)`);
     return; // Prevent multiple starts
   }
   
   const contentArea = contentRef.value;
   const phoneArea = sectionRef.value?.querySelector('.phone-area');
   
-  console.log(`${getTimestamp()} 📊 Animation elements:`, {
-    contentArea: !!contentArea,
-    phoneArea: !!phoneArea,
-    delay: props.animation.delay || 0,
-    phoneDelay: props.animation.phoneDelay,
-    time: `${startTime.toFixed(0)}ms`
-  });
-  
   if (!contentArea || !phoneArea) {
-    console.error(`${getTimestamp()} ❌ Missing required elements for animation (t=${startTime.toFixed(0)}ms)`);
     return;
   }
   
   // Set initial state - hide both elements
-  console.log(`${getTimestamp()} 🎬 Setting initial animation state (t=${startTime.toFixed(0)}ms)`);
   gsap.set(contentArea, { 
     autoAlpha: 0,
     y: 30
@@ -130,9 +94,7 @@ const startAnimations = () => {
   
   // Create timeline for sequential animation
   const tl = gsap.timeline({
-    delay: props.animation.delay || 0,
-    onStart: () => console.log(`${getTimestamp()} ⏱️ Animation timeline started (t=${(performance.now() - componentLoadTime).toFixed(0)}ms)`),
-    onComplete: () => console.log(`${getTimestamp()} ✅ Animation timeline completed (t=${(performance.now() - componentLoadTime).toFixed(0)}ms)`)
+    delay: props.animation.delay || 0
   });
   
   // Always animate content first
@@ -140,9 +102,7 @@ const startAnimations = () => {
     autoAlpha: 1,
     y: 0,
     duration: props.animation.duration,
-    ease: "power2.out",
-    onStart: () => console.log(`${getTimestamp()} 📄 Content animation started (t=${(performance.now() - componentLoadTime).toFixed(0)}ms)`),
-    onComplete: () => console.log(`${getTimestamp()} 📄 Content animation completed (t=${(performance.now() - componentLoadTime).toFixed(0)}ms)`)
+    ease: "power2.out"
   });
   
   // Add phone with specific delay
@@ -150,18 +110,16 @@ const startAnimations = () => {
     autoAlpha: 1,
     y: 0,
     duration: props.animation.duration,
-    ease: "power2.out",
-    onStart: () => console.log(`${getTimestamp()} 📱 Phone animation started after delay: ${props.animation.phoneDelay} (t=${(performance.now() - componentLoadTime).toFixed(0)}ms)`),
-    onComplete: () => console.log(`${getTimestamp()} 📱 Phone animation completed (t=${(performance.now() - componentLoadTime).toFixed(0)}ms)`)
+    ease: "power2.out"
   }, `+=${props.animation.phoneDelay}`);
   
   animationStarted.value = true;
-  console.log(`${getTimestamp()} 🏁 Animation sequence initialized (t=${(performance.now() - componentLoadTime).toFixed(0)}ms)`);
 };
 
-// Expose the startAnimations method to parent components
+// Expose the startAnimations method and animation props to parent components
 defineExpose({
-  startAnimations
+  startAnimations,
+  animation: props.animation
 });
 
 // Calculate wrapper height based on messages

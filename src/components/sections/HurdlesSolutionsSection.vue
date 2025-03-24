@@ -1,13 +1,5 @@
 <template>
-  <div class="progressive-reveal overflow-visible" ref="sectionContainerRef"> <!-- Added ref here -->
-    <!-- <PhoneSection
-      :messages="getInitialConversation()" 
-      sectionId="vision"
-      :showTypingFor="[0, 1]"
-      :tilt-x="8"
-      :tilt-y="-20"
-      position="right"
-    /> -->
+  <div class="progressive-reveal overflow-visible" ref="sectionContainerRef">
     <FlexibleContentWithPhone
       phonePosition="left"
       :messages="getHurdlesIntroduction()"
@@ -17,8 +9,8 @@
       sectionId="hurdles"
       layout="content-right"
       :animation="{
-        contentFirst: true, // Content appears first
-        duration: 0.7, // Animation duration
+        contentFirst: true,
+        duration: 0.7,
         phoneDelay: 1
       }"
       :initiallyHidden="true" 
@@ -28,15 +20,6 @@
         <WebsiteSolutionsHeader />
       </template>
     </FlexibleContentWithPhone>
-    <!-- <WebsiteSolutionsHeader /> -->
-    <!-- <PhoneSection
-      :messages="getHurdlesIntroduction()" 
-      sectionId="hurdles"
-      :showTypingFor="[0, 1]"
-      :tilt-x="8"
-      :tilt-y="20"
-      position="left"
-    /> -->
 
     <!-- Hurdles Section -->
     <ScrollableCardsSection
@@ -84,26 +67,62 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, computed, ref, reactive } from 'vue';
+import { onMounted, onUnmounted, computed, ref, reactive, watch, nextTick } from 'vue';
 import type { ComponentPublicInstance } from 'vue';
 import { struggles, solutions } from '@/data/strugglesAndSolutions';
 import { useScrollAnimation } from '@/composables/useScrollAnimation';
+import { useScrollDebugger } from '@/composables/useScrollDebugger';
 import gsap from 'gsap';
 import WebsiteSolutionsHeader from '@/components/sections/WebsiteSolutionsHeader.vue';
 import ScrollableCardsSection from '@/components/sections/ScrollableCardsSection.vue';
 import PhoneSection from '@/components/PhoneSection.vue';
 import FlexibleContentWithPhone from '@/components/sections/FlexibleContentWithPhone.vue';
 import {
-  getVisionToRealitySteps,
-  getCommonFrustrationsSteps,
-  getPersonalApproachSteps,
-  getCollaborationProcessSteps,
   getInitialConversation,
   getHurdlesIntroduction,
   getTransitionToSolutions,
   getFinalConversation
 } from '@/data/chatSections';
+import ScrollDebugger from '@/utils/scroll/debug/ScrollDebugger';
 
+// Set up scroll debugger
+const { elementRef: sectionContainerRef, isVisible: sectionVisible, debugAnimation } = 
+  useScrollDebugger({ 
+    sectionId: 'hurdles-solutions-section',
+    enabled: true, // Explicitly enable debugging
+    threshold: 0.1
+  });
+
+// Define the handleResize function
+function handleResize() {
+  // Recalculate dimensions on window resize
+  nextTick(() => {
+    initializeElements();
+  });
+  
+  debugAnimation.info('global', 'Window resized - recalculating dimensions');
+}
+
+// Register components we want to track
+onMounted(() => {
+  // Enable ScrollDebugger globally
+  ScrollDebugger.setEnabled(true);
+  ScrollDebugger.registerSection('hurdles-solutions-section');
+  debugAnimation.registerComponent('flexible-content');
+  debugAnimation.registerComponent('hurdles-section');
+  debugAnimation.registerComponent('solutions-section');
+  
+  // Log something to verify the debugger is working
+  debugAnimation.info('global', 'ScrollDebugger initialized in HurdlesSolutionsSection');
+  
+  // Initialize elements after a short delay to ensure DOM is updated
+  nextTick(() => {
+    initializeElements();
+  });
+  
+  // Handle window resize
+  window.addEventListener('resize', handleResize);
+});
 
 // Computed property to reverse the solutions array
 const reversedSolutions = computed(() => [...solutions].reverse());
@@ -120,27 +139,40 @@ const state = reactive({
   }
 });
 
-// Add timestamp utility function
-const getTimestamp = () => {
-  const now = new Date();
-  const time = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3 });
-  return `[${time}]`;
-};
-
-// Track page load time
-const pageLoadTime = performance.now();
-console.log(`${getTimestamp()} 📄 Page load started (t=0ms)`);
-
 // Refs for intersection observer
-const mainSectionRef = ref(null);
-const sectionContainerRef = ref(null);
-const flexibleContentRef = ref<ComponentPublicInstance<{}, { startAnimations: () => void }>>();
-const sectionVisible = ref(false);
+const flexibleContentRef = ref<ComponentPublicInstance<{}, { 
+  startAnimations: () => void,
+  animation?: { phoneDelay?: number | string }
+}>>();
 
 // Extract scroll animation logic to a composable
 const { setupScrollObservers, cleanupScrollObservers } = useScrollAnimation({
   onScroll: handleScroll,
   threshold: 0.1
+});
+
+// Watch for section visibility and trigger animations
+watch(sectionVisible, (isVisible) => {
+  if (isVisible) {
+    // Trigger animations for all components
+    if (flexibleContentRef.value) {
+      debugAnimation.triggered('flexible-content', {
+        phoneDelay: flexibleContentRef.value?.animation?.phoneDelay || 'default'
+      });
+      
+      // Start the animations
+      flexibleContentRef.value.startAnimations();
+      
+      debugAnimation.started('flexible-content');
+      
+      // For demo purposes, simulate animation completion after delay
+      setTimeout(() => {
+        debugAnimation.completed('flexible-content');
+      }, 1000);
+    } else {
+      debugAnimation.error('flexible-content', 'flexibleContentRef is not available');
+    }
+  }
 });
 
 // Calculate scrollable width for a container
@@ -168,6 +200,13 @@ function handleHurdlesScroll() {
   // Apply transform to hurdles container (right to left)
   const hurdlesTransform = hurdlesProgress * state.hurdlesScrollWidth;
   hurdlesContainer.style.transform = `translateX(-${hurdlesTransform}px)`;
+  
+  // Log progress with debugger
+  if (hurdlesProgress > 0 && hurdlesProgress < 1) {
+    debugAnimation.info('hurdles-section', `Scroll progress: ${hurdlesProgress.toFixed(2)}`, {
+      transform: hurdlesTransform
+    });
+  }
 }
 
 // Handle solutions section scroll
@@ -184,87 +223,17 @@ function handleSolutionsScroll() {
   // Apply transform to solutions container (reversed direction)
   const solutionsTransform = (1 - solutionsProgress) * state.solutionsScrollWidth;
   solutionsContainer.style.transform = `translateX(-${solutionsTransform}px)`;
+  
+  // Log progress with debugger
+  if (solutionsProgress > 0 && solutionsProgress < 1) {
+    debugAnimation.info('solutions-section', `Scroll progress: ${solutionsProgress.toFixed(2)}`, {
+      transform: solutionsTransform
+    });
+  }
 }
 
-onMounted(() => {
-  const mountTime = performance.now() - pageLoadTime;
-  console.log(`${getTimestamp()} 🔄 Component mounted (t=${mountTime.toFixed(0)}ms)`);
-  
-  // Set up intersection observer for the main section
-  if (sectionContainerRef.value) {
-    console.log(`${getTimestamp()} 🔍 Setting up intersection observer for HurdlesSolutionsSection`);
-    
-    // Check if element is already in viewport on page load
-    const rect = sectionContainerRef.value.getBoundingClientRect();
-    const isInitiallyVisible = (
-      rect.top >= 0 &&
-      rect.left >= 0 &&
-      rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-      rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-    );
-    
-    console.log(`${getTimestamp()} 📏 Initial visibility check: ${isInitiallyVisible} (t=${(performance.now() - pageLoadTime).toFixed(0)}ms)`);
-    
-    // If already visible on page load, trigger animations immediately
-    if (isInitiallyVisible && !sectionVisible.value) {
-      sectionVisible.value = true;
-      console.log(`${getTimestamp()} 🔍 HurdlesSolutionsSection is initially visible in viewport (t=${(performance.now() - pageLoadTime).toFixed(0)}ms)`);
-      
-      // Trigger animations for all components
-      if (flexibleContentRef.value) {
-        console.log(`${getTimestamp()} 📱 Starting phone animations immediately (t=${(performance.now() - pageLoadTime).toFixed(0)}ms)`);
-        flexibleContentRef.value.startAnimations();
-      } else {
-        console.error(`${getTimestamp()} ❌ flexibleContentRef is not available (t=${(performance.now() - pageLoadTime).toFixed(0)}ms)`);
-      }
-    }
-    
-    // Set up observer for scrolling into view later
-    const observer = new IntersectionObserver((entries) => {
-      const [entry] = entries;
-      const observerTime = performance.now() - pageLoadTime;
-      
-      console.log(`${getTimestamp()} 👁️ Intersection detected (t=${observerTime.toFixed(0)}ms), isIntersecting: ${entry.isIntersecting}`);
-      
-      if (entry.isIntersecting && !sectionVisible.value) {
-        sectionVisible.value = true;
-        console.log(`${getTimestamp()} 🔍 HurdlesSolutionsSection is now visible in viewport (t=${observerTime.toFixed(0)}ms)`);
-        
-        // Trigger animations for all components
-        if (flexibleContentRef.value) {
-          console.log(`${getTimestamp()} 📱 Starting phone animations with delay: ${
-            flexibleContentRef.value.$props?.animation?.phoneDelay || 'default'} (t=${observerTime.toFixed(0)}ms)`);
-          flexibleContentRef.value.startAnimations();
-        } else {
-          console.error(`${getTimestamp()} ❌ flexibleContentRef is not available (t=${observerTime.toFixed(0)}ms)`);
-        }
-        
-        // Remove the observer once triggered
-        observer.disconnect();
-        console.log(`${getTimestamp()} 👁️ Intersection observer disconnected (t=${observerTime.toFixed(0)}ms)`);
-      }
-    }, {
-      threshold: 0.1 // Trigger when 10% of the element is visible
-    });
-    
-    observer.observe(sectionContainerRef.value);
-    console.log(`${getTimestamp()} 👀 Now observing section container (t=${(performance.now() - pageLoadTime).toFixed(0)}ms)`);
-  } else {
-    console.error(`${getTimestamp()} ❌ sectionContainerRef is not available (t=${(performance.now() - pageLoadTime).toFixed(0)}ms)`);
-  }
-  
-  // Test GSAP
-  const testEl = document.createElement('div');
-  testEl.textContent = 'Test';
-  document.body.appendChild(testEl);
-  gsap.to(testEl, {
-    x: 100,
-    duration: 1,
-    onComplete: () => {
-      console.log('GSAP test animation complete');
-      testEl.remove();
-    }
-  });
+function initializeElements() {
+  debugAnimation.info('global', 'Initializing elements');
   
   // Get elements
   state.elements.hurdlesSection = document.getElementById('hurdlesSection');
@@ -275,41 +244,35 @@ onMounted(() => {
   // Calculate scrollable widths
   if (state.elements.hurdlesContainer) {
     state.hurdlesScrollWidth = getScrollableWidth(state.elements.hurdlesContainer);
+    debugAnimation.info('hurdles-section', 'Calculated scroll width', { width: state.hurdlesScrollWidth });
+  } else {
+    debugAnimation.error('hurdles-section', 'hurdlesContainer not found');
   }
   
   if (state.elements.solutionsContainer) {
     state.solutionsScrollWidth = getScrollableWidth(state.elements.solutionsContainer);
+    debugAnimation.info('solutions-section', 'Calculated scroll width', { width: state.solutionsScrollWidth });
+  } else {
+    debugAnimation.error('solutions-section', 'solutionsContainer not found');
   }
 
   // Set up observers and scroll handler
-  setupScrollObservers(state.elements.hurdlesSection, state.elements.solutionsSection);
-  window.addEventListener('scroll', handleScroll);
-  
-  // Initial calculation
-  handleScroll();
-  
-  // Handle window resize
-  window.addEventListener('resize', handleResize);
-});
-
-// Recalculate on window resize
-function handleResize() {
-  if (state.elements.hurdlesContainer) {
-    state.hurdlesScrollWidth = getScrollableWidth(state.elements.hurdlesContainer);
+  if (state.elements.hurdlesSection && state.elements.solutionsSection) {
+    setupScrollObservers(state.elements.hurdlesSection, state.elements.solutionsSection);
+    window.addEventListener('scroll', handleScroll);
+    
+    // Initial calculation
+    handleScroll();
+  } else {
+    debugAnimation.error('global', 'Failed to set up observers - sections not found');
   }
-  
-  if (state.elements.solutionsContainer) {
-    state.solutionsScrollWidth = getScrollableWidth(state.elements.solutionsContainer);
-  }
-  
-  // Update transforms
-  handleScroll();
 }
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll);
   window.removeEventListener('resize', handleResize);
   cleanupScrollObservers();
+  debugAnimation.info('global', 'Component unmounted');
 });
 </script>
 
