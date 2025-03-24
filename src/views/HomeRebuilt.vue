@@ -29,8 +29,8 @@
     </LazySection>
     <!-- Timeline section - use default slot instead of content slot -->
     <LazySection id="timeline" @visible="onSectionVisible('timeline')">
-      <!-- Remove the template #content wrapper -->
-      <TimelineHowItWorks />
+      <!-- Replace TimelineHowItWorks with the refactored Timeline component -->
+      <Timeline />
       
       <template #placeholder>
         <div class="section-placeholder">Loading...</div>
@@ -46,7 +46,7 @@ import { ref, onMounted, computed } from 'vue';
 import HeroSection from '@/components/sections/refactored/HeroSection.vue';
 import HurdlesSolutionsSection from '@/components/sections/refactored/HurdlesSolutionsSection.vue';
 import LazySection from '@/components/LazySection.vue';
-import TimelineHowItWorks from '@/components/sections/TimelineHowItWorks.vue';
+import Timeline from '@/components/sections/refactored/Timeline.vue';
 import ServicesSection from '@/components/sections/refactored/ServicesSection.vue';
 import { useTheme } from '@/composables/useTheme';
 import { useSectionLoader } from '@/composables/useSectionLoader';

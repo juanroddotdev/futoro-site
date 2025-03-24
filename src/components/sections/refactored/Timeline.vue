@@ -114,7 +114,7 @@ onMounted(() => {
           </defs>
           <text class="circle-text">
             <textPath href="#circlePath" startOffset="0%">
-              ☞ ☞CLICK ME ☞ CLICK ME
+              ☞ CLICK ME ☞ CLICK ME
             </textPath>
           </text>
         </svg>
@@ -246,6 +246,95 @@ onMounted(() => {
   .touch-circle-btn:hover & {
     transform: scale(0);
     opacity: 0;
+  }
+}
+.rotating-text {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  animation: rotate 10s linear infinite;
+  
+  .circle-text {
+    fill: currentColor;
+    font-size: 1.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// .timeline-line {
+//   background: linear-gradient(to bottom, 
+//     var(--color-primary-500) 0%, 
+//     var(--color-secondary-500) 100%);
+//   border-radius: 4px;
+// }
+
+// .timeline-stem {
+//   background: linear-gradient(to right, 
+//     var(--color-primary-500) 0%, 
+//     var(--color-secondary-500) 100%);
+//   border-radius: 4px;
+// }
+
+// .timeline-number {
+//   background: var(--color-primary-500);
+//   color: var(--color-background);
+//   box-shadow: 0 0 10px rgba(var(--color-primary-rgb), 0.5);
+// }
+
+// .timeline-card {
+//   background: var(--color-card-bg);
+//   border: 1px solid var(--color-border);
+//   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+//   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+//   &:hover {
+//     transform: translateY(-5px);
+//     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+//   }
+// }
+
+.btn-round-large-primary {
+  position: relative;
+  padding: 1.5rem 3rem;
+  border-radius: 9999px;
+  background: var(--color-primary-500);
+  color: var(--color-text-on-primary);
+  font-weight: 600;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  
+  &:hover {
+    background: var(--color-primary-600);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(var(--color-primary-rgb), 0.3);
+    
+    .rotating-text {
+      opacity: 1;
+    }
+    
+    .hover-text {
+      opacity: 0;
+    }
+  }
+  
+  .rotating-text {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .hover-text {
+    transition: opacity 0.3s ease;
   }
 }
 </style>
