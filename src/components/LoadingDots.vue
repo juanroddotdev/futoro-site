@@ -17,6 +17,7 @@ const props = withDefaults(defineProps<{
   loop?: boolean;
   customClass?: string;
   paused?: boolean;
+  dotsDisabled?: boolean;  // New property to disable animation
   animationStyle?: LoadingDotsAnimationStyle;
 }>(), {
   dots: 3,
@@ -29,6 +30,7 @@ const props = withDefaults(defineProps<{
   loop: true,
   customClass: '',
   paused: false,
+  dotsDisabled: false,  // Default is false
   animationStyle: 'bounce'
 });
 
@@ -37,21 +39,27 @@ let loadingAnimation: ReturnType<typeof createLoadingDots> | null = null;
 
 onMounted(() => {
   if (dotsContainer.value) {
-    loadingAnimation = createLoadingDots({
-      container: dotsContainer.value,
-      dots: props.dots,
-      duration: props.duration,
-      delay: props.delay,
-      dotSize: props.dotSize,
-      dotColor: props.dotColor,
-      dotSpacing: props.dotSpacing,
-      yOffset: props.yOffset,
-      loop: props.loop,
-      animationStyle: props.animationStyle
-    });
-    
-    if (props.paused) {
-      loadingAnimation.pause();
+    // Only create animation if not dotsDisabled
+    if (!props.dotsDisabled) {
+      loadingAnimation = createLoadingDots({
+        container: dotsContainer.value,
+        dots: props.dots,
+        duration: props.duration,
+        delay: props.delay,
+        dotSize: props.dotSize,
+        dotColor: props.dotColor,
+        dotSpacing: props.dotSpacing,
+        yOffset: props.yOffset,
+        loop: props.loop,
+        animationStyle: props.animationStyle
+      });
+      
+      if (props.paused) {
+        loadingAnimation.pause();
+      }
+    } else {
+      // Just create static dots without animation
+      createStaticDots();
     }
   }
 });
@@ -77,6 +85,36 @@ onBeforeUnmount(() => {
     loadingAnimation.stop();
   }
 });
+
+// Add this new function to create static dots without animation
+const createStaticDots = () => {
+  if (!dotsContainer.value) return;
+  
+  // Clear container
+  dotsContainer.value.innerHTML = '';
+  
+  // Create dots container
+  const dotsWrapper = document.createElement('div');
+  dotsWrapper.className = 'loading-dots';
+  dotsWrapper.style.display = 'flex';
+  dotsWrapper.style.alignItems = 'center';
+  dotsWrapper.style.gap = `${props.dotSpacing}px`;
+  
+  // Create static dots
+  for (let i = 0; i < props.dots; i++) {
+    const dot = document.createElement('span');
+    dot.className = 'loading-dot';
+    dot.style.width = `${props.dotSize}px`;
+    dot.style.height = `${props.dotSize}px`;
+    dot.style.backgroundColor = props.dotColor;
+    dot.style.borderRadius = '50%';
+    dot.style.display = 'inline-block';
+    
+    dotsWrapper.appendChild(dot);
+  }
+  
+  dotsContainer.value.appendChild(dotsWrapper);
+};
 </script>
 
 <style scoped>

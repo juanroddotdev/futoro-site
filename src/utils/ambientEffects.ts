@@ -30,6 +30,8 @@ export function applyAmbientPullEffect(
 ): boolean {
   if (!ambientScreen) return false;
   
+  console.log(`[AmbientEffects] 🔄 Applying Pull Effect - Progress: ${progress.toFixed(2)}`);
+  
   // Default options
   const {
     baseColor = '#1a1f2c',
@@ -39,18 +41,26 @@ export function applyAmbientPullEffect(
     pullWidthMultiplier = 1.33
   } = options;
   
-  // Calculate pull metrics
-  const pullHeight = maxOffset * progress;
-  const pullWidth = maxOffset * pullWidthMultiplier * progress;
-  
-  // Check if we've reached max pull threshold (90%)
+  // Calculate if we've reached max pull threshold (90%)
   const maxPullReached = progress > 0.9;
+  
+  if (maxPullReached) {
+    console.log(`[AmbientEffects] 🔔 Max Pull Threshold Reached - Progress: ${progress.toFixed(2)}`);
+  }
+  
+  // Calculate pull width and height based on progress
+  const pullWidth = progress * 50 * pullWidthMultiplier; // Wider at the top
+  const pullHeight = progress * maxOffset; // Deeper pull at higher progress
+  
+  console.log(`[AmbientEffects] 🔄 Pull Dimensions - Width: ${pullWidth.toFixed(2)}, Height: ${pullHeight.toFixed(2)}`);
   
   // Create radial gradient that starts from top and enlarges with pull
   if (progress > 0.05) {
     // Increase opacity as we approach max pull
     const opacityFactor = maxPullReached ? 0.6 : progress * 0.3;
     const gradientColor = `rgba(245, 245, 245, ${opacityFactor})`;
+    
+    console.log(`[AmbientEffects] 🎨 Gradient - Opacity: ${opacityFactor.toFixed(2)}`);
     
     // Apply gradient from top (50% 0%)
     ambientScreen.style.background = `
@@ -73,11 +83,13 @@ export function applyAmbientPullEffect(
       const scaleAmount = 0.98 + ((progress - 0.9) * 0.02); // Scale from 0.98 to 1.0
       ambientScreen.style.transform = `scale(${scaleAmount})`;
       ambientScreen.style.transition = 'transform 0.2s ease';
+      console.log(`[AmbientEffects] 🔄 Scale Effect - Amount: ${scaleAmount.toFixed(4)}`);
     } else {
       ambientScreen.style.transform = '';
     }
   } else {
     // Reset to default when pull is minimal
+    console.log(`[AmbientEffects] 🔄 Resetting Ambient Screen - Progress too low: ${progress.toFixed(2)}`);
     resetAmbientScreen(ambientScreen, baseColor, endColor);
   }
   

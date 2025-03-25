@@ -36,7 +36,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import PhoneSection from '@/components/PhoneSection.vue';
+import PhoneSection from '@/components/sections/refactored/PhoneSection.vue';
 import { calculateContainerHeight } from '@/utils/containerHeightUtils';
 
 // Component props definition
@@ -81,7 +81,11 @@ const props = withDefaults(defineProps<Props>(), {
   heightMultiplier: 1,
   ambientMode: false,
   enablePullEffect: false,
-  ambientTheme: {},
+  ambientTheme: () => ({
+    baseColor: '#1a1f2c',
+    endColor: '#2E3440',
+    accentColor: 'rgba(245, 245, 245, 0.3)'
+  }),
   unlockAnimationType: 'wave',
   isUnlocked: false
 });

@@ -62,3 +62,19 @@ export function formatElapsedTime(startTime: number, endTime: number = Date.now(
   const elapsed = getElapsedTime(startTime, endTime);
   return formatDuration(elapsed, true);
 }
+
+/**
+ * Get current time formatted with date
+ * @returns An object containing formatted time and date strings
+ */
+export function getCurrentTimeAndDate(): { time: string; date: string } {
+  const now = new Date();
+  return {
+    time: formatTime(now),
+    date: now.toLocaleDateString('en-US', { 
+      weekday: 'long', 
+      month: 'long', 
+      day: 'numeric' 
+    })
+  };
+}

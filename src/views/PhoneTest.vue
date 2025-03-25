@@ -1,21 +1,6 @@
 <template>
   <div class="phone-test-container">
-    <h1 class="text-3xl font-bold mb-8">Phone Component Testing</h1>
-    
-    <div class="test-section mb-16">
-      <h2 class="text-2xl font-semibold mb-4">Basic Phone</h2>
-      <div class="phone-wrapper">
-        <PhoneSection
-          :messages="basicMessages"
-          :showTypingFor="[0, 2]"
-          sectionId="basic-phone"
-          :tilt-x="8"
-          :tilt-y="-15"
-          position="center"
-          :pin-settings="{ enabled: false }"
-        />
-      </div>
-    </div>
+  
     
     <div class="test-section mb-16">
       <h2 class="text-2xl font-semibold mb-4">Sticky Content with Phone</h2>
