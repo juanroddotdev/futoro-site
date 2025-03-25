@@ -21,6 +21,12 @@
             :position="phonePosition"
             :pin-settings="{ enabled: false }"
             :ambient-mode="ambientMode"
+            :enable-pull-effect="enablePullEffect"
+            :ambient-theme="ambientTheme"
+            :unlock-animation-type="unlockAnimationType"
+            :is-unlocked="isUnlocked"
+            @pull-threshold-reached="$emit('pull-threshold-reached')"
+            @unlock="$emit('unlock')"
           />
         </div>
       </div>
@@ -53,7 +59,15 @@ interface Props {
   customClass?: string;
   containerHeight?: string;
   heightMultiplier?: number;
-  ambientMode?: boolean; // New prop for ambient mode
+  ambientMode?: boolean;
+  enablePullEffect?: boolean;
+  ambientTheme?: {
+    baseColor?: string;
+    endColor?: string;
+    accentColor?: string;
+  };
+  unlockAnimationType?: 'wave' | 'ripple';
+  isUnlocked?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -65,8 +79,14 @@ const props = withDefaults(defineProps<Props>(), {
   customClass: '',
   containerHeight: '',
   heightMultiplier: 1,
-  ambientMode: false // Default to false
+  ambientMode: false,
+  enablePullEffect: false,
+  ambientTheme: {},
+  unlockAnimationType: 'wave',
+  isUnlocked: false
 });
+
+const emit = defineEmits(['pull-threshold-reached', 'unlock']);
 
 const computedContainerHeight = computed(() => {
   if (props.containerHeight) {

@@ -1,5 +1,5 @@
 <template>
-  <StickySectionContainer 
+  <ScrollPinWrapper 
     height="300vh"
     position="top"
     :offset="0"
@@ -10,13 +10,13 @@
       :current-theme="currentTheme" 
       ref="heroSectionRef"
     />
-  </StickySectionContainer>
+  </ScrollPinWrapper>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
 import HeroSectionWithPhone from './HeroSectionWithPhone.vue';
-import StickySectionContainer from '@/components/ui/containers/StickySectionContainer.vue';
+import ScrollPinWrapper from '@/components/ui/containers/ScrollPinWrapper.vue';
 
 // Define props
 const props = withDefaults(defineProps<{

@@ -6,8 +6,8 @@ This guide explains how to use the various sticky components in our project for 
 
 Our project includes several sticky components that work together:
 
-1. `StickySectionContainer` - Base component that creates a sticky container
-2. `StickyFlexibleContent` - Combines sticky behavior with flexible content layout
+1. `ScrollPinWrapper` - Base component that creates a sticky container
+2. `ScrollablePhoneSection` - Combines sticky behavior with flexible content layout
 3. `StickyHeroSection` - Specialized sticky hero section with phone display
 
 ## Basic Usage Pattern
@@ -17,7 +17,7 @@ All sticky components follow a similar pattern:
 - Content inside the container sticks to the viewport while scrolling through this space
 - This creates an opportunity for scroll-based animations and interactions
 
-## 1. StickySectionContainer
+## 1. ScrollPinWrapper
 
 This is the foundational component that provides sticky behavior.
 
@@ -35,7 +35,7 @@ This is the foundational component that provides sticky behavior.
 
 ```vue
 <template>
-  <StickySectionContainer 
+  <ScrollPinWrapper 
     height="300vh"
     position="top"
     :offset="0"
@@ -46,15 +46,15 @@ This is the foundational component that provides sticky behavior.
       <h2>Your Sticky Content</h2>
       <p>This content will stick to the top as you scroll.</p>
     </div>
-  </StickySectionContainer>
+  </ScrollPinWrapper>
 </template>
 
 <script setup>
-import StickySectionContainer from '@/components/ui/containers/StickySectionContainer.vue';
+import ScrollPinWrapper from '@/components/ui/containers/ScrollPinWrapper.vue';
 </script>
 ```
 
-## 2. StickyFlexibleContent
+## 2. ScrollablePhoneSection
 
 This component combines the sticky behavior with a flexible content layout that includes a phone display and content area.
 
@@ -77,7 +77,7 @@ This component combines the sticky behavior with a flexible content layout that 
 
 ```vue
 <template>
-  <StickyFlexibleContent
+  <ScrollablePhoneSection
     :messages="messages"
     :showTypingFor="[0, 1]"
     layout="content-left"
@@ -98,11 +98,11 @@ This component combines the sticky behavior with a flexible content layout that 
       <p>Additional content goes here.</p>
       <button class="btn-primary">Call to Action</button>
     </template>
-  </StickyFlexibleContent>
+  </ScrollablePhoneSection>
 </template>
 
 <script setup>
-import StickyFlexibleContent from '@/components/sections/StickyFlexibleContent.vue';
+import ScrollablePhoneSection from '@/components/sections/ScrollablePhoneSection.vue';
 import { ref } from 'vue';
 
 const messages = ref([
@@ -154,14 +154,14 @@ You can combine sticky sections with the grid paper overlay for enhanced visual 
     </div>
     
     <!-- Sticky content -->
-    <StickyFlexibleContent
+    <ScrollablePhoneSection
       :messages="messages"
       layout="content-left"
       phonePosition="right"
       containerHeight="400vh"
     >
       <!-- Content slots here -->
-    </StickyFlexibleContent>
+    </ScrollablePhoneSection>
   </div>
 </template>
 
@@ -184,12 +184,12 @@ Combine sticky sections with scroll accordion for complex scroll-based interacti
 
 ```vue
 <template>
-  <StickySectionContainer height="500vh">
+  <ScrollPinWrapper height="500vh">
     <div class="sticky-content">
       <h2>Scroll down to see the accordion</h2>
       <ScrollAccordionVanilla :items="accordionItems" />
     </div>
-  </StickySectionContainer>
+  </ScrollPinWrapper>
 </template>
 ```
 

@@ -19,7 +19,7 @@
     
     <div class="test-section mb-16">
       <h2 class="text-2xl font-semibold mb-4">Sticky Content with Phone</h2>
-      <StickyFlexibleContent
+      <ScrollablePhoneSection
         phonePosition="right"
         :messages="flexibleMessages"
         :showTypingFor="[1]"
@@ -30,6 +30,17 @@
         :debug="false"
         containerHeight="300vh"
         :ambient-mode="true"
+        :enable-pull-effect="true"
+        @pull-threshold-reached="handlePullThresholdReached"
+        :unlock-animation-type="'wave'"
+        :ambient-theme="{
+          baseColor: '#0a1525',
+          endColor: '#1a2535',
+          accentColor: 'rgba(100, 200, 255, 0.3)'
+        }"
+        :pin-settings="{ enabled: true, start: 'top top', end: 'bottom bottom' }"
+        :is-unlocked="isUnlocked"
+        @unlock="handlePhoneUnlock"
       >
         <template #headline>
           <h3 class="text-2xl font-bold mb-4">Sticky Content Test</h3>
@@ -55,85 +66,27 @@
         >
           Ambient Off
         </button>
+        <button 
+          class="px-4 py-2 rounded" 
+          :class="isUnlocked ? 'bg-purple-500 text-white' : 'bg-gray-200'"
+          @click="isUnlocked = !isUnlocked"
+        >
+          {{ isUnlocked ? 'Locked' : 'Unlock' }}
+        </button>
       </div>
         </template>
-      </StickyFlexibleContent>
+      </ScrollablePhoneSection>
     </div>
     
-    <div class="test-section mb-16">
-      <h2 class="text-2xl font-semibold mb-4">Ambient Mode</h2>
-      <div class="flex gap-4 mb-4">
-        <button 
-          class="px-4 py-2 rounded" 
-          :class="ambientMode ? 'bg-green-500 text-white' : 'bg-gray-200'"
-          @click="ambientMode = true"
-        >
-          Ambient On
-        </button>
-        <button 
-          class="px-4 py-2 rounded" 
-          :class="!ambientMode ? 'bg-blue-500 text-white' : 'bg-gray-200'"
-          @click="ambientMode = false"
-        >
-          Ambient Off
-        </button>
-      </div>
-      <div class="phone-wrapper">
-        <PhoneSection
-          :messages="basicMessages"
-          :showTypingFor="[0, 2]"
-          sectionId="ambient-phone"
-          :tilt-x="5"
-          :tilt-y="-10"
-          position="center"
-          :ambient-mode="true"
-          :enable-pull-effect="true"
-          :ambient-theme="{
-            baseColor: '#0a1525',
-            endColor: '#1a2535',
-            accentColor: 'rgba(100, 200, 255, 0.3)'
-          }"
-          :pin-settings="{ enabled: false }"
-        />
-      </div>
-    </div>
     
-    <div class="test-section">
-      <h2 class="text-2xl font-semibold mb-4">Animation Controls</h2>
-      <div class="controls grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="control-group">
-          <h3 class="text-xl mb-2">Phone Tilt</h3>
-          <div class="flex gap-4 mb-4">
-            <label class="flex flex-col">
-              X Tilt
-              <input type="range" min="-30" max="30" v-model="tiltX" class="w-full">
-              <span>{{ tiltX }}°</span>
-            </label>
-            <label class="flex flex-col">
-              Y Tilt
-              <input type="range" min="-30" max="30" v-model="tiltY" class="w-full">
-              <span>{{ tiltY }}°</span>
-            </label>
-          </div>
-          <PhoneSection
-            :messages="controlMessages"
-            :showTypingFor="[]"
-            sectionId="control-phone"
-            :tilt-x="tiltX"
-            :tilt-y="tiltY"
-            position="center"
-            :pin-settings="{ enabled: false }"
-          />
-        </div>
-      </div>
-    </div>
+   
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
 import PhoneSection from '@/components/PhoneSection.vue';
-import StickyFlexibleContent from '@/components/sections/refactored/StickyFlexibleContent.vue';
+import ScrollablePhoneSection from '@/components/sections/refactored/ScrollablePhoneSection.vue';
 
 // Sample messages for testing
 const basicMessages = [
@@ -156,11 +109,25 @@ const controlMessages = [
 ];
 
 // Control values
-const tiltX = ref(8);
-const tiltY = ref(-15);
+const ambientMode = ref(true);
+const isUnlocked = ref(false);
+const unlockAnimationType = ref<'wave' | 'ripple'>('wave');
+const tiltX = ref(5);
+const tiltY = ref(-10);
 
-// Ambient mode toggle
-const ambientMode = ref(false);
+// Handle phone unlock
+const handlePhoneUnlock = () => {
+  console.log('Phone unlocked!');
+  isUnlocked.value = true;
+};
+
+// Handle pull threshold reached
+const handlePullThresholdReached = () => {
+  console.log('Pull threshold reached, triggering unlock animation');
+  setTimeout(() => {
+    isUnlocked.value = true;
+  }, 500); // Small delay to make the transition feel natural
+};
 </script>
 
 <style lang="scss" scoped>

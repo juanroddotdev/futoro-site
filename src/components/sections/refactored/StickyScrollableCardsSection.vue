@@ -1,5 +1,5 @@
 <template>
-  <StickySectionContainer
+  <ScrollPinWrapper
     :id="props.sectionId"
     ref="sectionRef"
     :height="computedContainerHeight"
@@ -40,12 +40,12 @@
         </div>
       </div>
     </div>
-  </StickySectionContainer>
+  </ScrollPinWrapper>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue';
-import StickySectionContainer from '@/components/ui/containers/StickySectionContainer.vue';
+import ScrollPinWrapper from '@/components/ui/containers/ScrollPinWrapper.vue';
 import { calculateContainerHeight } from '@/utils/containerHeightUtils';
 // import { useStickyScrollableCardsDebug } from '@/debug/StickyScrollableCardsDebug';
 
