@@ -1,6 +1,7 @@
 <template>
   <div ref="containerRef" class="container" :id="sectionId" :class="position">
     <div ref="phoneContainerRef">
+<<<<<<< Updated upstream
       <FloatingPhone 
         ref="floatingPhoneRef"
         :tilt-x="tiltX"
@@ -27,6 +28,21 @@
                 class="message"
                 :class="[
                   message.type === 'sent'  ? 'sent' : 'received',
+=======
+      <FloatingPhone ref="floatingPhoneRef" :tilt-x="tiltX" :tilt-y="tiltY">
+        <div class="chat-screen">
+          <div ref="messagesRef" class="messages-container">
+            <template v-for="(message, idx) in messages" :key="`typing-${idx}`">
+              <div v-if="showTypingFor.includes(idx)" :class="`typing-container typing-container-${idx + 1}`">
+                <TypingIndicator :class="`typing-indicator-${idx + 1}`" :is-sent="message.type === 'sent'" />
+              </div>
+            </template>
+
+            <template v-for="(message, idx) in messages" :key="`message-${idx}`">
+              <div :class="`message-group message-group-${idx + 1}`">
+                <div class="message" :class="[
+                  message.type === 'sent' ? 'sent' : 'received',
+>>>>>>> Stashed changes
                   `message-${idx + 1}`
                 ]"
               >
@@ -55,6 +71,18 @@ import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 import TypingIndicator from './TypingIndicator.vue';
 import FloatingPhone from './FloatingPhone.vue';
+<<<<<<< Updated upstream
+=======
+import LoadingDots from './LoadingDots.vue';
+import { getCurrentTime } from '@/utils/timestamp';
+import {
+  applyAmbientPullEffect,
+  resetAmbientScreen,
+  performUnlockAnimation,
+  performRippleUnlockAnimation,
+  animateDotsUShapeEffect
+} from '@/utils/ambientEffects';
+>>>>>>> Stashed changes
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -302,4 +330,134 @@ onUnmounted(() => {
     }
   }
 }
+<<<<<<< Updated upstream
 </style> 
+=======
+
+.ambient-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  background: linear-gradient(135deg, #1a1f2c 0%, #2E3440 100%);
+  color: white;
+  padding: 20px;
+  text-align: center;
+
+  .ambient-time {
+    font-size: 3.5rem;
+    font-weight: 300;
+    margin-bottom: 0.5rem;
+  }
+
+  .ambient-date {
+    font-size: 1rem;
+    opacity: 0.8;
+    margin-bottom: 2rem;
+  }
+
+  .ambient-notifications {
+    display: flex;
+    justify-content: center;
+    min-height: 20px; // Ensure space is reserved even when dots are not visible
+  }
+}
+
+.chat-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #f5f5f5;
+}
+
+.messages-container {
+  flex: 1;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.message-group {
+  position: absolute;
+  bottom: 80px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  will-change: transform;
+  margin-bottom: 16px;
+}
+
+.typing-container {
+  position: absolute;
+  bottom: 80px;
+  left: 20px;
+  right: 20px;
+  opacity: 0;
+}
+
+.message {
+  max-width: 80%;
+  padding-bottom: 8px;
+
+  &.sent {
+    margin-left: auto;
+    margin-right: 0;
+  }
+
+  &.received {
+    margin-right: auto;
+    margin-left: 0;
+  }
+
+  &-content {
+    padding: 12px 16px;
+    border-radius: 20px;
+    font-size: 16px;
+    line-height: 1.4;
+  }
+}
+
+.sent .message-content {
+  background: linear-gradient(135deg, #007aff, #0063cc);
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.received .message-content {
+  background: linear-gradient(135deg, #e5e5ea, #d1d1d6);
+  color: black;
+  border-bottom-left-radius: 4px;
+}
+
+.message-input-container {
+  padding: 10px 15px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.input-wrapper {
+  background: white;
+  border-radius: 20px;
+  padding: 10px 15px;
+}
+
+.message-input {
+  width: 100%;
+  min-height: 24px;
+}
+
+.placeholder {
+  color: #8e8e93;
+  font-size: 16px;
+}
+
+.futoro {
+  font-weight: bold;
+  color: #007aff;
+  margin-right: 4px;
+}
+</style>
+gi
+>>>>>>> Stashed changes
