@@ -13,7 +13,7 @@
     "analyze-css": "npm run build && node purgecss.js"
   },
   "dependencies": {
-    "@vueuse/core": "^10.7.2",
+    "@vueuse/core": "^10.11.1",
     "gsap": "^3.12.5",
     "vue": "^3.4.38",
     "vue-router": "^4.2.5"

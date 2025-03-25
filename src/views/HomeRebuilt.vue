@@ -8,6 +8,11 @@
     <!-- Hero Section -->
     <HeroSection 
       :heroContent="heroContent"
+      :ambientMode="true"
+      :isUnlocked="false"
+      :enablePullEffect="true"
+      @pull-threshold-reached="onHeroPullThresholdReached"
+      @unlock="onHeroUnlock"
     />
     
     <!-- Hurdles and Solutions Section -->
@@ -66,13 +71,23 @@ const { currentTheme } = useTheme();
 // Use the section loader
 const sectionLoader = useSectionLoader();
 
+// Add a flag to track if the hero section has been unlocked
+const heroSectionUnlocked = ref(false);
 
 // Handle section visibility
 function onSectionVisible(sectionId: string, track: boolean = true) {
   sectionLoader.markSectionLoaded(sectionId, track);
   sectionLoader.markSectionVisible(sectionId, track);
 }
+// Update these methods
+const onHeroPullThresholdReached = () => {
+  // No console log needed
+};
 
+const onHeroUnlock = () => {
+  // Only set the flag to true once
+  heroSectionUnlocked.value = true;
+};
 </script>
 
 <style lang="scss">

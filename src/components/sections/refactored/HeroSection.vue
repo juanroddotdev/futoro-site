@@ -10,6 +10,13 @@
     :containerHeight="calculateHeroContainerHeight(heroMessages.length)"
     :debug="debug"
     :customClass="customClass"
+    :isUnlocked="isUnlocked"
+    :ambientMode="ambientMode"
+    :enablePullEffect="enablePullEffect"
+    :ambientTheme="ambientTheme"
+    :unlockAnimationType="unlockAnimationType"
+    @pull-threshold-reached="onPullThresholdReached"
+    @unlock="onUnlock"
   >
     <template #headline>
       <h1 class="heading--accent mb-6 headline heading-responsive">
@@ -53,6 +60,15 @@ const props = withDefaults(defineProps<{
   secondaryCtaLink?: string;
   secondaryCtaText?: string;
   messages?: any[];
+  isUnlocked?: boolean;
+  ambientMode?: boolean;
+  enablePullEffect?: boolean;
+  ambientTheme?: {
+    baseColor?: string;
+    endColor?: string;
+    accentColor?: string;
+  };
+  unlockAnimationType?: 'wave' | 'ripple';
 }>(), {
   heroContent: undefined,
   tiltX: 8,
@@ -65,7 +81,16 @@ const props = withDefaults(defineProps<{
   primaryCtaLink: '#contact',
   secondaryCtaLink: '#services',
   secondaryCtaText: 'Our Services',
-  messages: undefined
+  messages: undefined,
+  isUnlocked: false,
+  ambientMode: true, // Start in ambient mode
+  enablePullEffect: true,
+  ambientTheme: () => ({
+    baseColor: '#1a1f2c',
+    endColor: '#2E3440',
+    accentColor: 'rgba(245, 245, 245, 0.3)'
+  }),
+  unlockAnimationType: 'wave'
 });
 
 // Use provided hero content or get random one
@@ -78,10 +103,34 @@ const heroMessages = computed(() => props.messages || getInitialConversation());
 const calculateHeroContainerHeight = (messageCount: number) => {
   return calculateContainerHeight(messageCount, {
     baseHeight: 100,
-    itemHeight: 15,
+    itemHeight: 20,
     padding: 100,
-    heightMultiplier: 1.5
+    heightMultiplier: 1.8
   });
+};
+
+// Add the emit definition
+const emit = defineEmits(['pull-threshold-reached', 'unlock']);
+
+// Add state for phone lock status and threshold tracking
+const isPhoneUnlocked = ref(props.isUnlocked);
+const thresholdReached = ref(false);
+
+// Update event handlers
+const onPullThresholdReached = () => {
+  // Only emit once if not already unlocked
+  if (!thresholdReached.value && !isPhoneUnlocked.value) {
+    thresholdReached.value = true;
+    emit('pull-threshold-reached');
+  }
+};
+
+const onUnlock = () => {
+  // Only emit once if not already unlocked
+  if (!isPhoneUnlocked.value) {
+    isPhoneUnlocked.value = true;
+    emit('unlock');
+  }
 };
 </script>
 

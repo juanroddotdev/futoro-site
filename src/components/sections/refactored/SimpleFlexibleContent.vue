@@ -20,6 +20,13 @@
             :tilt-y="tiltY"
             :position="phonePosition"
             :pin-settings="{ enabled: false }"
+            :isUnlocked="isUnlocked"
+            :ambientMode="ambientMode"
+            :enablePullEffect="enablePullEffect"
+            :ambientTheme="ambientTheme"
+            :unlockAnimationType="unlockAnimationType"
+            @pull-threshold-reached="onPullThresholdReached"
+            @unlock="onUnlock"
           />
         </div>
       </div>
@@ -52,6 +59,16 @@ interface Props {
   customClass?: string;
   containerHeight?: string;
   heightMultiplier?: number;
+   // Add ambient screen related props
+   isUnlocked?: boolean;
+  ambientMode?: boolean;
+  enablePullEffect?: boolean;
+  ambientTheme?: {
+    baseColor?: string;
+    endColor?: string;
+    accentColor?: string;
+  };
+  unlockAnimationType?: 'wave' | 'ripple';
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -62,8 +79,28 @@ const props = withDefaults(defineProps<Props>(), {
   sectionId: 'flexible-section',
   customClass: '',
   containerHeight: '',
-  heightMultiplier: 1
+  heightMultiplier: 1,
+  isUnlocked: false,
+  ambientMode: false,
+  enablePullEffect: true,
+  ambientTheme: () => ({
+    baseColor: '#1a1f2c',
+    endColor: '#2E3440',
+    accentColor: 'rgba(245, 245, 245, 0.3)'
+  }),
+  unlockAnimationType: 'wave'
 });
+// Add emits
+const emit = defineEmits(['pull-threshold-reached', 'unlock']);
+
+// Add event handlers
+const onPullThresholdReached = () => {
+  emit('pull-threshold-reached');
+};
+
+const onUnlock = () => {
+  emit('unlock');
+};
 
 const computedContainerHeight = computed(() => {
   if (props.containerHeight) {
