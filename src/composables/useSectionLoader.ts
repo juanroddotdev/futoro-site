@@ -6,13 +6,13 @@ const visibleSections = ref<Set<string>>(new Set());
 
 export function useSectionLoader() {
   // Register a section as loaded
-  function markSectionLoaded(sectionId: string) {
+  function markSectionLoaded(sectionId: string, track: boolean) {
     loadedSections.value.add(sectionId);
     console.log(`[SectionLoader] Section ${sectionId} loaded. Total loaded: ${loadedSections.value.size}`);
   }
 
   // Register a section as visible
-  function markSectionVisible(sectionId: string) {
+  function markSectionVisible(sectionId: string, track: boolean) {
     visibleSections.value.add(sectionId);
     console.log(`[SectionLoader] Section ${sectionId} visible. Currently visible: ${Array.from(visibleSections.value).join(', ')}`);
   }

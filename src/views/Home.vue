@@ -1,9 +1,12 @@
 <template>
   <div class="main-content">
-    <!-- Hero section is always visible immediately -->
-    <GridPaperOverlay :theme="currentTheme.replace('theme-', '')" :floating="true" :spotlight="true">
-      <HeroSectionWithPhone :current-theme="currentTheme" />
-    </GridPaperOverlay>
+    <!-- Fixed grid overlay that stays in viewport -->
+    <div class="viewport-grid">
+      <GridPaperOverlay :theme="currentTheme.replace('theme-', '')" :floating="true" :spotlight="true" />
+    </div>
+    
+    <!-- Use the new NewStickyHeroSection -->
+    <!-- <NewStickyHeroSection :current-theme="currentTheme" :debug="true" /> -->
     
     <!-- Lazy load all other sections -->
     <LazySection id="hurdles-solutions" @visible="onSectionVisible('hurdles-solutions')">
@@ -49,7 +52,8 @@
 </template>
 
 <script setup lang="ts">
-import HeroSectionWithPhone from '@/components/sections/HeroSectionWithPhone.vue';
+import { ref, onMounted } from 'vue';
+// import NewStickyHeroSection from '@/components/sections/NewStickyHeroSection.vue';
 import HurdlesSolutionsSection from '@/components/sections/HurdlesSolutionsSection.vue';
 import ServicesSection from '@/components/sections/ServicesSection.vue';
 import TimelineHowItWorks from '@/components/sections/TimelineHowItWorks.vue';
@@ -73,19 +77,8 @@ function onSectionVisible(sectionId: string) {
 </script>
 
 <style lang="scss">
-.viewport-only {
-  height: 100vh;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.hero-container {
-  position: relative;
-  // This container will be the full scrollable height
+.main-content {
+  position: relative; /* Create positioning context */
 }
 
 .viewport-grid {
@@ -93,14 +86,21 @@ function onSectionVisible(sectionId: string) {
   top: 0;
   left: 0;
   width: 100%;
-  height: 100vh; // Only viewport height
-  pointer-events: none; // Allow scrolling through
+  height: 100vh; /* Only viewport height */
+  pointer-events: none; /* Allow scrolling through */
   z-index: 1;
 }
 
-// Ensure hero content appears above grid
+/* Ensure hero content appears above grid */
 .hero-section {
-  position: sticky;
+  position: relative;
   z-index: 2;
 }
+
+/* Make grid paper overlay fill its container */
+::v-deep(.grid-paper-overlay) {
+  height: 100%;
+}
+
+// Existing styles...
 </style>

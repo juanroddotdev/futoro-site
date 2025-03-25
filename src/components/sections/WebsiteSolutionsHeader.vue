@@ -1,7 +1,7 @@
 <template>
-  <div class="py-20">
+  <div class="pb-20">
     <AnimatedText 
-      class="text-3xl font-bold text-center gradient-text my-10" 
+      class="text-3xl font-bold text-center gradient-text mb-40" 
       firstPart="Website Solutions"
       animation="fadeUp" 
       :useGradient="true" 
@@ -13,28 +13,17 @@
         ref="splitTextRef"
         class="text-3xl font-bold text-center gradient-text" 
         firstPart="From Frustration"
-        secondPart="To Fantastic" 
-        animation="split" 
+        animation="slideInRight" 
         :useGradient="true" 
         :delay="3" 
         :duration="3"
         :initiallyHidden="true"
         :wordEffects="true"
-        :wordTargets="['Frustration', 'Fantastic']"
-        :wordEffectTypes="['highlight', 'highlight']"
+        :wordTargets="['Frustration']"
+        :wordEffectTypes="['highlight']"
         :wordEffectStyles="[
           { 
             gradientClass: 'gradient-theme-fire',
-            iterations: 3,
-            customStyles: {
-              transform: 'scale(1.05)',
-              display: 'inline-block',
-              position: 'relative',
-              transition: 'all 1s cubic-bezier(0.34, 1.56, 0.64, 1)'
-            }
-          },
-          { 
-            gradientClass: 'gradient-theme-cool',
             iterations: 3,
             customStyles: {
               transform: 'scale(1.05)',

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { onMounted, ref, computed, defineExpose, nextTick, onUnmounted } from 'vue';
-import { heroSectionAnimations } from '@/animations/heroSection';
 import PhoneSection from '@/components/PhoneSection.vue';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
@@ -56,12 +55,23 @@ const props = withDefaults(defineProps<Props>(), {
   initiallyHidden: false
 });
 
+// Compute position class based on phonePosition prop
+const position = computed(() => {
+  return `position-${props.phonePosition}`;
+});
+
 // Add refs for visibility tracking
 const sectionRef = ref<HTMLElement | null>(null);
 const contentRef = ref<HTMLElement | null>(null);
 const isVisible = ref(false);
 const animationStarted = ref(false);
 const phoneAreaRef = ref<HTMLElement | null>(null);
+
+// Calculate wrapper height based on messages
+const wrapperHeight = computed(() => {
+  const baseHeight = 100; // Base viewport height
+  return `${baseHeight + (props.messages.length * props.wrapperHeightMultiplier)}vh`;
+});
 
 // Component methods
 const startAnimations = () => {
@@ -70,70 +80,21 @@ const startAnimations = () => {
   }
   
   const contentArea = contentRef.value;
-  const phoneArea = sectionRef.value?.querySelector('.phone-area');
+  const phoneArea = phoneAreaRef.value;
   
   if (!contentArea || !phoneArea) {
+    console.error('[FlexibleContentWithPhone] Cannot start animations: elements not found');
     return;
   }
   
   // Ensure everything is visible
   contentArea.style.opacity = '1';
-  (phoneArea as HTMLElement).style.opacity = '1';
-  (phoneArea as HTMLElement).style.display = 'block';
+  phoneArea.style.opacity = '1';
+  phoneArea.style.display = 'block';
   
   animationStarted.value = true;
+  console.log('[FlexibleContentWithPhone] Animations started');
 };
-
-// DEBUGGING CONFIGURATION
-// All debug-related configuration in one place
-const debugConfig = import.meta.env.DEV ? {
-  // Component references needed for debugging
-  refs: {
-    sectionRef,
-    contentRef, 
-    phoneAreaRef
-  },
-  // Component state
-  state: {
-    animationStarted
-  },
-  // Component methods that debug needs to access
-  methods: {
-    startAnimations
-  },
-  // Props to track
-  props: props,
-  // Optional configuration
-  options: {
-    enabled: true
-  }
-} : null;
-
-// Initialize debugger only if configuration exists
-const debug = debugConfig ? useFlexibleContentDebug(debugConfig) : null;
-
-// Component lifecycle hooks
-onMounted(() => {
-  // Initialize debugger if available
-  debug?.init();
-  
-  // Set up phone area reference
-  nextTick(() => {
-    phoneAreaRef.value = sectionRef.value?.querySelector('.phone-area') as HTMLElement;
-  });
-  
-  // If not initially hidden, start animations immediately
-  if (!props.initiallyHidden) {
-    startAnimations();
-    // Track animation if debug is available
-    debug?.trackAnimation('completed');
-  }
-});
-
-onUnmounted(() => {
-  // Clean up debugger if available
-  debug?.cleanup();
-});
 
 // Expose the startAnimations method and animation props to parent components
 defineExpose({
@@ -141,68 +102,45 @@ defineExpose({
   animation: props.animation
 });
 
-// Calculate wrapper height based on messages
-const wrapperHeight = computed(() => {
-  const baseHeight = 100; // Base viewport height
-  return `${baseHeight + (props.messages.length * props.wrapperHeightMultiplier)}vh`;
+// Apply the wrapper height to the component
+onMounted(() => {
+  console.log('[FlexibleContentWithPhone] Component mounted');
+  
+  if (sectionRef.value) {
+    sectionRef.value.style.height = wrapperHeight.value;
+  }
+  
+  // If not initially hidden, start animations
+  if (!props.initiallyHidden) {
+    nextTick(() => {
+      startAnimations();
+    });
+  }
 });
 </script>
 
 <template>
-  <div class="flexible-wrapper" :style="stickySection ? { height: wrapperHeight } : {}">
-    <section 
-      ref="sectionRef" 
-      class="flexible-section" 
-      :class="[
-        layout,
-        { 'sticky-section': stickySection }
-      ]"
-    >
-      <div class="flexible-grid" :class="layout">
+  <div class="flexible-content-with-phone" :class="[layout, position]" ref="sectionRef" :style="{ height: wrapperHeight }">
+    <section class="section-container">
+      <div class="section-inner">
+        <!-- Content area with slots -->
         <div class="content-area" ref="contentRef">
-          <!-- Only show headline area if slot content is provided -->
-          <div class="headline-area mb-6" v-if="$slots.headline">
-            <slot name="headline"></slot>
-          </div>
-          
-          <!-- Only show subheadline area if slot content is provided -->
-          <div class="subheadline-area mb-8" v-if="$slots.subheadline">
-            <slot name="subheadline"></slot>
-          </div>
-          
-          <!-- Only show CTA area if at least one CTA is provided -->
-          <div class="cta-area" v-if="primaryCta || secondaryCta">
-            <div class="flex gap-4">
-              <a 
-                v-if="primaryCta"
-                :href="primaryCta.link" 
-                class="btn-round-large-primary cta"
-              >
-                {{ primaryCta.text }}
-              </a>
-              <a 
-                v-if="secondaryCta"
-                :href="secondaryCta.link" 
-                class="btn-round-large-outline-primary"
-              >
-                {{ secondaryCta.text }}
-              </a>
-            </div>
-          </div>
+          <slot name="headline"></slot>
+          <slot name="subheadline"></slot>
+          <slot name="content"></slot>
+          <slot></slot>
         </div>
-        <div class="phone-area">
+        
+        <!-- Phone area with PhoneSection component -->
+        <div class="phone-area" ref="phoneAreaRef">
           <PhoneSection
-            :messages="messages" 
-            :sectionId="sectionId"
-            :showTypingFor="showTypingFor"
-            :tilt-x="tiltX"
-            :tilt-y="tiltY"
-            :position="phonePosition"
-            class="section-phone"
-            :pin-settings="{
-              enabled: false, // Disable phone's own pinning since parent is pinned
-              start: 'top 30%',
-            }"
+            :messages="props.messages"
+            :showTypingFor="props.showTypingFor"
+            :sectionId="props.sectionId"
+            :tilt-x="props.tiltX"
+            :tilt-y="props.tiltY"
+            :position="props.phonePosition"
+            :pin-settings="{ enabled: props.stickySection }"
           />
         </div>
       </div>
@@ -211,128 +149,76 @@ const wrapperHeight = computed(() => {
 </template>
 
 <style lang="scss">
-.flexible-wrapper {
+.flexible-content-with-phone {
   position: relative;
-}
-
-.flexible-section {
-  min-height: 100vh;
+  min-height: 100vh; /* Ensure minimum height */
   width: 100%;
   
-  &.sticky-section {
-    position: sticky;
-    top: 0;
-  }
-  
-  .flexible-grid {
-    display: grid;
+  .section-container {
     min-height: 100vh;
-    padding: 2rem;
-    position: relative;
-    z-index: 2;
+    width: 100%;
     
-    .content-area {
-      opacity: 1; /* Make visible by default */
-    }
-    
-    .phone-area {
-      opacity: 1; /* Make visible by default */
-    }
-    
-    &.content-left {
+    .section-inner {
+      display: grid;
       grid-template-columns: 1fr 1fr;
-      grid-template-areas: 
-        "content phone";
+      min-height: 100vh;
+      padding: 2rem;
       
       .content-area {
-        grid-area: content;
-        padding-right: 2rem;
-      }
-      
-      .phone-area {
-        grid-area: phone;
-      }
-    }
-    
-    &.content-right {
-      grid-template-columns: 1fr 1fr;
-      grid-template-areas: 
-        "phone content";
-      
-      .content-area {
-        grid-area: content;
-        padding-left: 2rem;
-      }
-      
-      .phone-area {
-        grid-area: phone;
-      }
-    }
-    
-    &.content-top {
-      grid-template-rows: auto 1fr;
-      grid-template-areas: 
-        "content"
-        "phone";
-      
-      .content-area {
-        grid-area: content;
-        padding-bottom: 2rem;
-      }
-      
-      .phone-area {
-        grid-area: phone;
+        grid-column: 1 / 2;
+        padding: 2rem;
         display: flex;
+        flex-direction: column;
         justify-content: center;
       }
-    }
-    
-    .content-area {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
       
-      .headline-area, 
-      .subheadline-area, 
-      .cta-area {
-        position: relative;
-        z-index: 3;
-        padding: 1rem;
+      .phone-area {
+        grid-column: 2 / 3;
+        display: flex;
+        justify-content: center;
+        align-items: center;
       }
-    }
-    
-    .phone-area {
-      align-self: center;
-      position: relative;
       
-      .container {
-        min-height: unset;
-        padding-top: 0;
+      /* Layout variations */
+      .position-left .section-inner {
+        .content-area {
+          grid-column: 2 / 3;
+        }
+        
+        .phone-area {
+          grid-column: 1 / 2;
+        }
+      }
+      
+      .position-center .section-inner {
+        grid-template-columns: 1fr;
+        
+        .content-area {
+          grid-column: 1 / 2;
+          text-align: center;
+        }
+        
+        .phone-area {
+          grid-column: 1 / 2;
+          margin-top: 2rem;
+        }
       }
     }
   }
 }
 
-// Media queries for responsive layout
+/* Media query for mobile */
 @media (max-width: 768px) {
-  .flexible-section {
-    .flexible-grid {
-      &.content-left,
-      &.content-right {
-        grid-template-columns: 1fr;
-        grid-template-areas: 
-          "content"
-          "phone";
-      }
+  .flexible-content-with-phone {
+    .section-container .section-inner {
+      grid-template-columns: 1fr;
       
-      .content-area {
-        padding: 1rem;
+      .content-area, .phone-area {
+        grid-column: 1 / 2;
       }
       
       .phone-area {
-        padding: 1rem;
-        justify-content: center;
-        display: flex;
+        margin-top: 2rem;
       }
     }
   }

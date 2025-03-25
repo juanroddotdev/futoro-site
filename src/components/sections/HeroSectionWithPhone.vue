@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue';
+import { onMounted, ref, computed, defineEmits } from 'vue';
 import { heroSectionAnimations } from '@/animations/heroSection';
 import { HeroContent, getRandomHeroContent } from '@/data/heroContent';
 import PhoneSection from '@/components/PhoneSection.vue';
 import { getInitialConversation } from '@/data/chatSections';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
+// Add import for FlexibleContentWithPhone
+import FlexibleContentWithPhone from '@/components/sections/FlexibleContentWithPhone.vue';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -14,6 +16,8 @@ const heroRef = ref<HTMLElement | null>(null);
 const contentRef = ref<HTMLElement | null>(null);
 const navRef = ref<HTMLElement | null>(null);
 const messages = getInitialConversation();
+// Add ref for FlexibleContentWithPhone
+const flexibleContentRef = ref(null);
 
 // Calculate wrapper height based on messages
 const wrapperHeight = computed(() => {
@@ -22,7 +26,15 @@ const wrapperHeight = computed(() => {
   return `${baseHeight + (messages.length * messageHeight)}vh`;
 });
 
+// Define emits
+const emit = defineEmits(['mounted']);
+
 onMounted(() => {
+  console.log('[HeroSectionWithPhone] Component mounted');
+  
+  // Emit mounted event
+  emit('mounted');
+
   if (!heroRef.value || !contentRef.value) return;
 
   // Initial content animation
@@ -35,7 +47,47 @@ onMounted(() => {
 
 <template>
   <div class="hero-wrapper" :style="{ height: wrapperHeight }">
+    <!-- New implementation using FlexibleContentWithPhone -->
     <section ref="heroRef" class="hero-section">
+      <FlexibleContentWithPhone 
+        phonePosition="right" 
+        :messages="getInitialConversation()" 
+        :showTypingFor="[0, 1]"
+        :tilt-x="8" 
+        :tilt-y="-20" 
+        sectionId="hero-phone" 
+        layout="content-left" 
+        :stickySection="false"
+        :animation="{
+          contentFirst: true,
+          duration: 0.7,
+          phoneDelay: 1
+        }"
+        :initiallyHidden="true" 
+        ref="flexibleContentRef"
+      >
+        <template #headline>
+          <h1 class="heading--accent mb-6 headline heading-responsive">
+            {{ heroContent.headline }}
+          </h1>
+        </template>
+        <template #subheadline>
+          <p class="mb-8 subheadline subheading-responsive heading heading--highlight">
+            {{ heroContent.subheadline }}
+          </p>
+          <div class="flex gap-4">
+            <a href="#contact" class="btn-round-large-primary cta">
+              {{ heroContent.cta }}
+            </a>
+            <a href="#services" class="btn-round-large-outline-primary">
+              Our Services
+            </a>
+          </div>
+        </template>
+      </FlexibleContentWithPhone>
+      
+      <!-- Original implementation (commented out) -->
+      <!--
       <div class="hero-grid">
         <div class="headline-area">
           <h1 class="heading--accent mb-6 headline heading-responsive">
@@ -78,6 +130,7 @@ onMounted(() => {
           />
         </div>
       </div>
+      -->
     </section>
   </div>
 </template>

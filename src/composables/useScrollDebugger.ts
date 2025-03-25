@@ -32,6 +32,13 @@ export function useScrollDebugger(options: UseScrollDebuggerOptions) {
     
     // Create a watcher for the elementRef that will set up the observer when it becomes available
     if (observeElement) {
+      // Use a watch instead of trying to set up immediately
+      watch(elementRef, (newVal) => {
+        if (newVal) {
+          setupObserver();
+        }
+      });
+      
       const setupObserver = () => {
         if (!elementRef.value) {
           console.warn(`[ScrollDebugger] ⚠️ Element ref not available for section: ${sectionId}`);
@@ -59,14 +66,9 @@ export function useScrollDebugger(options: UseScrollDebuggerOptions) {
         return true;
       };
       
-      // Try to set up immediately if element is available
-      if (!setupObserver()) {
-        // If not available, set up a watcher to try again when it becomes available
-        watch(elementRef, (newValue) => {
-          if (newValue) {
-            setupObserver();
-          }
-        });
+      // Try to set up immediately if the ref is already available
+      if (elementRef.value) {
+        setupObserver();
       }
     }
   });
