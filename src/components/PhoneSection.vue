@@ -5,7 +5,25 @@
         ref="floatingPhoneRef"
         :tilt-x="tiltX"
         :tilt-y="tiltY"
-      >
+      > 
+      <!-- <AmbientScreen 
+          v-if="isUnlocked"
+          ref="ambientScreenRef"
+          :time="currentTime"
+          :date="currentDate"
+          :theme="normalizedTheme"
+          :enable-pull-effect="enablePullEffect"
+          @pull-threshold-reached="onPullThresholdReached"
+        /> -->
+        <!-- <AmbientScreen 
+          v-if="isUnlocked"
+          ref="ambientScreenRef"
+          :time="'4:20 PM'"
+          :date="'March 26th, 2023'"
+          :enable-pull-effect="true"
+          @pull-threshold-reached="onPullThresholdReached"
+        /> -->
+      <!-- <span v-else> -->
         <div ref="messagesRef" class="messages-container">
           <template v-for="(message, idx) in messages" :key="`typing-${idx}`">
             <div 
@@ -44,6 +62,7 @@
             </div>
           </div>
         </div>
+      <!-- </span> -->
       </FloatingPhone>
     </div>
   </div>
@@ -260,6 +279,14 @@ onUnmounted(() => {
     timeline.kill();
   }
 });
+// const onPullThresholdReached = () => {
+//   console.log('[PhoneSection] 🔔 onPullThresholdReached called from AmbientScreen');
+//   // Forward the event to parent components
+//   // emit('pull-threshold-reached');
+  
+//   // // Automatically unlock the phone when pull threshold is reached
+//   // unlockPhone();
+// };
 </script>
 
 <style lang="scss" scoped>
