@@ -20,6 +20,7 @@
             :tilt-y="tiltY"
             :position="phonePosition"
             :pin-settings="{ enabled: false }"
+            :ambient-mode="ambientMode"
           />
         </div>
       </div>
@@ -52,6 +53,7 @@ interface Props {
   customClass?: string;
   containerHeight?: string;
   heightMultiplier?: number;
+  ambientMode?: boolean; // New prop for ambient mode
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -62,7 +64,8 @@ const props = withDefaults(defineProps<Props>(), {
   sectionId: 'flexible-section',
   customClass: '',
   containerHeight: '',
-  heightMultiplier: 1
+  heightMultiplier: 1,
+  ambientMode: false // Default to false
 });
 
 const computedContainerHeight = computed(() => {

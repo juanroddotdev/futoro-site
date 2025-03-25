@@ -25,7 +25,7 @@
   ]">
     <Navbar />
     <router-view :currentTheme="currentTheme" />
-    <ContactSectionV2 v-if="$route.name !== 'Playground'" />
+    <ContactSectionV2 v-if="$route.name !== 'Playground' && $route.name !== 'PhoneTest'" />
     <Footer />
     <ThemeSwitcher :currentTheme="currentTheme" @update:currentTheme="handleThemeChange" />
   </div>

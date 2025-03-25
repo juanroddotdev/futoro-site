@@ -17,6 +17,7 @@
       :primaryCta="primaryCta"
       :secondaryCta="secondaryCta"
       :customClass="customClass"
+      :ambientMode="ambientMode"
       ref="flexibleContentRef"
     >
       <template #headline>
@@ -62,6 +63,7 @@ interface Props {
   debug?: boolean;
   customClass?: string;
   startAtBeginning?: boolean; // New prop to control starting position
+  ambientMode?: boolean; // New prop for ambient mode
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -73,7 +75,8 @@ const props = withDefaults(defineProps<Props>(), {
   containerHeight: '300vh',
   debug: false,
   customClass: '',
-  startAtBeginning: true // Default to true to show first message
+  startAtBeginning: true,
+  ambientMode: true // Changed from false to true
 });
 
 // Reference to the flexible content component
