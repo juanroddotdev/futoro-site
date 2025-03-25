@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import LoadingDots from './LoadingDots.vue';
 
 interface Props {
@@ -35,7 +35,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   paused: false,
-  enablePullEffect: false,
+  enablePullEffect: true,
   theme: () => ({
     baseColor: '#1a1f2c',
     endColor: '#2E3440',
@@ -43,10 +43,17 @@ const props = withDefaults(defineProps<Props>(), {
   })
 });
 
-const dotsRef = ref<InstanceType<typeof LoadingDots> | null>(null);
+const emit = defineEmits(['pull-threshold-reached']);
 
+// Add a method to handle pull threshold reached
+const handlePullThresholdReached = () => {
+  console.log('[AmbientScreen] 🔔 Pull threshold reached, emitting event');
+  emit('pull-threshold-reached');
+};
+
+// Expose the method to parent components
 defineExpose({
-  dotsRef
+  handlePullThresholdReached
 });
 
 const backgroundStyle = computed(() => ({

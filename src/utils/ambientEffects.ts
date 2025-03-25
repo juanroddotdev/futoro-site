@@ -115,194 +115,104 @@ export function resetAmbientScreen(
 }
 
 /**
- * Performs a wave oscillation animation on the ambient screen
- * @param ambientScreen - The ambient screen element to animate
- * @param options - Configuration options for the animation
+ * Performs an unlock animation on the ambient screen
+ * @param ambientScreen - The ambient screen element
+ * @param onComplete - Callback function to execute when animation completes
  */
 export function performUnlockAnimation(
-  ambientScreen: HTMLElement | null,
-  chatScreen: HTMLElement | null,
-  options: AmbientTransitionOptions = {}
-): void {
-  if (!ambientScreen || !chatScreen) return;
+  ambientScreen: HTMLElement,
+  onComplete: () => void
+) {
+  if (!ambientScreen) {
+    console.error('[AmbientEffects] ❌ Cannot perform unlock animation: ambientScreen is null');
+    // Still call onComplete to ensure the app continues to function
+    onComplete();
+    return;
+  }
+
+  console.log('[AmbientEffects] 🎬 Starting unlock animation');
   
-  const {
-    baseColor = '#1a1f2c',
-    endColor = '#2E3440',
-    accentColor = 'rgba(245, 245, 245, 0.3)',
-    duration = 1.5,
-    onComplete = () => {}
-  } = options;
-  
-  // Import GSAP dynamically to avoid SSR issues
-  import('gsap').then(({ gsap }) => {
-    // Hide chat screen initially
-    chatScreen.style.opacity = '0';
-    chatScreen.style.display = 'block';
-    
-    // Create timeline for wave oscillation animation
-    const timeline = gsap.timeline({
-      onComplete: () => {
-        // Hide ambient screen and show chat screen
-        ambientScreen.style.display = 'none';
-        chatScreen.style.opacity = '1';
-        onComplete();
-      }
-    });
-    
-    // First phase: Expand from top with bright flash
-    timeline.to({}, {
-      duration: duration * 0.2,
-      onUpdate: function() {
-        const progress = this.progress();
-        const pullHeight = 50 * progress;
-        const pullWidth = 80 * progress;
-        
-        // Top-down gradient with increasing brightness
-        ambientScreen.style.background = `
-          radial-gradient(
-            ${100 + pullWidth}% ${100 + pullHeight}% at 50% 0%, 
-            rgba(255, 255, 255, ${0.6 + progress * 0.4}) 0%, 
-            transparent ${40 + progress * 20}%
-          ),
-          linear-gradient(135deg, ${baseColor} 0%, ${endColor} 100%)
-        `;
-        
-        // Add subtle box-shadow
-        ambientScreen.style.boxShadow = `
-          inset 0 ${pullHeight * 0.5}px ${pullHeight}px 
-          -${pullHeight * 0.3}px rgba(0,0,0,${0.3 + progress * 0.2})
-        `;
-        
-        // Scale down slightly
-        ambientScreen.style.transform = `scale(${1 - progress * 0.02})`;
-      }
-    });
-    
-    // Second phase: Wave from top to bottom
-    timeline.to({}, {
-      duration: duration * 0.3,
-      onUpdate: function() {
-        const progress = this.progress();
-        const wavePosition = progress * 100; // 0% to 100% from top to bottom
-        
-        // Create wave effect moving down the screen
-        ambientScreen.style.background = `
-          linear-gradient(
-            to bottom,
-            rgba(255, 255, 255, 0.8) 0%,
-            rgba(255, 255, 255, 0.9) ${wavePosition - 10}%,
-            rgba(255, 255, 255, 0.7) ${wavePosition}%,
-            rgba(255, 255, 255, 0.2) ${wavePosition + 10}%,
-            rgba(255, 255, 255, 0) ${wavePosition + 20}%,
-            linear-gradient(135deg, ${baseColor} 0%, ${endColor} 100%) 100%
-          )
-        `;
-        
-        // Reduce box shadow as wave moves down
-        ambientScreen.style.boxShadow = `
-          inset 0 ${(1 - progress) * 25}px ${(1 - progress) * 50}px 
-          -${(1 - progress) * 15}px rgba(0,0,0,${0.5 - progress * 0.5})
-        `;
-        
-        // Scale back up
-        ambientScreen.style.transform = `scale(${0.98 + progress * 0.02})`;
-      }
-    });
-    
-    // Third phase: Fade out ambient screen, fade in chat screen
-    timeline.to(ambientScreen, {
-      opacity: 0,
-      duration: duration * 0.2,
-      ease: "power2.inOut"
-    }, "-=0.1");
-    
-    timeline.to(chatScreen, {
-      opacity: 1,
-      duration: duration * 0.3,
-      ease: "power2.inOut"
-    }, "-=0.2");
-    
-    // Start the animation
-    timeline.play();
+  // Create a timeline for the animation
+  const timeline = gsap.timeline({
+    onComplete: () => {
+      console.log('[AmbientEffects] ✅ Unlock animation complete');
+      onComplete();
+    }
   });
+  
+  // Add animation steps
+  timeline
+    .to(ambientScreen, {
+      y: -20,
+      opacity: 0.8,
+      duration: 0.2,
+      ease: 'power1.in'
+    })
+    .to(ambientScreen, {
+      y: -window.innerHeight,
+      opacity: 0,
+      duration: 0.5,
+      ease: 'power2.in'
+    });
 }
 
 /**
- * Alternative unlock animation with ripple effect
+ * Performs a ripple unlock animation
+ * @param ambientScreen - The ambient screen element
+ * @param container - The container element
+ * @param onComplete - Callback function to execute when animation completes
  */
 export function performRippleUnlockAnimation(
-  ambientScreen: HTMLElement | null,
-  chatScreen: HTMLElement | null,
-  options: AmbientTransitionOptions = {}
-): void {
-  if (!ambientScreen || !chatScreen) return;
+  ambientScreen: HTMLElement,
+  container: HTMLElement | null,
+  onComplete: () => void
+) {
+  if (!ambientScreen || !container) {
+    console.error('[AmbientEffects] ❌ Cannot perform ripple unlock animation: missing elements');
+    // Still call onComplete to ensure the app continues to function
+    onComplete();
+    return;
+  }
+
+  console.log('[AmbientEffects] 🎬 Starting ripple unlock animation');
   
-  const {
-    baseColor = '#1a1f2c',
-    endColor = '#2E3440',
-    duration = 1.2,
-    onComplete = () => {}
-  } = options;
+  // Create ripple element
+  const ripple = document.createElement('div');
+  ripple.className = 'unlock-ripple';
+  container.appendChild(ripple);
   
-  // Import GSAP dynamically
-  import('gsap').then(({ gsap }) => {
-    // Hide chat screen initially
-    chatScreen.style.opacity = '0';
-    chatScreen.style.display = 'block';
-    
-    // Create a ripple element
-    const ripple = document.createElement('div');
-    ripple.style.position = 'absolute';
-    ripple.style.top = '0';
-    ripple.style.left = '50%';
-    ripple.style.width = '10px';
-    ripple.style.height = '10px';
-    ripple.style.borderRadius = '50%';
-    ripple.style.backgroundColor = 'white';
-    ripple.style.transform = 'translate(-50%, -50%)';
-    ripple.style.zIndex = '10';
-    
-    // Add ripple to ambient screen
-    ambientScreen.style.position = 'relative';
-    ambientScreen.style.overflow = 'hidden';
-    ambientScreen.appendChild(ripple);
-    
-    // Create timeline
-    const timeline = gsap.timeline({
-      onComplete: () => {
-        // Clean up and transition
-        ambientScreen.removeChild(ripple);
-        ambientScreen.style.display = 'none';
-        chatScreen.style.opacity = '1';
-        onComplete();
-      }
-    });
-    
-    // Ripple animation
-    timeline.to(ripple, {
-      width: '300%',
-      height: '300%',
-      opacity: 0,
-      duration: duration * 0.6,
-      ease: "power2.out"
-    });
-    
-    // Fade out ambient screen
-    timeline.to(ambientScreen, {
-      opacity: 0,
-      duration: duration * 0.3,
-      ease: "power2.inOut"
-    }, "-=0.3");
-    
-    // Fade in chat screen
-    timeline.to(chatScreen, {
-      opacity: 1,
-      duration: duration * 0.4,
-      ease: "power2.inOut"
-    }, "-=0.2");
-    
-    // Start the animation
-    timeline.play();
+  // Position ripple at the bottom center of the screen
+  const rect = ambientScreen.getBoundingClientRect();
+  ripple.style.position = 'absolute';
+  ripple.style.left = `${rect.width / 2}px`;
+  ripple.style.top = `${rect.height - 50}px`;
+  ripple.style.width = '10px';
+  ripple.style.height = '10px';
+  ripple.style.borderRadius = '50%';
+  ripple.style.backgroundColor = '#f5f5f5';
+  ripple.style.transform = 'translate(-50%, -50%)';
+  ripple.style.zIndex = '10';
+  
+  // Animate the ripple
+  gsap.to(ripple, {
+    width: rect.width * 3,
+    height: rect.width * 3,
+    opacity: 0,
+    duration: 0.8,
+    ease: 'power2.out',
+    onComplete: () => {
+      // Remove the ripple element
+      container.removeChild(ripple);
+      
+      // Fade out the ambient screen
+      gsap.to(ambientScreen, {
+        opacity: 0,
+        duration: 0.3,
+        onComplete: () => {
+          console.log('[AmbientEffects] ✅ Ripple unlock animation complete');
+          onComplete();
+        }
+      });
+    }
   });
 }

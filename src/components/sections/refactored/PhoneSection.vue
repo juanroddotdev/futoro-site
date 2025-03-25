@@ -7,15 +7,18 @@
           ref="ambientScreenRef"
           :time="currentTime"
           :date="currentDate"
-          :theme="ambientTheme"
+          :theme="normalizedTheme"
           :enable-pull-effect="enablePullEffect"
           @pull-threshold-reached="onPullThresholdReached"
         />
         <ChatScreen 
-          v-else
+          v-if="isUnlocked || !ambientMode"
           ref="chatScreenRef"
-          :messages="messages"
-          :show-typing-for="showTypingFor"
+          :messages="messages" 
+          :showTypingFor="showTypingFor"
+          :sectionId="sectionId"
+          :pinSettings="pinSettings"
+          :isUnlocked="isUnlocked"
         />
       </FloatingPhone>
     </div>
@@ -31,9 +34,9 @@ import { useScrollAnimation } from '@/composables/useScrollAnimation';
 import { usePullEffect } from '@/composables/usePullEffect';
 import { useAmbientTime } from '@/composables/useAmbientTime';
 import { performUnlockAnimation, performRippleUnlockAnimation } from '@/utils/phoneAnimations';
-import { applyAmbientPullEffect } from '@/utils/ambientEffects';
+// import { applyAmbientPullEffect } from '@/utils/ambientEffects';
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+// import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 // gsap.registerPlugin(ScrollTrigger);
 
@@ -108,7 +111,11 @@ const { setupScrollAnimation, cleanupScrollAnimation } = useScrollAnimation(
   props.pinSettings
 );
 const { setupPullEffect, cleanupPullEffect } = usePullEffect(() => {
+  console.log('[PhoneSection] 🎯 Pull threshold reached callback triggered');
   emit('pull-threshold-reached');
+  
+  // Automatically unlock the phone when pull threshold is reached
+  unlockPhone();
 });
 
 // Handle time updates for ambient mode
@@ -116,33 +123,79 @@ const { currentTime, currentDate, cleanup: cleanupAmbientTime } = useAmbientTime
 
 // Unlock phone method
 const unlockPhone = () => {
-  if (isUnlocked.value) return;
+  if (isUnlocked.value) {
+    console.log('[PhoneSection] ⚠️ Phone already unlocked, ignoring unlock request');
+    return;
+  }
+  
+  console.log('[PhoneSection] 🔓 Unlocking phone...');
   
   const ambientScreen = ambientScreenRef.value?.$el as HTMLElement | undefined;
   
-  if (ambientScreen) {
-    if (props.unlockAnimationType === 'ripple') {
-      performRippleUnlockAnimation(ambientScreen, containerRef.value, () => {
-        isUnlocked.value = true;
-        emit('unlock');
+  if (!ambientScreen) {
+    console.error('[PhoneSection] ❌ Cannot unlock: ambientScreen element not found');
+    return;
+  }
+  
+  // Check for chatScreen but don't block the unlock if it's not found
+  const chatScreen = chatScreenRef.value?.$el as HTMLElement | undefined;
+  if (!chatScreen) {
+    console.warn('[PhoneSection] ⚠️ ChatScreen element not found, but continuing with unlock animation');
+  }
+  
+  console.log('[PhoneSection] 🎬 Starting unlock animation');
+  
+  if (props.unlockAnimationType === 'ripple') {
+    performRippleUnlockAnimation(ambientScreen, containerRef.value, () => {
+      console.log('[PhoneSection] 🔓 Unlock animation complete, showing chat screen');
+      isUnlocked.value = true;
+      emit('unlock');
+      
+      // Re-setup scroll animations after unlocking
+      nextTick(() => {
+        setupScrollAnimation();
         
-        // Re-setup scroll animations after unlocking
-        nextTick(() => {
-          setupScrollAnimation();
-        });
+        // Show first message when chat screen appears
+        if (props.messages.length > 0) {
+          const sectionSelector = `#${props.sectionId}`;
+          const firstMessageGroup = document.querySelector(`${sectionSelector} .message-group-1`);
+          if (firstMessageGroup) {
+            gsap.to(firstMessageGroup, { 
+              opacity: 1, 
+              y: 0, 
+              duration: 0.4,
+              delay: 0.2
+            });
+          }
+        }
       });
-    } else {
-      // Default to wave animation
-      performUnlockAnimation(ambientScreen, () => {
-        isUnlocked.value = true;
-        emit('unlock');
+    });
+  } else {
+    // Default to wave animation
+    performUnlockAnimation(ambientScreen, () => {
+      console.log('[PhoneSection] 🔓 Unlock animation complete, showing chat screen');
+      isUnlocked.value = true;
+      emit('unlock');
+      
+      // Re-setup scroll animations after unlocking
+      nextTick(() => {
+        setupScrollAnimation();
         
-        // Re-setup scroll animations after unlocking
-        nextTick(() => {
-          setupScrollAnimation();
-        });
+        // Show first message when chat screen appears
+        if (props.messages.length > 0) {
+          const sectionSelector = `#${props.sectionId}`;
+          const firstMessageGroup = document.querySelector(`${sectionSelector} .message-group-1`);
+          if (firstMessageGroup) {
+            gsap.to(firstMessageGroup, { 
+              opacity: 1, 
+              y: 0, 
+              duration: 0.4,
+              delay: 0.2
+            });
+          }
+        }
       });
-    }
+    });
   }
 };
 
@@ -198,55 +251,15 @@ defineExpose({
 });
 
 const onPullThresholdReached = () => {
+  console.log('[PhoneSection] 🔔 onPullThresholdReached called from AmbientScreen');
   // Forward the event to parent components
   emit('pull-threshold-reached');
   
-  // You can choose to automatically unlock the phone here
-  // unlockPhone();
+  // Automatically unlock the phone when pull threshold is reached
+  unlockPhone();
 };
 
-// Add this watch to handle the transition when isUnlocked changes
-watch(isUnlocked, (newValue) => {
-  if (newValue) {
-    // When phone is unlocked, ensure messages are visible
-    nextTick(() => {
-      // Get reference to the chat screen elements
-      const chatScreenElement = chatScreenRef.value?.$el;
-      if (chatScreenElement) {
-        // Animate messages appearing
-        const messagesContainer = chatScreenElement.querySelector('.messages-container');
-        if (messagesContainer) {
-          gsap.to(messagesContainer, {
-            opacity: 1,
-            duration: 0.3
-          });
-          
-          // Animate each message group
-          const messageGroups = messagesContainer.querySelectorAll('.message-group');
-          if (messageGroups.length > 0) {
-            gsap.to(messageGroups, {
-              opacity: 1,
-              y: 0,
-              duration: 0.4,
-              stagger: 0.1,
-              delay: 0.2
-            });
-          }
-          
-          // Animate typing indicators if any
-          const typingContainers = messagesContainer.querySelectorAll('.typing-container');
-          if (typingContainers.length > 0) {
-            gsap.to(typingContainers, {
-              opacity: 1,
-              duration: 0.3,
-              delay: 0.1
-            });
-          }
-        }
-      }
-    });
-  }
-});
+
 </script>
 
 <style scoped>

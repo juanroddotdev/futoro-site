@@ -31,6 +31,8 @@ export function usePullEffect(onThresholdReached: () => void) {
     
     if (!containerRef.value || !enablePullEffect) return;
     
+    console.log(`[PullEffect] 🔄 Setting up pull effect for section: ${sectionId}`);
+    
     scrollTriggerInstance = ScrollTrigger.create({
       trigger: containerRef.value,
       start: 'top bottom',
@@ -79,6 +81,7 @@ export function usePullEffect(onThresholdReached: () => void) {
           
           // Handle pull threshold detection
           if (self.progress > pullThreshold && maxPullReached) {
+            console.log(`[PullEffect] 🚨 THRESHOLD REACHED - Section: ${sectionId}, Progress: ${progress.toFixed(2)}`);
             onThresholdReached();
           }
         }
