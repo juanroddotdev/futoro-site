@@ -1,28 +1,48 @@
+/**
+ * phoneAnimations.ts
+ * 
+ * This utility module provides animation functions for phone UI elements.
+ * It uses GSAP to create smooth animations for various phone interactions
+ * such as unlock effects, message animations, and ambient screen effects.
+ */
+
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 
 /**
- * Creates a wave-like animation for dots
+ * animateDotsWaveEffect - Creates a wave-like animation for dots
+ * 
+ * This function animates a set of dots in a wave-like pattern by:
+ * 1. Applying a sine wave pattern to the vertical position
+ * 2. Staggering the animation across all dots
+ * 3. Repeating the animation with a yoyo effect
+ * 
  * @param dots - NodeList of dot elements to animate
  */
 export function animateDotsWaveEffect(dots: NodeListOf<Element>) {
   if (!dots || dots.length === 0) return;
   
   gsap.to(dots, {
-    y: (i) => -10 * Math.sin(i * 0.5),
+    y: (i) => -10 * Math.sin(i * 0.5),  // Sine wave pattern
     opacity: 1,
     duration: 0.4,
     stagger: {
-      each: 0.05,
-      repeat: 2,
-      yoyo: true
+      each: 0.05,  // Time between each dot's animation
+      repeat: 2,   // Repeat the animation twice
+      yoyo: true   // Reverse the animation on repeat
     },
-    ease: "sine.inOut"
+    ease: "sine.inOut"  // Smooth sine easing
   });
 }
 
 /**
- * Triggers a rebound animation for the ambient screen
+ * triggerReboundAnimation - Triggers a rebound animation for the ambient screen
+ * 
+ * This function animates the ambient screen with an elastic rebound effect by:
+ * 1. Resetting the background gradient
+ * 2. Removing any box shadows
+ * 3. Scaling back to normal size with an elastic easing
+ * 
  * @param ambientScreen - The ambient screen element
  * @param progress - Current progress value (0-1)
  */
@@ -37,16 +57,24 @@ export function triggerReboundAnimation(
     boxShadow: 'none',
     transform: 'scale(1)',
     duration: 0.5,
-    ease: "elastic.out(1, 0.5)"
+    ease: "elastic.out(1, 0.5)"  // Elastic easing for rebound effect
   });
 }
 
 /**
- * Sets up scroll animation for phone messages
+ * setupScrollAnimation - Sets up scroll animation for phone messages
+ * 
+ * This function creates a ScrollTrigger instance that:
+ * 1. Tracks scroll position relative to the container
+ * 2. Animates message visibility based on scroll progress
+ * 3. Shows/hides typing indicators at appropriate times
+ * 4. Calls an optional update callback with the current progress
+ * 
  * @param container - Container element
  * @param messages - Message elements
  * @param typingIndicators - Typing indicator elements
  * @param options - Configuration options
+ * @returns ScrollTrigger instance
  */
 export function setupScrollAnimation(
   container: HTMLElement,
@@ -117,7 +145,13 @@ export function setupScrollAnimation(
 }
 
 /**
- * Performs a wave-like unlock animation on the ambient screen
+ * performUnlockAnimation - Performs a wave-like unlock animation on the ambient screen
+ * 
+ * This function:
+ * 1. Animates dots in a wave pattern if they exist
+ * 2. Animates the ambient screen with an elastic rebound effect
+ * 3. Calls an optional callback function when the animation completes
+ * 
  * @param ambientScreen - The ambient screen element
  * @param callback - Optional callback function to execute after animation completes
  */
@@ -151,7 +185,14 @@ export function performUnlockAnimation(
 }
 
 /**
- * Performs a ripple unlock animation on the ambient screen
+ * performRippleUnlockAnimation - Performs a ripple unlock animation on the ambient screen
+ * 
+ * This function:
+ * 1. Creates a ripple element at the center of the ambient screen
+ * 2. Animates the ripple to expand and fade out
+ * 3. Removes the ripple element after the animation completes
+ * 4. Calls an optional callback function when the animation is finished
+ * 
  * @param ambientScreen - The ambient screen element
  * @param container - The container element
  * @param callback - Optional callback function to execute after animation completes

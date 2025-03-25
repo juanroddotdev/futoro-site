@@ -9,12 +9,46 @@ interface AmbientTheme {
   accentColor: string;
 }
 
+/**
+ * usePullEffect Composable
+ * 
+ * This composable provides functionality for creating a pull-to-unlock effect
+ * on an ambient screen element. It uses GSAP ScrollTrigger to track scroll position
+ * and applies visual effects to the ambient screen based on scroll progress.
+ * 
+ * Key features:
+ * - Creates a GSAP ScrollTrigger to track scroll position
+ * - Applies visual effects to the ambient screen based on scroll progress
+ * - Triggers a callback when the pull threshold is reached
+ * - Provides cleanup functionality to prevent memory leaks
+ * 
+ * @param onThresholdReached - Callback function to execute when pull threshold is reached
+ * @returns Object with setup and cleanup functions
+ */
 export function usePullEffect(onThresholdReached: () => void) {
   // Register GSAP plugins
   gsap.registerPlugin(ScrollTrigger);
   
   let scrollTriggerInstance: ScrollTrigger;
   
+  /**
+   * setupPullEffect - Creates and configures the pull effect
+   * 
+   * This function:
+   * 1. Cleans up any existing ScrollTrigger instance
+   * 2. Gets the container and ambient screen elements
+   * 3. Creates a new ScrollTrigger instance to track scroll position
+   * 4. Applies visual effects to the ambient screen based on scroll progress
+   * 5. Triggers the onThresholdReached callback when the pull threshold is reached
+   * 
+   * @param containerRef - Reference to the container element
+   * @param ambientScreenRef - Reference to the ambient screen component
+   * @param sectionId - Unique ID for the section (used for DOM selection)
+   * @param enablePullEffect - Whether the pull effect is enabled
+   * @param ambientMode - Whether the ambient mode is active
+   * @param ambientTheme - Theme colors for the ambient screen
+   * @param pullThreshold - Threshold value (0-1) that triggers the callback
+   */
   const setupPullEffect = (
     containerRef: Ref<HTMLElement | null>,
     ambientScreenRef: Ref<any>,
@@ -29,68 +63,61 @@ export function usePullEffect(onThresholdReached: () => void) {
       scrollTriggerInstance.kill();
     }
     
-    if (!containerRef.value || !enablePullEffect) return;
+    // If pull effect is disabled or ambient mode is off, don't set up
+    if (!enablePullEffect || !ambientMode) {
+      return;
+    }
     
-    console.log(`[PullEffect] 🔄 Setting up pull effect for section: ${sectionId}`);
+    const container = containerRef.value;
+    if (!container) {
+      console.warn('[usePullEffect] Container element not found');
+      return;
+    }
     
+    // Get the ambient screen element
+    const ambientScreenEl = ambientScreenRef.value?.$el as HTMLElement;
+    if (!ambientScreenEl) {
+      console.warn('[usePullEffect] Ambient screen element not found');
+      return;
+    }
+    
+    // Create a new ScrollTrigger instance
     scrollTriggerInstance = ScrollTrigger.create({
-      trigger: containerRef.value,
-      start: 'top bottom',
-      end: 'bottom top',
-      scrub: 0.5,
+      trigger: container,
+      start: 'top top',
+      end: '+=100%',
+      scrub: true,
       onUpdate: (self) => {
-        // Only apply pull effect when in ambient mode and past halfway point
-        if (self.progress > 0.5 && ambientMode && ambientScreenRef.value) {
-          const progress = Math.min(1, Math.max(0, (self.progress - 0.5) * 2)); // Normalize to 0-1
+        // Apply visual effects based on scroll progress
+        const progress = self.progress;
+        
+        // Apply the ambient pull effect to the screen
+        applyAmbientPullEffect(ambientScreenEl, progress, ambientTheme);
+        
+        // Check if we've reached the pull threshold
+        if (progress >= pullThreshold && !self.vars.thresholdReached) {
+          console.log('[usePullEffect] 🎯 Pull threshold reached!');
           
-          console.log(`[PullEffect] 📜 Pull Effect - Section: ${sectionId}, Progress: ${progress.toFixed(2)}`);
+          // Call the threshold reached callback
+          onThresholdReached();
           
-          // Apply the pull effect to the ambient screen
-          const maxPullReached = applyAmbientPullEffect(
-            ambientScreenRef.value.$el,
-            progress,
-            ambientTheme
-          );
-          
-          // Apply U-shaped effect to notification dots
-          const dotsContainer = ambientScreenRef.value.$el.querySelector('.ambient-notifications');
-          if (dotsContainer) {
-            const dots = dotsContainer.querySelectorAll('.loading-dot');
-            if (dots.length > 0) {
-              const maxOffset = 40; // Maximum downward movement
-              const maxScale = 1.5; // Maximum scale factor for middle dot
-              
-              // Calculate the middle index
-              const middleIndex = Math.floor(dots.length / 2);
-              
-              dots.forEach((dot: HTMLElement, index: number) => {
-                // Calculate distance from middle (0 to 1)
-                const distFromMiddle = Math.abs(index - middleIndex) / middleIndex;
-                
-                // Calculate offset based on distance from middle (U-shape)
-                const offset = progress * maxOffset * (1 - distFromMiddle);
-                
-                // Calculate scale based on distance from middle (middle dot scales more)
-                const scale = 1 + (progress * (maxScale - 1) * (1 - distFromMiddle));
-                
-                // Apply transformations
-                dot.style.transform = `translateY(${offset}px) scale(${scale})`;
-              });
-            }
-          }
-          
-          // Handle pull threshold detection
-          if (self.progress > pullThreshold && maxPullReached) {
-            console.log(`[PullEffect] 🚨 THRESHOLD REACHED - Section: ${sectionId}, Progress: ${progress.toFixed(2)}`);
-            onThresholdReached();
-          }
+          // Mark as reached to prevent multiple calls
+          self.vars.thresholdReached = true;
         }
       }
-    }) as ScrollTrigger;
+    });
     
-    return scrollTriggerInstance;
+    // Add a custom property to track if threshold was reached
+    scrollTriggerInstance.vars.thresholdReached = false;
   };
   
+  /**
+   * cleanupPullEffect - Cleans up the ScrollTrigger instance
+   * 
+   * This function:
+   * 1. Checks if a ScrollTrigger instance exists
+   * 2. Kills the ScrollTrigger to prevent memory leaks
+   */
   const cleanupPullEffect = () => {
     if (scrollTriggerInstance) {
       scrollTriggerInstance.kill();
@@ -99,7 +126,6 @@ export function usePullEffect(onThresholdReached: () => void) {
   
   return {
     setupPullEffect,
-    cleanupPullEffect,
-    onPullThresholdReached: onThresholdReached
+    cleanupPullEffect
   };
 }
