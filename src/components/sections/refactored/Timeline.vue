@@ -1,38 +1,184 @@
 <script setup lang="ts">
-import { onMounted, computed } from "vue";
+import { onMounted, computed, ref, onUnmounted } from "vue";
 import { timelineAnimations } from "@/animations/timelineHowItWorks";
 import { steps as defaultSteps, alternativeSteps, type ProcessSteps } from "@/data/howItWorksSteps";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { createComponentDebugger } from "@/utils/scroll/debug/ComponentDebugger";
+
+// Register GSAP plugins
+gsap.registerPlugin(ScrollTrigger);
 
 interface Props {
   useAlternative?: boolean;
+  debug?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  useAlternative: false
+  useAlternative: false,
+  debug: import.meta.env.DEV
 });
 
 const steps = computed<ProcessSteps>(() => 
   props.useAlternative ? alternativeSteps : defaultSteps
 );
 
+const timelineContainerRef = ref<HTMLElement | null>(null);
+const timelineLineRef = ref<HTMLElement | null>(null);
+const timelineItemsRef = ref<HTMLElement[]>([]);
+
+// Add refs for animation control
+const timelineAnimationComplete = ref(false);
+const timelineItemsVisible = ref<boolean[]>([]);
+
+// Add a direct console log to verify script execution
+console.log('[Timeline] Script section executing');
+
+// ===== DEBUG CODE START =====
+// Initialize the component debug utility
+const debug = createComponentDebugger({
+  componentName: 'Timeline',
+  sectionId: 'howItWorks',
+  enabled: props.debug,
+  observeElements: {
+    container: {
+      ref: timelineContainerRef,
+      threshold: 0.1,
+      trackStyles: true
+    },
+    timeline: {
+      ref: timelineLineRef,
+      trackStyles: true
+    }
+  },
+  trackAnimations: true,
+  trackProps: true,
+  props
+});
+
+// Add direct console log to verify debug object creation
+console.log('[Timeline] Debug object created:', debug);
+// ===== DEBUG CODE END =====
+
 const handleContactClick = () => {
   const contactSection = document.querySelector('#contact');
   contactSection?.scrollIntoView({ behavior: 'smooth' });
 };
 
-onMounted(() => {
-  // Initialize main timeline animation
-  timelineAnimations.initMainTimeline();
+// Timeline animation functions
+const timelineAnimations = {
+  initMainTimeline() {
+    // Reset timeline line to be invisible initially
+    gsap.set('.timeline-line', { autoAlpha: 0, scaleY: 0, transformOrigin: 'top center' });
+    
+    // Reset all timeline items to be invisible initially
+    gsap.set('.timeline-item', { autoAlpha: 0 });
+    gsap.set('.timeline-stem', { scaleX: 0 });
+    
+    // Create the main timeline animation
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: timelineContainerRef.value,
+        start: 'top 70%',
+        end: 'bottom 30%',
+        toggleActions: 'play none none none',
+        onEnter: () => {
+          console.log('[Timeline] ScrollTrigger entered');
+        }
+      },
+      onComplete: () => {
+        console.log('[Timeline] Center timeline animation complete');
+      }
+    });
+    
+    // Animate the main timeline line growing from top to bottom
+    tl.to('.timeline-line', {
+      autoAlpha: 1,
+      scaleY: 1,
+      duration: 1.5,
+      ease: 'power2.out'
+    });
+    
+    return tl;
+  },
+  
+  // Function to animate timeline items as they become visible
+  animateTimelineItems() {
+    if (!timelineItemsRef.value.length) return;
+    
+    timelineItemsRef.value.forEach((item, index) => {
+      // Create a scroll trigger for each timeline item
+      ScrollTrigger.create({
+        trigger: item,
+        start: 'top 80%',
+        onEnter: () => {
+          // Only animate if the main timeline has completed
+          if (timelineLineRef.value && 
+              window.getComputedStyle(timelineLineRef.value).transform.includes('1')) {
+            console.log(`[Timeline] Item ${index + 1} visible`);
+            
+            // Animate the item appearing
+            gsap.to(item, {
+              autoAlpha: 1,
+              duration: 0.5,
+              ease: 'power2.out'
+            });
+            
+            // Animate the stem line
+            const stem = item.querySelector('.timeline-stem');
+            if (stem) {
+              gsap.to(stem, {
+                scaleX: 1,
+                duration: 0.5,
+                ease: 'power2.out',
+                delay: 0.2
+              });
+            }
+          }
+        }
+      });
+    });
+  }
+};
 
-  // Animate each timeline item
-  document.querySelectorAll('.timeline-item').forEach((item, index) => {
-    timelineAnimations.animateTimelineItems(item, index);
+onMounted(() => {
+  console.log('[Timeline] Component mounted');
+  
+  // Initialize main timeline animation
+  const mainTimeline = timelineAnimations.initMainTimeline();
+  
+  // Set up timeline items animation after main timeline completes
+  mainTimeline.then(() => {
+    timelineAnimations.animateTimelineItems();
   });
+  
+  // Find timeline items
+  timelineItemsRef.value = Array.from(document.querySelectorAll('.timeline-item'));
+  console.log(`[Timeline] Found ${timelineItemsRef.value.length} timeline items`);
+  
+  // Remove debug styles that were forcing visibility
+  // Comment these out for now to let the animations work
+  /*
+  gsap.set('.timeline-line', { autoAlpha: 1, scaleY: 1 });
+  gsap.set('.timeline-item', { autoAlpha: 1 });
+  gsap.set('.timeline-stem', { scaleX: 1 });
+  */
+});
+
+onUnmounted(() => {
+  // ===== DEBUG CODE START =====
+  debug.cleanup();
+  // ===== DEBUG CODE END =====
 });
 </script>
 
 <template>
   <section id="howItWorks" class="section py-32">
+    <!-- Add a debug indicator -->
+    <div v-if="debug" class="debug-indicator">
+      TIMELINE COMPONENT IS HERE
+    </div>
+    
     <div class="text-center mb-24">
       <h2 class="heading-responsive text-5xl heading--accent">How It Works</h2>
       <p class="body-text text-md max-w-2xl mx-auto mt-4">
@@ -40,9 +186,11 @@ onMounted(() => {
       </p>
     </div>
 
-    <div class="timeline-container max-w-4xl mx-auto relative">
-      <!-- Timeline line -->
-      <div class="timeline-line absolute left-1/2 transform -translate-x-1/2 h-full w-1"></div>
+    <div ref="timelineContainerRef" class="timeline-container max-w-4xl mx-auto relative">
+      <!-- Timeline line with debug styles -->
+      <div ref="timelineLineRef" class="timeline-line absolute left-1/2 transform -translate-x-1/2 h-full w-1"
+           style="border: 2px solid red; background-color: blue; width: 5px;">
+      </div>
 
       <!-- Timeline items -->
       <div class="relative">
@@ -92,7 +240,6 @@ onMounted(() => {
         </div>
       </div>
     </div>
-
     <div class="flex justify-center mt-24 relative">
       <button 
         type="button"
@@ -114,7 +261,7 @@ onMounted(() => {
           </defs>
           <text class="circle-text">
             <textPath href="#circlePath" startOffset="0%">
-              ☞ CLICK ME ☞ CLICK ME
+              ☞ ☞CLICK ME ☞ CLICK ME
             </textPath>
           </text>
         </svg>
@@ -149,160 +296,51 @@ onMounted(() => {
   }
 }
 
-.floating-texts {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.timeline-line {
+  background: linear-gradient(to bottom, 
+    var(--color-primary-500) 0%, 
+    var(--color-secondary-500) 100%);
+  border-radius: 4px;
+  /* Remove the !important flags to allow animations to work */
+  /* opacity: 1 !important;
+  visibility: visible !important;
+  transform: scaleY(1) !important; */
+  z-index: 10;
+  width: 2px; /* Set a reasonable width */
 }
 
-.floating-text {
-  position: absolute;
-  font-size: 0.5rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  opacity: 0;
-  transform: translate(var(--x), var(--y));
-  animation: floatText 4.8s linear infinite;
-  animation-delay: var(--delay);
-  pointer-events: none;
+/* Timeline item styles */
+.timeline-item {
+  transition: opacity 0.5s ease;
+  /* Remove the !important flags to allow animations to work */
+  /* opacity: 1 !important;
+  visibility: visible !important; */
 }
 
-@keyframes floatText {
-  0%, 100% {
-    opacity: 0;
-    transform: translate(var(--x), var(--y));
-  }
-  25%, 75% {
-    opacity: 1;
-    transform: translate(var(--x), var(--y)) translateY(-10px);
-  }
+.timeline-stem {
+  background: linear-gradient(to right, 
+    var(--color-primary-500) 0%, 
+    var(--color-secondary-500) 100%);
+  border-radius: 4px;
 }
 
-.touch-circle-btn {
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-  
-  .default-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); // Increased from 0.4s to 0.8s
-    transform-origin: center center;
-    
-    span {
-      display: block;
-      text-align: center;
-    }
-  }
-  
-  .hover-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    opacity: 0;
-    transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); // Increased from 0.4s to 0.8s
-    transform-origin: center center;
-  }
+.timeline-number {
+  background: var(--color-primary-500);
+  color: var(--color-background);
+  box-shadow: 0 0 10px rgba(var(--color-primary-rgb), 0.5);
+}
+
+.timeline-card {
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   
   &:hover {
-    .default-text {
-      transform: translate(-50%, -50%) scale(0);
-      opacity: 0;
-    }
-    
-    .floating-text {
-      animation: suckToCenter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; // Increased from 0.4s to 0.8s
-    }
-    
-    .hover-text {
-      transform: translate(-50%, -50%) scale(1);
-      opacity: 1;
-      transition-delay: 0.4s; // Increased from 0.2s to 0.4s
-    }
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   }
 }
-
-@keyframes suckToCenter {
-  0% {
-    transform: translate(var(--x), var(--y));
-    opacity: 1;
-  }
-  100% {
-    transform: translate(0, 0) scale(0);
-    opacity: 0;
-  }
-}
-
-// Ensure the rotating text also gets sucked in slower
-.rotating-text {
-  transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); // Increased from 0.4s to 0.8s
-  
-  .touch-circle-btn:hover & {
-    transform: scale(0);
-    opacity: 0;
-  }
-}
-.rotating-text {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  animation: rotate 10s linear infinite;
-  
-  .circle-text {
-    fill: currentColor;
-    font-size: 1.8rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-}
-
-@keyframes rotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-// .timeline-line {
-//   background: linear-gradient(to bottom, 
-//     var(--color-primary-500) 0%, 
-//     var(--color-secondary-500) 100%);
-//   border-radius: 4px;
-// }
-
-// .timeline-stem {
-//   background: linear-gradient(to right, 
-//     var(--color-primary-500) 0%, 
-//     var(--color-secondary-500) 100%);
-//   border-radius: 4px;
-// }
-
-// .timeline-number {
-//   background: var(--color-primary-500);
-//   color: var(--color-background);
-//   box-shadow: 0 0 10px rgba(var(--color-primary-rgb), 0.5);
-// }
-
-// .timeline-card {
-//   background: var(--color-card-bg);
-//   border: 1px solid var(--color-border);
-//   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-//   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  
-//   &:hover {
-//     transform: translateY(-5px);
-//     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-//   }
-// }
 
 .btn-round-large-primary {
   position: relative;
@@ -336,5 +374,94 @@ onMounted(() => {
   .hover-text {
     transition: opacity 0.3s ease;
   }
+}
+
+/* Debug styles */
+.debug-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  background: rgba(0,0,0,0.7);
+  color: white;
+  padding: 10px;
+  font-family: monospace;
+  font-size: 12px;
+  max-width: 300px;
+  max-height: 80vh;
+  overflow: auto;
+}
+
+/* ===== DEBUG STYLES START ===== */
+.debug-marker {
+  pointer-events: none;
+  box-shadow: 0 0 0 2px white, 0 0 10px rgba(0,0,0,0.5);
+  
+  &--end {
+    animation: pulse-red 2s infinite;
+  }
+  
+  &--stem {
+    animation: pulse-blue 2s infinite;
+  }
+}
+
+@keyframes pulse-red {
+  0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+}
+
+@keyframes pulse-blue {
+  0% { box-shadow: 0 0 0 0 rgba(0, 0, 255, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(0, 0, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 0, 255, 0); }
+}
+/* ===== DEBUG STYLES END ===== */
+
+/* Add animation styles */
+.timeline-item {
+  transition: opacity 0.5s ease;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.timeline-stem {
+  transform-origin: left center;
+  transform: scaleX(0);
+  
+  .timeline-item:nth-child(even) & {
+    transform-origin: right center;
+  }
+}
+
+/* Override the initial invisible state for debugging */
+.timeline-item {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.timeline-line {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: scaleY(1) !important;
+}
+
+.timeline-stem {
+  transform: scaleX(1) !important;
+}
+
+/* Debug indicator */
+.debug-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: red;
+  color: white;
+  padding: 10px;
+  text-align: center;
+  font-weight: bold;
+  z-index: 9999;
 }
 </style>

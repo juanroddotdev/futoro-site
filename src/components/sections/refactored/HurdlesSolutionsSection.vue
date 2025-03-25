@@ -195,15 +195,14 @@ const solutionsContainerHeight = computed(() =>
 
 const handleEmberStart = () => {
   emberStartTime.value = Date.now();
-  console.log('Ember effect started at:', getTimestampForLog());
 };
 // Lifecycle hooks
 onMounted(() => {
-  console.log('[Refactored] HurdlesSolutionsSection mounted');
+  // console.log('[Refactored] HurdlesSolutionsSection mounted');
 });
 
 onUnmounted(() => {
-  console.log('[Refactored] HurdlesSolutionsSection unmounted');
+  // console.log('[Refactored] HurdlesSolutionsSection unmounted');
 });
 </script>
 

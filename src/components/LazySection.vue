@@ -31,6 +31,10 @@ const props = defineProps({
   },
   debug: {
     type: Boolean,
+    default: false
+  },
+  trackSection: {
+    type: Boolean,
     default: true
   }
 });
@@ -41,8 +45,8 @@ const sectionRef = ref<HTMLElement | null>(null);
 let observer: IntersectionObserver | null = null;
 
 onMounted(() => {
-  // Register with ScrollDebugger
-  if (props.debug) {
+  // Register with ScrollDebugger only if tracking is enabled
+  if (props.debug && props.trackSection) {
     scrollDebugger.registerSection(`lazy-section-${props.id}`);
   }
   
@@ -50,7 +54,7 @@ onMounted(() => {
     isVisible.value = true;
     emit('visible');
     
-    if (props.debug) {
+    if (props.debug && props.trackSection) {
       scrollDebugger.sectionVisible(`lazy-section-${props.id}`, {
         forceVisible: true,
         timeSincePageLoad: scrollDebugger.getTimeSincePageLoad()
@@ -70,11 +74,14 @@ onMounted(() => {
     if (entry.isIntersecting && !isVisible.value) {
       const timeSincePageLoad = scrollDebugger.getTimeSincePageLoad();
       
-      console.log(`👁️✨ [LazySection] Section ${props.id} entering viewport - initializing content (${timeSincePageLoad} since page load)`);
+      if (props.debug) {
+        console.log(`👁️✨ [LazySection] Section ${props.id} entering viewport - initializing content (${timeSincePageLoad} since page load)`);
+      }
+      
       isVisible.value = true;
       emit('visible');
       
-      if (props.debug) {
+      if (props.debug && props.trackSection) {
         scrollDebugger.sectionVisible(`lazy-section-${props.id}`, {
           intersectionRatio: entry.intersectionRatio,
           timeSincePageLoad

@@ -1,7 +1,12 @@
 <script setup lang="ts">
-import { onMounted, computed } from "vue";
+import { onMounted, computed, ref, onUnmounted } from "vue";
 import { timelineAnimations } from "@/animations/timelineHowItWorks";
 import { steps as defaultSteps, alternativeSteps, type ProcessSteps } from "@/data/howItWorksSteps";
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+// Register GSAP plugins
+gsap.registerPlugin(ScrollTrigger);
 
 interface Props {
   useAlternative?: boolean;
@@ -15,10 +20,78 @@ const steps = computed<ProcessSteps>(() =>
   props.useAlternative ? alternativeSteps : defaultSteps
 );
 
+// Track active step
+const activeStepId = ref<number | null>(null);
+const timelineProgress = ref(0);
+const timelineItems = ref<Element[]>([]);
+const scrollTriggers = ref<ScrollTrigger[]>([]);
+
 const handleContactClick = () => {
   const contactSection = document.querySelector('#contact');
   contactSection?.scrollIntoView({ behavior: 'smooth' });
 };
+
+// Add this computed property to the script section
+const isDevelopment = computed(() => import.meta.env.DEV);
+
+// Track when timeline reaches each step
+function setupStepTracking() {
+  timelineItems.value = Array.from(document.querySelectorAll('.timeline-item'));
+  
+  timelineItems.value.forEach((item, index) => {
+    const step = steps.value[index];
+    const trigger = ScrollTrigger.create({
+      trigger: item,
+      start: 'top 70%',
+      end: 'bottom 30%',
+      onEnter: () => {
+        activeStepId.value = step.id;
+        console.log(`Timeline reached step ${step.id}: ${step.step || step.title}`);
+      },
+      onEnterBack: () => {
+        activeStepId.value = step.id;
+        console.log(`Timeline returned to step ${step.id}: ${step.step || step.title}`);
+      },
+      onLeave: () => {
+        // Only update if this is the active step
+        if (activeStepId.value === step.id) {
+          const nextIndex = index + 1;
+          if (nextIndex < steps.value.length) {
+            activeStepId.value = steps.value[nextIndex].id;
+          }
+        }
+      },
+      onLeaveBack: () => {
+        // Only update if this is the active step
+        if (activeStepId.value === step.id) {
+          const prevIndex = index - 1;
+          if (prevIndex >= 0) {
+            activeStepId.value = steps.value[prevIndex].id;
+          } else {
+            activeStepId.value = null; // Before first step
+          }
+        }
+      },
+      markers: false // Set to true for debugging
+    });
+    
+    scrollTriggers.value.push(trigger);
+  });
+  
+  // Track overall timeline progress
+  const timelineContainer = document.querySelector('.timeline-container');
+  if (timelineContainer) {
+    ScrollTrigger.create({
+      trigger: timelineContainer,
+      start: 'top 80%',
+      end: 'bottom 20%',
+      onUpdate: (self) => {
+        timelineProgress.value = self.progress;
+      },
+      markers: false // Set to true for debugging
+    });
+  }
+}
 
 onMounted(() => {
   // Initialize main timeline animation
@@ -28,6 +101,14 @@ onMounted(() => {
   document.querySelectorAll('.timeline-item').forEach((item, index) => {
     timelineAnimations.animateTimelineItems(item, index);
   });
+  
+  // Setup step tracking
+  setupStepTracking();
+});
+
+onUnmounted(() => {
+  // Clean up ScrollTriggers to prevent memory leaks
+  scrollTriggers.value.forEach(trigger => trigger.kill());
 });
 </script>
 
@@ -38,19 +119,29 @@ onMounted(() => {
       <p class="body-text text-md max-w-2xl mx-auto mt-4">
         A streamlined process designed to deliver exceptional results for your web project
       </p>
+      <!-- Optional: Display active step for debugging -->
+      <div v-if="isDevelopment" class="mt-4 text-sm">
+        <span class="font-bold">Active Step:</span> {{ activeStepId !== null ? activeStepId : 'None' }}
+        <span class="ml-4 font-bold">Progress:</span> {{ Math.round(timelineProgress * 100) }}%
+      </div>
     </div>
 
     <div class="timeline-container max-w-4xl mx-auto relative">
-      <!-- Timeline line -->
+      <!-- Timeline line with progress indicator -->
       <div class="timeline-line absolute left-1/2 transform -translate-x-1/2 h-full w-1"></div>
+      <div class="timeline-progress absolute left-1/2 transform -translate-x-1/2 w-1"
+           :style="{ height: `${timelineProgress * 100}%`, backgroundColor: 'var(--color-accent)' }"></div>
 
       <!-- Timeline items -->
       <div class="relative">
         <div v-for="(step, index) in steps" 
              :key="step.id"
              class="timeline-item relative mb-24 last:mb-0"
-             :class="{ 'text-left ml-auto pl-8': index % 2 === 0, 'text-right mr-auto pr-8': index % 2 === 1 }"
-             :style="{ width: 'calc(50% - 2rem)' }"
+             :class="[
+               { 'text-left ml-auto pl-8': index % 2 === 0, 'text-right mr-auto pr-8': index % 2 === 1 },
+               { 'timeline-item--active': activeStepId === step.id }
+             ]"
+             :style="{ width: 'calc(50% - 4rem)' }"
         >
           <!-- Stem line from main timeline -->
           <div class="timeline-stem absolute h-1"
@@ -125,6 +216,32 @@ onMounted(() => {
 </template>
 
 <style lang="scss" scoped>
+// Add styles for active timeline items
+.timeline-item {
+  transition: transform 0.3s ease;
+  
+  &--active {
+    .timeline-card {
+      box-shadow: 0 0 15px rgba(var(--color-accent-rgb), 0.5);
+      transform: scale(1.03);
+    }
+    
+    .timeline-number {
+      background-color: var(--color-accent);
+      color: var(--color-background);
+    }
+  }
+}
+
+// Add styles for timeline progress indicator
+.timeline-progress {
+  position: absolute;
+  top: 0;
+  background-color: var(--color-accent);
+  z-index: 1;
+  transition: height 0.1s linear;
+}
+
 .rotating-text {
   position: absolute;
   inset: 0;

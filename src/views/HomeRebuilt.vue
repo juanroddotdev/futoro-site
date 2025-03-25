@@ -11,7 +11,9 @@
     />
     
     <!-- Hurdles and Solutions Section -->
-    <LazySection id="hurdles-solutions" @visible="onSectionVisible('hurdles-solutions')">
+    <LazySection id="hurdles-solutions" 
+    :trackSection="false" 
+    @visible="onSectionVisible('hurdles-solutions', false)">
       <HurdlesSolutionsSection />
       
       <template #placeholder>
@@ -20,7 +22,9 @@
     </LazySection>
 
     <!-- Services section - use default slot instead of content slot -->
-    <LazySection id="services" @visible="onSectionVisible('services')">
+    <LazySection id="services" 
+    @visible="onSectionVisible('services', false)"
+    :trackSection="false" >
       <ServicesSection />
       
       <template #placeholder>
@@ -28,9 +32,10 @@
       </template>
     </LazySection>
     <!-- Timeline section - use default slot instead of content slot -->
-    <LazySection id="timeline" @visible="onSectionVisible('timeline')">
+    <LazySection id="timeline" :trackSection="false"  @visible="onSectionVisible('timeline', false)">
       <!-- Replace TimelineHowItWorks with the refactored Timeline component -->
-      <Timeline />
+      <!-- <Timeline /> -->
+       <TimelineHowItWorks />
       
       <template #placeholder>
         <div class="section-placeholder">Loading...</div>
@@ -47,6 +52,7 @@ import HeroSection from '@/components/sections/refactored/HeroSection.vue';
 import HurdlesSolutionsSection from '@/components/sections/refactored/HurdlesSolutionsSection.vue';
 import LazySection from '@/components/LazySection.vue';
 import Timeline from '@/components/sections/refactored/Timeline.vue';
+import TimelineHowItWorks from '@/components/sections/TimelineHowItWorks.vue';
 import ServicesSection from '@/components/sections/refactored/ServicesSection.vue';
 import { useTheme } from '@/composables/useTheme';
 import { useSectionLoader } from '@/composables/useSectionLoader';
@@ -62,10 +68,9 @@ const sectionLoader = useSectionLoader();
 
 
 // Handle section visibility
-function onSectionVisible(sectionId: string) {
-
-  sectionLoader.markSectionLoaded(sectionId);
-  sectionLoader.markSectionVisible(sectionId);
+function onSectionVisible(sectionId: string, track: boolean = true) {
+  sectionLoader.markSectionLoaded(sectionId, track);
+  sectionLoader.markSectionVisible(sectionId, track);
 }
 
 </script>
