@@ -44,79 +44,46 @@ export function useScrollAnimation(
             gsap.to(firstGroup, { opacity: 1, y: 0, duration: 0.3 });
           }
         },
+        onUpdate: (self) => {
+          // Calculate which messages to show based on scroll progress
+          const progress = self.progress;
+          const totalMessages = messages.length;
+          const messagesToShow = Math.ceil(progress * totalMessages);
+          
+          // Get all message groups
+          const sectionSelector = `#${sectionId}`;
+          for (let i = 1; i <= totalMessages; i++) {
+            const messageGroup = document.querySelector(`${sectionSelector} .message-group-${i}`);
+            const typingIndicator = document.querySelector(`${sectionSelector} .typing-indicator-${i}`);
+            
+            if (messageGroup) {
+              // Show message if it should be visible based on scroll progress
+              const shouldShow = i <= messagesToShow;
+              gsap.to(messageGroup, {
+                opacity: shouldShow ? 1 : 0,
+                y: shouldShow ? 0 : 20,
+                duration: 0.3
+              });
+              
+              // Handle typing indicators
+              if (typingIndicator && showTypingFor.includes(i - 1)) {
+                const typingProgress = (progress * totalMessages) - (i - 1);
+                const showTyping = typingProgress > 0 && typingProgress < 0.5;
+                
+                gsap.to(typingIndicator, {
+                  opacity: showTyping ? 1 : 0,
+                  duration: 0.2
+                });
+              }
+            }
+          }
+        },
         immediateRender: true
       }
     });
 
     // Store the ScrollTrigger instance for cleanup
-    scrollTriggerInstance = timeline.scrollTrigger as ScrollTrigger;
-
-    // Modify selectors to be scoped to this section
-    const sectionSelector = `#${sectionId}`;
-    
-    // Check if messages exist before creating animations
-    if (messages.length === 0) {
-      return;
-    }
-
-    const MESSAGE_OFFSET = 100;
-
-    messages.forEach((_, idx) => {
-      const currentGroup = `${sectionSelector} .message-group-${idx + 1}`;
-      // Check if element exists before animating
-      const currentGroupEl = document.querySelector(currentGroup);
-      if (!currentGroupEl) {
-        return; // Skip this animation if element doesn't exist
-      }
-
-      if (idx > 0) {
-        const previousGroups = [];
-        // Collect only existing elements
-        for (let i = 0; i < idx; i++) {
-          const el = document.querySelector(`${sectionSelector} .message-group-${i + 1}`);
-          if (el) previousGroups.push(el);
-        }
-
-        if (previousGroups.length > 0) {
-          timeline.to(previousGroups, {
-            y: `-=${MESSAGE_OFFSET}`,
-            duration: 0.3,
-            ease: "power2.out",
-            stagger: {
-              amount: 0.1,
-              ease: "power1.in"
-            }
-          });
-        }
-      }
-
-      if (showTypingFor.includes(idx)) {
-        const typingContainer = `${sectionSelector} .typing-container-${idx + 1}`;
-        // Check if typing container exists
-        const typingEl = document.querySelector(typingContainer);
-        if (typingEl) {
-          timeline
-            .to(typingEl, {
-              opacity: 1,
-              duration: 0.15,
-              ease: "power1.out"
-            })
-            .to({}, { duration: 0.3 })
-            .to(typingEl, {
-              opacity: 0,
-              duration: 0.15,
-              ease: "power1.in"
-            });
-        }
-      }
-
-      timeline.to(currentGroupEl, {
-        opacity: 1,
-        duration: 0.2,
-        ease: "power1.out"
-      })
-        .to({}, { duration: 0.3 });
-    });
+    scrollTriggerInstance = timeline.scrollTrigger;
   };
 
   const cleanupScrollAnimation = () => {

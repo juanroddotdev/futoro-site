@@ -125,12 +125,22 @@ const unlockPhone = () => {
       performRippleUnlockAnimation(ambientScreen, containerRef.value, () => {
         isUnlocked.value = true;
         emit('unlock');
+        
+        // Re-setup scroll animations after unlocking
+        nextTick(() => {
+          setupScrollAnimation();
+        });
       });
     } else {
       // Default to wave animation
       performUnlockAnimation(ambientScreen, () => {
         isUnlocked.value = true;
         emit('unlock');
+        
+        // Re-setup scroll animations after unlocking
+        nextTick(() => {
+          setupScrollAnimation();
+        });
       });
     }
   }
@@ -191,10 +201,52 @@ const onPullThresholdReached = () => {
   // Forward the event to parent components
   emit('pull-threshold-reached');
   
-  // Optionally trigger unlock animation directly
-  // If you want the pull to automatically unlock the phone
+  // You can choose to automatically unlock the phone here
   // unlockPhone();
 };
+
+// Add this watch to handle the transition when isUnlocked changes
+watch(isUnlocked, (newValue) => {
+  if (newValue) {
+    // When phone is unlocked, ensure messages are visible
+    nextTick(() => {
+      // Get reference to the chat screen elements
+      const chatScreenElement = chatScreenRef.value?.$el;
+      if (chatScreenElement) {
+        // Animate messages appearing
+        const messagesContainer = chatScreenElement.querySelector('.messages-container');
+        if (messagesContainer) {
+          gsap.to(messagesContainer, {
+            opacity: 1,
+            duration: 0.3
+          });
+          
+          // Animate each message group
+          const messageGroups = messagesContainer.querySelectorAll('.message-group');
+          if (messageGroups.length > 0) {
+            gsap.to(messageGroups, {
+              opacity: 1,
+              y: 0,
+              duration: 0.4,
+              stagger: 0.1,
+              delay: 0.2
+            });
+          }
+          
+          // Animate typing indicators if any
+          const typingContainers = messagesContainer.querySelectorAll('.typing-container');
+          if (typingContainers.length > 0) {
+            gsap.to(typingContainers, {
+              opacity: 1,
+              duration: 0.3,
+              delay: 0.1
+            });
+          }
+        }
+      }
+    });
+  }
+});
 </script>
 
 <style scoped>
