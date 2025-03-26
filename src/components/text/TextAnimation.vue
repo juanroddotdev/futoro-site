@@ -10,12 +10,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick, watch, onUnmounted } from 'vue';
+import { ref, onMounted, nextTick, watch, onUnmounted, PropType } from 'vue';
 import { textAnimations, type TextAnimationType } from '@/animations/text/textAnimations';
 import gsap from 'gsap';
 import { TextPlugin } from 'gsap/TextPlugin';
 
 gsap.registerPlugin(TextPlugin);
+
+interface EffectStyle {
+  gradientClass?: string;
+  customStyles?: Record<string, string>;
+  scaleX?: number;
+  scaleY?: number;
+  intensity?: number;
+  iterations?: number;
+  height?: number;
+  ease?: string;
+  [key: string]: any;
+}
 
 const props = defineProps({
   firstPart: {
@@ -84,8 +96,8 @@ const props = defineProps({
     default: () => []  // 'highlight', 'bounce', 'shake', 'squeeze', etc.
   },
   wordEffectStyles: {
-    type: Array,
-    default: () => []  // For highlight: gradients, for others: animation parameters
+    type: Array as PropType<EffectStyle[]>,
+    default: () => []
   },
   wordEffectDuration: {
     type: Number,
@@ -239,7 +251,12 @@ const applyWordEffects = () => {
 };
 
 // Individual effect functions
-const applyHighlightEffect = (tl, el, effectStyle, wordIndex) => {
+const applyHighlightEffect = (
+  tl: gsap.core.Timeline, 
+  el: HTMLElement, 
+  effectStyle: EffectStyle, 
+  wordIndex: number
+) => {
   const iterations = effectStyle?.iterations || 2;
   
   // Animate the gradient position back and forth
@@ -265,10 +282,15 @@ const applyHighlightEffect = (tl, el, effectStyle, wordIndex) => {
   }, props.wordEffectDuration);
 };
 
-const applyBounceEffect = (tl, el, params, index) => {
+const applyBounceEffect = (
+  tl: gsap.core.Timeline, 
+  el: HTMLElement, 
+  effectStyle: EffectStyle, 
+  wordIndex: number
+) => {
   // Default bounce parameters
-  const bounceHeight = params?.height || 20;
-  const bounceEase = params?.ease || 'elastic.out(1, 0.3)';
+  const bounceHeight = effectStyle?.height || 20;
+  const bounceEase = effectStyle?.ease || 'elastic.out(1, 0.3)';
   
   // Set initial state with no transform to ensure clean start
   gsap.set(el, { 
@@ -293,10 +315,15 @@ const applyBounceEffect = (tl, el, params, index) => {
   }, 0.3);
 };
 
-const applyShakeEffect = (tl, el, params, index) => {
+const applyShakeEffect = (
+  tl: gsap.core.Timeline, 
+  el: HTMLElement, 
+  effectStyle: EffectStyle, 
+  wordIndex: number
+) => {
   // Default shake parameters
-  const intensity = params?.intensity || 5;
-  const iterations = params?.iterations || 5;
+  const intensity = effectStyle?.intensity || 5;
+  const iterations = effectStyle?.iterations || 5;
   
   // Set initial state with no transform to ensure clean start
   gsap.set(el, { 
@@ -328,7 +355,12 @@ const applyShakeEffect = (tl, el, params, index) => {
   }, 0.1 * iterations);
 };
 
-const applySqueezeEffect = (tl, el, params, index) => {
+const applySqueezeEffect = (
+  tl: gsap.core.Timeline, 
+  el: HTMLElement, 
+  params: EffectStyle, 
+  index: number
+) => {
   const scaleX = params?.scaleX || 0.7;
   const scaleY = params?.scaleY || 1.3;
   

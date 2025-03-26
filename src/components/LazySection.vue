@@ -9,8 +9,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, defineProps, defineEmits } from 'vue';
+import type { Ref } from 'vue';
 import scrollDebugger from '@/utils/scroll/debug/ScrollDebugger';
 import { formatDuration } from '@/utils/timestamp';
+
+// Define slot props types
+type DefaultSlotProps = Record<string, never>;
+type PlaceholderSlotProps = Record<string, never>;
 
 const props = defineProps({
   id: {

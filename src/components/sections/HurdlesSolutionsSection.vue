@@ -124,10 +124,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, onUnmounted } from 'vue';
+import type { Ref } from 'vue';
 import ChatScrollSection from '@/components/sections/ChatScrollSection.vue';
 import StickyScrollableCardsSection from '@/components/sections/StickyScrollableCardsSection.vue';
 import { getHurdlesIntroduction, getTransitionToSolutions } from '@/data/chatSections';
-import { getTimestampForLog, formatElapsedTime } from '@/utils/timestamp';
 import { struggles, solutions } from '@/data/strugglesAndSolutions';
 import EmberAnimation from '@/components/effects/EmberAnimation.vue';
 import { calculateContainerHeight } from '@/utils/containerHeightUtils';
@@ -141,7 +141,8 @@ const emberStartTime = ref<number | null>(null);
 // Reference to the main container
 const sectionContainerRef = ref<HTMLElement | null>(null);
 const introSectionRef = ref(null);
-const splitTextRef = ref(null);
+const splitTextRef = ref<HTMLElement | null>(null);
+const toFantasticRef = ref<HTMLElement | null>(null);
 
 // Computed property to reverse the solutions array
 const reversedSolutions = computed(() => [...solutions].reverse());
