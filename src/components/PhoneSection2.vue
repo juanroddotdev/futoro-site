@@ -1,44 +1,16 @@
 <template>
   <div ref="containerRef" class="container" :id="sectionId" :class="position">
     <div ref="phoneContainerRef">
-      <FloatingPhone 
-        ref="floatingPhoneRef"
-        :tilt-x="tiltX"
-        :tilt-y="tiltY"
-        :alternatePhoneStyle="alternatePhoneStyle"
-      > 
-        <AmbientScreen 
-          v-if="!isUnlocked && ambientMode"
-          ref="ambientScreenRef"
-          :time="'4:20 PM'"
-          :date="'March 26th, 2023'"
-          :enable-pull-effect="enablePullEffect"
-          :theme="ambientTheme"
-          @pull-threshold-reached="onPullThresholdReached"
-          class="ambient-screen-layer"
-        />
-        
-        <!-- Replace the messages container with the new component -->
+    
         <PhoneMessages
           ref="messagesComponentRef"
           :messages="messages"
           :showTypingFor="showTypingFor"
-          :isVisible="isUnlocked || !ambientMode"
-          :isHidden="!isUnlocked && ambientMode"
+          :isVisible="true"
+          :isHidden="false"
           :sectionId="sectionId"
         />
         
-        <div 
-          class="message-input-container"
-          :style="{ visibility: (!isUnlocked && ambientMode) ? 'hidden' : 'visible', opacity: (!isUnlocked && ambientMode) ? 0 : 1 }"
-        >
-          <div class="input-wrapper">
-            <div class="message-input">
-              <span class="placeholder"><span class="futoro">futoro</span>Message</span>
-            </div>
-          </div>
-        </div>
-      </FloatingPhone>
     </div>
   </div>
 </template>
@@ -82,7 +54,6 @@ interface Props {
     accentColor?: string;
   };
   unlockAnimationType?: 'wave' | 'ripple';
-  alternatePhoneStyle?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -104,8 +75,7 @@ const props = withDefaults(defineProps<Props>(), {
     endColor: '#2E3440',
     accentColor: 'rgba(245, 245, 245, 0.3)'
   }),
-  unlockAnimationType: 'wave',
-  alternatePhoneStyle: false
+  unlockAnimationType: 'wave'
 });
 // Add emit for unlock events
 const emit = defineEmits(['pull-threshold-reached', 'unlock']);
@@ -128,10 +98,11 @@ const isVisible = ref(false);
 const setupScrollAnimation = () => {
   const container = containerRef.value;
   if (!container) {
+    console.error('Container ref is null, cannot set up scroll animation');
     return;
   }
   
-  // Reset message animations using the PhoneMessages component method
+  // Always reset message animations before setting up scroll animation
   if (messagesComponentRef.value) {
     messagesComponentRef.value.resetMessageAnimations();
   }
@@ -142,42 +113,41 @@ const setupScrollAnimation = () => {
       trigger: container,
       start: props.pinSettings.start,
       end: props.pinSettings.end || `+=${props.messages.length * 50}%`,
-      scrub: 0.5,
+      scrub: true, // Make sure scrub is enabled for smooth scrolling
       pin: props.pinSettings.enabled,
       pinSpacing: props.pinSettings.enabled ? props.pinSettings.pinSpacing : false,
       anticipatePin: props.pinSettings.enabled ? props.pinSettings.anticipatePin : 0,
       onEnter: () => {
-        // Only try to show messages if we're not in ambient mode or we're unlocked
-        if ((!props.ambientMode || props.isUnlocked) && props.messages.length > 0 && messagesComponentRef.value) {
+        if (messagesComponentRef.value) {
           messagesComponentRef.value.showFirstMessage();
         }
       },
-      onEnterBack: () => {
-        // Only reset and show messages if we're not in ambient mode or we're unlocked
-        if (!props.ambientMode || props.isUnlocked) {
-          if (messagesComponentRef.value) {
-            messagesComponentRef.value.resetMessageAnimations();
-            messagesComponentRef.value.showFirstMessage();
-          }
-        }
-      },
-      immediateRender: true
+      markers: true // Enable markers for debugging
     }
   });
   
-  // If in ambient mode and not unlocked, disable the ScrollTrigger
-  if (props.ambientMode && !props.isUnlocked && timeline.scrollTrigger) {
-    timeline.scrollTrigger.disable();
-  } else if (timeline.scrollTrigger) {
-    // Make sure ScrollTrigger is enabled when not in ambient mode
-    timeline.scrollTrigger.enable();
-  }
+  // Add a simple test animation to verify ScrollTrigger is working
+  timeline.to('.test-element', {
+    opacity: 1,
+    y: 0,
+    duration: 1
+  }, 0);
   
-  // Get message timeline from PhoneMessages component and add it to our main timeline
+  // This is the critical part - get the message timeline and add it to our main timeline
   if (messagesComponentRef.value) {
     const messageTimeline = messagesComponentRef.value.createMessageTimeline();
-    timeline.add(messageTimeline, 0);
+    if (messageTimeline) {
+      console.log('Adding message timeline to main timeline');
+      timeline.add(messageTimeline, 0);
+    } else {
+      console.error('Failed to create message timeline');
+    }
+  } else {
+    console.error('Messages component ref is null');
   }
+  
+  console.log('Scroll animation setup complete');
+  console.log('ScrollTrigger enabled:', timeline.scrollTrigger.enabled());
   
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -200,9 +170,9 @@ const setupScrollAnimation = () => {
 };
 
 onMounted(() => {
-  // Only reset message animations if we're not in ambient mode
-  if (!props.ambientMode && !props.isUnlocked) {
-    resetMessageAnimationState();
+  // Reset message animations regardless of mode
+  if (messagesComponentRef.value) {
+    messagesComponentRef.value.resetMessageAnimations();
   }
   
   // Then continue with setup
@@ -363,6 +333,34 @@ watch(() => props.isUnlocked, (newValue, oldValue) => {
     }
   }
 }, { immediate: false });
+
+// Make sure resetMessageAnimations is called when the component becomes visible
+watch(isVisible, (newValue) => {
+  if (newValue && messagesComponentRef.value) {
+    messagesComponentRef.value.resetMessageAnimations();
+    
+    // Only show first message if not in ambient mode or if unlocked
+    if (!props.ambientMode || props.isUnlocked) {
+      messagesComponentRef.value.showFirstMessage();
+    }
+  }
+});
+
+// Ensure resetMessageAnimations is called when messages prop changes
+watch(() => props.messages, () => {
+  if (messagesComponentRef.value) {
+    messagesComponentRef.value.resetMessageAnimations();
+    
+    // Refresh the scroll animation to account for new messages
+    nextTick(() => {
+      if (timeline && timeline.scrollTrigger) {
+        timeline.scrollTrigger.refresh();
+      } else {
+        setupScrollAnimation();
+      }
+    });
+  }
+}, { deep: true });
 </script>
 
 <style lang="scss" scoped>

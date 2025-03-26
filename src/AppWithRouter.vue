@@ -6,7 +6,7 @@
   ]">
     <Navbar />
     <router-view :currentTheme="currentTheme" />
-    <ContactSectionV2 v-if="$route.name !== 'Playground'" />
+    <ContactSectionV2 v-if="!['FloatingChatDemo', 'ChatSectionsDemo', 'Playground'].includes($route.name as string)" />
     <Footer />
     <ThemeSwitcher :currentTheme="currentTheme" @update:currentTheme="handleThemeChange" />
   </div>

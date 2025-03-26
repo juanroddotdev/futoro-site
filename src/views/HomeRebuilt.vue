@@ -6,13 +6,18 @@
     </div>
     
     <!-- Hero Section -->
-    <HeroSection 
+    <!-- <HeroSection 
       :heroContent="heroContent"
       :ambientMode="true"
       :isUnlocked="false"
       :enablePullEffect="true"
       @pull-threshold-reached="onHeroPullThresholdReached"
       @unlock="onHeroUnlock"
+    /> -->
+    <!-- Replace HeroSection with HeroSectionChat -->
+    <HeroSectionChat 
+      :heroContent="heroContent"
+      @mounted="onHeroMounted"
     />
     
     <!-- Hurdles and Solutions Section -->
@@ -53,6 +58,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
+import HeroSectionChat from '@/components/sections/refactored/HeroSectionChat.vue';
 import HeroSection from '@/components/sections/refactored/HeroSection.vue';
 import HurdlesSolutionsSection from '@/components/sections/refactored/HurdlesSolutionsSection.vue';
 import LazySection from '@/components/LazySection.vue';
@@ -79,6 +85,10 @@ function onSectionVisible(sectionId: string, track: boolean = true) {
   sectionLoader.markSectionLoaded(sectionId, track);
   sectionLoader.markSectionVisible(sectionId, track);
 }
+const onHeroMounted = () => {
+  sectionLoader.markSectionLoaded('hero-section', true);
+  sectionLoader.markSectionVisible('hero-section', true);
+};
 // Update these methods
 const onHeroPullThresholdReached = () => {
   // No console log needed

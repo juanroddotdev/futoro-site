@@ -1,7 +1,25 @@
 <template>
   <div class="playground">
     <div class="controls">
-      <div class="transform-controls">
+      <div class="control-group buttons">
+        <button 
+          class="toggle-button" 
+          :class="{ active: activeView === 'transform' }"
+          @click="activeView = 'transform'"
+        >
+          Transform
+        </button>
+        <button 
+          class="toggle-button" 
+          :class="{ active: activeView === 'chat' }"
+          @click="activeView = 'chat'"
+        >
+          Chat
+        </button>
+      </div>
+      
+      <!-- Transform controls (show only when transform view is active) -->
+      <div v-if="activeView === 'transform'" class="transform-controls">
         <div class="control-group buttons">
           <button 
             class="toggle-button" 
@@ -68,60 +86,98 @@
         </div>
       </div>
 
-      <div class="generated-css">
-        <h3>Generated CSS</h3>
-        <pre>{{ generatedCSS }}</pre>
-        <h3>Phone Tilt CSS</h3>
-        <pre>.floating-phone {
-  --tilt-x: {{ tiltX }}deg;
-  --tilt-y: {{ tiltY }}deg;
-  --tilt-x-hover: {{ tiltX - 2 }}deg;
-  --tilt-y-hover: {{ tiltY - 2 }}deg;
-}</pre>
+      <!-- Chat controls (show only when chat view is active) -->
+      <div v-if="activeView === 'chat'" class="chat-controls">
+        <div class="control-group">
+          <h3>Chat Settings</h3>
+          <button @click="addMessage('sent')">Add Sent Message</button>
+          <button @click="addMessage('received')">Add Received Message</button>
+          <button @click="toggleTyping">Toggle Typing</button>
+          <button @click="clearMessages">Clear Messages</button>
+        </div>
+        
+        <div class="control-group">
+          <h3>Message Text</h3>
+          <input 
+            type="text" 
+            v-model="newMessageText" 
+            placeholder="Enter message text"
+            @keyup.enter="addMessage(newMessageType)"
+          />
+          <div class="radio-group">
+            <label>
+              <input type="radio" v-model="newMessageType" value="sent"> Sent
+            </label>
+            <label>
+              <input type="radio" v-model="newMessageType" value="received"> Received
+            </label>
+          </div>
+        </div>
       </div>
     </div>
 
     <div class="viewport" :style="viewportStyle">
-      <div v-if="isPhone" class="element phone">
-        <FloatingPhone 
-          :tilt-x="tiltX"
-          :tilt-y="tiltY"
-        >
-          <div class="phone-inner">
-            <div class="status-bar">
-              <div class="notch">
-                <div class="notch-content"></div>
-              </div>
-              <div class="status-bar-content">
-                <span>9:41</span>
-                <div class="right-items">
-                  <span>5G</span>
-                  <span>100%</span>
+      <!-- Show transform view -->
+      <div v-if="activeView === 'transform'">
+        <div v-if="isPhone" class="element phone">
+          <FloatingPhone 
+            :tilt-x="tiltX"
+            :tilt-y="tiltY"
+          >
+            <div class="phone-inner">
+              <div class="status-bar">
+                <div class="notch">
+                  <div class="notch-content"></div>
+                </div>
+                <div class="status-bar-content">
+                  <span>9:41</span>
+                  <div class="right-items">
+                    <span>5G</span>
+                    <span>100%</span>
+                  </div>
                 </div>
               </div>
+              <div class="content">
+                <!-- Phone content here -->
+              </div>
             </div>
-            <div class="content">
-              <!-- Phone content here -->
-            </div>
-          </div>
-        </FloatingPhone>
-      </div>
-
-      <div v-else class="element cube" :style="elementStyle">
-        <div 
-          v-for="face in faces" 
-          :key="face.name"
-          class="face"
-          :class="[
-            face.name, 
-            { 
-              hidden: !is3D && face.name !== 'front',
-              opaque: isOpaque
-            }
-          ]"
-        >
-          {{ face.name }}
+          </FloatingPhone>
         </div>
+
+        <div v-else class="element cube" :style="elementStyle">
+          <div 
+            v-for="face in faces" 
+            :key="face.name"
+            class="face"
+            :class="[
+              face.name, 
+              { 
+                hidden: !is3D && face.name !== 'front',
+                opaque: isOpaque
+              }
+            ]"
+          >
+            {{ face.name }}
+          </div>
+        </div>
+      </div>
+      
+      <!-- Show chat view -->
+      <div v-if="activeView === 'chat'" class="chat-view">
+        <ChatScreen 
+          :messages="chatMessages" 
+          :showTypingFor="typingIndicators"
+          :sectionId="'playground-chat'"
+          :tiltX="tiltX"
+          :tiltY="tiltY"
+          :pinSettings="{
+            enabled: true,
+            start: 'top top',
+            end: `+=${chatMessages.length * 50}%`,
+            pinSpacing: true,
+            anticipatePin: 1
+          }"
+        />
       </div>
     </div>
   </div>
@@ -130,6 +186,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import FloatingPhone from '@/components/FloatingPhone.vue';
+import ChatScreen from '@/components/ChatScreen.vue';
 
 const is3D = ref(true);
 const isOpaque = ref(false);
@@ -166,7 +223,7 @@ const elementStyle = computed(() => ({
     rotateY(${is3D.value ? rotateY.value : 0}deg)
     rotateZ(${rotateZ.value}deg)
   `,
-  transformStyle: is3D.value ? 'preserve-3d' : 'flat'
+  transformStyle: is3D.value ? 'preserve-3d' as const : 'flat' as const
 }));
 
 const generatedCSS = computed(() => `
@@ -182,6 +239,59 @@ const generatedCSS = computed(() => `
 .viewport {
   perspective: ${perspective.value}px;
 }`);
+
+// New refs for chat functionality
+const activeView = ref('transform'); // 'transform' or 'chat'
+const chatMessages = ref([
+  { text: 'Hello! How can I help you today?', type: 'received' },
+  { text: 'I need help with my Vue project.', type: 'sent' }
+]);
+const typingIndicators = ref<number[]>([]);
+const newMessageText = ref('');
+const newMessageType = ref('sent');
+
+// Chat functions
+const addMessage = (type: string) => {
+  if (!newMessageText.value.trim() && type !== 'typing') return;
+  
+  const messageIndex = chatMessages.value.length;
+  
+  // Add typing indicator first if it's a received message
+  if (type === 'received') {
+    typingIndicators.value.push(messageIndex);
+    setTimeout(() => {
+      // Remove typing indicator after 1.5 seconds
+      typingIndicators.value = typingIndicators.value.filter(idx => idx !== messageIndex);
+      // Then add the actual message
+      chatMessages.value.push({ 
+        text: newMessageText.value || 'This is a sample received message.', 
+        type: 'received' 
+      });
+      newMessageText.value = '';
+    }, 1500);
+  } else {
+    // Add sent message immediately
+    chatMessages.value.push({ 
+      text: newMessageText.value || 'This is a sample sent message.', 
+      type: 'sent' 
+    });
+    newMessageText.value = '';
+  }
+};
+
+const toggleTyping = () => {
+  const lastIndex = chatMessages.value.length - 1;
+  if (typingIndicators.value.includes(lastIndex)) {
+    typingIndicators.value = typingIndicators.value.filter(idx => idx !== lastIndex);
+  } else {
+    typingIndicators.value.push(lastIndex);
+  }
+};
+
+const clearMessages = () => {
+  chatMessages.value = [];
+  typingIndicators.value = [];
+};
 </script>
 
 <style lang="scss" scoped>
@@ -469,5 +579,40 @@ const generatedCSS = computed(() => `
 .cube {
   width: 200px;
   height: 200px;
+}
+
+.chat-view {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f5f5f5;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.chat-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  
+  .radio-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+  }
+  
+  input[type="text"] {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+  
+  button {
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
 }
 </style>

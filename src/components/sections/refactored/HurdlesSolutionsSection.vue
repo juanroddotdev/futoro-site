@@ -1,7 +1,7 @@
 <template>
   <div class="progressive-reveal overflow-visible" ref="sectionContainerRef">
-    <!-- Introduction section with phone on left -->
-    <ScrollablePhoneSection
+    <!-- Introduction section with floating chat on left -->
+    <ScrollableChatSectionV2
       phonePosition="left"
       :messages="getHurdlesIntroduction()"
       :showTypingFor="[0, 1]"
@@ -28,7 +28,7 @@
         <AnimatedText 
         ref="splitTextRef"
         class="text-3xl font-bold text-center gradient-text" 
-        firstPart="From Frustration"
+        firstPart="From Frustration" 
         animation="slideInRight" 
         :useGradient="true" 
         :delay="3" 
@@ -36,18 +36,8 @@
         :initiallyHidden="true"
         :wordEffects="true"
         :wordTargets="['Frustration']"
-        :wordEffectTypes="['highlight']"
-        :wordEffectStyles="[
-          { 
-            gradientClass: 'gradient-theme-fire',
-            iterations: 3,
-            customStyles: {
-              transform: 'scale(1.05)',
-              display: 'inline-block',
-              position: 'relative',
-              transition: 'all 1s cubic-bezier(0.34, 1.56, 0.64, 1)'
-            }
-          }
+        :wordEffectClasses="[
+          'frustration-word'
         ]"
         :wordEffectDuration="2"
         :wordEffectDelay=".3"
@@ -65,7 +55,7 @@
         @ember-start="handleEmberStart"
       />
       </template>
-    </ScrollablePhoneSection>
+    </ScrollableChatSectionV2>
      <!-- NEW Hurdles Section -->
     <StickyScrollableCardsSection
       sectionId="stickyHurdlesSection"
@@ -80,8 +70,8 @@
       containerHeight="250vh"
       :debug="false"
     />
-    <!-- Introduction section with phone on left -->
-    <ScrollablePhoneSection
+    <!-- Transition section with floating chat on right -->
+    <ScrollableChatSectionV2
       phonePosition="right"
       :messages="getTransitionToSolutions()"
       :showTypingFor="[0, 1]"
@@ -90,11 +80,6 @@
       sectionId="solutions"
       layout="content-left"
       :containerHeight="solutionsContainerHeight"
-      :animation="{
-        contentFirst: true,
-        duration: 0.7,
-        phoneDelay: 1
-      }"
       :debug="false"
       customClass="solutions-intro-section"
       :initiallyHidden="true" 
@@ -112,37 +97,15 @@
         :initiallyHidden="true"
         :wordEffects="true"
         :wordTargets="['Fantastic']"
-        :wordEffectTypes="['highlight']"
-        :wordEffectStyles="[
-          { 
-            gradientClass: 'gradient-theme-cool',
-            iterations: 3,
-            customStyles: {
-              transform: 'scale(1.05)',
-              display: 'inline-block',
-              position: 'relative',
-              transition: 'all 1s cubic-bezier(0.34, 1.56, 0.64, 1)'
-            }
-          }
+        :wordEffectClasses="[
+          'fantastic-word'
         ]"
         :wordEffectDuration="2"
         :wordEffectDelay=".3"
       />
-       <!-- Add ember effect for "Frustration" word -->
-       <!-- <EmberEffect 
-        :targetElement="frustrationElement" 
-        effectType="ember"
-        :particleCount="20"
-        :duration="2.5"
-        :colors="['#ff4500', '#ff7800', '#ffaa33', '#ffcc00']"
-        :relativeToParent="true"
-        :startDelay="emberDelay"
-        :active="frustrationElement !== null"
-        @ember-start="handleEmberStart"
-      /> -->
       </template>
-    </ScrollablePhoneSection>
-     <!-- NEW Hurdles Section -->
+    </ScrollableChatSectionV2>
+     <!-- Solutions Section -->
      <StickyScrollableCardsSection
       sectionId="solutionsSection"
       containerId="solutionsContainer"
@@ -156,14 +119,12 @@
       containerHeight="250vh"
       :debug="false"
     />
-    
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed, onUnmounted } from 'vue';
-import ScrollablePhoneSection from '@/components/sections/refactored/ScrollablePhoneSection.vue';
-import ScrollableCardsSection from '@/components/sections/ScrollableCardsSection.vue';
+import ScrollableChatSectionV2 from '@/components/sections/refactored/ScrollableChatSectionV2.vue';
 import StickyScrollableCardsSection from '@/components/sections/refactored/StickyScrollableCardsSection.vue';
 import { getHurdlesIntroduction, getTransitionToSolutions } from '@/data/chatSections';
 import { getTimestampForLog, formatElapsedTime } from '@/utils/timestamp';
@@ -198,7 +159,10 @@ const handleEmberStart = () => {
 };
 // Lifecycle hooks
 onMounted(() => {
-  // console.log('[Refactored] HurdlesSolutionsSection mounted');
+  // Find the frustration element after component is mounted
+  setTimeout(() => {
+    frustrationElement.value = document.querySelector('.frustration-word');
+  }, 500);
 });
 
 onUnmounted(() => {

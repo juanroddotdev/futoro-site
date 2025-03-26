@@ -179,6 +179,68 @@
   }
 }
 
+/* Alternate phone style */
+.floating-phone.alternate-style {
+  .phone-frame {
+    display: none;
+    background: transparent;
+    box-shadow: none;
+    
+    /* Gradient border effect */
+    &::before {
+      display:none;
+      content: '';
+      position: absolute;
+      inset: -2px;
+      background: transparent;
+      border-radius: min(54px, 14.4vw);
+      z-index: 0;
+      opacity: 0.8;
+    }
+    
+    /* Bezel shine effect - modified for alternate style */
+    &::after {
+      display:none;
+      background: transparent;
+    }
+  }
+  
+  .phone-inner {
+    background: transparent;
+    box-shadow: none;
+    .status-bar {
+      display:none;
+      background: transparent;
+    }
+    .content {
+      background: transparent;
+    }
+    .message-input-container{
+      display: none;
+    }
+  }
+
+  
+  /* Modified shadow for alternate style */
+  .phone-shadow {
+    display: none;
+    background: transparent;
+    filter: blur(min(30px, 8vw));
+  }
+  
+  /* Modified animation for alternate style */
+  animation: float-alternate 5s ease-in-out infinite;
+}
+
+@keyframes float-alternate {
+  0%, 100% {
+    transform: translateY(0) rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+  }
+  50% {
+    transform: translateY(-15px) rotateX(calc(var(--tilt-x) - 2deg)) rotateY(calc(var(--tilt-y) - 2deg));
+  }
+}
+
 /* Media query for very tall screens */
 @media (min-aspect-ratio: 1/1.2) {
   .floating-phone {
