@@ -18,6 +18,13 @@
       :secondaryCta="secondaryCta"
       :customClass="customClass"
       ref="flexibleContentRef"
+      :ambientMode="ambientMode"
+    :enablePullEffect="enablePullEffect"
+    :ambientTheme="ambientTheme"
+    :unlockAnimationType="unlockAnimationType"
+    :isUnlocked="isUnlocked"
+    @pull-threshold-reached="onPullThresholdReached"
+    @unlock="onUnlock"
     >
       <template #headline>
         <slot name="headline"></slot>
@@ -61,7 +68,16 @@ interface Props {
   containerHeight?: string;
   debug?: boolean;
   customClass?: string;
-  startAtBeginning?: boolean; // New prop to control starting position
+  startAtBeginning?: boolean; 
+  isUnlocked?: boolean;
+  ambientMode?: boolean;
+  enablePullEffect?: boolean;
+  ambientTheme?: {
+    baseColor?: string;
+    endColor?: string;
+    accentColor?: string;
+  };
+  unlockAnimationType?: 'wave' | 'ripple';// New prop to control starting position
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -73,8 +89,29 @@ const props = withDefaults(defineProps<Props>(), {
   containerHeight: '300vh',
   debug: false,
   customClass: '',
-  startAtBeginning: true // Default to true to show first message
+  startAtBeginning: true, // Default to true to show first message
+  isUnlocked: false,
+  ambientMode: false,
+  enablePullEffect: true,
+  ambientTheme: () => ({
+    baseColor: '#1a1f2c',
+    endColor: '#2E3440',
+    accentColor: 'rgba(245, 245, 245, 0.3)'
+  }),
+  unlockAnimationType: 'wave'
 });
+
+// Add emits
+const emit = defineEmits(['pull-threshold-reached', 'unlock']);
+
+// Add event handlers
+const onPullThresholdReached = () => {
+  emit('pull-threshold-reached');
+};
+
+const onUnlock = () => {
+  emit('unlock');
+};
 
 // Reference to the flexible content component
 const flexibleContentRef = ref(null);

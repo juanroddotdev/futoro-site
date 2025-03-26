@@ -5,6 +5,13 @@
     :offset="0"
     :zIndex="2"
     :debug="debug"
+    :isUnlocked="isUnlocked"
+    :ambientMode="ambientMode"
+    :enablePullEffect="enablePullEffect"
+    :ambientTheme="ambientTheme"
+    :unlockAnimationType="unlockAnimationType"
+    @pull-threshold-reached="onPullThresholdReached"
+    @unlock="onUnlock"
   >
     <PhoneContentLayout
       :messages="messages"
@@ -17,6 +24,13 @@
       :primaryCta="primaryCta"
       :secondaryCta="secondaryCta"
       :customClass="customClass"
+      :isUnlocked="isUnlocked"
+      :ambientMode="ambientMode"
+      :enablePullEffect="enablePullEffect"
+      :ambientTheme="ambientTheme"
+      :unlockAnimationType="unlockAnimationType"
+      @pull-threshold-reached="onPullThresholdReached"
+      @unlock="onUnlock"
       ref="flexibleContentRef"
     >
       <template #headline>
@@ -61,7 +75,16 @@ interface Props {
   containerHeight?: string;
   debug?: boolean;
   customClass?: string;
-  startAtBeginning?: boolean; // New prop to control starting position
+  startAtBeginning?: boolean;
+  isUnlocked?: boolean;
+  ambientMode?: boolean;
+  enablePullEffect?: boolean;
+  ambientTheme?: {
+    baseColor?: string;
+    endColor?: string;
+    accentColor?: string;
+  };
+  unlockAnimationType?: 'wave' | 'ripple'; 
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -73,7 +96,16 @@ const props = withDefaults(defineProps<Props>(), {
   containerHeight: '300vh',
   debug: false,
   customClass: '',
-  startAtBeginning: true // Default to true to show first message
+  startAtBeginning: true,
+  isUnlocked: false,
+  ambientMode: false,
+  enablePullEffect: true,
+  ambientTheme: () => ({
+    baseColor: '#1a1f2c',
+    endColor: '#2E3440',
+    accentColor: 'rgba(245, 245, 245, 0.3)'
+  }),
+  unlockAnimationType: 'wave'// 
 });
 
 // Reference to the flexible content component
@@ -93,6 +125,17 @@ const computedContainerHeight = computed(() => {
     heightMultiplier: 1.3
   });
 });
+// Add emits
+const emit = defineEmits(['pull-threshold-reached', 'unlock']);
+
+// Add event handlers
+const onPullThresholdReached = () => {
+  emit('pull-threshold-reached');
+};
+
+const onUnlock = () => {
+  emit('unlock');
+};
 </script>
 
 <style lang="scss">

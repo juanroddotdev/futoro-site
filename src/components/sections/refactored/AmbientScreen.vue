@@ -10,7 +10,7 @@
         :dotSpacing="8"
         :dotColor="theme.accentColor || 'rgba(255, 255, 255, 0.8)'" 
         :duration="0.8" 
-        :paused="!enablePullEffect" 
+        :paused="true" 
         animationStyle="pulse"
       />
     </div>
@@ -18,8 +18,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
-import LoadingDots from './LoadingDots.vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import LoadingDots from '@/components/LoadingDots.vue';
+import { useScroll, useTransition } from '@vueuse/core';
+import gsap from 'gsap';
 
 /**
  * AmbientScreen Component
@@ -57,9 +59,26 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits(['pull-threshold-reached']);
 
 // Refs
-const notificationDotsRef = ref(null);
+const notificationDotsRef = ref<InstanceType<typeof LoadingDots> | null>(null);
+const scrollTarget = ref(null);
+const { y: scrollY } = useScroll(scrollTarget);
+const thresholdReached = ref(false);
 
 // Computed properties
+const rawPullProgress = computed(() => {
+  if (!props.enablePullEffect) return 0;
+  
+  // Convert scroll position to pull progress (0-1)
+  const maxPullScroll = 100; // How many pixels of scroll = 100% pull
+  return Math.min(1, Math.max(0, scrollY.value / maxPullScroll));
+});
+
+// Add smooth transition to the pull progress
+const scrollPullProgress = useTransition(rawPullProgress, {
+  duration: 150,
+  transition: [0.25, 0.1, 0.25, 1], // Cubic bezier for smooth feel
+});
+
 const backgroundStyle = computed(() => {
   return {
     background: `linear-gradient(135deg, ${props.theme.baseColor} 0%, ${props.theme.endColor} 100%)`
@@ -73,6 +92,7 @@ const applyPullEffect = (progress: number) => {
   const el = document.querySelector('.ambient-screen') as HTMLElement;
   if (!el) return;
   
+  // Apply pull effect transformations
   const maxOffset = 40;
   const dotsContainer = notificationDotsRef.value?.$el;
   const dots = dotsContainer?.querySelectorAll('.loading-dot');
@@ -179,9 +199,52 @@ watch(() => props.theme, () => {
   resetPullEffect();
 }, { deep: true });
 
+// Define handleScroll function first
+const handleScroll = () => {
+  // Early return if pull effect is disabled or already unlocked
+  if (!props.enablePullEffect || thresholdReached.value) return;
+  
+  // Convert scroll position to pull progress (0-1)
+  const maxPullScroll = 100; // How many pixels of scroll = 100% pull
+  const progress = Math.min(1, Math.max(0, window.scrollY / maxPullScroll));
+  
+  // Update the source reactive property that scrollPullProgress is based on
+  scrollY.value = window.scrollY;
+
+  // Apply the pull effect based on progress
+  if (progress > 0) {
+    applyPullEffect(progress);
+    
+    // Only emit once when threshold is reached
+    if (progress >= 0.8 && !thresholdReached.value) {
+      thresholdReached.value = true;
+      emit('pull-threshold-reached');
+      
+      // Optionally remove scroll listener after threshold is reached
+      window.removeEventListener('scroll', handleScroll);
+    }
+  } else {
+    resetPullEffect();
+  }
+};
+
 // Watch for changes to enablePullEffect
-watch(() => props.enablePullEffect, (newValue) => {
+watch(() => props.enablePullEffect, (newValue, oldValue) => {
   if (!newValue) {
+    resetPullEffect();
+    // Remove the scroll listener when pull effect is disabled
+    window.removeEventListener('scroll', handleScroll);
+  } else if (!oldValue && newValue) {
+    // Only add the listener if it wasn't previously enabled
+    window.addEventListener('scroll', handleScroll);
+  }
+}, { immediate: true });
+
+// Watch for changes to scroll pull progress
+watch(scrollPullProgress, (newProgress) => {
+  if (newProgress > 0) {
+    applyPullEffect(newProgress);
+  } else {
     resetPullEffect();
   }
 });
@@ -195,6 +258,15 @@ defineExpose({
 onMounted(() => {
   // Initialize with current theme
   resetPullEffect();
+  
+  // Add scroll listener only if pull effect is enabled
+  if (props.enablePullEffect) {
+    window.addEventListener('scroll', handleScroll);
+  }
+});
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll);
 });
 </script>
 
