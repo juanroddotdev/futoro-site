@@ -3,7 +3,6 @@
 # Create destination directories
 UNUSED_DIR="src/_unused"
 mkdir -p "$UNUSED_DIR/vue"
-mkdir -p "$UNUSED_DIR/ts"
 mkdir -p "$UNUSED_DIR/js"
 
 # Log file for documenting moved files
@@ -66,34 +65,6 @@ for file in $ALL_VUE; do
     echo "- $file -> $UNUSED_DIR/vue/$(basename "$file")" >> "$LOG_FILE"
     echo "mkdir -p $(dirname "$file")" >> "$RESTORE_SCRIPT"
     echo "mv $UNUSED_DIR/vue/$(basename "$file") $file" >> "$RESTORE_SCRIPT"
-    echo "Moved: $file"
-  fi
-done
-
-# Process TS files
-echo "" >> "$LOG_FILE"
-echo "## TypeScript Files" >> "$LOG_FILE"
-echo "Processing TypeScript files..."
-ALL_TS=$(find src -name "*.ts" -type f | grep -v "node_modules" | grep -v "_unused" | grep -v -E "$EXCLUDE_DIRS")
-
-for file in $ALL_TS; do
-  base_name=$(basename "$file" .ts)
-  is_related=false
-  
-  # Check if this TS file is related to a used component
-  for comp_name in "${COMPONENT_NAMES[@]}"; do
-    if [[ "$base_name" == "$comp_name" || "$base_name" == "${comp_name}Props" || "$base_name" == "${comp_name}Types" ]]; then
-      is_related=true
-      break
-    fi
-  done
-  
-  if [[ "$is_related" == false ]]; then
-    # Move the file
-    mv "$file" "$UNUSED_DIR/ts/$(basename "$file")"
-    echo "- $file -> $UNUSED_DIR/ts/$(basename "$file")" >> "$LOG_FILE"
-    echo "mkdir -p $(dirname "$file")" >> "$RESTORE_SCRIPT"
-    echo "mv $UNUSED_DIR/ts/$(basename "$file") $file" >> "$RESTORE_SCRIPT"
     echo "Moved: $file"
   fi
 done
