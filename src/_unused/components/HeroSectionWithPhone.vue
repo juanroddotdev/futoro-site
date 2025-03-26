@@ -7,7 +7,7 @@ import { getInitialConversation } from '@/data/chatSections';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 // Add import for FlexibleContentWithPhone
-import FlexibleContentWithPhone from '@/components/sections/FlexibleContentWithPhone.vue';
+import FlexibleContentWithPhone from '@/_unused/components/FlexibleContentWithPhone.vue';
 
 gsap.registerPlugin(ScrollTrigger);
 

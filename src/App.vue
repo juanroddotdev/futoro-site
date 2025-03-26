@@ -9,7 +9,7 @@ import TimelineHowItWorks from './components/sections/TimelineHowItWorks.vue';
 import ContactSectionV2 from './components/sections/ContactSectionV2.vue';
 import AboutSectionAlt from './components/sections/AboutSectionAlt.vue';
 // import GridPaperOverlay from '@/components/export-to-main/gridBackground/GridPaperOverlay.vue';
-import HurdlesSolutionsSection from '@/components/sections/HurdlesSolutionsSection.vue';
+import HurdlesSolutionsSection from '@/_unused/components/HurdlesSolutionsSection.vue';
 
 
 const currentTheme = ref('theme-neon-horizon');
