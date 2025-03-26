@@ -2,19 +2,10 @@
   <div class="main-content">
     <!-- Fixed grid overlay that stays in viewport -->
     <div class="viewport-grid">
-      <GridPaperOverlay :theme="currentTheme.replace('theme-', '')" :floating="true" :spotlight="true" />
+      <PaperGridBackground :theme="currentTheme.replace('theme-', '')" :floating="true" :spotlight="true" />
     </div>
     
     <!-- Hero Section -->
-    <!-- <HeroSection 
-      :heroContent="heroContent"
-      :ambientMode="true"
-      :isUnlocked="false"
-      :enablePullEffect="true"
-      @pull-threshold-reached="onHeroPullThresholdReached"
-      @unlock="onHeroUnlock"
-    /> -->
-    <!-- Replace HeroSection with HeroSectionChat -->
     <HeroSectionChat 
       :heroContent="heroContent"
       @mounted="onHeroMounted"
@@ -43,9 +34,7 @@
     </LazySection>
     <!-- Timeline section - use default slot instead of content slot -->
     <LazySection id="timeline" :trackSection="false"  @visible="onSectionVisible('timeline', false)">
-      <!-- Replace TimelineHowItWorks with the refactored Timeline component -->
-      <!-- <Timeline /> -->
-       <TimelineHowItWorks />
+       <ProcessTimeline />
       
       <template #placeholder>
         <div class="section-placeholder">Loading...</div>
@@ -58,16 +47,15 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import HeroSectionChat from '@/components/sections/refactored/HeroSectionChat.vue';
-import HeroSection from '@/components/sections/refactored/HeroSection.vue';
-import HurdlesSolutionsSection from '@/components/sections/refactored/HurdlesSolutionsSection.vue';
+import HeroSectionChat from '@/components/sections/HeroSectionChat.vue';
+import HurdlesSolutionsSection from '@/components/sections/HurdlesSolutionsSection.vue';
 import LazySection from '@/components/LazySection.vue';
-import Timeline from '@/components/sections/refactored/Timeline.vue';
-import TimelineHowItWorks from '@/components/sections/TimelineHowItWorks.vue';
-import ServicesSection from '@/components/sections/refactored/ServicesSection.vue';
+import ProcessTimeline from '@/components/sections/ProcessTimeline.vue';
+import ServicesSection from '@/components/sections/ServicesSection.vue';
 import { useTheme } from '@/composables/useTheme';
-import { useSectionLoader } from '@/composables/useSectionLoader';
-import { HeroContent, getRandomHeroContent } from '@/data/heroContent';
+import { useLazySection } from '@/composables/useLazySection';
+import { HeroContent, getRandomHeroContent } from '@/data/heroContentData';
+import PaperGridBackground from '@/components/ui/backgrounds/PaperGridBackground.vue';
 
 const heroContent = ref<HeroContent>(getRandomHeroContent());
 
@@ -75,7 +63,7 @@ const heroContent = ref<HeroContent>(getRandomHeroContent());
 const { currentTheme } = useTheme();
 
 // Use the section loader
-const sectionLoader = useSectionLoader();
+const sectionLoader = useLazySection();
 
 // Add a flag to track if the hero section has been unlocked
 const heroSectionUnlocked = ref(false);

@@ -1,5 +1,5 @@
 <template>
-  <ScrollPinWrapper 
+  <StickyScrollContainer 
     id="services" 
     class="services-grid section theme-bg--neutral"
     :height="containerHeight || calculateServicesHeight(services.length)"
@@ -10,7 +10,7 @@
   >
     <div class="grid grid-cols-5 gap-4">
       <div class="col-span-2 sticky-heading-container">
-        <AnimatedText 
+        <TextAnimation 
           class="sticky-heading text-3xl font-bold text-center my-16 gradient-text"
           firstPart="How I" 
           secondPart="Can Help" 
@@ -26,12 +26,12 @@
         <ScrollAccordionVanilla :items="services" />
       </div>
     </div>
-  </ScrollPinWrapper>
+  </StickyScrollContainer>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import ScrollPinWrapper from '@/components/ui/containers/ScrollPinWrapper.vue';
+import StickyScrollContainer from '@/components/ui/containers/StickyScrollContainer.vue';
 import ScrollAccordionVanilla from '@/components/ui/ScrollAccordionVanilla.vue';
 import { services } from '@/data/services';
 import { calculateServicesHeight } from '@/utils/containerHeightUtils';

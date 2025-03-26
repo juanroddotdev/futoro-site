@@ -1,6 +1,6 @@
 <template>
   <div class="hero-section-chat">
-    <ScrollableChatSection
+    <ChatScrollSection
       :messages="heroMessages"
       :showTypingFor="[0, 1]"
       :layout="layout"
@@ -29,15 +29,15 @@
           </a>
         </div>
       </template>
-    </ScrollableChatSection>
+    </ChatScrollSection>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import ScrollableChatSection from '@/components/sections/refactored/ScrollableChatSection.vue';
+import ChatScrollSection from '@/components/sections/ChatScrollSection.vue';
 import { getInitialConversation } from '@/data/chatSections';
-import { HeroContent, getRandomHeroContent } from '@/data/heroContent';
+import { HeroContent, getRandomHeroContent } from '@/data/heroContentData';
 import { calculateContainerHeight } from '@/utils/containerHeightUtils';
 
 // Define props with defaults

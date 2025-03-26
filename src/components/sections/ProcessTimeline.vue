@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, computed, ref, onUnmounted } from "vue";
-import { timelineAnimations } from "@/animations/timelineHowItWorks";
+import { timelineAnimations } from "@/animations/processTimeline";
 import { steps as defaultSteps, alternativeSteps, type ProcessSteps } from "@/data/howItWorksSteps";
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';

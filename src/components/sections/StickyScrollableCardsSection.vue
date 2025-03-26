@@ -1,5 +1,5 @@
 <template>
-  <ScrollPinWrapper
+  <StickyScrollContainer
     :id="props.sectionId"
     ref="sectionRef"
     :height="computedContainerHeight"
@@ -10,7 +10,7 @@
     class="horizontal-scroll-section"
   >
     <div class="header-container" :class="headerContainerClass">
-      <AnimatedText 
+      <TextAnimation 
         class="section-title gradient-text"
         :firstPart="title"  
         :animation="titleAnimation"
@@ -40,12 +40,12 @@
         </div>
       </div>
     </div>
-  </ScrollPinWrapper>
+  </StickyScrollContainer>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue';
-import ScrollPinWrapper from '@/components/ui/containers/ScrollPinWrapper.vue';
+import StickyScrollContainer from '@/components/ui/containers/StickyScrollContainer.vue';
 import { calculateContainerHeight } from '@/utils/containerHeightUtils';
 // import { useStickyScrollableCardsDebug } from '@/debug/StickyScrollableCardsDebug';
 

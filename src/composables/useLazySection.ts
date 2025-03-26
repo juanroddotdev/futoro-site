@@ -4,7 +4,7 @@ import { ref, readonly } from 'vue';
 const loadedSections = ref<Set<string>>(new Set());
 const visibleSections = ref<Set<string>>(new Set());
 
-export function useSectionLoader() {
+export function useLazySection() {
   // Register a section as loaded
   function markSectionLoaded(sectionId: string, track: boolean) {
     loadedSections.value.add(sectionId);

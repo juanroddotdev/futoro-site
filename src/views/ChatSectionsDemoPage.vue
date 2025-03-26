@@ -66,7 +66,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import ScrollableChatSection from '@/components/sections/refactored/ScrollableChatSection.vue';
+import ScrollableChatSection from '@/components/sections/ScrollableChatSection.vue';
 import { 
   getVisionToRealitySteps, 
   getCommonFrustrationsSteps, 

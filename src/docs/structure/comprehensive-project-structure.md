@@ -28,13 +28,13 @@ src/
 │   │       └── ScrollPinWrapper.vue
 │   │
 │   ├── sections/             # Page sections
-│   │   ├── refactored/       # Refactored sections
-│   │   │   ├── HeroSectionChat.vue
-│   │   │   ├── ScrollableChatSection.vue
-│   │   │   ├── ScrollableChatSectionV2.vue
-│   │   │   ├── HurdlesSolutionsSection.vue
-│   │   │   ├── ServicesSection.vue
-│   │   │   └── StickyScrollableCardsSection.vue
+│   │   ├
+│   │   ├── HeroSectionChat.vue
+│   │   ├── ScrollableChatSection.vue
+│   │   ├── ScrollableChatSectionV2.vue
+│   │   ├── HurdlesSolutionsSection.vue
+│   │   ├── ServicesSection.vue
+│   │   ├── StickyScrollableCardsSection.vue
 │   │   └── TimelineHowItWorks.vue
 │   │
 │   ├── chat/                 # Chat-related components
@@ -72,65 +72,7 @@ src/
 │   ├── heroContent.ts        # Hero section content
 │   └── hurdlesSolutions.ts   # Problems and solutions data
 │
-├── scss/                     # SCSS styles (instead of styles/)
-│   ├── abstracts/
-│   │   ├── _variables.scss
-│   │   ├── _functions.scss
-│   │   └── _mixins.scss
-│   │
-│   ├── base/
-│   │   ├── _reset.scss
-│   │   ├── _typography.scss
-│   │   └── _animations.scss
-│   │
-│   ├── components/
-│   │   ├── _buttons.scss
-│   │   ├── _cards.scss
-│   │   ├── _forms.scss
-│   │   ├── _message-bubbles.scss
-│   │   ├── _typing-indicator.scss
-│   │   ├── _hero-section-with-phone.scss
-│   │   └── _phone-conversation-floating.scss
-│   │
-│   ├── layout/
-│   │   ├── _grid.scss
-│   │   └── _app.scss
-│   │
-│   ├── separators/
-│   │   └── _code-evolution.scss
-│   │
-│   ├── themes/
-│   │   ├── _neutral.scss
-│   │   └── _theme-classes.scss
-│   │
-│   ├── playground/
-│   │   └── _index.scss
-│   │
-│   └── main.scss             # Main stylesheet
-│
-├── scripts/                  # Utility scripts
-│   ├── find-missing-components.sh
-│   ├── move-components.sh
-│   ├── move-unused-components.sh
-│   └── restore-specific-files.sh
-│
-├── docs/                     # Project documentation
-│   ├── README.md
-│   ├── maintenance/
-│   │   ├── unused-files-guide.md
-│   │   ├── css-cleanup-guide.md
-│   │   └── dev-dependencies-guide.md
-│   │
-│   ├── structure/
-│   │   ├── project-structure.md
-│   │   ├── scss-folder-layout.md
-│   │   └── component-nesting-guide.md
-│   │
-│   ├── typescript/
-│   │   └── config-guide.md
-│   │
-│   └── components/
-│       └── export-guide.md
+├
 │
 ├── router/                   # Vue Router
 │   └── index.js

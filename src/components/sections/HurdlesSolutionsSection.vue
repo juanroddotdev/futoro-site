@@ -1,7 +1,7 @@
 <template>
   <div class="progressive-reveal overflow-visible" ref="sectionContainerRef">
     <!-- Introduction section with floating chat on left -->
-    <ScrollableChatSectionV2
+    <ChatScrollSection
       phonePosition="left"
       :messages="getHurdlesIntroduction()"
       :showTypingFor="[0, 1]"
@@ -15,7 +15,7 @@
       ref="introSectionRef"
     >
       <template #headline>
-        <AnimatedText 
+        <TextAnimation 
           class="text-3xl font-bold text-center gradient-text mb-40" 
           firstPart="Website Solutions"
           animation="fadeUp" 
@@ -25,7 +25,7 @@
         />
       </template>
       <template #subheadline>
-        <AnimatedText 
+        <TextAnimation 
         ref="splitTextRef"
         class="text-3xl font-bold text-center gradient-text" 
         firstPart="From Frustration" 
@@ -43,7 +43,7 @@
         :wordEffectDelay=".3"
       />
        <!-- Add ember effect for "Frustration" word -->
-       <EmberEffect 
+       <EmberAnimation 
         :targetElement="frustrationElement" 
         effectType="ember"
         :particleCount="20"
@@ -55,7 +55,7 @@
         @ember-start="handleEmberStart"
       />
       </template>
-    </ScrollableChatSectionV2>
+    </ChatScrollSection>
      <!-- NEW Hurdles Section -->
     <StickyScrollableCardsSection
       sectionId="stickyHurdlesSection"
@@ -71,7 +71,7 @@
       :debug="false"
     />
     <!-- Transition section with floating chat on right -->
-    <ScrollableChatSectionV2
+    <ChatScrollSection
       phonePosition="right"
       :messages="getTransitionToSolutions()"
       :showTypingFor="[0, 1]"
@@ -86,7 +86,7 @@
       ref="solutionsSectionRef"
     >
       <template #subheadline>
-        <AnimatedText 
+        <TextAnimation 
         ref="toFantasticRef"
         class="text-3xl font-bold text-center gradient-text" 
         firstPart="To Fantastic" 
@@ -104,7 +104,7 @@
         :wordEffectDelay=".3"
       />
       </template>
-    </ScrollableChatSectionV2>
+    </ChatScrollSection>
      <!-- Solutions Section -->
      <StickyScrollableCardsSection
       sectionId="solutionsSection"
@@ -124,13 +124,14 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, onUnmounted } from 'vue';
-import ScrollableChatSectionV2 from '@/components/sections/refactored/ScrollableChatSectionV2.vue';
-import StickyScrollableCardsSection from '@/components/sections/refactored/StickyScrollableCardsSection.vue';
+import ChatScrollSection from '@/components/sections/ChatScrollSection.vue';
+import StickyScrollableCardsSection from '@/components/sections/StickyScrollableCardsSection.vue';
 import { getHurdlesIntroduction, getTransitionToSolutions } from '@/data/chatSections';
 import { getTimestampForLog, formatElapsedTime } from '@/utils/timestamp';
 import { struggles, solutions } from '@/data/strugglesAndSolutions';
-import EmberEffect from '@/components/effects/EmberEffect.vue';
+import EmberAnimation from '@/components/effects/EmberAnimation.vue';
 import { calculateContainerHeight } from '@/utils/containerHeightUtils';
+import TextAnimation from '@/components/text/TextAnimation.vue';
 
 const frustrationElement = ref<HTMLElement | null>(null);
 // Computed value for ember delay

@@ -1,12 +1,12 @@
 import { App } from 'vue'
-import GridPaperOverlay from '@/components/ui/backgrounds/GridPaperOverlay.vue'
-import AnimatedText from '@/components/text/AnimatedText.vue'
+import PaperGridBackground from '@/components/ui/backgrounds/PaperGridBackground.vue'
+import TextAnimation from '@/components/text/TextAnimation.vue'
 
 export default {
   install: (app: App) => {
     // Register global components
-    app.component('GridPaperOverlay', GridPaperOverlay)
-    app.component('AnimatedText', AnimatedText)
+    app.component('PaperGridBackground', PaperGridBackground)
+    app.component('TextAnimation', TextAnimation)
     
     // Add more global components here
   }

@@ -1,5 +1,5 @@
 <template>
-  <ScrollPinWrapper 
+  <StickyScrollContainer 
     :height="computedContainerHeight"
     position="top"
     :offset="0"
@@ -19,14 +19,14 @@
           
           <!-- Chat area -->
           <div class="chat-area">
-            <FloatingChatInterface
+            <FloatingChat
               :messages="messages"
               :showTypingFor="showTypingFor"
               :sectionId="sectionId"
               :tiltX="tiltX"
               :tiltY="tiltY"
               :pinSettings="{
-                enabled: false, // No need to pin as ScrollPinWrapper handles this
+                enabled: false, // No need to pin as StickyScrollContainer handles this
                 start: 'top top',
                 end: `+=${messages.length * 50}%`,
                 pinSpacing: false
@@ -36,13 +36,13 @@
         </div>
       </div>
     </div>
-  </ScrollPinWrapper>
+  </StickyScrollContainer>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import ScrollPinWrapper from '@/components/ui/containers/ScrollPinWrapper.vue';
-import FloatingChatInterface from '@/components/FloatingChatInterface.vue';
+import StickyScrollContainer from '@/components/ui/containers/StickyScrollContainer.vue';
+import FloatingChat from '@/components/chat/FloatingChat.vue';
 import { calculateContainerHeight } from '@/utils/containerHeightUtils';
 
 // Component props definition
@@ -127,7 +127,7 @@ const computedContainerHeight = computed(() => {
 defineExpose({
   focusContent: () => {
     // No-op implementation for compatibility
-    console.log('focusContent called on ScrollableChatSectionV2');
+    console.log('focusContent called on ChatScrollSection');
   }
 });
 </script>

@@ -12,7 +12,7 @@
           v-if="showTypingFor.includes(idx)"
           :class="`typing-container typing-container-${idx + 1}`"
         >
-          <TypingIndicator 
+          <ChatTypingIndicator 
             :class="`typing-indicator-${idx + 1}`"
             :is-sent="message.type === 'sent'"
           />
@@ -43,7 +43,7 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
-import TypingIndicator from './TypingIndicator.vue';
+import ChatTypingIndicator from '@/components/chat/ChatTypingIndicator.vue';
 
 gsap.registerPlugin(ScrollTrigger);
 

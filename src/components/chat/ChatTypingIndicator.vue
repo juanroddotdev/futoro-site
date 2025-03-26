@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import LoadingDots from './LoadingDots.vue';
+import LoadingDots from '@/components/ui/loaders/LoadingDots.vue';
 
 defineProps<{
   isSent?: boolean;
@@ -27,7 +27,7 @@ defineProps<{
 </script>
 
 <style lang="scss" scoped>
-@import '../scss/components/typing-indicator';
+@import '../../scss/components/typing-indicator';
 
 .typing-animation {
   display: flex;
