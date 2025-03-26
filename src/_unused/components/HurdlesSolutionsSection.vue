@@ -162,7 +162,7 @@ import { struggles, solutions } from '@/data/strugglesAndSolutions';
 import { useScrollAnimation } from '@/composables/useScrollAnimation';
 import WebsiteSolutionsHeader from '@/components/sections/WebsiteSolutionsHeader.vue';
 import ScrollableCardsSection from '@/components/sections/ScrollableCardsSection.vue';
-import FlexibleContentWithPhone from '@/components/sections/FlexibleContentWithPhone.vue';
+import FlexibleContentWithPhone from '@/_unused/components/FlexibleContentWithPhone.vue';
 import EmberEffect from '@/components/effects/EmberEffect.vue';
 import {
   getInitialConversation,

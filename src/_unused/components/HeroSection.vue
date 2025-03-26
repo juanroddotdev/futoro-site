@@ -3,7 +3,7 @@ import { onMounted, ref, computed } from 'vue';
 import { heroSectionAnimations } from '@/animations/heroSection';
 import { HeroContent, getRandomHeroContent } from '@/data/heroContent';
 import { getInitialConversation } from '@/data/chatSections';
-import FlexibleContentWithPhone from '@/components/sections/FlexibleContentWithPhone.vue';
+import FlexibleContentWithPhone from '@/_unused/components/FlexibleContentWithPhone.vue';
 
 const heroContent = ref<HeroContent>(getRandomHeroContent());
 const flexibleContentRef = ref(null);
