@@ -6,7 +6,7 @@
   ]">
     <Navbar />
     <router-view :currentTheme="currentTheme" />
-    <ContactSectionV2 v-if="!['FloatingChatDemo', 'ChatSectionsDemo', 'Playground'].includes($route.name as string)" />
+    <ContactSection v-if="!['FloatingChatDemo', 'ChatSectionsDemo', 'Playground'].includes($route.name as string)" />
     <Footer />
     <ThemeSwitcher :currentTheme="currentTheme" @update:currentTheme="handleThemeChange" />
   </div>
@@ -16,8 +16,8 @@
 import { useRoute } from 'vue-router'
 import Navbar from '@/components/layout/Navbar.vue';
 import Footer from '@/components/layout/Footer.vue';
-import ContactSectionV2 from './components/sections/ContactSectionV2.vue';
-import ThemeSwitcher from '@/components/ThemeSwitcher.vue';
+import ContactSection from './components/sections/ContactSection.vue';
+import ThemeSwitcher from '@/components/ui/theme/ThemeSwitcher.vue';
 import GradientDefinitions from '@/components/ui/GradientDefinitions.vue';
 import { useTheme } from '@/composables/useTheme';
 

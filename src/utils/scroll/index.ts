@@ -1,29 +1,52 @@
-/**
- * ScrollTracker Package
- * A flexible, extensible scroll tracking utility for web applications
- * 
- * This file exports all public APIs from the package
- */
 
-// Core exports
-export { ScrollTracker } from './core/ScrollTracker';
-export type { 
-  ScrollPosition, 
-  ElementPosition, 
-  TrackerOptions,
-  Plugin 
-} from './core/ScrollTracker';
+import { createRouter, createWebHistory } from 'vue-router'
+import Home from '@/views/Home.vue'
+import ChatSectionsDemo from '@/views/ChatSectionsDemo.vue'
 
-// Plugins
-export { VisualizationPlugin } from './plugins/VisualizationPlugin';
-export { AnimationPlugin } from './plugins/AnimationPlugin';
+// Create a new component for experiments
+const Playground = () => import('@/views/Playground.vue')
+const HomeRebuilt = () => import('@/views/HomeRebuilt.vue')
+// Add the floating chat demo route
+const FloatingChatDemo = () => import('@/views/FloatingChatDemo.vue')
 
-// Utilities
-export { 
-  throttle, 
-  debounce, 
-  rafThrottle 
-} from './utils/performance';
+const routes = [
+  {
+    path: '/',
+    name: 'Home',
+    component: HomeRebuilt
+  },
+  {
+    path: '/playground',
+    name: 'Playground',
+    component: Playground
+  },
+  {
+    path: '/home-rebuilt',
+    name: 'HomeRebuilt',
+    component: HomeRebuilt,
+    meta: {
+      title: 'Home Rebuilt'
+    }
+  },
+  {
+    path: '/floating-chat',
+    name: 'FloatingChatDemo',
+    component: FloatingChatDemo,
+    meta: {
+      title: 'Floating Chat Demo'
+    }
+  },
+  {
+    path: '/chat-sections-demo',
+    name: 'ChatSectionsDemo',
+    component: ChatSectionsDemo
+  }
+]
 
-// Version info
-export const VERSION = '0.1.0';
+const router = createRouter({
+  history: createWebHistory('/futoro-site/'),
+  routes
+})
+
+export default router
+

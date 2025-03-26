@@ -11,6 +11,14 @@ node_modules
 dist
 dist-ssr
 *.local
+src/_unused
+
+# Project backup folders
+project-backup-*
+pre-restoration-backup-*
+
+# File renaming logs
+rename-files-log-*.txt
 
 # Editor directories and files
 .vscode/*
@@ -25,3 +33,29 @@ dist-ssr
 
 # TypeScript build info
 *.tsbuildinfo
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Coverage reports
+coverage/
+
+# Temporary files
+.tmp/
+temp/
+
+# Build artifacts
+.cache/
+.output/
+
+# Storybook
+storybook-static/
+
+# Cypress
+cypress/videos/
+cypress/screenshots/
+
+# Vitest
+vitest-coverage/
