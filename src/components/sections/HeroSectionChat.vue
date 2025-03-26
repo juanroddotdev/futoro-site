@@ -68,6 +68,8 @@ const heroContent = computed(() => props.heroContent || getRandomHeroContent());
 
 // Use provided messages or get default ones
 const heroMessages = computed(() => props.messages || getInitialConversation());
+console.log('getInitialConversation()', getInitialConversation());
+console.log('heroMessages', heroMessages);
 
 // Calculate container height based on message count
 const calculateHeroContainerHeight = (messageCount: number) => {

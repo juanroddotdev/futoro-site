@@ -52,8 +52,8 @@ import HurdlesSolutionsSection from '@/components/sections/HurdlesSolutionsSecti
 import LazySection from '@/components/LazySection.vue';
 import ProcessTimeline from '@/components/sections/ProcessTimeline.vue';
 import ServicesSection from '@/components/sections/ServicesSection.vue';
-import { useTheme } from '@/composables/useTheme';
-import { useLazySection } from '@/composables/useLazySection';
+import { useTheme } from '../composables/useTheme';
+import { useLazySection } from '../composables/useLazySection';
 import { HeroContent, getRandomHeroContent } from '@/data/heroContentData';
 import PaperGridBackground from '@/components/ui/backgrounds/PaperGridBackground.vue';
 
@@ -61,6 +61,7 @@ const heroContent = ref<HeroContent>(getRandomHeroContent());
 
 // Get the global theme
 const { currentTheme } = useTheme();
+console.log('currentTheme:', currentTheme);
 
 // Use the section loader
 const sectionLoader = useLazySection();
