@@ -1,5 +1,5 @@
 <template>
-  <StickySectionContainer 
+  <ScrollPinWrapper 
     id="services" 
     class="services-grid section theme-bg--neutral"
     :height="containerHeight || calculateServicesHeight(services.length)"
@@ -26,12 +26,12 @@
         <ScrollAccordionVanilla :items="services" />
       </div>
     </div>
-  </StickySectionContainer>
+  </ScrollPinWrapper>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import StickySectionContainer from '@/components/ui/containers/StickySectionContainer.vue';
+import ScrollPinWrapper from '@/components/ui/containers/ScrollPinWrapper.vue';
 import ScrollAccordionVanilla from '@/components/ui/ScrollAccordionVanilla.vue';
 import { services } from '@/data/services';
 import { calculateServicesHeight } from '@/utils/containerHeightUtils';

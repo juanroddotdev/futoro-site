@@ -1,12 +1,12 @@
 <template>
-  <StickySectionContainer 
+  <ScrollPinWrapper 
     :height="computedContainerHeight"
     position="top"
     :offset="0"
     :zIndex="2"
     :debug="debug"
   >
-    <SimpleFlexibleContent
+    <PhoneContentLayout
       :messages="messages"
       :showTypingFor="showTypingFor"
       :layout="layout"
@@ -38,14 +38,14 @@
       <template #default>
         <slot></slot>
       </template>
-    </SimpleFlexibleContent>
-  </StickySectionContainer>
+    </PhoneContentLayout>
+  </ScrollPinWrapper>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import StickySectionContainer from '@/components/ui/containers/StickySectionContainer.vue';
-import SimpleFlexibleContent from './SimpleFlexibleContent.vue';
+import ScrollPinWrapper from '@/components/ui/containers/ScrollPinWrapper.vue';
+import PhoneContentLayout from './PhoneContentLayout.vue';
 import { calculateContainerHeight } from '@/utils/containerHeightUtils';
 
 // Component props definition

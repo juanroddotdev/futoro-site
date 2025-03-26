@@ -47,15 +47,6 @@ const props = withDefaults(defineProps<{
   
   // Debug mode
   debug?: boolean;
-  isUnlocked?: boolean;
-  ambientMode?: boolean;
-  enablePullEffect?: boolean;
-  ambientTheme?: {
-    baseColor?: string;
-    endColor?: string;
-    accentColor?: string;
-  };
-  unlockAnimationType?: 'wave' | 'ripple';
 }>(), {
   height: '200vh',
   minHeight: '100vh',
@@ -63,29 +54,8 @@ const props = withDefaults(defineProps<{
   position: 'top',
   offset: 0,
   zIndex: 2,
-  debug: false,
-  isUnlocked: false,
-  ambientMode: false,
-  enablePullEffect: true,
-  ambientTheme: () => ({
-    baseColor: '#1a1f2c',
-    endColor: '#2E3440',
-    accentColor: 'rgba(245, 245, 245, 0.3)'
-  }),
-  unlockAnimationType: 'wave'
+  debug: false
 });
-
-// Add emits for ambient screen events
-const emit = defineEmits(['pull-threshold-reached', 'unlock']);
-
-// Add event handlers
-const onPullThresholdReached = () => {
-  emit('pull-threshold-reached');
-};
-
-const onUnlock = () => {
-  emit('unlock');
-};
 
 // Reference to the sticky section element
 const stickySection = ref<HTMLElement | null>(null);

@@ -1,5 +1,5 @@
 <template>
-  <StickyFlexibleContent
+  <ScrollablePhoneSection
     :messages="heroMessages"
     :showTypingFor="[0, 1]"
     :tilt-x="tiltX" 
@@ -36,12 +36,12 @@
         </a>
       </div>
     </template>
-  </StickyFlexibleContent>
+  </ScrollablePhoneSection>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import StickyFlexibleContent from '@/components/sections/refactored/StickyFlexibleContent.vue';
+import ScrollablePhoneSection from '@/components/sections/refactored/ScrollablePhoneSection.vue';
 import { getInitialConversation } from '@/data/chatSections';
 import { HeroContent, getRandomHeroContent } from '@/data/heroContent';
 import { calculateContainerHeight } from '@/utils/containerHeightUtils';
