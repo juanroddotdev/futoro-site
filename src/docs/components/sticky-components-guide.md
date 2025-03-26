@@ -6,7 +6,7 @@ This guide explains how to use the various sticky components in our project for 
 
 Our project includes several sticky components that work together:
 
-1. `StickySectionContainer` - Base component that creates a sticky container
+1. `ScrollPinWrapper` - Base component that creates a sticky container
 2. `StickyFlexibleContent` - Combines sticky behavior with flexible content layout
 3. `StickyHeroSection` - Specialized sticky hero section with phone display
 
@@ -17,7 +17,7 @@ All sticky components follow a similar pattern:
 - Content inside the container sticks to the viewport while scrolling through this space
 - This creates an opportunity for scroll-based animations and interactions
 
-## 1. StickySectionContainer
+## 1. ScrollPinWrapper
 
 This is the foundational component that provides sticky behavior.
 
@@ -35,7 +35,7 @@ This is the foundational component that provides sticky behavior.
 
 ```vue
 <template>
-  <StickySectionContainer 
+  <ScrollPinWrapper 
     height="300vh"
     position="top"
     :offset="0"
@@ -46,11 +46,11 @@ This is the foundational component that provides sticky behavior.
       <h2>Your Sticky Content</h2>
       <p>This content will stick to the top as you scroll.</p>
     </div>
-  </StickySectionContainer>
+  </ScrollPinWrapper>
 </template>
 
 <script setup>
-import StickySectionContainer from '@/components/ui/containers/StickySectionContainer.vue';
+import ScrollPinWrapper from '@/components/ui/containers/ScrollPinWrapper.vue';
 </script>
 ```
 
@@ -102,7 +102,7 @@ This component combines the sticky behavior with a flexible content layout that 
 </template>
 
 <script setup>
-import StickyFlexibleContent from '@/components/sections/StickyFlexibleContent.vue';
+import ScrollablePhoneSectionfrom '@/components/sections/StickyFlexibleContent.vue';
 import { ref } from 'vue';
 
 const messages = ref([
@@ -184,12 +184,12 @@ Combine sticky sections with scroll accordion for complex scroll-based interacti
 
 ```vue
 <template>
-  <StickySectionContainer height="500vh">
+  <ScrollPinWrapper height="500vh">
     <div class="sticky-content">
       <h2>Scroll down to see the accordion</h2>
       <ScrollAccordionVanilla :items="accordionItems" />
     </div>
-  </StickySectionContainer>
+  </ScrollPinWrapper>
 </template>
 ```
 

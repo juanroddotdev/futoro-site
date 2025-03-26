@@ -1,7 +1,7 @@
 <template>
   <div class="progressive-reveal overflow-visible" ref="sectionContainerRef">
     <!-- Introduction section with phone on left -->
-    <StickyFlexibleContent
+    <ScrollablePhoneSection
       phonePosition="left"
       :messages="getHurdlesIntroduction()"
       :showTypingFor="[0, 1]"
@@ -65,7 +65,7 @@
         @ember-start="handleEmberStart"
       />
       </template>
-    </StickyFlexibleContent>
+    </ScrollablePhoneSection>
      <!-- NEW Hurdles Section -->
     <StickyScrollableCardsSection
       sectionId="stickyHurdlesSection"
@@ -81,7 +81,7 @@
       :debug="false"
     />
     <!-- Introduction section with phone on left -->
-    <StickyFlexibleContent
+    <ScrollablePhoneSection
       phonePosition="right"
       :messages="getTransitionToSolutions()"
       :showTypingFor="[0, 1]"
@@ -141,7 +141,7 @@
         @ember-start="handleEmberStart"
       /> -->
       </template>
-    </StickyFlexibleContent>
+    </ScrollablePhoneSection>
      <!-- NEW Hurdles Section -->
      <StickyScrollableCardsSection
       sectionId="solutionsSection"
@@ -162,7 +162,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, onUnmounted } from 'vue';
-import StickyFlexibleContent from '@/components/sections/refactored/StickyFlexibleContent.vue';
+import ScrollablePhoneSection from '@/components/sections/refactored/ScrollablePhoneSection.vue';
 import ScrollableCardsSection from '@/components/sections/ScrollableCardsSection.vue';
 import StickyScrollableCardsSection from '@/components/sections/refactored/StickyScrollableCardsSection.vue';
 import { getHurdlesIntroduction, getTransitionToSolutions } from '@/data/chatSections';
