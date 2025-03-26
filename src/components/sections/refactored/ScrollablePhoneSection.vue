@@ -6,7 +6,7 @@
     :zIndex="2"
     :debug="debug"
   >
-    <PhoneContentLayout
+    <!-- <PhoneContentLayout
       :messages="messages"
       :showTypingFor="showTypingFor"
       :layout="layout"
@@ -38,7 +38,33 @@
       <template #default>
         <slot></slot>
       </template>
-    </PhoneContentLayout>
+    </PhoneContentLayout> -->
+  <PlainMessageLayout
+    :messages="messages"
+    :showTypingFor="showTypingFor"
+    :layout="layout"
+    :phonePosition="phonePosition"
+    :tiltX="tiltX"
+    :tiltY="tiltY"
+    :sectionId="sectionId"
+    :primaryCta="primaryCta"
+    :secondaryCta="secondaryCta"
+    :customClass="customClass"
+    ref="flexibleContentRef"
+  >
+    <template #headline>
+      <slot name="headline"></slot>
+    </template>
+    <template #subheadline>
+      <slot name="subheadline"></slot>
+    </template>
+    <template #content>
+      <slot name="content"></slot>
+    </template>
+    <template #default>
+      <slot></slot>
+    </template>
+  </PlainMessageLayout>
   </ScrollPinWrapper>
 </template>
 
@@ -46,7 +72,9 @@
 import { ref, computed, onMounted } from 'vue';
 import ScrollPinWrapper from '@/components/ui/containers/ScrollPinWrapper.vue';
 import PhoneContentLayout from './PhoneContentLayout.vue';
+
 import { calculateContainerHeight } from '@/utils/containerHeightUtils';
+import PlainMessageLayout from './PlainMessageLayout.vue';
 
 // Component props definition
 interface Props {
