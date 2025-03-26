@@ -16,43 +16,17 @@
           @pull-threshold-reached="onPullThresholdReached"
           class="ambient-screen-layer"
         />
-        <!-- Always render messages but hide them when ambient mode is active -->
-        <div 
-          ref="messagesRef" 
-          class="messages-container"
-          :class="{'messages-visible': isUnlocked || !ambientMode}"
-          :style="{ visibility: (!isUnlocked && ambientMode) ? 'hidden' : 'visible', opacity: (!isUnlocked && ambientMode) ? 0 : 1 }"
-        >
-          <template v-for="(message, idx) in messages" :key="`typing-${idx}`">
-            <div 
-              v-if="showTypingFor.includes(idx)"
-              :class="`typing-container typing-container-${idx + 1}`"
-            >
-              <TypingIndicator 
-                :class="`typing-indicator-${idx + 1}`"
-                :is-sent="message.type === 'sent'"
-              />
-            </div>
-          </template>
-
-          <template v-for="(message, idx) in messages" :key="`message-${idx}`">
-            <div 
-              :class="`message-group message-group-${idx + 1}`"
-            >
-              <div 
-                class="message"
-                :class="[
-                  message.type === 'sent'  ? 'sent' : 'received',
-                  `message-${idx + 1}`
-                ]"
-              >
-                <div class="message-content">
-                  {{ message.text }}
-                </div>
-              </div>
-            </div>
-          </template>
-        </div>
+        
+        <!-- Replace the messages container with the new component -->
+        <PhoneMessages
+          ref="messagesComponentRef"
+          :messages="messages"
+          :showTypingFor="showTypingFor"
+          :isVisible="isUnlocked || !ambientMode"
+          :isHidden="!isUnlocked && ambientMode"
+          :sectionId="sectionId"
+        />
+        
         <div 
           class="message-input-container"
           :style="{ visibility: (!isUnlocked && ambientMode) ? 'hidden' : 'visible', opacity: (!isUnlocked && ambientMode) ? 0 : 1 }"
@@ -69,12 +43,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
+import { ref, onMounted, onUnmounted, watch, nextTick, computed } from 'vue';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 import TypingIndicator from './TypingIndicator.vue';
 import FloatingPhone from './FloatingPhone.vue';
-import AmbientScreen from './sections/refactored/AmbientScreen.vue'; // Add this import
+import AmbientScreen from './sections/refactored/AmbientScreen.vue';
+import PhoneMessages from './PhoneMessages.vue';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -134,7 +109,7 @@ const emit = defineEmits(['pull-threshold-reached', 'unlock']);
 
 const containerRef = ref<HTMLElement | null>(null);
 const floatingPhoneRef = ref<InstanceType<typeof FloatingPhone> | null>(null);
-const messagesRef = ref<HTMLElement | null>(null);
+const messagesComponentRef = ref<InstanceType<typeof PhoneMessages> | null>(null);
 const phoneContainerRef = ref<HTMLElement | null>(null);
 
 // Add a flag to prevent multiple unlock attempts
@@ -153,31 +128,10 @@ const setupScrollAnimation = () => {
     return;
   }
   
-  // Always set up the animation, but only make it active when not in ambient mode
-  // or when unlocked
-  
-  // Reset function to set initial state - make sure ALL messages are hidden initially
-  const resetState = () => {
-    // Hide all messages initially - use more specific selectors
-    const sectionSelector = `#${props.sectionId}`;
-    
-    // Hide all message groups
-    gsap.set(`${sectionSelector} .message-group`, { 
-      opacity: 0, 
-      y: 20,
-      force3D: true 
-    });
-    
-    // Hide all typing containers
-    gsap.set(`${sectionSelector} .typing-container`, { 
-      opacity: 0, 
-      y: 20,
-      force3D: true 
-    });
-  };
-  
-  // Always reset state
-  resetState();
+  // Reset message animations using the PhoneMessages component method
+  if (messagesComponentRef.value) {
+    messagesComponentRef.value.resetMessageAnimations();
+  }
   
   // Create timeline with ScrollTrigger
   timeline = gsap.timeline({
@@ -191,20 +145,16 @@ const setupScrollAnimation = () => {
       anticipatePin: props.pinSettings.enabled ? props.pinSettings.anticipatePin : 0,
       onEnter: () => {
         // Only try to show messages if we're not in ambient mode or we're unlocked
-        if ((!props.ambientMode || props.isUnlocked) && props.messages.length > 0) {
-          const sectionSelector = `#${props.sectionId}`;
-          const firstGroup = `${sectionSelector} .message-group-1`;
-          gsap.to(firstGroup, { opacity: 1, y: 0, duration: 0.3 });
+        if ((!props.ambientMode || props.isUnlocked) && props.messages.length > 0 && messagesComponentRef.value) {
+          messagesComponentRef.value.showFirstMessage();
         }
       },
       onEnterBack: () => {
         // Only reset and show messages if we're not in ambient mode or we're unlocked
         if (!props.ambientMode || props.isUnlocked) {
-          resetState();
-          if (props.messages.length > 0) {
-            const sectionSelector = `#${props.sectionId}`;
-            const firstGroup = `${sectionSelector} .message-group-1`;
-            gsap.to(firstGroup, { opacity: 1, y: 0, duration: 0.3 });
+          if (messagesComponentRef.value) {
+            messagesComponentRef.value.resetMessageAnimations();
+            messagesComponentRef.value.showFirstMessage();
           }
         }
       },
@@ -220,56 +170,12 @@ const setupScrollAnimation = () => {
     timeline.scrollTrigger.enable();
   }
   
-  // Modify selectors to be scoped to this section
-  const sectionSelector = `#${props.sectionId}`;
+  // Get message timeline from PhoneMessages component and add it to our main timeline
+  if (messagesComponentRef.value) {
+    const messageTimeline = messagesComponentRef.value.createMessageTimeline();
+    timeline.add(messageTimeline, 0);
+  }
   
-  // Don't show first message immediately - wait for scroll to begin
-
-  const MESSAGE_OFFSET = 100;
-
-  props.messages.forEach((_, idx) => {
-    const currentGroup = `${sectionSelector} .message-group-${idx + 1}`;
-    if (idx > 0) {
-      const previousGroups = props.messages
-        .slice(0, idx)
-        .map((_, i) => `${sectionSelector} .message-group-${i + 1}`);
-      
-      timeline.to(previousGroups, {
-        y: `-=${MESSAGE_OFFSET}`,
-        duration: 0.3,
-        ease: "power2.out",
-        stagger: {
-          amount: 0.1,
-          ease: "power1.in"
-        }
-      });
-    }
-
-    if (props.showTypingFor.includes(idx)) {
-      const typingContainer = `${sectionSelector} .typing-container-${idx + 1}`;
-      
-      timeline
-        .to(typingContainer, { 
-          opacity: 1, 
-          duration: 0.15,
-          ease: "power1.out"
-        })
-        .to({}, { duration: 0.3 })
-        .to(typingContainer, { 
-          opacity: 0, 
-          duration: 0.15,
-          ease: "power1.in"
-        });
-    }
-
-    timeline.to(currentGroup, { 
-      opacity: 1,
-      duration: 0.2,
-      ease: "power1.out"
-    })
-    .to({}, { duration: 0.3 });
-  });
-
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -335,7 +241,7 @@ const onPullThresholdReached = () => {
   }
 };
 
-// Define helper functions for animation state management
+// Handle unlock animation
 const handleUnlock = () => {
   // Create a timeline for the unlock animation
   const unlockTl = gsap.timeline();
@@ -346,8 +252,12 @@ const handleUnlock = () => {
   
   if (ambientScreen) {
     // First make sure messages are behind ambient screen
-    if (messagesRef.value) {
-      messagesRef.value.style.zIndex = '1';
+    if (messagesComponentRef.value?.messagesRef) {
+      // Check if messagesRef exists and is an HTMLElement
+      const messagesElement = messagesComponentRef.value.messagesRef as HTMLElement;
+      if (messagesElement) {
+        messagesElement.style.zIndex = '1';
+      }
     }
     
     // Fade out the ambient screen
@@ -365,13 +275,13 @@ const handleUnlock = () => {
   }
   
   // Make messages container visible with higher z-index
-  if (messagesRef.value) {
-    unlockTl.set(messagesRef.value, {
+  if (messagesComponentRef.value?.messagesRef) {
+    unlockTl.set(messagesComponentRef.value.messagesRef, {
       zIndex: '2',
       visibility: 'visible'
     }, "-=0.4");
     
-    unlockTl.to(messagesRef.value, {
+    unlockTl.to(messagesComponentRef.value.messagesRef, {
       opacity: 1,
       duration: 0.3
     }, "-=0.3");
@@ -380,8 +290,10 @@ const handleUnlock = () => {
   // Enable scroll animations after unlock
   unlockTl.call(() => {
     nextTick(() => {
-      resetMessageAnimationState();
-      showFirstMessageIfVisible();
+      if (messagesComponentRef.value) {
+        messagesComponentRef.value.resetMessageAnimations();
+        messagesComponentRef.value.showFirstMessage();
+      }
       
       // Enable the ScrollTrigger if it exists
       if (timeline && timeline.scrollTrigger) {
@@ -397,40 +309,17 @@ const handleUnlock = () => {
   return unlockTl;
 };
 
+// Simplified function that uses the PhoneMessages component methods
 const resetMessageAnimationState = () => {
-  const sectionSelector = `#${props.sectionId}`;
-  
-  // Check if elements exist before trying to animate them
-  const messageGroups = document.querySelectorAll(`${sectionSelector} .message-group`);
-  const typingContainers = document.querySelectorAll(`${sectionSelector} .typing-container`);
-  
-  // Only animate if elements exist
-  if (messageGroups.length > 0) {
-    gsap.set(messageGroups, { 
-      opacity: 0, 
-      y: 20,
-      force3D: true 
-    });
-  }
-  
-  if (typingContainers.length > 0) {
-    gsap.set(typingContainers, { 
-      opacity: 0, 
-      y: 20,
-      force3D: true 
-    });
+  if (messagesComponentRef.value) {
+    messagesComponentRef.value.resetMessageAnimations();
   }
 };
 
+// Simplified function that uses the PhoneMessages component methods
 const showFirstMessageIfVisible = () => {
-  if (props.messages.length > 0) {
-    const sectionSelector = `#${props.sectionId}`;
-    const firstGroupSelector = `${sectionSelector} .message-group-1`;
-    const firstGroup = document.querySelector(firstGroupSelector);
-    
-    if (firstGroup) {
-      gsap.to(firstGroup, { opacity: 1, y: 0, duration: 0.3 });
-    }
+  if (messagesComponentRef.value) {
+    messagesComponentRef.value.showFirstMessage();
   }
 };
 
