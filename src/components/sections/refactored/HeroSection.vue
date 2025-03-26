@@ -15,6 +15,7 @@
     :enablePullEffect="enablePullEffect"
     :ambientTheme="ambientTheme"
     :unlockAnimationType="unlockAnimationType"
+    :alternatePhoneStyle="alternatePhoneStyle"
     @pull-threshold-reached="onPullThresholdReached"
     @unlock="onUnlock"
   >
@@ -40,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import ScrollablePhoneSection from '@/components/sections/refactored/ScrollablePhoneSection.vue';
 import { getInitialConversation } from '@/data/chatSections';
 import { HeroContent, getRandomHeroContent } from '@/data/heroContent';
@@ -69,6 +70,7 @@ const props = withDefaults(defineProps<{
     accentColor?: string;
   };
   unlockAnimationType?: 'wave' | 'ripple';
+  alternatePhoneStyle?: boolean;
 }>(), {
   heroContent: undefined,
   tiltX: 8,
@@ -83,14 +85,15 @@ const props = withDefaults(defineProps<{
   secondaryCtaText: 'Our Services',
   messages: undefined,
   isUnlocked: false,
-  ambientMode: true, // Start in ambient mode
+  ambientMode: true,
   enablePullEffect: true,
   ambientTheme: () => ({
     baseColor: '#1a1f2c',
     endColor: '#2E3440',
     accentColor: 'rgba(245, 245, 245, 0.3)'
   }),
-  unlockAnimationType: 'wave'
+  unlockAnimationType: 'wave',
+  alternatePhoneStyle: false 
 });
 
 // Use provided hero content or get random one
@@ -132,6 +135,21 @@ const onUnlock = () => {
     emit('unlock');
   }
 };
+
+// Add this to debug the props
+onMounted(() => {
+  console.log('HeroSection mounted with isUnlocked:', props.isUnlocked, 'ambientMode:', props.ambientMode);
+});
+
+// Watch for changes to these props
+watch(() => props.isUnlocked, (newVal) => {
+  console.log('isUnlocked changed to:', newVal);
+  isPhoneUnlocked.value = newVal;
+});
+
+watch(() => props.ambientMode, (newVal) => {
+  console.log('ambientMode changed to:', newVal);
+});
 </script>
 
 <style lang="scss" scoped>

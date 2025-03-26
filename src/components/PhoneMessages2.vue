@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, defineExpose, onMounted } from 'vue';
+import { ref, defineProps, defineExpose, onMounted, nextTick } from 'vue';
 import TypingIndicator from './TypingIndicator.vue';
 import gsap from 'gsap';
 
@@ -66,97 +66,187 @@ const props = defineProps({
   }
 });
 
-const messagesRef = ref(null);
+const messagesRef = ref<HTMLElement | null>(null);
 
 // Add methods to control message animations
 const MESSAGE_OFFSET = 100; // Define the offset for message animations
 
-const resetMessageAnimations = () => {
-  const sectionSelector = `#${props.sectionId}`;
-  console.log('sectionSelector', sectionSelector);
+// Add onMounted hook to reset animations and show first message/typing indicator
+onMounted(() => {
+  console.log('PhoneMessages2 mounted');
+  // Reset message animations on initial mount
+  resetMessageAnimations();
   
-  // Hide all message groups
-  gsap.set(`${sectionSelector} .message-group`, { 
-    opacity: 0, 
-    y: 20,
-    force3D: true 
+  // After reset, show the first message or typing indicator
+  nextTick(() => {
+    showFirstMessage();
+    console.log('First message shown after mount');
   });
-  
-  // Hide all typing containers
-  gsap.set(`${sectionSelector} .typing-container`, { 
-    opacity: 0, 
-    y: 20,
-    force3D: true 
+});
+
+const resetMessageAnimations = () => {
+  // Wait for next tick to ensure DOM is updated
+  nextTick(() => {
+    const sectionSelector = `#${props.sectionId}`;
+    console.log('Resetting animations for', sectionSelector);
+    
+    // Try direct reference first if possible
+    if (messagesRef.value) {
+      // Get all message groups within this component directly
+      const messageGroups = messagesRef.value.querySelectorAll('.message-group');
+      console.log(`Found ${messageGroups.length} message groups directly in component`);
+      
+      // Hide all message groups using direct reference
+      gsap.set(messageGroups, { 
+        opacity: 0, 
+        y: 20,
+        force3D: true 
+      });
+      
+      // Hide all typing containers using direct reference
+      const typingContainers = messagesRef.value.querySelectorAll('.typing-container');
+      gsap.set(typingContainers, { 
+        opacity: 0, 
+        y: 20,
+        force3D: true 
+      });
+    } else {
+      // Fallback to document queries if direct reference not available
+      const messageGroups = document.querySelectorAll(`${sectionSelector} .message-group`);
+      console.log(`Found ${messageGroups.length} message groups via document query`);
+      
+      gsap.set(`${sectionSelector} .message-group`, { 
+        opacity: 0, 
+        y: 20,
+        force3D: true 
+      });
+      
+      gsap.set(`${sectionSelector} .typing-container`, { 
+        opacity: 0, 
+        y: 20,
+        force3D: true 
+      });
+    }
   });
 };
 
+// Add a function to show the first message or typing indicator
 const showFirstMessage = () => {
-  if (props.messages.length > 0) {
-    const sectionSelector = `#${props.sectionId}`;
-    const firstGroupSelector = `${sectionSelector} .message-group-1`;
-    const firstGroup = document.querySelector(firstGroupSelector);
-    
-    if (firstGroup) {
-      gsap.to(firstGroup, { opacity: 1, y: 0, duration: 0.3 });
+  if (!messagesRef.value) return;
+  
+  const sectionSelector = `#${props.sectionId}`;
+  
+  // Check if we should show typing indicator first
+  if (props.showTypingFor.includes(0)) {
+    // Show the first typing indicator
+    const firstTypingContainer = messagesRef.value.querySelector('.typing-container-1');
+    if (firstTypingContainer) {
+      console.log('Showing first typing indicator');
+      gsap.to(firstTypingContainer, { 
+        opacity: 1, 
+        y: 0, 
+        duration: 0.3,
+        ease: "power1.out"
+      });
+    }
+  } else if (props.messages.length > 0) {
+    // Show the first message
+    const firstMessageGroup = messagesRef.value.querySelector('.message-group-1');
+    if (firstMessageGroup) {
+      console.log('Showing first message');
+      gsap.to(firstMessageGroup, { 
+        opacity: 1, 
+        y: 0, 
+        duration: 0.3,
+        ease: "power1.out"
+      });
     }
   }
 };
 
+// Modify createMessageTimeline to ensure messages appear after typing indicators
 const createMessageTimeline = () => {
+  console.log('createMessageTimeline called');
   const timeline = gsap.timeline();
-  const sectionSelector = `#${props.sectionId}`;
   
+  // Skip the first message since it's already shown
   props.messages.forEach((_, idx) => {
-    const currentGroup = `${sectionSelector} .message-group-${idx + 1}`;
+    // Only animate messages after the first one (index 0)
     if (idx > 0) {
-      const previousGroups = props.messages
-        .slice(0, idx)
-        .map((_, i) => `${sectionSelector} .message-group-${i + 1}`);
+      console.log(`Setting up animation for message ${idx + 1}`);
+      const currentGroup = messagesRef.value?.querySelector(`.message-group-${idx + 1}`);
+      const previousGroups = Array.from(messagesRef.value?.querySelectorAll(`.message-group-${idx}`) || []);
       
-      timeline.to(previousGroups, {
-        y: `-=${MESSAGE_OFFSET}`,
-        duration: 0.3,
-        ease: "power2.out",
-        stagger: {
-          amount: 0.1,
-          ease: "power1.in"
-        }
-      });
-    }
-
-    if (props.showTypingFor.includes(idx)) {
-      const typingContainer = `${sectionSelector} .typing-container-${idx + 1}`;
-      
-      timeline
-        .to(typingContainer, { 
-          opacity: 1, 
-          duration: 0.15,
-          ease: "power1.out"
-        })
-        .to({}, { duration: 0.3 })
-        .to(typingContainer, { 
-          opacity: 0, 
-          duration: 0.15,
-          ease: "power1.in"
+      if (previousGroups.length > 0) {
+        timeline.to(previousGroups, {
+          y: `-=${MESSAGE_OFFSET}`,
+          duration: 0.3,
+          ease: "power2.out"
         });
-    }
+      }
 
-    timeline.to(currentGroup, { 
-      opacity: 1,
-      duration: 0.2,
-      ease: "power1.out"
-    })
-    .to({}, { duration: 0.3 });
+      if (props.showTypingFor.includes(idx)) {
+        const typingContainer = messagesRef.value?.querySelector(`.typing-container-${idx + 1}`);
+        
+        if (typingContainer) {
+          timeline
+            .to(typingContainer, { 
+              opacity: 1, 
+              y: 0,
+              duration: 0.15,
+              ease: "power1.out"
+            })
+            .to({}, { duration: 0.5 }) // Longer pause to see typing
+            .to(typingContainer, { 
+              opacity: 0, 
+              duration: 0.15,
+              ease: "power1.in"
+            });
+        }
+      }
+
+      if (currentGroup) {
+        // Ensure this runs after typing indicator is hidden
+        timeline.to(currentGroup, { 
+          opacity: 1,
+          y: 0,
+          duration: 0.3,
+          ease: "power1.out"
+        });
+      }
+    }
   });
   
+  console.log('Message timeline created with', timeline.getChildren().length, 'animations');
   return timeline;
 };
 
+// Add a function to check if the timeline is being properly used
+const checkTimelineIntegration = () => {
+  console.log('Checking timeline integration');
+  // This is just a utility function to be called from the parent component
+  // to verify that the component is accessible
+  return {
+    messagesCount: props.messages.length,
+    hasMessagesRef: !!messagesRef.value,
+    messageGroupsCount: messagesRef.value ? messagesRef.value.querySelectorAll('.message-group').length : 0
+  };
+};
+
+// Add a method to play the timeline for testing
+const playMessageTimeline = () => {
+  const tl = createMessageTimeline();
+  tl.play();
+  return tl;
+};
+
 defineExpose({
-  messagesRef,
   resetMessageAnimations,
   showFirstMessage,
-  createMessageTimeline
+  createMessageTimeline,
+  playMessageTimeline, // Add this new method
+  messagesRef,
+  checkTimelineIntegration
 });
 </script>
 

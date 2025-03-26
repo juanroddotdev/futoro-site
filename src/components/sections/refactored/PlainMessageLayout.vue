@@ -21,7 +21,6 @@
               :isHidden="false"
               :sectionId="sectionId"
             />
-            
           </div>
         </div>
       </div>
@@ -30,7 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, nextTick, watch } from 'vue';
 import PhoneMessages2 from '@/components/PhoneMessages2.vue';
 import { calculateContainerHeight } from '@/utils/containerHeightUtils';
 
@@ -84,10 +83,73 @@ const focusContent = () => {
   contentRef.value?.scrollIntoView({ behavior: 'smooth' });
 };
 
+// Add an onMounted hook
+onMounted(() => {
+  console.log('PlainMessageLayout mounted');
+  console.log('Messages count:', props.messages.length);
+  
+  // Check if messagesComponentRef is properly set
+  nextTick(() => {
+    console.log('messagesComponentRef available:', !!messagesComponentRef.value);
+    if (messagesComponentRef.value) {
+      console.log('PhoneMessages2 methods:', Object.keys(messagesComponentRef.value));
+      
+      // Try to call the checkTimelineIntegration method if it exists
+      if (typeof messagesComponentRef.value.checkTimelineIntegration === 'function') {
+        const checkResult = messagesComponentRef.value.checkTimelineIntegration();
+        console.log('Messages component check:', checkResult);
+      }
+      
+      // Auto-play the message timeline after a short delay
+      setTimeout(() => {
+        if (messagesComponentRef.value.playMessageTimeline) {
+          console.log('Auto-playing message timeline');
+          messagesComponentRef.value.playMessageTimeline();
+        }
+      }, 1000); // 1 second delay to ensure everything is ready
+    }
+  });
+});
+
+// Add a method to create a scroll-linked animation
+const createScrollLinkedAnimation = () => {
+  console.log('Creating scroll-linked animation in PlainMessageLayout');
+  if (messagesComponentRef.value) {
+    console.log('Getting message timeline from PhoneMessages2');
+    const timeline = messagesComponentRef.value.createMessageTimeline();
+    
+    // Automatically play the timeline after creation
+    if (timeline) {
+      console.log('Automatically playing message timeline');
+      timeline.play();
+    }
+    
+    return timeline;
+  }
+  console.error('Cannot create scroll-linked animation - messagesComponentRef is null');
+  return null;
+};
+
 // Expose methods to parent components
 defineExpose({
-  focusContent,
-  messagesComponent: messagesComponentRef
+  // Directly expose messagesComponentRef (this is the key change)
+  messagesComponentRef,
+  
+  // Keep the existing method for backward compatibility
+  messagesComponent: () => messagesComponentRef.value,
+  
+  // Other methods you want to expose
+  focusContent: () => {
+    // Implementation of focusContent
+  },
+  
+  // Add a method to create scroll-linked animation
+  createScrollLinkedAnimation: (scrollTrigger: any) => {
+    if (messagesComponentRef.value && messagesComponentRef.value.createMessageTimeline) {
+      return messagesComponentRef.value.createMessageTimeline(scrollTrigger);
+    }
+    return null;
+  }
 });
 </script>
 

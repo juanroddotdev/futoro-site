@@ -25,6 +25,7 @@
             :enablePullEffect="enablePullEffect"
             :ambientTheme="ambientTheme"
             :unlockAnimationType="unlockAnimationType"
+            :alternatePhoneStyle="alternatePhoneStyle"
             @pull-threshold-reached="onPullThresholdReached"
             @unlock="onUnlock"
           />
@@ -69,6 +70,7 @@ interface Props {
     accentColor?: string;
   };
   unlockAnimationType?: 'wave' | 'ripple';
+  alternatePhoneStyle?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -88,7 +90,8 @@ const props = withDefaults(defineProps<Props>(), {
     endColor: '#2E3440',
     accentColor: 'rgba(245, 245, 245, 0.3)'
   }),
-  unlockAnimationType: 'wave'
+  unlockAnimationType: 'wave',
+  alternatePhoneStyle: false
 });
 // Add emits
 const emit = defineEmits(['pull-threshold-reached', 'unlock']);

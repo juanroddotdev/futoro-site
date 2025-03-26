@@ -2,6 +2,7 @@
   <div class="floating-container">
     <div 
       class="floating-phone"
+      :class="{ 'alternate-style': alternatePhoneStyle }"
       :style="{
         '--tilt-x': `${tiltX}deg`,
         '--tilt-x-hover': `${tiltX - 2}deg`,
@@ -69,11 +70,13 @@ import { getCurrentTime } from '@/utils/timestamp';
 interface Props {
   tiltX?: number;
   tiltY?: number;
+  alternatePhoneStyle?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   tiltX: -12,  // Default X rotation
-  tiltY: -15   // Default Y rotation
+  tiltY: -15 ,
+  alternatePhoneStyle: false
 });
 
 const currentTime = ref(getCurrentTime());

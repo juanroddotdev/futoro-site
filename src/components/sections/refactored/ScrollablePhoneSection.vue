@@ -6,7 +6,7 @@
     :zIndex="2"
     :debug="debug"
   >
-    <!-- <PhoneContentLayout
+    <PhoneContentLayout
       :messages="messages"
       :showTypingFor="showTypingFor"
       :layout="layout"
@@ -21,6 +21,7 @@
       :ambientMode="ambientMode"
     :enablePullEffect="enablePullEffect"
     :ambientTheme="ambientTheme"
+    :alternatePhoneStyle="alternatePhoneStyle"
     :unlockAnimationType="unlockAnimationType"
     :isUnlocked="isUnlocked"
     @pull-threshold-reached="onPullThresholdReached"
@@ -38,41 +39,14 @@
       <template #default>
         <slot></slot>
       </template>
-    </PhoneContentLayout> -->
-  <PlainMessageLayout
-    :messages="messages"
-    :showTypingFor="showTypingFor"
-    :layout="layout"
-    :phonePosition="phonePosition"
-    :tiltX="tiltX"
-    :tiltY="tiltY"
-    :sectionId="sectionId"
-    :primaryCta="primaryCta"
-    :secondaryCta="secondaryCta"
-    :customClass="customClass"
-    ref="flexibleContentRef"
-  >
-    <template #headline>
-      <slot name="headline"></slot>
-    </template>
-    <template #subheadline>
-      <slot name="subheadline"></slot>
-    </template>
-    <template #content>
-      <slot name="content"></slot>
-    </template>
-    <template #default>
-      <slot></slot>
-    </template>
-  </PlainMessageLayout>
+    </PhoneContentLayout>
   </ScrollPinWrapper>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import ScrollPinWrapper from '@/components/ui/containers/ScrollPinWrapper.vue';
 import PhoneContentLayout from './PhoneContentLayout.vue';
-
 import { calculateContainerHeight } from '@/utils/containerHeightUtils';
 import PlainMessageLayout from './PlainMessageLayout.vue';
 
@@ -105,7 +79,8 @@ interface Props {
     endColor?: string;
     accentColor?: string;
   };
-  unlockAnimationType?: 'wave' | 'ripple';// New prop to control starting position
+  unlockAnimationType?: 'wave' | 'ripple';
+  alternatePhoneStyle?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -126,7 +101,8 @@ const props = withDefaults(defineProps<Props>(), {
     endColor: '#2E3440',
     accentColor: 'rgba(245, 245, 245, 0.3)'
   }),
-  unlockAnimationType: 'wave'
+  unlockAnimationType: 'wave',
+  alternatePhoneStyle: false
 });
 
 // Add emits
@@ -142,7 +118,7 @@ const onUnlock = () => {
 };
 
 // Reference to the flexible content component
-const flexibleContentRef = ref(null);
+const flexibleContentRef = ref<InstanceType<typeof PlainMessageLayout> | null>(null);
 
 // Expose methods from the child component
 defineExpose({
@@ -156,6 +132,34 @@ const computedContainerHeight = computed(() => {
   return calculateContainerHeight(props.messages.length, {
     itemHeight: 50, // Adjust as needed for message height
     heightMultiplier: 1.3
+  });
+});
+
+onMounted(() => {
+  nextTick(() => {
+    console.log('ScrollablePhoneSection mounted');
+    // Check if we can access the messages component through flexibleContentRef
+    if (flexibleContentRef.value) {
+      console.log('flexibleContentRef is available');
+      
+      // Try to access messagesComponentRef directly
+      if (flexibleContentRef.value?.messagesComponentRef) {
+        console.log('messagesComponentRef is directly accessible');
+      } else {
+        console.log('messagesComponentRef is NOT directly accessible');
+      }
+      
+      // Try to access through messagesComponent method
+      const messagesComponent = flexibleContentRef.value.messagesComponent?.();
+      if (messagesComponent) {
+        console.log('messagesComponent method returns a value');
+        console.log('Available methods:', Object.keys(messagesComponent));
+      } else {
+        console.log('messagesComponent method returns null or undefined');
+      }
+    } else {
+      console.log('flexibleContentRef is NOT available');
+    }
   });
 });
 </script>

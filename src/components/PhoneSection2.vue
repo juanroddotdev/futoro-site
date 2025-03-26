@@ -2,7 +2,6 @@
   <div ref="containerRef" class="container" :id="sectionId" :class="position">
     <div ref="phoneContainerRef">
     
-
         <PhoneMessages
           ref="messagesComponentRef"
           :messages="messages"
@@ -99,6 +98,7 @@ const isVisible = ref(false);
 const setupScrollAnimation = () => {
   const container = containerRef.value;
   if (!container) {
+    console.error('Container ref is null, cannot set up scroll animation');
     return;
   }
   
@@ -113,42 +113,41 @@ const setupScrollAnimation = () => {
       trigger: container,
       start: props.pinSettings.start,
       end: props.pinSettings.end || `+=${props.messages.length * 50}%`,
-      scrub: 0.5,
+      scrub: true, // Make sure scrub is enabled for smooth scrolling
       pin: props.pinSettings.enabled,
       pinSpacing: props.pinSettings.enabled ? props.pinSettings.pinSpacing : false,
       anticipatePin: props.pinSettings.enabled ? props.pinSettings.anticipatePin : 0,
       onEnter: () => {
-        // Only try to show messages if we're not in ambient mode or we're unlocked
-        if ((!props.ambientMode || props.isUnlocked) && props.messages.length > 0 && messagesComponentRef.value) {
+        if (messagesComponentRef.value) {
           messagesComponentRef.value.showFirstMessage();
         }
       },
-      onEnterBack: () => {
-        // Only reset and show messages if we're not in ambient mode or we're unlocked
-        if (!props.ambientMode || props.isUnlocked) {
-          if (messagesComponentRef.value) {
-            messagesComponentRef.value.resetMessageAnimations();
-            messagesComponentRef.value.showFirstMessage();
-          }
-        }
-      },
-      immediateRender: true
+      markers: true // Enable markers for debugging
     }
   });
   
-  // If in ambient mode and not unlocked, disable the ScrollTrigger
-  if (props.ambientMode && !props.isUnlocked && timeline.scrollTrigger) {
-    timeline.scrollTrigger.disable();
-  } else if (timeline.scrollTrigger) {
-    // Make sure ScrollTrigger is enabled when not in ambient mode
-    timeline.scrollTrigger.enable();
-  }
+  // Add a simple test animation to verify ScrollTrigger is working
+  timeline.to('.test-element', {
+    opacity: 1,
+    y: 0,
+    duration: 1
+  }, 0);
   
-  // Get message timeline from PhoneMessages component and add it to our main timeline
+  // This is the critical part - get the message timeline and add it to our main timeline
   if (messagesComponentRef.value) {
     const messageTimeline = messagesComponentRef.value.createMessageTimeline();
-    timeline.add(messageTimeline, 0);
+    if (messageTimeline) {
+      console.log('Adding message timeline to main timeline');
+      timeline.add(messageTimeline, 0);
+    } else {
+      console.error('Failed to create message timeline');
+    }
+  } else {
+    console.error('Messages component ref is null');
   }
+  
+  console.log('Scroll animation setup complete');
+  console.log('ScrollTrigger enabled:', timeline.scrollTrigger.enabled());
   
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
