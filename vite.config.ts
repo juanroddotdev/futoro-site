@@ -11,5 +11,16 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src')
     },
     extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue']
+  },
+  // Add this to help with module resolution
+  optimizeDeps: {
+    include: ['vue', 'vue-router', '@vueuse/core', 'gsap']
+  },
+  // Add this to help with build issues
+  build: {
+    sourcemap: true,
+    commonjsOptions: {
+      transformMixedEsModules: true
+    }
   }
 })

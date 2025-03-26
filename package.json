@@ -10,7 +10,12 @@
     "deploy": "sh deploy.sh",
     "type-check": "vue-tsc --noEmit",
     "type-check:strict": "cross-env TS_NODE_COMPILER_OPTIONS='{\"strict\":true,\"noUnusedLocals\":true,\"noUnusedParameters\":true}' vue-tsc --noEmit",
-    "analyze-css": "npm run build && node purgecss.js"
+    "analyze-css": "npm run build && node purgecss.js",
+    "check-circular": "npx dependency-cruiser --output-type err-long src/",
+    "fix-deps": "npx dependency-cruiser --output-type err-long --focus src/ > dependency-report.txt",
+    "visualize-deps": "npx dependency-cruiser --exclude \"node_modules\" --output-type dot src/ | dot -T svg > dependency-graph.svg",
+    "log-deps": "npx dependency-cruiser --output-type text src/ > dependency-violations.log",
+    "analyze-scss": "./src/scripts/analyze-scss.sh"
   },
   "dependencies": {
     "@vueuse/core": "^10.11.1",
@@ -22,6 +27,7 @@
     "@types/node": "^20.11.20",
     "@vitejs/plugin-vue": "^5.1.3",
     "autoprefixer": "^10.4.17",
+    "dependency-cruiser": "^16.10.0",
     "postcss": "^8.4.35",
     "postcss-nesting": "^13.0.1",
     "sass": "^1.85.0",
