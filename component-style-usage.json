@@ -1,0 +1,266 @@
+[
+  {
+    "component": "AppWithRouter.vue",
+    "hasStyles": false,
+    "styleInfo": {
+      "styleBlocks": 0,
+      "scoped": false,
+      "module": false,
+      "lang": null,
+      "lineCount": 0,
+      "selectorCount": 0
+    }
+  },
+  {
+    "component": "views/HomePage.vue",
+    "hasStyles": true,
+    "styleInfo": {
+      "styleBlocks": 1,
+      "scoped": false,
+      "module": false,
+      "lang": "scss",
+      "lineCount": 21,
+      "selectorCount": 4
+    }
+  },
+  {
+    "component": "components/LazySection.vue",
+    "hasStyles": true,
+    "styleInfo": {
+      "styleBlocks": 1,
+      "scoped": true,
+      "module": false,
+      "lang": "css",
+      "lineCount": 14,
+      "selectorCount": 2
+    }
+  },
+  {
+    "component": "components/ui/ScrollAccordionVanilla.vue",
+    "hasStyles": true,
+    "styleInfo": {
+      "styleBlocks": 1,
+      "scoped": true,
+      "module": false,
+      "lang": "css",
+      "lineCount": 0,
+      "selectorCount": 0
+    }
+  },
+  {
+    "component": "components/ui/GradientDefinitions.vue",
+    "hasStyles": false,
+    "styleInfo": {
+      "styleBlocks": 0,
+      "scoped": false,
+      "module": false,
+      "lang": null,
+      "lineCount": 0,
+      "selectorCount": 0
+    }
+  },
+  {
+    "component": "components/text/TextAnimation.vue",
+    "hasStyles": true,
+    "styleInfo": {
+      "styleBlocks": 1,
+      "scoped": true,
+      "module": false,
+      "lang": "css",
+      "lineCount": 35,
+      "selectorCount": 6
+    }
+  },
+  {
+    "component": "components/sections/StickyScrollableCardsSection.vue",
+    "hasStyles": true,
+    "styleInfo": {
+      "styleBlocks": 1,
+      "scoped": true,
+      "module": false,
+      "lang": "scss",
+      "lineCount": 96,
+      "selectorCount": 14
+    }
+  },
+  {
+    "component": "components/sections/ServicesSection.vue",
+    "hasStyles": true,
+    "styleInfo": {
+      "styleBlocks": 1,
+      "scoped": true,
+      "module": false,
+      "lang": "scss",
+      "lineCount": 2,
+      "selectorCount": 0
+    }
+  },
+  {
+    "component": "components/sections/ProcessTimeline.vue",
+    "hasStyles": true,
+    "styleInfo": {
+      "styleBlocks": 1,
+      "scoped": true,
+      "module": false,
+      "lang": "scss",
+      "lineCount": 130,
+      "selectorCount": 28
+    }
+  },
+  {
+    "component": "components/sections/HurdlesSolutionsSection.vue",
+    "hasStyles": true,
+    "styleInfo": {
+      "styleBlocks": 1,
+      "scoped": true,
+      "module": false,
+      "lang": "scss",
+      "lineCount": 58,
+      "selectorCount": 13
+    }
+  },
+  {
+    "component": "components/sections/HeroSectionChat.vue",
+    "hasStyles": true,
+    "styleInfo": {
+      "styleBlocks": 1,
+      "scoped": true,
+      "module": false,
+      "lang": "scss",
+      "lineCount": 100,
+      "selectorCount": 24
+    }
+  },
+  {
+    "component": "components/sections/ContactSection.vue",
+    "hasStyles": true,
+    "styleInfo": {
+      "styleBlocks": 1,
+      "scoped": false,
+      "module": false,
+      "lang": "scss",
+      "lineCount": 11,
+      "selectorCount": 1
+    }
+  },
+  {
+    "component": "components/sections/ChatScrollSection.vue",
+    "hasStyles": true,
+    "styleInfo": {
+      "styleBlocks": 1,
+      "scoped": true,
+      "module": false,
+      "lang": "scss",
+      "lineCount": 39,
+      "selectorCount": 12
+    }
+  },
+  {
+    "component": "components/layout/Navbar.vue",
+    "hasStyles": true,
+    "styleInfo": {
+      "styleBlocks": 1,
+      "scoped": false,
+      "module": false,
+      "lang": "scss",
+      "lineCount": 104,
+      "selectorCount": 30
+    }
+  },
+  {
+    "component": "components/layout/Footer.vue",
+    "hasStyles": true,
+    "styleInfo": {
+      "styleBlocks": 1,
+      "scoped": false,
+      "module": false,
+      "lang": "scss",
+      "lineCount": 1,
+      "selectorCount": 0
+    }
+  },
+  {
+    "component": "components/effects/EmberAnimation.vue",
+    "hasStyles": true,
+    "styleInfo": {
+      "styleBlocks": 1,
+      "scoped": true,
+      "module": false,
+      "lang": "css",
+      "lineCount": 3,
+      "selectorCount": 1
+    }
+  },
+  {
+    "component": "components/chat/FloatingChat.vue",
+    "hasStyles": true,
+    "styleInfo": {
+      "styleBlocks": 1,
+      "scoped": true,
+      "module": false,
+      "lang": "scss",
+      "lineCount": 95,
+      "selectorCount": 14
+    }
+  },
+  {
+    "component": "components/chat/ChatTypingIndicator.vue",
+    "hasStyles": true,
+    "styleInfo": {
+      "styleBlocks": 1,
+      "scoped": true,
+      "module": false,
+      "lang": "scss",
+      "lineCount": 8,
+      "selectorCount": 1
+    }
+  },
+  {
+    "component": "components/ui/theme/ThemeSwitcher.vue",
+    "hasStyles": true,
+    "styleInfo": {
+      "styleBlocks": 1,
+      "scoped": true,
+      "module": false,
+      "lang": "scss",
+      "lineCount": 0,
+      "selectorCount": 0
+    }
+  },
+  {
+    "component": "components/ui/loaders/LoadingDots.vue",
+    "hasStyles": true,
+    "styleInfo": {
+      "styleBlocks": 1,
+      "scoped": true,
+      "module": false,
+      "lang": "css",
+      "lineCount": 5,
+      "selectorCount": 1
+    }
+  },
+  {
+    "component": "components/ui/containers/StickyScrollContainer.vue",
+    "hasStyles": true,
+    "styleInfo": {
+      "styleBlocks": 1,
+      "scoped": false,
+      "module": false,
+      "lang": "scss",
+      "lineCount": 41,
+      "selectorCount": 8
+    }
+  },
+  {
+    "component": "components/ui/backgrounds/PaperGridBackground.vue",
+    "hasStyles": true,
+    "styleInfo": {
+      "styleBlocks": 1,
+      "scoped": false,
+      "module": false,
+      "lang": "scss",
+      "lineCount": 84,
+      "selectorCount": 16
+    }
+  }
+]

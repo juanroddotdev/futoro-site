@@ -1,5 +1,5 @@
 {
-  "name": "vite-vue-typescript-starter",
+  "name": "FutoroDigital",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -11,13 +11,17 @@
     "deploy": "sh deploy.sh",
     "type-check": "vue-tsc --noEmit",
     "type-check:strict": "cross-env TS_NODE_COMPILER_OPTIONS='{\"strict\":true,\"noUnusedLocals\":true,\"noUnusedParameters\":true}' vue-tsc --noEmit",
-    "analyze-css": "npm run build && node purgecss.js",
     "build-no-types": "vite build",
-    "check-circular": "npx dependency-cruiser --output-type err-long src/",
-    "fix-deps": "npx dependency-cruiser --output-type err-long --focus src/ > dependency-report.txt",
-    "visualize-deps": "npx dependency-cruiser --exclude \"node_modules\" --output-type dot src/ | dot -T svg > dependency-graph.svg",
-    "log-deps": "npx dependency-cruiser --output-type text src/ > dependency-violations.log",
-    "analyze-scss": "./src/scripts/analyze-scss.sh"
+    "analyze": "node scripts/run-all-analyses.js",
+    "analyze:deps": "node scripts/analyze.js deps",
+    "analyze:deps:circular": "node scripts/analyze.js deps:circular",
+    "analyze:deps:graph": "node scripts/analyze.js deps:graph",
+    "analyze:deps:violations": "node scripts/analyze.js deps:violations",
+    "analyze:css": "node scripts/analyze.js css",
+    "analyze:scss": "node scripts/analyze.js scss",
+    "analyze:components": "node scripts/analyze.js components",
+    "analyze:report": "node scripts/analyze.js report",
+    "analyze:css-report": "npm run analyze:css && npm run analyze:components && npm run analyze:scss && npm run analyze:report"
   },
   "dependencies": {
     "@vueuse/core": "^10.11.1",
