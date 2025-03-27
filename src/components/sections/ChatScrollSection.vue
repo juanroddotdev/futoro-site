@@ -25,6 +25,7 @@
               :sectionId="sectionId"
               :tiltX="tiltX"
               :tiltY="tiltY"
+              :handDrawnStyle="true"
               :pinSettings="{
                 enabled: false, // No need to pin as StickyScrollContainer handles this
                 start: 'top top',
