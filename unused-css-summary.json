@@ -1,0 +1,27 @@
+{
+  "date": "2025-03-27T00:25:47.630Z",
+  "totalCSSFiles": 2,
+  "filesWithUnusedSelectors": 2,
+  "totalUnusedSelectors": 323,
+  "totalSelectors": 135480,
+  "percentageUnused": "0.24%",
+  "fileBreakdown": [
+    {
+      "file": "./dist/assets/HomePage-IKIVVTRY.css",
+      "rejectedSelectors": 173,
+      "usedSelectors": 1294,
+      "cssSelectors": 1467,
+      "totalSelectors": 1467,
+      "percentageUnused": "11.79%"
+    },
+    {
+      "file": "./dist/assets/index-CI0o8Bpy.css",
+      "rejectedSelectors": 150,
+      "usedSelectors": 133863,
+      "cssSelectors": 134013,
+      "totalSelectors": 134013,
+      "percentageUnused": "0.11%"
+    }
+  ],
+  "countingMethodology": "Selectors are counted based on the total CSS selectors in each file. Unused percentage is calculated as (rejected selectors / total CSS selectors) * 100."
+}

@@ -1,30 +1,13 @@
 declare module '@/data/chatSections' {
   export interface ChatMessage {
-    id: string;
-    content: string;
-    sender: 'user' | 'assistant' | string;
-    timestamp?: number;
-    type?: string;
-    status?: string;
+    type: string;
+    text: string;
   }
-
-  /**
-   * Returns initial conversation messages for the hero section
-   */
+  
+  export function getHurdlesIntroduction(): ChatMessage[];
+  export function getTransitionToSolutions(): ChatMessage[];
   export function getInitialConversation(): ChatMessage[];
-
-  /**
-   * Returns messages for the vision to reality section
-   */
-  export function getVisionToRealitySteps(): ChatMessage[];
-
-  /**
-   * Returns messages for the common frustrations section
-   */
-  export function getCommonFrustrationsSteps(): ChatMessage[];
-
-  /**
-   * Returns messages for the personal approach section
-   */
-  export function getPersonalApproachSteps(): ChatMessage[];
+  export function getFinalConversation(): ChatMessage[];
+  export function getFullConversation(): ChatMessage[];
+  export function getConversationSegment(startIndex: number, endIndex: number): ChatMessage[];
 }
