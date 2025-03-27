@@ -1,0 +1,89 @@
+// Chat Scroll Section Component Styles
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+.scrollable-chat-section {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+    align-items: center;
+  
+  // Container structure
+  .section-container {
+    padding: 2rem;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    
+    @media (min-width: 768px) {
+      padding: 4rem 2rem;
+    }
+  }
+  
+  .section-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    
+    @media (min-width: 1024px) {
+      flex-direction: row;
+      gap: 4rem;
+    }
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
+    .chat-area {
+      max-width: 100%;
+    }
+  }
+  
+  // Content area
+  .content-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2rem 0;
+    
+    @media (min-width: 768px) {
+      padding: 3rem 0;
+    }
+  }
+  
+  // Chat area
+  .chat-area {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    max-width: 600px;
+    margin-right: 100px;
+  }
+  
+  // Layout variations
+  &.content-left {
+    .section-inner {
+      @media (min-width: 1024px) {
+        flex-direction: row;
+      }
+    }
+  }
+  
+  &.content-right {
+    .section-inner {
+      @media (min-width: 1024px) {
+        flex-direction: row-reverse;
+      }
+    }
+  }
+  
+  &.content-top {
+    .section-inner {
+      flex-direction: column;
+    }
+  }
+}

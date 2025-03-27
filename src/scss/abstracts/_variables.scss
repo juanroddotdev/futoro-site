@@ -71,6 +71,45 @@ $pastel-future-background-alt: #E2E4F0;
 $pastel-future-heading-font: 'Space Grotesk', sans-serif;
 $pastel-future-body-font: 'Raleway', sans-serif;
 
+/* Cyber Boom  */
+$cyber-bloom-primary: #1A1A2E; // Dark navy/purple
+$cyber-bloom-secondary: #C792EA; // Light purple/lavender
+$cyber-bloom-accent: #64FFDA; // Bright teal/cyan
+$cyber-bloom-highlight: #FF6B6B; // Coral/salmon
+$cyber-bloom-neutral: #E1E1E6; // Light off-white
+
+/* Quantum Leap */
+$quantum-leap-primary: #222F3E; // Dark blue-gray
+$quantum-leap-secondary: #84CEEB; // Light sky blue
+$quantum-leap-accent: #A0E7E5; // Light mint green
+$quantum-leap-highlight: #FFC4D3; // Soft pink
+$quantum-leap-neutral: #E8F0FE; // Very light blue
+
+/* Pixel Nebula */
+
+$pixel-nebula-primary: #121212; // Very dark gray
+$pixel-nebula-secondary-start: #4A148C; // Deep purple gradient start
+$pixel-nebula-secondary-end: #6A1B9A; // Deep purple gradient end
+$pixel-nebula-secondary: #4A148C;
+$pixel-nebula-accent: #9FA8DA; // Light lavender blue
+$pixel-nebula-highlight: #FFD740; // Gold/yellow
+$pixel-nebula-neutral: #E0E0E0; // Medium gray
+
+/* Circuit Dusk */
+$circuit-dusk-primary: #263238; // Dark blue-gray
+$circuit-dusk-secondary: #90A4AE; // Medium gray-blue
+$circuit-dusk-accent: #AED581; // Light lime green
+$circuit-dusk-highlight: #FFAB91; // Light orange-red
+$circuit-dusk-neutral: #ECEFF1; // Light gray-blue
+
+/* Professional Edge */
+
+$professional-edge-primary: #2E3440; // Dark blue-gray
+$professional-edge-secondary: #434C5E; // Slightly lighter blue-gray
+$professional-edge-accent: #88C0D0; // Light blue
+$professional-edge-highlight: #EBCB8B; // Light gold
+$professional-edge-neutral: #D8DEE9; // Very light gray
+
 .retro-wave-element {
   background: linear-gradient(to right, $retro-wave-secondary-start, $retro-wave-secondary-end);
 }
@@ -127,6 +166,41 @@ $themes: (
     'neutral': $pastel-future-neutral,
     'background': $pastel-future-background,
     'background-alt': $pastel-future-background-alt
+  ),
+  'cyber-bloom': (
+    'primary': $cyber-bloom-primary,
+    'secondary': $cyber-bloom-secondary,
+    'accent': $cyber-bloom-accent,
+    'highlight': $cyber-bloom-highlight,
+    'neutral': $cyber-bloom-neutral
+  ),
+  'quantum-leap': (
+    'primary': $quantum-leap-primary,
+    'secondary': $quantum-leap-secondary,
+    'accent': $quantum-leap-accent,
+    'highlight': $quantum-leap-highlight,
+    'neutral': $quantum-leap-neutral
+  ),
+  'pixel-nebula': (
+    'primary': $pixel-nebula-primary,
+    'secondary': $pixel-nebula-secondary,
+    'accent': $pixel-nebula-accent,
+    'highlight': $pixel-nebula-highlight,
+    'neutral': $pixel-nebula-neutral
+  ),
+  'circuit-dusk': (
+    'primary': $circuit-dusk-primary,
+    'secondary': $circuit-dusk-secondary,
+    'accent': $circuit-dusk-accent,
+    'highlight': $circuit-dusk-highlight,
+    'neutral': $circuit-dusk-neutral
+  ),
+  'professional-edge': (
+    'primary': $professional-edge-primary,
+    'secondary': $professional-edge-secondary,
+    'accent': $professional-edge-accent,
+    'highlight': $professional-edge-highlight,
+    'neutral': $professional-edge-neutral
   )
 );
 

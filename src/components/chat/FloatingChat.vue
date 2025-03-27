@@ -96,12 +96,19 @@ const themeVariables = computed(() => {
     'neon-horizon': { accent: '#A3BE8C', secondary: '#1a1b26' },
     'digital-sunset': { accent: '#B48EAD', secondary: '#2E3440' },
     'retro-wave': { accent: '#FF4081', secondary: '#0f0f17' },
-    'pastel-future': { accent: '#98FB98', secondary: '#f8f9fa' }
+    'pastel-future': { accent: '#98FB98', secondary: '#f8f9fa' },
+    // New themes
+    'cyber-bloom': { accent: '#64FFDA', secondary: '#1A1A2E' },
+    'quantum-leap': { accent: '#A0E7E5', secondary: '#222F3E' },
+    'pixel-nebula': { accent: '#9FA8DA', secondary: '#121212' },
+    'circuit-dusk': { accent: '#AED581', secondary: '#263238' },
+    'professional-edge': { accent: '#88C0D0', secondary: '#2E3440' }
   };
   
   // Get current theme from props or use default
   const currentTheme = props.theme || 'neon-horizon';
-  const themeColors = themes[currentTheme] || themes['neon-horizon'];
+  // Use type assertion with a type guard to ensure currentTheme is a valid key
+  const themeColors = themes[currentTheme as keyof typeof themes] || themes['neon-horizon'];
   
   return {
     '--theme-accent': themeColors.accent,
@@ -199,12 +206,12 @@ const props = withDefaults(defineProps<Props>(), {
   tiltX: 0,
   tiltY: 0,
   messageAnimationConfig: () => ({
-    scaleDecrement: 0.05,
-    opacityDecrement: 0.2,
+    scaleDecrement: .05,
+    opacityDecrement: 0.1,
     verticalOffset: 100,
-    duration: 0.3,
+    duration: 0.5,
     staggerAmount: 0.1,
-    minScale: 0.7,
+    minScale: 0.4,
     minOpacity: 0.2
   }),
   handDrawnStyle: false,

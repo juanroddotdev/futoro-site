@@ -22,6 +22,32 @@ const themes = [
     name: 'theme-pastel-future',
     gradient: 'linear-gradient(45deg, #f8f9fa, #6A5ACD, #98FB98)',
     label: 'Pastel Future'
+  },
+  // New themes
+  { 
+    name: 'theme-cyber-bloom',
+    gradient: 'linear-gradient(45deg, #1A1A2E, #C792EA, #64FFDA)',
+    label: 'Cyber Bloom'
+  },
+  { 
+    name: 'theme-quantum-leap',
+    gradient: 'linear-gradient(45deg, #222F3E, #84CEEB, #A0E7E5)',
+    label: 'Quantum Leap'
+  },
+  { 
+    name: 'theme-pixel-nebula',
+    gradient: 'linear-gradient(45deg, #121212, #4A148C, #9FA8DA)',
+    label: 'Pixel Nebula'
+  },
+  { 
+    name: 'theme-circuit-dusk',
+    gradient: 'linear-gradient(45deg, #263238, #90A4AE, #AED581)',
+    label: 'Circuit Dusk'
+  },
+  { 
+    name: 'theme-professional-edge',
+    gradient: 'linear-gradient(45deg, #2E3440, #434C5E, #88C0D0)',
+    label: 'Professional Edge'
   }
 ];
 

@@ -1,0 +1,45 @@
+// Hero Section Chat Component Styles
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+.hero-section-chat {
+  // Structure only, no styling properties
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+// Typography structure
+.headline {
+  
+}
+
+.subheadline {
+  
+}
+
+.heading-responsive {
+  
+}
+
+.subheading-responsive {
+  
+}
+
+// Layout utilities structure
+.flex {
+  
+  &.gap-4 {
+    
+  }
+}
+
+.mb-6 {
+  
+}
+
+.mb-8 {
+  
+}

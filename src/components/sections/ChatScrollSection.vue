@@ -134,52 +134,5 @@ defineExpose({
 </script>
 
 <style lang="scss" scoped>
-.scrollable-chat-section {
-  width: 100%;
-  
-  .section-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-  }
-  
-  .section-inner {
-    display: flex;
-    gap: 40px;
-    
-    &.content-left {
-      flex-direction: row;
-    }
-    
-    &.content-right {
-      flex-direction: row-reverse;
-    }
-    
-    &.content-top {
-      flex-direction: column;
-    }
-  }
-  
-  .content-area {
-    flex: 1;
-    padding: 20px;
-  }
-  
-  .chat-area {
-    flex: 1;
-    max-width: 400px;
-  }
-}
 
-@media (max-width: 768px) {
-  .scrollable-chat-section {
-    .section-inner {
-      flex-direction: column !important;
-    }
-    
-    .chat-area {
-      max-width: 100%;
-    }
-  }
-}
 </style>
