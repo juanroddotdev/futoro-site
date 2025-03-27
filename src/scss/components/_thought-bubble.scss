@@ -44,6 +44,15 @@
   }
 }
 
+// Background bubble styles
+.background-bubble {
+  pointer-events: none;
+  
+  .background-path {
+    animation: float 3.5s ease-in-out infinite;
+  }
+}
+
 // Content container
 .thought-bubble-content {
   position: relative;

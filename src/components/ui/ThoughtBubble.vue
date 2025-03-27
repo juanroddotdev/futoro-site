@@ -1,5 +1,32 @@
 <template>
   <div class="thought-bubble-wrapper" :style="wrapperStyles" ref="bubbleWrapper">
+    <!-- Background bubble (lower opacity) -->
+    <svg 
+      v-if="showBackgroundBubble"
+      class="thought-bubble-svg background-bubble" 
+      :viewBox="`0 0 ${dynamicViewBoxWidth} 200`" 
+      xmlns="http://www.w3.org/2000/svg"
+      :width="'100%'" 
+      :height="'100%'"
+      :style="backgroundSvgStyles"
+    >
+      <path 
+        class="bubble-path background-path" 
+        :d="dynamicBubblePath" 
+        :fill="fillColor" 
+        :stroke="strokeColor" 
+        stroke-width="6" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"
+        :filter="hasFilter ? 'url(#wavy-edge)' : ''"
+      />
+      
+      <circle class="bubble-circle" cx="35" cy="140" r="8" :fill="fillColor" :stroke="strokeColor" stroke-width="2" />
+      <circle class="bubble-circle" cx="20" cy="155" r="5" :fill="fillColor" :stroke="strokeColor" stroke-width="2" />
+      <circle class="bubble-circle" cx="10" cy="165" r="3" :fill="fillColor" :stroke="strokeColor" stroke-width="1.5" />
+    </svg>
+    
+    <!-- Foreground bubble (main) -->
     <svg 
       class="thought-bubble-svg" 
       :viewBox="`0 0 ${dynamicViewBoxWidth} 200`" 
@@ -8,7 +35,6 @@
       :height="'100%'"
       :style="svgStyles"
     >
-      <!-- Dynamic path based on content width -->
       <path 
         class="bubble-path" 
         :d="dynamicBubblePath" 
@@ -20,12 +46,10 @@
         :filter="hasFilter ? 'url(#wavy-edge)' : ''"
       />
       
-      <!-- Small bubbles -->
       <circle class="bubble-circle" cx="35" cy="140" r="8" :fill="fillColor" :stroke="strokeColor" stroke-width="2" />
       <circle class="bubble-circle" cx="20" cy="155" r="5" :fill="fillColor" :stroke="strokeColor" stroke-width="2" />
       <circle class="bubble-circle" cx="10" cy="165" r="3" :fill="fillColor" :stroke="strokeColor" stroke-width="1.5" />
       
-      <!-- Filters for hand-drawn effect -->
       <defs>
         <filter id="wavy-edge" x="-10%" y="-10%" width="120%" height="120%">
           <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="3" result="noise" />
@@ -34,7 +58,6 @@
       </defs>
     </svg>
     
-    <!-- Content slot with ref to measure -->
     <div class="thought-bubble-content" :style="contentStyles" ref="contentRef">
       <slot></slot>
     </div>
@@ -154,6 +177,26 @@ const props = defineProps({
   adaptToContent: {
     type: Boolean,
     default: false
+  },
+  showBackgroundBubble: {
+    type: Boolean,
+    default: false
+  },
+  backgroundOpacity: {
+    type: Number,
+    default: 0.4
+  },
+  backgroundOffsetX: {
+    type: Number,
+    default: 10
+  },
+  backgroundOffsetY: {
+    type: Number,
+    default: 10
+  },
+  backgroundRotate: {
+    type: Number,
+    default: -5
   }
 });
 
@@ -171,14 +214,29 @@ const svgWidth = computed(() => {
   return typeof props.width === 'number' ? `${props.width}px` : props.width || '100%';
 });
 
+const backgroundSvgStyles = computed(() => {
+  const style = {
+    position: 'absolute',
+    top: `${props.backgroundOffsetY}px`,
+    left: `${props.backgroundOffsetX}px`,
+    opacity: props.backgroundOpacity,
+    transform: `rotate(${props.backgroundRotate}deg)`,
+    zIndex: 1
+  };
+  
+  style.height = typeof props.height === 'number' ? `${props.height}px` : props.height;
+  
+  return style;
+});
+
 const svgStyles = computed(() => {
   const style = {
     position: 'absolute',
     top: 0,
-    left: 0
+    left: 0,
+    zIndex: 2
   };
   
-  // Only set height in styles, width is handled by the width attribute
   style.height = typeof props.height === 'number' ? `${props.height}px` : props.height;
   
   return style;
@@ -187,7 +245,7 @@ const svgStyles = computed(() => {
 const contentStyles = computed(() => ({
   padding: props.contentPadding,
   position: 'relative',
-  zIndex: 2
+  zIndex: 3
 }));
 
 </script>
