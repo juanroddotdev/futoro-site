@@ -6,6 +6,38 @@ defineProps<{
   spotlightPosition?: string,
   fixed?: boolean
 }>();
+
+// Calculate the SVG path for the visibility boundary
+const calculateRadialGradientBoundary = () => {
+  // The radial gradient is defined as:
+  // circle at 20% 20%, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.8) 20%, rgba(0, 0, 0, 0) 50%
+  
+  // Center point of the gradient (20%, 20%)
+  const centerX = 20;
+  const centerY = 20;
+  
+  // Radius where opacity reaches 0 (50% of the gradient size)
+  const radius = 50;
+  
+  // Generate points along the circle
+  let path = '';
+  const points = 36; // Number of points to generate (more = smoother)
+  
+  for (let i = 0; i <= points; i++) {
+    const angle = (i / points) * 2 * Math.PI;
+    const x = centerX + radius * Math.cos(angle);
+    const y = centerY + radius * Math.sin(angle);
+    
+    if (i === 0) {
+      path += `M ${x},${y}`;
+    } else {
+      path += ` L ${x},${y}`;
+    }
+  }
+  
+  path += ' Z'; // Close the path
+  return path;
+}
 </script>
 
 <template>
@@ -20,6 +52,11 @@ defineProps<{
       }
     ]"
   >
+    <!-- Curved visibility indicator that follows the radial gradient -->
+    <svg v-if="spotlight" class="grid-visibility-indicator" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <!-- This path represents the 50% opacity boundary of the radial gradient -->
+      <circle cx="20" cy="20" r="50" fill="none" stroke="red" stroke-width="0.5" stroke-dasharray="2,2" />
+    </svg>
     <slot></slot>
   </div>
 </template>
@@ -42,6 +79,18 @@ defineProps<{
   position: relative;
   isolation: isolate;
   height: 100%; /* Ensure it fills its container */
+
+  /* Curved visibility indicator */
+  .grid-visibility-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none;
+    opacity: 0.7;
+  }
 
   /* When used as a fixed background */
   &--fixed {
