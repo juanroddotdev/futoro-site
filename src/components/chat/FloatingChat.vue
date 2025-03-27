@@ -3,7 +3,7 @@
     ref="containerRef" 
     class="chat-container" 
     :id="sectionId"
-    :style="tiltStyle"
+    :style="containerStyle"
   >
     <div ref="messagesRef" class="messages-container">
       <!-- Typing indicators -->
@@ -22,12 +22,29 @@
       <!-- Messages -->
       <template v-for="(message, idx) in messages" :key="`message-${idx}`">
         <div :class="`message-group message-group-${idx + 1}`">
+          <!-- Use ThoughtBubble for thought messages -->
+          <!-- v-if="message.isThought" -->
+          <ThoughtBubble
+            v-if="true"
+            :class="['message-bubble', message.type]"
+            class="wavy-filter"
+            :fillColor="getThoughtBubbleColor(message.type)"
+            :strokeColor="getThoughtBubbleStrokeColor(message.type)"
+            :rotate="message.rotate || 0"
+            :contentPadding="message.contentPadding || '20px 30px 20px 20px'"
+          >
+            <div class="message-content-bubble">
+              {{ message.text }}
+            </div>
+          </ThoughtBubble>
+          
+          <!-- Regular message -->
           <div 
+            v-else
             :class="[
               'message', 
               message.type, 
-              props.handDrawnStyle ? 'hand-drawn' : '',
-              props.handDrawnStyle && message.isThought ? 'thought' : ''
+              props.handDrawnStyle ? 'hand-drawn' : ''
             ]"
           >
             <div class="message-content">
@@ -53,6 +70,7 @@ import { ref, onMounted, onUnmounted, computed } from 'vue';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 import ChatTypingIndicator from '@/components/chat/ChatTypingIndicator.vue';
+import ThoughtBubble from '@/components/ui/ThoughtBubble.vue';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -65,10 +83,77 @@ const tiltStyle = computed(() => {
   };
 });
 
+// Add computed property for theme variables
+const themeVariables = computed(() => {
+  // Default theme colors
+  const themes = {
+    'neon-horizon': { accent: '#A3BE8C', secondary: '#1a1b26' },
+    'digital-sunset': { accent: '#B48EAD', secondary: '#2E3440' },
+    'retro-wave': { accent: '#FF4081', secondary: '#0f0f17' },
+    'pastel-future': { accent: '#98FB98', secondary: '#f8f9fa' }
+  };
+  
+  // Get current theme from props or use default
+  const currentTheme = props.theme || 'neon-horizon';
+  const themeColors = themes[currentTheme] || themes['neon-horizon'];
+  
+  return {
+    '--theme-accent': themeColors.accent,
+    '--theme-secondary': themeColors.secondary
+  };
+});
+
+// Add theme variables to container style
+const containerStyle = computed(() => {
+  return {
+    ...themeVariables.value,
+    ...tiltStyle.value
+    // Add any other existing styles here
+  };
+});
+
+// Helper functions for thought bubble colors
+const getThoughtBubbleColor = (messageType: string) => {
+  return 'transparent'; // Keep fill color transparent
+};
+
+const getThoughtBubbleStrokeColor = (messageType: string) => {
+  // Return appropriate stroke color based on message type
+  if (messageType === 'sent') {
+    return themeVariables.value['--theme-accent']; // Use theme accent color for sent messages
+  } else {
+    return themeVariables.value['--theme-accent']; // Use theme secondary color for received messages
+  }
+};
+// Helper function to handle dimension values
+const getBubbleDimension = (value: string | number | undefined): number | string => {
+  if (value === undefined || value === 'auto') {
+    // Instead of 100%, use a fixed width that's proportional to content
+    return 'auto'; // Let the ThoughtBubble component determine the appropriate size
+  }
+  return value;
+};
+// Alternative helper function if numeric values are required
+// const getBubbleDimension = (value: string | number | undefined): number => {
+//   if (value === undefined || value === 'auto') {
+//     return 200; // Default width/height in pixels
+//   }
+//   if (typeof value === 'string') {
+//     // Try to parse numeric values from strings like "200px" or "20rem"
+//     const numericValue = parseFloat(value);
+//     return isNaN(numericValue) ? 200 : numericValue;
+//   }
+//   return value;
+// };
+
 interface Message {
   text: string;
   type: string;
-  isThought?: boolean; // Optional property to indicate thought bubbles
+  isThought?: boolean;
+  bubbleWidth?: string | number;
+  bubbleHeight?: string | number;
+  rotate?: number;
+  contentPadding?: string;
 }
 
 interface Props {
@@ -95,6 +180,7 @@ interface Props {
     minOpacity?: number;         // Minimum opacity for oldest messages (default: 0.2)
   };
   handDrawnStyle?: boolean;
+  theme?: string; // New prop for theme selection
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -115,7 +201,8 @@ const props = withDefaults(defineProps<Props>(), {
     minScale: 0.7,
     minOpacity: 0.2
   }),
-  handDrawnStyle: false 
+  handDrawnStyle: false,
+  theme: 'neon-horizon' // Default theme
 });
 
 const containerRef = ref<HTMLElement | null>(null);
@@ -243,281 +330,34 @@ onUnmounted(() => {
 .chat-container {
   position: relative;
   width: 100%;
-  max-width: 400px;
+  max-width: 600px;
   margin: 0 auto;
-  border-radius: 12px;
-  // box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  transform-origin: center center;
-  height: 600px;
-  // height: 800px;
-  min-height: 500px;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
 }
 
 .messages-container {
-  flex: 1;
-  padding: 20px;
-  position: relative;
-  overflow: hidden; /* Hide messages that go beyond the container */
-  z-index: 2;
   display: flex;
   flex-direction: column;
+  gap: 16px;
+ 
 }
 
 .message-group {
-  position: absolute;
-  bottom: 80px;
-  left: 20px;
-  right: 20px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  will-change: transform, opacity, scale;
-  margin-bottom: 16px;
-  z-index: 3;
-  transform-origin: bottom center; /* Scale from bottom center */
+  width: 100%;
 }
 
-.typing-container {
-  position: absolute;
-  bottom: 80px;
-  left: 20px;
-  right: 20px;
-  opacity: 0;
-  z-index: 3; /* Ensure typing indicators are visible */
-}
-
-.message {
+.message-bubble {
   max-width: 80%;
-  padding-bottom: 8px;
+  align-self: flex-start;
   
   &.sent {
-    margin-left: auto;
-    margin-right: 0;
-  }
-  
-  &.received {
-    margin-right: auto;
-    margin-left: 0;
-  }
-  
-  &-content {
-    padding: 12px 16px;
-    border-radius: 20px;
-    font-size: 16px;
-    line-height: 1.4;
+    align-self: flex-end;
   }
 }
-
-// .sent .message-content {
-//   background: linear-gradient(135deg, #007aff, #0063cc);
-//   color: white;
-//   border-bottom-right-radius: 4px;
-// }
-
-// .received .message-content {
-//   background: #e5e5ea;
-//   color: #000;
-//   border-bottom-left-radius: 4px;
-// }
-
-// .message-input-container {
-//   position: absolute;
-//   bottom: 0;
-//   left: 0;
-//   right: 0;
-//   padding: 10px 20px;
-//   background: rgba(245, 245, 245, 0.9);
-//   backdrop-filter: blur(10px);
-// }
-
-// .input-wrapper {
-//   background: white;
-//   border-radius: 20px;
-//   padding: 8px 15px;
-// }
-
-// .message-input {
-//   font-size: 16px;
-//   line-height: 1.4;
-// }
-
-// .placeholder {
-//   color: #8e8e93;
-// }
-
-/* Hand-drawn thought bubble styles with 3D effect */
-.message {
-  &.hand-drawn {
-    position: relative;
-    
-    .message-content {
-      background-color: transparent !important; /* Force override with !important */
-      background-image: none !important; /* Remove any gradient backgrounds */
-      border: 2px solid white;
-      border-radius: 30px 30px 30px 5px;
-      box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.2);
-      position: relative;
-      color: white !important; /* Force text color override */
-      
-      /* Wavy border effect */
-      filter: url('#wavy-border');
-      z-index: 2; /* Ensure content is above the 3D layer */
-      
-      /* 3D effect with ::after pseudo-element */
-      &::after {
-        content: '';
-        position: absolute;
-        top: 4px;
-        left: 4px;
-        width: 100%;
-        height: 100%;
-        background-color: transparent;
-        border: 2px solid #fff;
-        border-radius: 30px 30px 30px 5px;
-        z-index: -1;
-        filter: url('#wavy-border');
-      }
-      
-      /* Speech bubble tail */
-      &::before {
-        content: '';
-        position: absolute;
-        bottom: -18px;
-        left: 10px;
-        width: 20px;
-        height: 10px;
-        background-color: transparent;
-        border-right: 2px solid #fff;
-        border-bottom: 2px solid #fff;
-        border-radius: 0 0 20px 0;
-        transform: rotate(10deg);
-        z-index: 1;
-      }
-    }
-    
-    /* Sent messages (right side) */
-    &.sent {
-      .message-content {
-        border-radius: 30px 30px 5px 30px;
-        background-color: transparent !important;
-        
-        /* 3D effect for sent messages */
-        &::after {
-          border-radius: 30px 30px 5px 30px;
-        }
-        
-        /* Speech bubble tail for sent messages */
-        &::before {
-          left: auto;
-          right: 18px;
-          border-left: 2px solid #fff;
-          border-right: none;
-          border-radius: 0 0 0 20px;
-          transform: rotate(-10deg);
-        }
-      }
-      
-      /* Thought bubble modifications */
-      &.thought {
-        .message-content {
-          border-radius: 30px;
-          
-          /* 3D effect for thought bubbles */
-          &::after {
-            border-radius: 30px;
-          }
-          
-          /* Remove speech bubble tail for thought bubbles */
-          &::before {
-            display: none;
-          }
-        }
-        
-        /* Add thought bubble indicators */
-        &::after, &::before {
-          content: '';
-          position: absolute;
-          background-color: transparent;
-          border: 2px solid #fff;
-          border-radius: 50%;
-          z-index: 1;
-        }
-        
-        &::after {
-          width: 12px;
-          height: 12px;
-          bottom: -15px;
-          right: 15px;
-        }
-        
-        &::before {
-          width: 8px;
-          height: 8px;
-          bottom: -25px;
-          right: 5px;
-        }
-      }
-    }
-    
-    /* Different colors for received messages */
-    &.received {
-      .message-content {
-        background-color: transparent !important;
-        
-        &::after {
-          background-color: transparent;
-        }
-      }
-      
-      /* Thought bubble for received messages */
-      &.thought {
-        .message-content {
-          border-radius: 30px;
-          
-          &::after {
-            border-radius: 30px;
-          }
-          
-          &::before {
-            display: none;
-          }
-        }
-        
-        &::after, &::before {
-          content: '';
-          position: absolute;
-          background-color: transparent;
-          border: 2px solid #fff;
-          border-radius: 50%;
-        }
-        
-        &::after {
-          width: 12px;
-          height: 12px;
-          bottom: -15px;
-          left: 15px;
-        }
-        
-        &::before {
-          width: 8px;
-          height: 8px;
-          bottom: -25px;
-          left: 5px;
-        }
-      }
-    }
-  }
+.message-content-bubble {
+  color: white;
 }
 
-/* Add SVG filter for wavy borders */
-.svg-filters {
-  position: absolute;
-  width: 0;
-  height: 0;
-  overflow: hidden;
-}
+// Add any additional styling you need
 </style>
