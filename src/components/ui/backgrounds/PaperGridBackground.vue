@@ -82,13 +82,13 @@ defineProps<{
     &::before {
       mask-image: radial-gradient(
         circle at 20% 20%, // Position the spotlight in the top-left area
-        rgba(0, 0, 0, 1) 0%,
+        #1a1b26 0%,
         rgba(0, 0, 0, 0.8) 20%,
         rgba(0, 0, 0, 0) 50%
       );
       -webkit-mask-image: radial-gradient(
         circle at 20% 20%,
-        rgba(0, 0, 0, 1) 0%,
+        #1a1b26 0%,
         rgba(0, 0, 0, 0.8) 20%,
         rgba(0, 0, 0, 0) 50%
       );

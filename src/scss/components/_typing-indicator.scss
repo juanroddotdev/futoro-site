@@ -15,7 +15,8 @@
   .typing-animation {
     padding: 8px 12px;
     border-radius: 16px;
-    background: #e5e5ea;
+    /* background: #e5e5ea; */
+    background: transparent !important;
     display: flex;
     align-items: center;
     gap: 4px;

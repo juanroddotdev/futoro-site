@@ -68,8 +68,6 @@ const heroContent = computed(() => props.heroContent || getRandomHeroContent());
 
 // Use provided messages or get default ones
 const heroMessages = computed(() => props.messages || getInitialConversation());
-console.log('getInitialConversation()', getInitialConversation());
-console.log('heroMessages', heroMessages);
 
 // Calculate container height based on message count
 const calculateHeroContainerHeight = (messageCount: number) => {
@@ -99,8 +97,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   position: relative;
-  
-  // Import hero section styles
+  Import hero section styles
   :deep(.scrollable-chat-section) {
     min-height: 100vh;
     display: flex;
@@ -116,104 +113,99 @@ onMounted(() => {
         padding: 4rem 2rem;
       }
     }
+  }
+}
+// .hero-section-chat {
+//   min-height: 100vh;
+//   width: 100%;
+//   display: flex;
+//   flex-direction: column;
+//   position: relative;
+  
+//   // Import hero section styles
+//   :deep(.scrollable-chat-section) {
+//     min-height: 100vh;
+//     display: flex;
+//     align-items: center;
     
-    .section-inner {
-      gap: 2rem;
+//     .section-container {
+//       padding: 2rem;
+//       width: 100%;
+//       max-width: 1400px;
+//       margin: 0 auto;
       
-      @media (min-width: 1024px) {
-        gap: 4rem;
-      }
-    }
+//       @media (min-width: 768px) {
+//         padding: 4rem 2rem;
+//       }
+//     }
     
-    .content-area {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 2rem 0;
+//     .section-inner {
+//       gap: 2rem;
       
-      @media (min-width: 768px) {
-        padding: 3rem 0;
-      }
-    }
-  }
-}
+//       @media (min-width: 1024px) {
+//         gap: 4rem;
+//       }
+//     }
+    
+//     .content-area {
+//       display: flex;
+//       flex-direction: column;
+//       justify-content: center;
+//       padding: 2rem 0;
+      
+//       @media (min-width: 768px) {
+//         padding: 3rem 0;
+//       }
+//     }
+//   }
+// }
 
-.headline {
-  font-size: 2.5rem;
-  font-weight: 700;
-  line-height: 1.2;
-  margin-bottom: 1.5rem;
+// .headline {
+//   font-size: 2.5rem;
+//   font-weight: 700;
+//   line-height: 1.2;
+//   margin-bottom: 1.5rem;
   
-  @media (min-width: 768px) {
-    font-size: 3.5rem;
-  }
-}
+//   @media (min-width: 768px) {
+//     font-size: 3.5rem;
+//   }
+// }
 
-.subheadline {
-  font-size: 1.25rem;
-  line-height: 1.6;
-  margin-bottom: 2rem;
+// .subheadline {
+//   font-size: 1.25rem;
+//   line-height: 1.6;
+//   margin-bottom: 2rem;
   
-  @media (min-width: 768px) {
-    font-size: 1.5rem;
-  }
-}
+//   @media (min-width: 768px) {
+//     font-size: 1.5rem;
+//   }
+// }
 
-.heading-responsive {
-  font-size: clamp(2rem, 5vw, 3.5rem);
-}
+// .heading-responsive {
+//   font-size: clamp(2rem, 5vw, 3.5rem);
+// }
 
-.subheading-responsive {
-  font-size: clamp(1rem, 3vw, 1.5rem);
-}
+// .subheading-responsive {
+//   font-size: clamp(1rem, 3vw, 1.5rem);
+// }
 
-// Add hero-specific styling
-.flex {
-  display: flex;
+// // Add hero-specific styling
+// .flex {
+//   display: flex;
   
-  &.gap-4 {
-    gap: 1rem;
-  }
-}
+//   &.gap-4 {
+//     gap: 1rem;
+//   }
+// }
 
-.mb-6 {
-  margin-bottom: 1.5rem;
-}
+// .mb-6 {
+//   margin-bottom: 1.5rem;
+// }
 
-.mb-8 {
-  margin-bottom: 2rem;
-}
+// .mb-8 {
+//   margin-bottom: 2rem;
+// }
 
-// Button styles
-.btn-round-large-primary,
-.btn-round-large-outline-primary {
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
-  border-radius: 9999px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    transform: translateY(-2px);
-  }
-}
 
-.btn-round-large-primary {
-  background-color: var(--theme-primary);
-  color: var(--theme-text-on-primary);
-  
-  &:hover {
-    background-color: var(--theme-primary-dark);
-  }
-}
 
-.btn-round-large-outline-primary {
-  border: 2px solid var(--theme-primary);
-  color: var(--theme-primary);
-  
-  &:hover {
-    background-color: var(--theme-primary-light);
-  }
-}
 </style>

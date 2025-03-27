@@ -1,0 +1,172 @@
+
+// Floating Chat Component Styles
+
+// Main container
+.chat-container {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  border-radius: 12px;
+  overflow: hidden;
+  transform-origin: center center;
+  height: 600px;
+  min-height: 500px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  
+  // Theme-specific container styles can be added here
+}
+
+// Messages container
+.messages-container {
+  flex: 1;
+  padding: 20px;
+  position: relative;
+  overflow: hidden; /* Hide messages that go beyond the container */
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+}
+
+// Typing indicators
+.typing-container {
+  // Base typing container styles
+  position: absolute;
+  bottom: 80px;
+  left: 20px;
+  right: 20px;
+  opacity: 0;
+  z-index: 3; /* Ensure typing indicators are visible */
+  // Numbered typing containers
+  @for $i from 1 through 10 {
+    &-#{$i} {
+      // Specific styling for each typing container
+    }
+  }
+}
+
+// Message groups
+.message-group {
+  position: absolute;
+  bottom: 80px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  will-change: transform, opacity, scale;
+  margin-bottom: 16px;
+  z-index: 3;
+  transform-origin: bottom center; /* Scale from bottom center */
+  
+  // Numbered message groups
+  @for $i from 1 through 10 {
+    &-#{$i} {
+      // Specific styling for each message group
+    }
+  }
+}
+
+// Message bubbles
+.message-bubble {
+  // Base message bubble styles
+  max-width: 80%;
+  align-self: flex-start;
+  
+  // Message types
+  &.sent {
+    // Sent message styles
+    align-self: flex-end;
+  }
+  
+  &.received {
+    // Received message styles
+  }
+}
+
+// Message content inside bubbles
+.message-content-bubble {
+  // Message content styles
+  color: white;
+}
+
+// Regular messages (non-thought bubbles)
+.message {
+  // Base message styles
+  
+  // Message types
+  &.sent {
+    // Sent message styles
+  }
+  
+  &.received {
+    // Received message styles
+  }
+  
+  // Hand-drawn style
+  &.hand-drawn {
+    // Hand-drawn message styles
+    
+    // Hand-drawn sent messages
+    &.sent {
+      // Hand-drawn sent message styles
+    }
+  }
+  
+  // Message content
+  .message-content {
+    // Message content styles
+  }
+}
+
+// SVG filters
+.svg-filters {
+  // SVG filters container styles
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  
+  svg {
+    filter {
+      feTurbulence {
+        type: fractalNoise;
+        baseFrequency: 0.01;
+        numOctaves: 3;
+      }
+      
+      feDisplacementMap {
+        scale: 2;
+      }
+    }
+  }
+}
+
+// Wavy filter utility class
+.wavy-filter {
+  filter: url(#wavy-border);
+}
+
+// Animation keyframes
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+// Theme-specific styles
+@each $theme-name, $theme-map in $themes {
+  .theme-#{$theme-name} {
+    // Theme-specific styles for chat elements
+    
+    .message-bubble {
+      // Theme-specific message bubble styles
+    }
+    
+    .message {
+      // Theme-specific message styles
+    }
+  }
+}
