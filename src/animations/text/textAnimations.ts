@@ -15,7 +15,8 @@ export type TextAnimationType =
   | 'scramble' 
   | 'fadeUp'
   | 'slideInLeft'
-  | 'slideInRight';
+  | 'slideInRight'
+  | 'outlineToFill';
 
 export interface TextAnimationOptions {
   duration?: number;
@@ -275,7 +276,66 @@ export const textAnimations = {
     
     return tl;
   },
-  
+
+  // Improve the outlineToFill animation
+  outlineToFill: (tl: gsap.core.Timeline, elements: HTMLElement[], options?: TextAnimationOptions) => {
+    console.log('Starting outlineToFill animation', { elements, options });
+    
+    elements.forEach((el, index) => {
+      // Set initial state - visible but with stroke only
+      console.log(`Setting initial state for element ${index}`, el);
+      
+      // First ensure the element has the outline class
+      el.classList.add('outline-gradient');
+      
+      // Set initial GSAP state with stronger values
+      gsap.set(el, { 
+        opacity: 1,
+        color: 'rgba(0,0,0,0)',
+        webkitTextStroke: '2px',
+        webkitTextStrokeColor: 'var(--theme-primary, #88C0D0)',
+        textShadow: '0 0 1px rgba(255,255,255,0.1)'
+      });
+      
+      // Create the fill animation with a two-step approach
+      console.log(`Adding fill animation for element ${index}`);
+      
+      // Step 1: Fade out the stroke
+      tl.to(el, {
+        duration: (options?.duration || 1.5) / 2,
+        webkitTextStroke: '0px transparent',
+        ease: "power2.inOut",
+        onStart: () => {
+          console.log(`Animation started for element ${index}`);
+        }
+      });
+      
+      // Step 2: Fade in the gradient fill
+      tl.to(el, {
+        duration: (options?.duration || 1.5) / 2,
+        backgroundClip: 'text',
+        webkitBackgroundClip: 'text',
+        backgroundImage: 'var(--theme-gradient-extended)',
+        ease: "power2.inOut",
+        onStart: () => {
+          // Add class at start of second phase
+          el.classList.add('outline-to-fill-animated');
+        },
+        onComplete: () => {
+          console.log(`Animation completed for element ${index}`);
+          // Force the final state with inline styles
+          el.style.webkitTextStroke = '0px transparent';
+          el.style.color = 'transparent';
+          el.style.backgroundClip = 'text';
+          el.style.webkitBackgroundClip = 'text';
+          el.style.backgroundImage = 'var(--theme-gradient-extended)';
+        }
+      });
+    });
+    
+    return tl;
+  },
+
   // Apply animation based on type
   applyAnimation: (
     animationType: TextAnimationType, 
@@ -308,6 +368,8 @@ export const textAnimations = {
         return textAnimations.slideInLeft(tl, elements, options);
       case 'slideInRight':
         return textAnimations.slideInRight(tl, elements, options);
+      case 'outlineToFill':
+        return textAnimations.outlineToFill(tl, elements, options);
       default:
         return textAnimations.fade(tl, elements, options);
     }

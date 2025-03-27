@@ -3,7 +3,12 @@
     ref="containerRef" 
     :class="['animated-text-container', { 'initially-hidden': initiallyHidden }]"
   >
-    <span v-if="firstPart" ref="firstPartRef" :class="{ 'theme-text--gradient': useGradient }">{{ firstPart }}</span>
+    <span v-if="firstPart" 
+          ref="firstPartRef" 
+          :class="{ 
+            'theme-text--gradient': useGradient && props.animation !== 'outlineToFill',
+            'outline-gradient': props.animation === 'outlineToFill'
+          }">{{ firstPart }}</span>
     <span v-if="secondPart" ref="secondPartRef" :class="{ 'theme-text--gradient': useGradient }">{{ secondPart }}</span>
     <span v-if="suffix" ref="suffixRef" :class="{ 'theme-text--gradient': useGradient }">{{ suffix }}</span>
   </div>
@@ -150,7 +155,7 @@ const applyWordEffects = () => {
       
       const effectType = props.wordEffectTypes[wordIndex] || 'highlight';
       const effectStyle = props.wordEffectStyles[wordIndex] || {};
-      const gradientClass = effectStyle.gradientClass || 'gradient-text';
+      const gradientClass = effectStyle.gradientClass || 'theme-text--gradient';
       
       const wordClass = `word-effect word-${effectType} word-index-${wordIndex} ${gradientClass}`;
       
@@ -382,8 +387,12 @@ const applySqueezeEffect = (
 const runAnimation = () => {
   // Emit that animation is starting
   emit('animation-start');
+  console.log('TextAnimation: Starting animation', props.animation);
   
-  if (!containerRef.value) return;
+  if (!containerRef.value) {
+    console.warn('TextAnimation: Container ref is not available');
+    return;
+  }
   
   nextTick().then(() => {
     if (containerRef.value) {
@@ -398,6 +407,20 @@ const runAnimation = () => {
         secondPartRef.value,
         suffixRef.value
       ].filter(Boolean) as HTMLElement[];
+      
+      console.log('TextAnimation: Found elements', elements.length);
+      
+      // If using outline-to-fill effect, add the outline class initially
+      if (props.animation === 'outlineToFill') {
+        console.log('TextAnimation: Applying outline-to-fill effect');
+        elements.forEach(el => {
+          if (el) {
+            el.classList.add('outline-gradient');
+            // Remove any gradient-text class if it exists
+            el.classList.remove('gradient-text', 'theme-text--gradient');
+          }
+        });
+      }
       
       // Store original text for each element
       elements.forEach(el => {
@@ -418,7 +441,9 @@ const runAnimation = () => {
           duration: props.duration
         },
         delay: props.delay,
+        onStart: () => console.log('TextAnimation: Timeline started'),
         onComplete: () => {
+          console.log('TextAnimation: Timeline completed');
           // If word effects are enabled, do that next
           if (props.wordEffects) {
             setTimeout(() => {
@@ -432,6 +457,7 @@ const runAnimation = () => {
       });
       
       // Apply animation with options
+      console.log('TextAnimation: Applying animation', props.animation);
       textAnimations.applyAnimation(props.animation as TextAnimationType, elements, {
         duration: props.duration,
         delay: props.delay,
@@ -439,6 +465,8 @@ const runAnimation = () => {
       });
       
       hasAnimated.value = true;
+    } else {
+      console.warn('TextAnimation: No container found to animate');
     }
   });
 };
@@ -477,6 +505,11 @@ const setupObserver = () => {
 };
 
 onMounted(() => {
+  // Set data-text attribute for gradient outline text
+  if (props.animation === 'outlineGradient' && secondPartRef.value) {
+    secondPartRef.value.setAttribute('data-text', secondPartRef.value.textContent || '');
+  }
+  
   // Store original text content for reset purposes
   if (firstPartRef.value) {
     firstPartRef.value.setAttribute('data-original-text', props.firstPart);

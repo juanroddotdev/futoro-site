@@ -1,5 +1,5 @@
 <template>
-  <div class="thought-bubble-wrapper" :style="wrapperStyles" ref="bubbleWrapper">
+  <div class="thought-bubble-wrapper" :class="themeClass" :style="wrapperStyles" ref="bubbleWrapper">
     <!-- Background bubble (lower opacity) -->
     <svg 
       v-if="showBackgroundBubble"
@@ -10,21 +10,31 @@
       :height="'100%'"
       :style="[backgroundSvgStyles, { transform: isSent ? `${backgroundSvgStyles.transform} scaleX(-1)` : backgroundSvgStyles.transform }]"
     >
+      <defs>
+        <linearGradient id="bgThemeGradient" x1="0%" y1="0%" x2="100%" y2="0%" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" :stop-color="gradientStartColor" />
+          <stop offset="50%" :stop-color="gradientMidColor" />
+          <stop offset="100%" :stop-color="gradientEndColor" />
+        </linearGradient>
+      </defs>
+      
       <path 
         class="bubble-path background-path" 
         :d="dynamicBubblePath" 
         :fill="fillColor" 
-        :stroke="strokeColor" 
-        stroke-width="6" 
+        stroke="url(#bgThemeGradient)" 
+        stroke-width="8" 
         stroke-linecap="round" 
         stroke-linejoin="round"
         :filter="hasFilter ? 'url(#wavy-edge)' : ''"
       />
       
-      <!-- Bubble circles (always on left side in the SVG) -->
-      <circle class="bubble-circle" cx="35" cy="140" r="8" :fill="fillColor" :stroke="strokeColor" stroke-width="2" />
-      <circle class="bubble-circle" cx="20" cy="155" r="5" :fill="fillColor" :stroke="strokeColor" stroke-width="2" />
-      <circle class="bubble-circle" cx="10" cy="165" r="3" :fill="fillColor" :stroke="strokeColor" stroke-width="1.5" />
+      <!-- Bubble circles with theme gradient stroke -->
+      <circle class="bubble-circle" cx="35" cy="140" r="8" :fill="fillColor" stroke="url(#bgThemeGradient)" stroke-width="6" />
+      <circle class="bubble-circle" cx="20" cy="155" r="5" :fill="fillColor" stroke="url(#bgThemeGradient)" stroke-width="4" />
+      <circle class="bubble-circle" cx="10" cy="165" r="3" :fill="fillColor" stroke="url(#bgThemeGradient)" stroke-width="2.5" />
+      
+      <!-- Remove the inner border path -->
     </svg>
     
     <!-- Foreground bubble (main) -->
@@ -37,30 +47,40 @@
       :style="svgStyles"
       :class="{'flipped': isSent}"
     >
-      <path 
-        class="bubble-path" 
-        :d="dynamicBubblePath" 
-        :fill="fillColor" 
-        :stroke="strokeColor" 
-        stroke-width="6" 
-        stroke-linecap="round" 
-        stroke-linejoin="round"
-        :filter="hasFilter ? 'url(#wavy-edge)' : ''"
-      />
-      
-      <!-- Bubble circles (always on left side in the SVG) -->
-      <circle class="bubble-circle" cx="35" cy="140" r="8" :fill="fillColor" :stroke="strokeColor" stroke-width="2" />
-      <circle class="bubble-circle" cx="20" cy="155" r="5" :fill="fillColor" :stroke="strokeColor" stroke-width="2" />
-      <circle class="bubble-circle" cx="10" cy="165" r="3" :fill="fillColor" :stroke="strokeColor" stroke-width="1.5" />
-      
       <defs>
+        <!-- Theme-specific gradient definitions -->
+        <linearGradient id="themeGradient" x1="0%" y1="0%" x2="100%" y2="0%" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" :stop-color="gradientStartColor" />
+          <stop offset="50%" :stop-color="gradientMidColor" />
+          <stop offset="100%" :stop-color="gradientEndColor" />
+        </linearGradient>
+        
         <filter id="wavy-edge" x="-10%" y="-10%" width="120%" height="120%">
           <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="3" result="noise" />
           <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G" />
         </filter>
       </defs>
+      
+      <path 
+        class="bubble-path" 
+        :d="dynamicBubblePath" 
+        :fill="fillColor" 
+        stroke="url(#themeGradient)" 
+        stroke-width="8" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"
+        :filter="hasFilter ? 'url(#wavy-edge)' : ''"
+      />
+      
+      <!-- Bubble circles with theme gradient stroke -->
+      <circle class="bubble-circle" cx="35" cy="140" r="8" :fill="fillColor" stroke="url(#themeGradient)" stroke-width="6" />
+      <circle class="bubble-circle" cx="20" cy="155" r="5" :fill="fillColor" stroke="url(#themeGradient)" stroke-width="4" />
+      <circle class="bubble-circle" cx="10" cy="165" r="3" :fill="fillColor" stroke="url(#themeGradient)" stroke-width="2.5" />
+      
+      <!-- Remove the inner border path -->
     </svg>
     
+    <!-- Add a content-container div to help with centering -->
     <div class="thought-bubble-content" :style="contentStyles" ref="contentRef">
       <slot></slot>
     </div>
@@ -68,13 +88,60 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted, watch, nextTick, onUnmounted } from 'vue';
+import { computed, ref, onMounted, watch, nextTick, onUnmounted, inject } from 'vue';
 
 // Add refs for measuring content
 const contentRef = ref(null);
 const bubbleWrapper = ref(null);
 const contentWidth = ref(0);
 const contentHeight = ref(0);
+
+// Get current theme from useTheme composable or inject
+const { currentTheme } = inject('theme', { currentTheme: ref('theme-neon-horizon') });
+
+// Compute theme class for gradient styling
+const themeClass = computed(() => {
+  // Return the current theme and gradient type classes
+  return {
+    [currentTheme.value]: true,
+    [`gradient-theme-${props.gradientType}`]: props.gradientType !== 'normal'
+  };
+});
+
+// Add these computed properties to define gradient colors based on theme
+const gradientStartColor = computed(() => {
+  const themeColors = {
+    'theme-neon-horizon': '#88C0D0',
+    'theme-digital-sunset': '#B48EAD',
+    'theme-retro-wave': '#FF4081',
+    'theme-pastel-future': '#A3BE8C'
+  };
+  
+  // Default to a color if theme not found
+  return themeColors[currentTheme.value] || '#88C0D0';
+});
+
+const gradientMidColor = computed(() => {
+  const themeColors = {
+    'theme-neon-horizon': '#A3BE8C',
+    'theme-digital-sunset': '#4C566A',
+    'theme-retro-wave': '#1A1A1A',
+    'theme-pastel-future': '#EBCB8B'
+  };
+  
+  return themeColors[currentTheme.value] || '#A3BE8C';
+});
+
+const gradientEndColor = computed(() => {
+  const themeColors = {
+    'theme-neon-horizon': '#88C0D0',
+    'theme-digital-sunset': '#B48EAD',
+    'theme-retro-wave': '#FF4081',
+    'theme-pastel-future': '#A3BE8C'
+  };
+  
+  return themeColors[currentTheme.value] || '#88C0D0';
+});
 
 // Compute dynamic viewBox width based on content
 const dynamicViewBoxWidth = computed(() => {
@@ -97,8 +164,8 @@ const dynamicBubblePath = computed(() => {
   const rightX = width - 30;
   const midX = width / 2;
   
-  // Use the same path for both sent and received
-  return `M30,100 C30,55 65,20 110,20 C155,20 ${midX + 150},20 ${rightX},100 C${rightX},145 ${midX + 150},180 110,180 C95,180 80,175 70,165 L40,185 L50,155 C35,140 30,120 30,100 Z`;
+  // Modified path to create a more symmetrical bubble
+  return `M30,100 C30,55 65,20 110,20 C155,20 ${midX + 150},20 ${rightX},100 C${rightX},145 ${midX + 150},180 110,180 C65,180 30,145 30,100 Z`;
 });
 
 // Add a watch to update the bubble when content changes
@@ -203,6 +270,11 @@ const props = defineProps({
   isSent: {
     type: Boolean,
     default: false
+  },
+  gradientType: {
+    type: String,
+    default: 'normal', // Options: 'normal', 'fire', 'cool'
+    validator: (value) => ['normal', 'fire', 'cool'].includes(value)
   }
 });
 
@@ -251,8 +323,21 @@ const svgStyles = computed(() => {
 const contentStyles = computed(() => ({
   padding: props.contentPadding,
   position: 'relative',
-  zIndex: 3
+  zIndex: 3,
+  display: 'inline-block', // Use inline-block to maintain content-based sizing
+  boxSizing: 'border-box',
+  textAlign: 'center' // Center text
 }));
+
+// Add this computed property to create the inner border path
+const innerBorderPath = computed(() => {
+  const width = dynamicViewBoxWidth.value;
+  const rightX = width - 60; // Inset from outer bubble
+  const midX = width / 2;
+  
+  // Create a symmetrical inner border
+  return `M60,100 C60,70 85,50 110,50 C135,50 ${midX + 100},50 ${rightX},100 C${rightX},130 ${midX + 100},150 110,150 C85,150 60,130 60,100 Z`;
+});
 
 </script>
 

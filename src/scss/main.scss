@@ -23,34 +23,40 @@
 @import 'components/buttons-round';
 @import 'components/form';
 @import 'components/transitions';
-@import 'components/headings';
+/* @import 'components/headings'; */
 @import 'components/custom-headings';
-@import 'components/accordion';
+/* @import 'components/accordion'; */
 @import 'components/timeline';
 @import 'components/theme-switcher';
 @import 'components/about-section';
-@import 'components/contact-section';
+/* @import 'components/contact-section'; */
 @import 'components/contact-section-v2';
 @import 'components/horizontal-scroll';
 @import 'components/navbar';
 @import 'components/services-section';
 @import 'components/hurdles-solutions';
 @import 'components/floating-phone';
-@import 'components/phone-conversation-floating';
+/* @import 'components/phone-conversation-floating'; */
 @import 'components/typing-indicator';
 @import 'components/scroll-accordion-vanilla';
 @import 'components/message-bubbles';
 @import 'components/floating-chat';
 @import 'components/thought-bubble';
+@import 'components/hero-section-chat';
+@import 'components/chat-scroll-section';
+@import 'components/message-container';
+@import 'components/message-bubble';
+@import 'components/text-animations';
 // Playground styles
 /* @import 'playground/_index'; */
 
 // Separators
-@import 'separators/code-evolution';
+/* @import 'separators/code-evolution'; */
 
 // Layout and themes
 @import 'layout/grid';
 @import 'layout/app';
+@import 'themes/variables';
 @import 'themes/neutral';
 @import 'themes/theme-classes';
 

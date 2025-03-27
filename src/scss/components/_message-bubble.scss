@@ -1,0 +1,99 @@
+// Message Bubble Component Styles
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+.message-bubble {
+  max-width: 80%;
+  padding: 0.75rem 1rem;
+  border-radius: 18px;
+  position: relative;
+  margin-bottom: 0.5rem;
+  word-break: break-word;
+  
+  // Received message
+  &.received {
+    align-self: flex-start;
+    background-color: transparent;
+    border-bottom-left-radius: 4px;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: -8px;
+      width: 16px;
+      height: 16px;
+      background-color: transparent;
+      border-bottom-right-radius: 16px;
+      z-index: -1;
+    }
+  }
+  
+  // Sent message
+  &.sent {
+    align-self: flex-end;
+    background-color: transparent;
+    color: white;
+    border-bottom-right-radius: 4px;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      right: -8px;
+      width: 16px;
+      height: 16px;
+      background-color: transparent;
+      border-bottom-left-radius: 16px;
+      z-index: -1;
+    }
+  }
+  
+  // Typing indicator
+  .typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: currentColor;
+      opacity: 0.6;
+      animation: typing-animation 1.5s infinite ease-in-out;
+      
+      &:nth-child(1) {
+        animation-delay: 0s;
+      }
+      
+      &:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      
+      &:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+    }
+  }
+  
+  // Dark theme variations
+  .dark-theme & {
+    &.received {
+      background-color: transparent;
+      
+      &::before {
+        background-color: transparent;
+      }
+    }
+  }
+}
+
+@keyframes typing-animation {
+  0%, 60%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-4px);
+  }
+}
