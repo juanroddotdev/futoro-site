@@ -4,8 +4,8 @@
 .thought-bubble-wrapper {
   position: relative;
   display: inline-block;
-  
-  // Transform variations can be added here
+  width: auto;
+  height: auto;
 }
 
 // SVG element
@@ -53,15 +53,26 @@
   }
 }
 
-// Content container
+// Add a content container for better centering
+.thought-bubble-content-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3;
+  pointer-events: none; // Allow clicks to pass through to content
+}
+
+// Update content styles
 .thought-bubble-content {
   position: relative;
   z-index: 2;
-  width: 100%;
-  height: 100%;
-  box-sizing: border-box;
-  
-  // Padding variations can be added here
+  min-width: 50px; // Ensure minimum width
+  text-align: center;
 }
 
 // Animation keyframes
@@ -71,6 +82,24 @@
   }
   50% { 
     transform: translateY(-5px); 
+  }
+}
+
+// Add styles for the inner border
+.bubble-inner-border {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+// Keep the pulse animation for the inner border
+@keyframes pulse {
+  0%, 100% { 
+    opacity: 0.4;
+    stroke-width: 2;
+  }
+  50% { 
+    opacity: 0.7;
+    stroke-width: 3;
   }
 }
 

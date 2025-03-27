@@ -12,16 +12,34 @@
       :customClass="customClass"
     >
       <template #headline>
-        <h1 class="heading--accent mb-4 heading-responsive">
-          {{ heroContent.headline }}
+        <h1 class="heading--accent mb-4 heading-responsive theme-text--gradient-animated gradient-shine">
+          <TextAnimation 
+            :firstPart="heroContent.headline" 
+            animation="fadeUp" 
+            :useGradient="true"
+            :duration="3" 
+            :initiallyHidden="true" 
+            :triggerOnVisible="true" 
+            :restartOnVisible="true" 
+          />
+          <!-- {{ heroContent.headline }} -->
         </h1>
       </template>
       <template #subheadline>
         <p class="mb-8 subheading-responsive heading--highlight">
-          {{ heroContent.subheadline }}
+          <TextAnimation 
+            :firstPart="heroContent.subheadline" 
+            animation="fade" 
+            :useGradient="true"
+            :duration="3" 
+            :initiallyHidden="true" 
+            :triggerOnVisible="true" 
+            :restartOnVisible="true" 
+          />
+          <!-- {{ heroContent.subheadline }} -->
         </p>
         <div class="flex gap-4">
-          <a :href="primaryCtaLink" class="btn-round-large-primary cta">
+          <a :href="primaryCtaLink" class="btn-round--secondary btn-round--large cta">
             {{ heroContent.cta }}
           </a>
           <a :href="secondaryCtaLink" class="btn-round-large-outline-secondary">
@@ -39,6 +57,7 @@ import ChatScrollSection from '@/components/sections/ChatScrollSection.vue';
 import { getInitialConversation } from '@/data/chatSections';
 import { HeroContent, getRandomHeroContent } from '@/data/heroContentData';
 import { calculateContainerHeight } from '@/utils/containerHeightUtils';
+import TextAnimation from '../text/TextAnimation.vue';
 
 // Define props with defaults
 const props = withDefaults(defineProps<{

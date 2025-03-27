@@ -42,10 +42,11 @@
 @import 'components/message-bubbles';
 @import 'components/floating-chat';
 @import 'components/thought-bubble';
-@import 'components/hero-section-chat';        // Add this line
-@import 'components/chat-scroll-section';      // Add this line
-@import 'components/message-container';        // Add this line
-@import 'components/message-bubble'; 
+@import 'components/hero-section-chat';
+@import 'components/chat-scroll-section';
+@import 'components/message-container';
+@import 'components/message-bubble';
+@import 'components/text-animations';
 // Playground styles
 /* @import 'playground/_index'; */
 
@@ -55,6 +56,7 @@
 // Layout and themes
 @import 'layout/grid';
 @import 'layout/app';
+@import 'themes/variables';
 @import 'themes/neutral';
 @import 'themes/theme-classes';
 

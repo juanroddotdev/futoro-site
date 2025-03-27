@@ -136,3 +136,11 @@ body {
 .font-bold {
   font-weight: 700;
 }
+
+// Add a simple outlined text class
+.text-outline {
+  -webkit-text-stroke: 2px #88C0D0; // Solid color outline
+  color: transparent; // Make the text fill transparent
+  text-shadow: none; // Remove any text shadow
+  font-weight: bold; // Make it bold for better visibility
+}

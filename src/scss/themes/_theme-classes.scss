@@ -23,11 +23,23 @@
       --neon-horizon-secondary: #{$neon-horizon-secondary};
       --neon-horizon-accent: #{$neon-horizon-accent};
       --neon-horizon-neutral: #{$neon-horizon-neutral};
+      --theme-gradient-extended: linear-gradient(
+        to right,
+        #{map-get($theme-map, 'secondary')} 0%,
+        #{map-get($theme-map, 'accent')} 50%,
+        #{map-get($theme-map, 'secondary')} 100%
+      );
     }
     @if $theme-name == 'digital-sunset' {
       --digital-sunset-secondary: #{$digital-sunset-secondary};
       --digital-sunset-accent: #{$digital-sunset-accent};
       --digital-sunset-neutral: #{$digital-sunset-neutral};
+      --theme-gradient-extended: linear-gradient(
+        to right,
+        #{map-get($theme-map, 'secondary')} 0%,
+        #{map-get($theme-map, 'accent')} 50%,
+        #{map-get($theme-map, 'secondary')} 100%
+      );
     }
     @if $theme-name == 'retro-wave' {
       --retro-wave-secondary: #{$retro-wave-secondary-start};
@@ -220,6 +232,43 @@
             map-get($theme-map, 'accent')
           );
         }
+      }
+    }
+
+    // Add after your existing .theme-text--gradient class
+    .theme-text--gradient-animated {
+      @include animated-gradient-text(3s, 'horizontal');
+      
+      // Left-to-right gradient
+      &.gradient-normal {
+        @if $theme-name == 'retro-wave' {
+          background-image: linear-gradient(
+            to right,
+            map-get($theme-map, 'accent'),
+            map-get($theme-map, 'highlight'),
+            map-get($theme-map, 'accent')
+          );
+        } @else {
+          background-image: linear-gradient(
+            to right,
+            map-get($theme-map, 'secondary'),
+            map-get($theme-map, 'accent'),
+            map-get($theme-map, 'secondary')
+          );
+        }
+      }
+      
+      // Shine effect (more dramatic)
+      &.gradient-shine {
+        @include animated-gradient-text(3s, 'shine');
+        background-image: linear-gradient(
+          to right,
+          map-get($theme-map, 'secondary'),
+          map-get($theme-map, 'accent'),
+          map-get($theme-map, 'highlight'),
+          map-get($theme-map, 'accent'),
+          map-get($theme-map, 'secondary')
+        );
       }
     }
 
