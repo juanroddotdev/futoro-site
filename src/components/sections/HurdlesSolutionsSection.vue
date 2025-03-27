@@ -13,7 +13,19 @@
           :duration="2" 
           :initiallyHidden="true" 
         /> -->
-        <OutlineToFillText class="heading-responsive font-bold text-center mb-40" text="Website Solutions" :fillPercentage="42" />
+        <!-- <OutlineToFillText class="heading-responsive font-bold text-center mb-40" text="Website Solutions" :fillPercentage="42" /> -->
+        <AnimatedOutlineToFillText 
+    class="heading-responsive font-bold text-center mb-40" 
+    text="Website Solutions" 
+    :fillPercentage="48" 
+    animation="fadeUp"
+    :duration="1.5"
+    :delay="0.3"
+    :initiallyHidden="true"
+    :triggerOnVisible="true"
+    :animateFill="true"
+          :fillDuration="1.2"
+  />
       </template>
       <template #subheadline>
         <TextAnimation ref="splitTextRef" class="text-3xl font-bold text-center gradient-text"
@@ -63,6 +75,7 @@ import EmberAnimation from '@/components/effects/EmberAnimation.vue';
 import { calculateContainerHeight } from '@/utils/containerHeightUtils';
 import TextAnimation from '@/components/text/TextAnimation.vue';
 import OutlineToFillText from '@/components/text/OutlineToFillText.vue';
+import AnimatedOutlineToFillText from '@/components/text/AnimatedOutlineToFillText.vue';
 
 const frustrationElement = ref<HTMLElement | null>(null);
 // Computed value for ember delay
