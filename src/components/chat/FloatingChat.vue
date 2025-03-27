@@ -37,6 +37,7 @@
             :strokeColor="getThoughtBubbleStrokeColor(message.type)"
             :rotate="message.rotate || 0"
             :contentPadding="message.contentPadding || '20px 30px 20px 20px'"
+            :isSent="message.type === 'sent'"
           >
             <div class="message-content-bubble">
               {{ message.text }}

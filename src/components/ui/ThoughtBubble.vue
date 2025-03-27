@@ -8,7 +8,7 @@
       xmlns="http://www.w3.org/2000/svg"
       :width="'100%'" 
       :height="'100%'"
-      :style="backgroundSvgStyles"
+      :style="[backgroundSvgStyles, { transform: isSent ? `${backgroundSvgStyles.transform} scaleX(-1)` : backgroundSvgStyles.transform }]"
     >
       <path 
         class="bubble-path background-path" 
@@ -21,6 +21,7 @@
         :filter="hasFilter ? 'url(#wavy-edge)' : ''"
       />
       
+      <!-- Bubble circles (always on left side in the SVG) -->
       <circle class="bubble-circle" cx="35" cy="140" r="8" :fill="fillColor" :stroke="strokeColor" stroke-width="2" />
       <circle class="bubble-circle" cx="20" cy="155" r="5" :fill="fillColor" :stroke="strokeColor" stroke-width="2" />
       <circle class="bubble-circle" cx="10" cy="165" r="3" :fill="fillColor" :stroke="strokeColor" stroke-width="1.5" />
@@ -34,6 +35,7 @@
       :width="'100%'" 
       :height="'100%'"
       :style="svgStyles"
+      :class="{'flipped': isSent}"
     >
       <path 
         class="bubble-path" 
@@ -46,6 +48,7 @@
         :filter="hasFilter ? 'url(#wavy-edge)' : ''"
       />
       
+      <!-- Bubble circles (always on left side in the SVG) -->
       <circle class="bubble-circle" cx="35" cy="140" r="8" :fill="fillColor" :stroke="strokeColor" stroke-width="2" />
       <circle class="bubble-circle" cx="20" cy="155" r="5" :fill="fillColor" :stroke="strokeColor" stroke-width="2" />
       <circle class="bubble-circle" cx="10" cy="165" r="3" :fill="fillColor" :stroke="strokeColor" stroke-width="1.5" />
@@ -91,12 +94,11 @@ const dynamicViewBoxWidth = computed(() => {
 // Compute dynamic bubble path based on content dimensions
 const dynamicBubblePath = computed(() => {
   const width = dynamicViewBoxWidth.value;
-  const rightX = width - 70; // Right side X coordinate
-  const midX = width / 2;    // Middle X coordinate
+  const rightX = width - 30;
+  const midX = width / 2;
   
-  // Make the bubble wider by adjusting control points
-  const path = `M30,100 C30,55 65,20 110,20 C155,20 ${midX + 150},20 ${rightX},100 C${rightX},145 ${midX + 150},180 110,180 C95,180 80,175 70,165 L40,185 L50,155 C35,140 30,120 30,100 Z`;
-  return path;
+  // Use the same path for both sent and received
+  return `M30,100 C30,55 65,20 110,20 C155,20 ${midX + 150},20 ${rightX},100 C${rightX},145 ${midX + 150},180 110,180 C95,180 80,175 70,165 L40,185 L50,155 C35,140 30,120 30,100 Z`;
 });
 
 // Add a watch to update the bubble when content changes
@@ -197,6 +199,10 @@ const props = defineProps({
   backgroundRotate: {
     type: Number,
     default: -5
+  },
+  isSent: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -251,6 +257,18 @@ const contentStyles = computed(() => ({
 </script>
 
 <style scoped>
+/* Add this to your existing styles */
+.thought-bubble-svg.flipped {
+  transform: scaleX(-1);
+}
 
+/* Flip the content back so text isn't mirrored */
+.flipped ~ .thought-bubble-content {
+  transform: scaleX(-1);
+}
 
+/* Ensure the content inside the bubble isn't flipped */
+.flipped ~ .thought-bubble-content > * {
+  transform: scaleX(-1);
+}
 </style>
