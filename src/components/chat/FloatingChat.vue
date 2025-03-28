@@ -7,7 +7,7 @@
   >
     <div ref="messagesRef" class="messages-container">
       <!-- Typing indicators -->
-      <!-- <template v-for="(message, idx) in messages" :key="`typing-${idx}`">
+      <template v-for="(message, idx) in messages" :key="`typing-${idx}`">
         <div 
           v-if="showTypingFor.includes(idx)"
           :class="`typing-container typing-container-${idx + 1}`"
@@ -17,7 +17,7 @@
             :is-sent="message.type === 'sent'"
           />
         </div>
-      </template> -->
+      </template>
 
       <!-- Messages -->
       <template v-for="(message, idx) in messages" :key="`message-${idx}`">
@@ -106,16 +106,10 @@ const themeVariables = computed(() => {
 
 // Add theme variables to container style
 const containerStyle = computed(() => {
-  if (props.animationStyle === 'stack') {
-    return {
-      ...themeVariables.value
-      // No tilt for stack animation
-    };
-  }
-  
   return {
     ...themeVariables.value,
     ...tiltStyle.value
+    // Add any other existing styles here
   };
 });
 
@@ -229,9 +223,6 @@ interface Props {
   };
   handDrawnStyle?: boolean;
   theme?: string; // New prop for theme selection
-  animationStyle?: 'default' | 'stack'; // Animation style option
-  slideDistance?: number; // Distance for slide animation
-  slideEasing?: 'power1.out' | 'power2.out' | 'power3.out' | 'back.out' | 'elastic.out' | 'bounce.out'; // Easing options
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -253,26 +244,20 @@ const props = withDefaults(defineProps<Props>(), {
     minOpacity: 0.2
   }),
   handDrawnStyle: false,
-  theme: 'neon-horizon', // Default theme
-  animationStyle: 'default',
-  slideDistance: 100, // Default slide distance in pixels
-  slideEasing: 'power2.out' // Changed from power3.out to power2.out for smoother effect
+  theme: 'neon-horizon' // Default theme
 });
 
 const containerRef = ref<HTMLElement | null>(null);
 const messagesRef = ref<HTMLElement | null>(null);
 let timeline: gsap.core.Timeline;
 
-// Modify the resetState function
+// Reset all message states
 const resetState = () => {
   if (!messagesRef.value) return;
   
-  // Reset all message groups with a starting position below
+  // Reset all message groups
   const messageGroups = messagesRef.value.querySelectorAll('.message-group');
-  gsap.set(messageGroups, { 
-    opacity: 0, 
-    y: 100 // Start below instead of at 0
-  });
+  gsap.set(messageGroups, { opacity: 0, y: 0 });
   
   // Reset all typing indicators
   const typingContainers = messagesRef.value.querySelectorAll('.typing-container');
@@ -290,7 +275,7 @@ onMounted(() => {
   timeline = gsap.timeline({
     scrollTrigger: {
       trigger: container,
-      start: "center bottom", // Changed from 'top top' to 'center bottom'
+      start: props.pinSettings.start,
       end: props.pinSettings.end || `+=${props.messages.length * 50}%`,
       scrub: 0.5,
       pin: props.pinSettings.enabled,
@@ -298,7 +283,6 @@ onMounted(() => {
       anticipatePin: props.pinSettings.enabled ? props.pinSettings.anticipatePin : 0,
       onEnter: resetState,
       onEnterBack: resetState,
-      markers: true, // Add this temporarily to debug trigger points
       onUpdate: (self) => {
         // Calculate current message index based on scroll progress
         const progress = self.progress;
@@ -311,115 +295,79 @@ onMounted(() => {
     }
   });
 
+  // Modify selectors to be scoped to this section
   const sectionSelector = `#${props.sectionId}`;
-  
-  if (props.animationStyle === 'stack') {
-    props.messages.forEach((message, idx) => {
-      const currentGroup = `${sectionSelector} .message-group-${idx + 1}`;
+  const {
+    scaleDecrement,
+    opacityDecrement,
+    verticalOffset,
+    duration,
+    staggerAmount,
+    minScale,
+    minOpacity
+  } = props.messageAnimationConfig;
+
+  props.messages.forEach((_, idx) => {
+    const currentGroup = `${sectionSelector} .message-group-${idx + 1}`;
+    
+    if (idx > 0) {
+      const previousGroups = props.messages
+        .slice(0, idx)
+        .map((_, i) => `${sectionSelector} .message-group-${i + 1}`);
       
-      // Set initial state for all messages
-      gsap.set(currentGroup, {
-        opacity: 0,
-        y: 100 // Start 100px below
-      });
-
-      // Move previous messages up
-      if (idx > 0) {
-        const previousGroups = props.messages
-          .slice(0, idx)
-          .map((_, i) => `${sectionSelector} .message-group-${i + 1}`);
-        
-        timeline.to(previousGroups, {
-          y: `-=50`,
-          duration: 0.5,
-          ease: "power2.out"
-        });
-      }
-
-      // Fade in and slide up new message
-      timeline.to(currentGroup, 
-        { 
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          ease: props.slideEasing
+      // Modified animation for previous groups with configurable values
+      timeline.to(previousGroups, {
+        y: `-=${verticalOffset}`,
+        scale: (i, target) => {
+          // Get the actual index from the target element class
+          const groupClass = target.className.match(/message-group-(\d+)/);
+          const groupIdx = groupClass ? parseInt(groupClass[1]) - 1 : 0;
+          // Apply scale based on how old the message is
+          const age = idx - groupIdx;
+          // Apply scale with minimum limit
+          return Math.max(1 - (age * (scaleDecrement ?? 0.05)), minScale ?? 0.7);
+        },
+        opacity: (i, target) => {
+          // Get the actual index from the target element class
+          const groupClass = target.className.match(/message-group-(\d+)/);
+          const groupIdx = groupClass ? parseInt(groupClass[1]) - 1 : 0;
+          // Apply opacity based on how old the message is
+          const age = idx - groupIdx;
+          // Apply opacity with minimum limit
+          return Math.max(1 - (age * (opacityDecrement ?? 0.2)), minOpacity ?? 0.2);
+        },
+        duration: duration,
+        ease: "power2.out",
+        stagger: {
+          amount: staggerAmount,
+          ease: "power1.in"
         }
-      );
-    });
-  } else {
-    // Default animation style (existing code)
-    const {
-      scaleDecrement,
-      opacityDecrement,
-      verticalOffset,
-      duration,
-      staggerAmount,
-      minScale,
-      minOpacity
-    } = props.messageAnimationConfig;
-
-    props.messages.forEach((_, idx) => {
-      const currentGroup = `${sectionSelector} .message-group-${idx + 1}`;
-      
-      if (idx > 0) {
-        const previousGroups = props.messages
-          .slice(0, idx)
-          .map((_, i) => `${sectionSelector} .message-group-${i + 1}`);
-        
-        // Modified animation for previous groups with configurable values
-        timeline.to(previousGroups, {
-          y: `-=${verticalOffset}`,
-          scale: (i, target) => {
-            // Get the actual index from the target element class
-            const groupClass = target.className.match(/message-group-(\d+)/);
-            const groupIdx = groupClass ? parseInt(groupClass[1]) - 1 : 0;
-            // Apply scale based on how old the message is
-            const age = idx - groupIdx;
-            // Apply scale with minimum limit
-            return Math.max(1 - (age * (scaleDecrement ?? 0.05)), minScale ?? 0.7);
-          },
-          opacity: (i, target) => {
-            // Get the actual index from the target element class
-            const groupClass = target.className.match(/message-group-(\d+)/);
-            const groupIdx = groupClass ? parseInt(groupClass[1]) - 1 : 0;
-            // Apply opacity based on how old the message is
-            const age = idx - groupIdx;
-            // Apply opacity with minimum limit
-            return Math.max(1 - (age * (opacityDecrement ?? 0.2)), minOpacity ?? 0.2);
-          },
-          duration: duration,
-          ease: "power2.out",
-          stagger: {
-            amount: staggerAmount,
-            ease: "power1.in"
-          }
-        });
-      }
-
-      if (props.showTypingFor.includes(idx)) {
-        const typingContainer = `${sectionSelector} .typing-container-${idx + 1}`;
-        
-        timeline
-          .to(typingContainer, { 
-            opacity: 1, 
-            duration: 0.15,
-            ease: "power1.out"
-          })
-          .to({}, { duration: 0.3 })
-          .to(typingContainer, { 
-            opacity: 0, 
-            duration: 0.15,
-            ease: "power1.in"
-          });
-      }
-
-      timeline.to(currentGroup, { 
-        opacity: 1,
-        duration: 0.2,
-        ease: "power1.out"
       });
+    }
+
+    if (props.showTypingFor.includes(idx)) {
+      const typingContainer = `${sectionSelector} .typing-container-${idx + 1}`;
+      
+      timeline
+        .to(typingContainer, { 
+          opacity: 1, 
+          duration: 0.15,
+          ease: "power1.out"
+        })
+        .to({}, { duration: 0.3 })
+        .to(typingContainer, { 
+          opacity: 0, 
+          duration: 0.15,
+          ease: "power1.in"
+        });
+    }
+
+    timeline.to(currentGroup, { 
+      opacity: 1,
+      duration: 0.2,
+      ease: "power1.out"
     });
-  }
+  });
 });
 
 onUnmounted(() => {
@@ -435,28 +383,19 @@ onUnmounted(() => {
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
 }
 
 .messages-container {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  overflow: visible;
-  padding: 20px;
-  position: relative;
-  min-height: 300px; // Increased minimum height
-  margin-bottom: 100px; // Add bottom margin for scroll space
+ 
 }
 
 .message-group {
   display: flex;
   flex-direction: column;
   width: 100%;
-  position: relative;
-  will-change: transform;
-  transform-origin: bottom center; // Add this to ensure animations pivot from bottom
 }
 
 .message-bubble {
@@ -470,4 +409,6 @@ onUnmounted(() => {
 .message-content-bubble {
   color: white;
 }
+
+// Add any additional styling you need
 </style>
