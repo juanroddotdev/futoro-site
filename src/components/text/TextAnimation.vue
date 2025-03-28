@@ -506,7 +506,7 @@ const setupObserver = () => {
 
 onMounted(() => {
   // Set data-text attribute for gradient outline text
-  if (props.animation === 'outlineGradient' && secondPartRef.value) {
+  if (props.animation === 'outlineToFill' && secondPartRef.value) {
     secondPartRef.value.setAttribute('data-text', secondPartRef.value.textContent || '');
   }
   
@@ -550,6 +550,7 @@ watch(() => props.resetKey, runAnimation);
   align-items: center;
   justify-content: center;
   width: 100%;
+  line-height: .9;
 }
 
 .initially-hidden {

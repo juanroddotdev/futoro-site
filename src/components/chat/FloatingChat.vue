@@ -22,19 +22,18 @@
       <!-- Messages -->
       <template v-for="(message, idx) in messages" :key="`message-${idx}`">
         <div :class="`message-group message-group-${idx + 1}`">
-          <!-- Use ThoughtBubble for thought messages -->
-          <!-- v-if="message.isThought" -->
-          <ThoughtBubble
-            v-if="true"
+          <!-- Transition between geometric and thought bubble -->
+          <component 
+            :is="getMessageComponent(idx)"
             :class="['message-bubble', message.type]"
             class="wavy-filter"
-            :showBackgroundBubble="true"
+            :showBackgroundBubble="shouldShowBackgroundBubble(idx)"
             :backgroundOpacity="0.3"
             :backgroundOffsetX="2"
             :backgroundOffsetY="6"
             :backgroundRotate="-2"
-            :fillColor="getThoughtBubbleColor(message.type)"
-            :strokeColor="getThoughtBubbleStrokeColor(message.type)"
+            :fillColor="getMessageFillColor(message.type, idx)"
+            :strokeColor="getMessageStrokeColor(message.type, idx)"
             :rotate="message.rotate || 0"
             :contentPadding="message.contentPadding || '20px 30px 20px 20px'"
             :isSent="message.type === 'sent'"
@@ -42,21 +41,9 @@
             <div class="message-content-bubble">
               {{ message.text }}
             </div>
-          </ThoughtBubble>
+          </component>
           
-          <!-- Regular message -->
-          <div 
-            v-else
-            :class="[
-              'message', 
-              message.type, 
-              props.handDrawnStyle ? 'hand-drawn' : ''
-            ]"
-          >
-            <div class="message-content">
-              {{ message.text }}
-            </div>
-          </div>
+          
         </div>
       </template>
     </div>
@@ -77,6 +64,7 @@ import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 import ChatTypingIndicator from '@/components/chat/ChatTypingIndicator.vue';
 import ThoughtBubble from '@/components/ui/ThoughtBubble.vue';
+import GeometricMessageBox from '@/components/ui/GeometricMessageBox.vue';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -125,19 +113,60 @@ const containerStyle = computed(() => {
   };
 });
 
-// Helper functions for thought bubble colors
-const getThoughtBubbleColor = (messageType: string) => {
-  return 'transparent'; // Keep fill color transparent
+// Determine which component to use based on message index and current state
+const getMessageComponent = (idx: number) => {
+  // Get the current visible message index
+  // const currentVisibleIdx = getCurrentVisibleMessageIndex();
+  
+  // // Use geometric for new messages and first two messages
+  // if (idx >= currentVisibleIdx - 2) {
+  //   return GeometricMessageBox;
+  // }
+  
+  // Use thought bubble for older messages
+  return ThoughtBubble;
 };
 
-const getThoughtBubbleStrokeColor = (messageType: string) => {
-  // Return appropriate stroke color based on message type
-  if (messageType === 'sent') {
-    return themeVariables.value['--theme-accent']; // Use theme accent color for sent messages
-  } else {
-    return themeVariables.value['--theme-accent']; // Use theme secondary color for received messages
-  }
+// Track the current visible message index
+const currentMessageIndex = ref(0);
+const getCurrentVisibleMessageIndex = () => currentMessageIndex.value;
+
+// Helper functions for styling based on component type
+const shouldShowBackgroundBubble = (idx: number) => {
+  return getMessageComponent(idx) === ThoughtBubble;
 };
+
+const getMessageFillColor = (type: string, idx: number) => {
+  const isThoughtBubble = getMessageComponent(idx) === ThoughtBubble;
+  
+  if (isThoughtBubble) {
+    return getThoughtBubbleColor(type);
+  }
+  
+  // For geometric message box, use a more solid but still semi-transparent fill
+  return 'rgba(255, 255, 255, 0.05)';
+};
+
+const getMessageStrokeColor = (type: string, idx: number) => {
+  const isThoughtBubble = getMessageComponent(idx) === ThoughtBubble;
+  
+  if (isThoughtBubble) {
+    return getThoughtBubbleStrokeColor(type);
+  }
+  
+  // For geometric, we'll use the gradient defined in the component
+  return '';
+};
+
+// Existing color functions
+const getThoughtBubbleColor = (type: string) => {
+  return type === 'sent' ? 'rgba(144, 202, 249, 0.2)' : 'rgba(129, 199, 132, 0.2)';
+};
+
+const getThoughtBubbleStrokeColor = (type: string) => {
+  return type === 'sent' ? '#90CAF9' : '#81C784';
+};
+
 // Helper function to handle dimension values
 const getBubbleDimension = (value: string | number | undefined): number | string => {
   if (value === undefined || value === 'auto') {
@@ -254,6 +283,15 @@ onMounted(() => {
       anticipatePin: props.pinSettings.enabled ? props.pinSettings.anticipatePin : 0,
       onEnter: resetState,
       onEnterBack: resetState,
+      onUpdate: (self) => {
+        // Calculate current message index based on scroll progress
+        const progress = self.progress;
+        const messageCount = props.messages.length;
+        currentMessageIndex.value = Math.min(
+          Math.floor(progress * messageCount),
+          messageCount - 1
+        );
+      }
     }
   });
 

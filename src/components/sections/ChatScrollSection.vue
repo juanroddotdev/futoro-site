@@ -19,6 +19,10 @@
           
           <!-- Chat area -->
           <div class="chat-area">
+            <!-- <FloatingChat2
+              :messages="messages"
+              sectionId="chat-section"
+            /> -->
             <FloatingChat
               :messages="messages"
               :showTypingFor="showTypingFor"
@@ -26,6 +30,8 @@
               :tiltX="tiltX"
               :tiltY="tiltY"
               :handDrawnStyle="true"
+              animationStyle="stack"
+              slideEasing="power1.out"
               :pinSettings="{
                 enabled: false, // No need to pin as StickyScrollContainer handles this
                 start: 'top top',
@@ -44,6 +50,7 @@
 import { computed } from 'vue';
 import StickyScrollContainer from '@/components/ui/containers/StickyScrollContainer.vue';
 import FloatingChat from '@/components/chat/FloatingChat.vue';
+import FloatingChat2 from '@/components/chat/FloatingChat2.vue';
 import { calculateContainerHeight } from '@/utils/containerHeightUtils';
 
 // Component props definition

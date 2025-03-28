@@ -21,7 +21,7 @@
       <path 
         class="bubble-path background-path" 
         :d="dynamicBubblePath" 
-        :fill="fillColor" 
+        :fill="'transparent'" 
         stroke="url(#bgThemeGradient)" 
         stroke-width="8" 
         stroke-linecap="round" 
@@ -64,7 +64,7 @@
       <path 
         class="bubble-path" 
         :d="dynamicBubblePath" 
-        :fill="fillColor" 
+        :fill="'transparent'" 
         stroke="url(#themeGradient)" 
         stroke-width="8" 
         stroke-linecap="round" 

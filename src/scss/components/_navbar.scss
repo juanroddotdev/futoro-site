@@ -25,7 +25,7 @@
     
     @each $theme-name, $theme-map in $themes {
       .theme-#{$theme-name} & {
-        background-color: rgba(255, 255, 255, 0.1); // Very subtle white overlay
+        background-color: transparent; // Very subtle white overlay
       }
     }
   }
