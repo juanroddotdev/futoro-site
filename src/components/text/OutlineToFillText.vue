@@ -1,6 +1,6 @@
 <template>
-  <div ref="containerRef" class="animated-text-container">
-    <div class="text-wrapper">
+  <div ref="containerRef" class="animated-text-container" :style="containerStyle">
+    <div class="text-wrapper" :style="wrapperStyle">
       <!-- Outlined version (base layer) -->
       <span ref="outlineTextRef" class="outline-text">{{ text }}</span>
       
@@ -8,14 +8,14 @@
       <span 
         ref="filledTextRef" 
         class="filled-text"
-        :style="{ clipPath: `inset(0 0 0 ${100 - fillPercentage}%)` }"
+        :style="{ clipPath: `inset(0 0 0 ${100 - computedFillPercentage}%)` }"
       >{{ text }}</span>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, watch, onUnmounted } from 'vue';
 
 const props = defineProps({
   text: {
@@ -25,12 +25,121 @@ const props = defineProps({
   fillPercentage: {
     type: Number,
     default: 50 // Default to 50% filled
+  },
+  spotlightEnabled: {
+    type: Boolean,
+    default: false
+  },
+  spotlightX: {
+    type: Number,
+    default: 50
+  },
+  spotlightY: {
+    type: Number,
+    default: 50
+  },
+  width: {
+    type: [String, Number],
+    default: 'auto'
+  },
+  textAlign: {
+    type: String,
+    default: 'left'
   }
 });
 
 const containerRef = ref<HTMLElement | null>(null);
 const outlineTextRef = ref<HTMLElement | null>(null);
 const filledTextRef = ref<HTMLElement | null>(null);
+const calculatedFillPercentage = ref(props.fillPercentage);
+
+// Compute the final fill percentage based on either the prop or calculated value
+const computedFillPercentage = computed(() => {
+  return props.spotlightEnabled ? calculatedFillPercentage.value : props.fillPercentage;
+});
+
+// Container style with width support
+const containerStyle = computed(() => {
+  const styles: Record<string, string> = {};
+  
+  if (props.width !== 'auto') {
+    styles.width = typeof props.width === 'number' ? `${props.width}px` : props.width;
+  }
+  
+  return styles;
+});
+
+// Wrapper style with text alignment
+const wrapperStyle = computed(() => {
+  return {
+    textAlign: props.textAlign,
+    width: props.width !== 'auto' ? '100%' : 'auto'
+  };
+});
+
+// Calculate fill percentage based on distance from spotlight
+const calculateFillPercentage = () => {
+  if (!containerRef.value || !props.spotlightEnabled) return;
+  
+  const textRect = containerRef.value.getBoundingClientRect();
+  const textCenter = {
+    x: textRect.left + textRect.width / 2,
+    y: textRect.top + textRect.height / 2
+  };
+  
+  // Convert spotlight position from percentage to viewport coordinates
+  const spotlightPos = {
+    x: (window.innerWidth * props.spotlightX) / 100,
+    y: (window.innerHeight * props.spotlightY) / 100
+  };
+  
+  // Calculate distance from text center to spotlight center
+  const distance = Math.sqrt(
+    Math.pow(textCenter.x - spotlightPos.x, 2) + 
+    Math.pow(textCenter.y - spotlightPos.y, 2)
+  );
+  
+  // Use a responsive approach for normalization
+  // Use the text element size as a factor in the calculation
+  const textSize = Math.max(textRect.width, textRect.height);
+  const viewportSize = Math.min(window.innerWidth, window.innerHeight);
+  
+  // Blend text size and viewport size for better responsiveness
+  const referenceSize = (textSize * 0.7) + (viewportSize * 0.3);
+  const normalizedDistance = distance / referenceSize;
+  
+  // Apply a non-linear curve with responsive scaling
+  const scaleFactor = Math.max(1, Math.min(2, window.innerWidth / 1000));
+  let fillPercent = 100 * (1 - Math.pow(Math.min(normalizedDistance * scaleFactor, 1), 2));
+  
+  // Clamp between 0 and 100
+  fillPercent = Math.max(0, Math.min(100, fillPercent));
+  
+  calculatedFillPercentage.value = fillPercent;
+};
+
+// Watch for changes in spotlight position
+watch(() => [props.spotlightX, props.spotlightY], () => {
+  if (props.spotlightEnabled) {
+    calculateFillPercentage();
+  }
+});
+
+// Set up event listeners for window resize and scroll
+onMounted(() => {
+  if (props.spotlightEnabled) {
+    calculateFillPercentage();
+    window.addEventListener('resize', calculateFillPercentage);
+    window.addEventListener('scroll', calculateFillPercentage);
+  }
+});
+
+onUnmounted(() => {
+  if (props.spotlightEnabled) {
+    window.removeEventListener('resize', calculateFillPercentage);
+    window.removeEventListener('scroll', calculateFillPercentage);
+  }
+});
 </script>
 
 <style scoped>

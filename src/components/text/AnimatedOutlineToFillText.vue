@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick, onUnmounted, computed } from 'vue';
+import { ref, onMounted, nextTick, onUnmounted, computed, watch } from 'vue';
 import gsap from 'gsap';
 import { textAnimations } from '@/animations/text/textAnimations';
 
@@ -62,6 +62,18 @@ const props = defineProps({
   fillDuration: {
     type: Number,
     default: 1.0
+  },
+  spotlightEnabled: {
+    type: Boolean,
+    default: false
+  },
+  spotlightX: {
+    type: Number,
+    default: 50
+  },
+  spotlightY: {
+    type: Number,
+    default: 50
   }
 });
 
@@ -72,13 +84,66 @@ const outlineTextRef = ref<HTMLElement | null>(null);
 const filledTextRef = ref<HTMLElement | null>(null);
 const hasAnimated = ref(false);
 const currentFillPercentage = ref(0); // Start with 0% fill
+const calculatedFillPercentage = ref(props.fillPercentage);
+
+// Compute the final fill percentage based on either the prop or calculated value
+const targetFillPercentage = computed(() => {
+  return props.spotlightEnabled ? calculatedFillPercentage.value : props.fillPercentage;
+});
 
 // Compute the clip path style based on the current fill percentage
 const clipPathStyle = computed(() => {
   // This creates a clip path that shows only the right portion of the text
-  // For example, if currentFillPercentage is 50, it shows the right 50% of the text
   return `inset(0 0 0 ${100 - currentFillPercentage.value}%)`;
 });
+
+// Calculate fill percentage based on distance from spotlight
+const calculateFillPercentage = () => {
+  if (!containerRef.value || !props.spotlightEnabled) return;
+  
+  const textRect = containerRef.value.getBoundingClientRect();
+  const textCenter = {
+    x: textRect.left + textRect.width / 2,
+    y: textRect.top + textRect.height / 2
+  };
+  
+  // Convert spotlight position from percentage to viewport coordinates
+  const spotlightPos = {
+    x: (window.innerWidth * props.spotlightX) / 100,
+    y: (window.innerHeight * props.spotlightY) / 100
+  };
+  
+  // Calculate distance from text center to spotlight center
+  const distance = Math.sqrt(
+    Math.pow(textCenter.x - spotlightPos.x, 2) + 
+    Math.pow(textCenter.y - spotlightPos.y, 2)
+  );
+  
+  // Normalize distance to viewport diagonal for percentage calculation
+  const viewportDiagonal = Math.sqrt(
+    Math.pow(window.innerWidth, 2) + 
+    Math.pow(window.innerHeight, 2)
+  );
+  
+  // Calculate fill percentage based on distance
+  // The closer to spotlight center, the lower the fill percentage
+  const maxDistance = viewportDiagonal / 2;
+  let fillPercent = (distance / maxDistance) * 100;
+  
+  // Clamp between 0 and 100
+  fillPercent = Math.max(0, Math.min(100, fillPercent));
+  
+  calculatedFillPercentage.value = fillPercent;
+  
+  // If animation has completed, update the current fill percentage directly
+  if (hasAnimated.value && props.animateFill) {
+    gsap.to(currentFillPercentage, {
+      value: fillPercent,
+      duration: 0.5,
+      ease: 'power2.out'
+    });
+  }
+};
 
 // Animation logic
 const animateText = () => {
@@ -102,6 +167,10 @@ const animateText = () => {
         delay: props.delay,
         onComplete: () => {
           emit('animation-complete');
+          // After animation completes, if spotlight is enabled, calculate fill percentage
+          if (props.spotlightEnabled) {
+            calculateFillPercentage();
+          }
         }
       });
       
@@ -131,15 +200,10 @@ const animateText = () => {
         if (props.animateFill && filledTextRef.value) {
           // Animate the clip path to reveal the fill up to fillPercentage (from right to left)
           // Start at the same time as the fadeUp animation
-          tl.to(filledTextRef.value, {
-            clipPath: `inset(0 0 0 ${100 - props.fillPercentage}%)`, // Reveal only up to fillPercentage
+          tl.to(currentFillPercentage, {
+            value: targetFillPercentage.value, // Use computed target fill percentage
             duration: props.fillDuration,
-            ease: 'power2.inOut',
-            onUpdate: () => {
-              // Update the current fill percentage for reactive styling
-              const progress = tl.progress();
-              currentFillPercentage.value = progress * props.fillPercentage;
-            }
+            ease: 'power2.inOut'
           }, "<"); // "<" means "start at the same time as the previous animation"
         }
       } else if (typeof textAnimations[props.animation] === 'function') {
@@ -154,6 +218,13 @@ const animateText = () => {
     }
   });
 };
+
+// Watch for changes in spotlight position
+watch(() => [props.spotlightX, props.spotlightY], () => {
+  if (props.spotlightEnabled && hasAnimated.value) {
+    calculateFillPercentage();
+  }
+});
 
 // Set up intersection observer for triggering animation when element is visible
 const setupIntersectionObserver = () => {
@@ -206,11 +277,23 @@ onMounted(() => {
   } else {
     animateText();
   }
+  
+  // Set up event listeners for window resize and scroll if spotlight is enabled
+  if (props.spotlightEnabled) {
+    window.addEventListener('resize', calculateFillPercentage);
+    window.addEventListener('scroll', calculateFillPercentage);
+  }
 });
 
 onUnmounted(() => {
   if (observer) {
     observer.disconnect();
+  }
+  
+  // Clean up event listeners
+  if (props.spotlightEnabled) {
+    window.removeEventListener('resize', calculateFillPercentage);
+    window.removeEventListener('scroll', calculateFillPercentage);
   }
 });
 </script>

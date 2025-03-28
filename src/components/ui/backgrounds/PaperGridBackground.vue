@@ -1,20 +1,21 @@
 <script setup lang="ts">
-defineProps<{
+const props = defineProps<{
   theme?: string,
   floating?: boolean,
   spotlight?: boolean,
-  spotlightPosition?: string,
+  spotlightX?: number,
+  spotlightY?: number,
   fixed?: boolean
 }>();
 
 // Calculate the SVG path for the visibility boundary
 const calculateRadialGradientBoundary = () => {
   // The radial gradient is defined as:
-  // circle at 20% 20%, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.8) 20%, rgba(0, 0, 0, 0) 50%
+  // circle at var(--spotlight-x) var(--spotlight-y), rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.8) 20%, rgba(0, 0, 0, 0) 50%
   
-  // Center point of the gradient (20%, 20%)
-  const centerX = 20;
-  const centerY = 20;
+  // Center point of the gradient (using props with fallback)
+  const centerX = props.spotlightX ?? 20;
+  const centerY = props.spotlightY ?? 20;
   
   // Radius where opacity reaches 0 (50% of the gradient size)
   const radius = 50;
@@ -44,18 +45,28 @@ const calculateRadialGradientBoundary = () => {
   <div 
     class="grid-paper-overlay"
     :class="[
-      theme ? `theme-${theme}` : '',
+      props.theme ? `theme-${props.theme}` : '',
       { 
-        'grid-paper-overlay--floating': floating,
-        'grid-paper-overlay--spotlight': spotlight,
-        'grid-paper-overlay--fixed': fixed
+        'grid-paper-overlay--floating': props.floating,
+        'grid-paper-overlay--spotlight': props.spotlight,
+        'grid-paper-overlay--fixed': props.fixed
       }
     ]"
+    :style="{
+      '--spotlight-x': `${props.spotlightX ?? 20}%`,
+      '--spotlight-y': `${props.spotlightY ?? 20}%`
+    }"
   >
     <!-- Curved visibility indicator that follows the radial gradient -->
-    <svg v-if="spotlight" class="grid-visibility-indicator" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <svg v-if="props.spotlight" class="grid-visibility-indicator" viewBox="0 0 100 100" preserveAspectRatio="none">
       <!-- This path represents the 50% opacity boundary of the radial gradient -->
-      <circle cx="20" cy="20" r="50" fill="none" stroke="red" stroke-width="0.5" stroke-dasharray="2,2" />
+      <path 
+        :d="calculateRadialGradientBoundary()" 
+        fill="none" 
+        stroke="red" 
+        stroke-width="0.5" 
+        stroke-dasharray="2,2" 
+      />
     </svg>
     <slot></slot>
   </div>
@@ -79,6 +90,8 @@ const calculateRadialGradientBoundary = () => {
   position: relative;
   isolation: isolate;
   height: 100%; /* Ensure it fills its container */
+  --spotlight-x: 20%;
+  --spotlight-y: 20%;
 
   /* Curved visibility indicator */
   .grid-visibility-indicator {
@@ -130,13 +143,13 @@ const calculateRadialGradientBoundary = () => {
   &--spotlight {
     &::before {
       mask-image: radial-gradient(
-        circle at 20% 20%, // Position the spotlight in the top-left area
+        circle at var(--spotlight-x) var(--spotlight-y), // Dynamic spotlight position
         #1a1b26 0%,
         rgba(0, 0, 0, 0.8) 20%,
         rgba(0, 0, 0, 0) 50%
       );
       -webkit-mask-image: radial-gradient(
-        circle at 20% 20%,
+        circle at var(--spotlight-x) var(--spotlight-y),
         #1a1b26 0%,
         rgba(0, 0, 0, 0.8) 20%,
         rgba(0, 0, 0, 0) 50%
@@ -165,6 +178,5 @@ const calculateRadialGradientBoundary = () => {
       }
     }
   }
-
 }
 </style>

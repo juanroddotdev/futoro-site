@@ -13,7 +13,7 @@
     >
       <template #headline>
         <h1 class="heading--accent mb-4 heading-responsive theme-text--gradient-animated gradient-shine">
-          <TextAnimation 
+          <!-- <TextAnimation 
             :firstPart="heroContent.headline" 
             animation="fadeUp" 
             :useGradient="true"
@@ -21,13 +21,21 @@
             :initiallyHidden="true" 
             :triggerOnVisible="true" 
             :restartOnVisible="true" 
-          />
+          /> -->
+          <SpotlightText 
+          :text="heroContent.headline"
+          class="spotlight-heading heading--accent mb-4 heading-responsive theme-text--gradient-animated gradient-shine"
+        />
           <!-- {{ heroContent.headline }} -->
         </h1>
       </template>
       <template #subheadline>
         <p class="mb-8 subheading-responsive heading--highlight">
-          <TextAnimation 
+          <SpotlightText 
+          :text="heroContent.subheadline"
+          class="spotlight-heading mb-8 subheading-responsive heading--highlight "
+        />
+          <!-- <TextAnimation 
             :firstPart="heroContent.subheadline" 
             animation="fade" 
             :useGradient="true"
@@ -35,7 +43,7 @@
             :initiallyHidden="true" 
             :triggerOnVisible="true" 
             :restartOnVisible="true" 
-          />
+          /> -->
           <!-- {{ heroContent.subheadline }} -->
         </p>
         <div class="flex gap-4">
@@ -58,6 +66,7 @@ import { getInitialConversation } from '@/data/chatSections';
 import { HeroContent, getRandomHeroContent } from '@/data/heroContentData';
 import { calculateContainerHeight } from '@/utils/containerHeightUtils';
 import TextAnimation from '../text/TextAnimation.vue';
+import SpotlightText from '../text/SpotlightText.vue';
 
 // Define props with defaults
 const props = withDefaults(defineProps<{
