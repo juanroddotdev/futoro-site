@@ -44,7 +44,8 @@ const props = defineProps({
   },
   textAlign: {
     type: String,
-    default: 'left'
+    default: 'left',
+    validator: (value: string) => ['left', 'center', 'right', 'justify'].includes(value)
   }
 });
 
@@ -71,10 +72,16 @@ const containerStyle = computed(() => {
 
 // Wrapper style with text alignment
 const wrapperStyle = computed(() => {
-  return {
+  const style: Record<string, string> = {
     textAlign: props.textAlign,
-    width: props.width !== 'auto' ? '100%' : 'auto'
   };
+  
+  if (props.width !== 'auto') {
+    style.width = '100%';
+    style.display = 'block'; // Change to block when width is specified
+  }
+  
+  return style;
 });
 
 // Calculate fill percentage based on distance from spotlight
@@ -151,13 +158,18 @@ onUnmounted(() => {
 .text-wrapper {
   position: relative;
   display: inline-block;
+  width: 100%; /* Make it take full width of its container */
+  max-width: 100%; /* Ensure it doesn't exceed parent width */
+  overflow: hidden; /* Prevent content from breaking out */
 }
 
 .outline-text, .filled-text {
   font-weight: bold;
-  white-space: nowrap;
+  white-space: normal; /* Allow text to wrap */
+  word-wrap: break-word; /* Break long words if needed */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  max-width: 100%; /* Ensure text doesn't exceed container width */
 }
 
 .outline-text {

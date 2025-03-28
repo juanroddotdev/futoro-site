@@ -1,24 +1,44 @@
 <template>
-  <div ref="containerRef" class="spotlight-text">
+  <div ref="containerRef" class="spotlight-text" :style="containerStyle">
     <OutlineToFillText 
       :text="text"
       :fillPercentage="fillPercentage"
       :spotlightEnabled="true"
       :spotlightX="spotlightX"
       :spotlightY="spotlightY"
+      :width="width"
+      :textAlign="textAlign"
       v-bind="$attrs"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, inject, watch, onMounted, onUnmounted } from 'vue';
+import { ref, inject, watch, onMounted, onUnmounted, computed } from 'vue';
 import OutlineToFillText from '@/components/text/OutlineToFillText.vue';
 
-const props = defineProps<{
-  text: string;
-  animated?: boolean;
-}>();
+const props = defineProps({
+  text: {
+    type: String,
+    required: true
+  },
+  animated: {
+    type: Boolean,
+    default: false
+  },
+  width: {
+    type: [String, Number],
+    default: 'auto'
+  },
+  textAlign: {
+    type: String,
+    default: 'left'
+  },
+  fullWidth: {
+    type: Boolean,
+    default: false
+  }
+});
 
 // Get spotlight context from provider
 const spotlight = inject('spotlight', {
@@ -31,6 +51,22 @@ const spotlight = inject('spotlight', {
 const { spotlightX, spotlightY, calculateFillPercentage } = spotlight;
 const containerRef = ref<HTMLElement | null>(null);
 const fillPercentage = ref(0);
+
+// Container style with width support
+const containerStyle = computed(() => {
+  if (props.fullWidth) {
+    return { width: '100%', display: 'block', textAlign: props.textAlign };
+  }
+  
+  const styles: Record<string, string> = {};
+  
+  if (props.width !== 'auto') {
+    styles.width = typeof props.width === 'number' ? `${props.width}px` : props.width;
+    styles.display = 'block';
+  }
+  
+  return styles;
+});
 
 // Update fill percentage based on position
 const updateFillPercentage = () => {

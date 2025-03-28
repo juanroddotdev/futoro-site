@@ -58,16 +58,15 @@ const calculateRadialGradientBoundary = () => {
     }"
   >
     <!-- Curved visibility indicator that follows the radial gradient -->
-    <svg v-if="props.spotlight" class="grid-visibility-indicator" viewBox="0 0 100 100" preserveAspectRatio="none">
-      <!-- This path represents the 50% opacity boundary of the radial gradient -->
-      <path 
+    <!-- <svg v-if="props.spotlight" class="grid-visibility-indicator" viewBox="0 0 100 100" preserveAspectRatio="none"> -->
+      <!-- <path 
         :d="calculateRadialGradientBoundary()" 
         fill="none" 
         stroke="red" 
         stroke-width="0.5" 
         stroke-dasharray="2,2" 
-      />
-    </svg>
+      /> -->
+    <!-- </svg> -->
     <slot></slot>
   </div>
 </template>

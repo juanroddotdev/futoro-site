@@ -550,6 +550,7 @@ watch(() => props.resetKey, runAnimation);
   align-items: center;
   justify-content: center;
   width: 100%;
+  line-height: .9;
 }
 
 .initially-hidden {

@@ -26,6 +26,8 @@
               :tiltX="tiltX"
               :tiltY="tiltY"
               :handDrawnStyle="true"
+              animationStyle="stack"
+              slideEasing="elastic.out"
               :pinSettings="{
                 enabled: false, // No need to pin as StickyScrollContainer handles this
                 start: 'top top',
