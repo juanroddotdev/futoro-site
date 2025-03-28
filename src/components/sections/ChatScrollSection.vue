@@ -25,12 +25,11 @@
             /> -->
             <FloatingChat
               :messages="messages"
-              :showTypingFor="showTypingFor"
               :sectionId="sectionId"
               :tiltX="tiltX"
               :tiltY="tiltY"
-              :handDrawnStyle="true"
-              animationStyle="stack"
+              animationStyle="slide-stack"
+              
               slideEasing="power1.out"
               :pinSettings="{
                 enabled: false, // No need to pin as StickyScrollContainer handles this
