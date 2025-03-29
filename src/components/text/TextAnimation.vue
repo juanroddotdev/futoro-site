@@ -387,7 +387,6 @@ const applySqueezeEffect = (
 const runAnimation = () => {
   // Emit that animation is starting
   emit('animation-start');
-  console.log('TextAnimation: Starting animation', props.animation);
   
   if (!containerRef.value) {
     console.warn('TextAnimation: Container ref is not available');
@@ -408,11 +407,9 @@ const runAnimation = () => {
         suffixRef.value
       ].filter(Boolean) as HTMLElement[];
       
-      console.log('TextAnimation: Found elements', elements.length);
       
       // If using outline-to-fill effect, add the outline class initially
       if (props.animation === 'outlineToFill') {
-        console.log('TextAnimation: Applying outline-to-fill effect');
         elements.forEach(el => {
           if (el) {
             el.classList.add('outline-gradient');
@@ -457,7 +454,6 @@ const runAnimation = () => {
       });
       
       // Apply animation with options
-      console.log('TextAnimation: Applying animation', props.animation);
       textAnimations.applyAnimation(props.animation as TextAnimationType, elements, {
         duration: props.duration,
         delay: props.delay,

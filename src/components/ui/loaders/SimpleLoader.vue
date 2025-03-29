@@ -11,10 +11,13 @@
       </defs>
     </svg>
     
-    <div class="grid-container" :style="{
+    <div class="grid-container" :class="{ 'debug-mode': debugMode }" :style="{
       '--spotlight-x': `${spotlightX}%`,
       '--spotlight-y': `${spotlightY}%`
     }">
+      <!-- Add spotlight position indicator -->
+      <div v-if="debugMode && isTextCrossing" class="spotlight-indicator"></div>
+      
       <div class="grid-lines horizontal" ref="horizontalLines">
         <div v-for="i in 20" :key="`h-${i}`" class="grid-line" />
       </div>
@@ -25,39 +28,29 @@
     
     <div class="content-wrapper">
       <div class="text-container">
-        <div class="headline">
-          <svg v-for="(word, wordIndex) in headline.split(' ')" 
-            :key="`headline-${wordIndex}`"
-            :class="`word-${wordIndex}`"
-            class="word"
-            viewBox="0 0 150 50"
-            preserveAspectRatio="xMidYMid meet"
-          >
-            <text v-for="(letter, letterIndex) in word.split('')"
-              :key="`headline-${wordIndex}-${letterIndex}`"
-              :class="`letter letter-${letterIndex} heading--accent theme-text--gradient-animated gradient-shine`"
-              :x="(letterIndex * 25) + 10"
-              y="50%"
-              text-anchor="middle"
-              dominant-baseline="middle"
-              fill="none"
-              stroke="var(--theme-primary, #88C0D0)"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              :style="{
-                strokeDasharray: '1000',
-                strokeDashoffset: '1000',
-                transition: 'fill 0.3s ease'
-              }"
-            >{{ letter }}</text>
-          </svg>
+        <div class="headline theme-text--gradient-animated gradient-shine">
+          <span v-for="(word, wordIndex) in headline.split(' ')" 
+                :key="`word-${wordIndex}`"
+                class="word">
+            <span v-for="(letter, letterIndex) in word.split('')"
+                  :key="`letter-${letterIndex}`"
+                  class="letter"
+                  :class="{ 
+                    'filled': isLetterFilled(wordIndex, letterIndex),
+                    'debug-highlight': debugMode && isLetterFilled(wordIndex, letterIndex)
+                  }"
+                  :data-position="getLetterPosition(wordIndex, letterIndex)"
+                  :data-word-index="wordIndex"
+                  :data-letter-index="letterIndex">
+              {{ letter }}
+            </span>
+          </span>
         </div>
         
-        <div class="subheadline">
+        <div class="subheadline theme-text--gradient-animated gradient-shine">
           <div v-for="(word, wordIndex) in subheadline.split(' ')" 
             :key="`subheadline-${wordIndex}`"
-            :class="`word word-${wordIndex} heading--highlight theme-text--gradient-animated gradient-shine`"
+            :class="`word word-${wordIndex} heading--highlight`"
           >
             {{ word }}
           </div>
@@ -91,6 +84,9 @@ const verticalLines = ref(null);
 const headlineText = ref(null);
 const subheadlineText = ref(null);
 
+const debugMode = ref(true);
+const isTextCrossing = ref(false); // Track when we're crossing the text
+
 // Use provided hero content or get random one, matching HeroSectionChat
 const heroContent = computed(() => props.heroContent || getRandomHeroContent());
 
@@ -108,18 +104,53 @@ const getRandomPosition = (min: number, max: number) => {
 // Function to generate random spotlight positions
 const generateRandomPositions = (numPositions: number) => {
   const positions = [];
-  for (let i = 0; i < numPositions; i++) {
+  // First position is always at the left edge (0%)
+  positions.push({
+    x: 0,
+    y: 50,
+    size: 50
+  });
+  
+  // Generate remaining random positions
+  for (let i = 1; i < numPositions; i++) {
     positions.push({
-      x: getRandomPosition(10, 90), // Keep away from edges
-      y: getRandomPosition(10, 90),
+      x: getRandomPosition(20, 80), // Keep away from edges
+      y: getRandomPosition(20, 80),
       size: getRandomPosition(30, 70) // Random size between 30% and 70%
     });
   }
   return positions;
 };
 
+// Add function to get letter position for debugging
+const getLetterPosition = (wordIndex: number, letterIndex: number) => {
+  const words = headline.value.split(' ');
+  let totalCharsBefore = 0;
+  for (let i = 0; i < wordIndex; i++) {
+    totalCharsBefore += words[i].length;
+  }
+  totalCharsBefore += letterIndex;
+  
+  const totalChars = headline.value.replace(/\s/g, '').length;
+  return (totalCharsBefore / totalChars) * 100;
+};
+
+// Add this near the top of the script with other refs
+const letterStates = ref(new Map());
+const filledLetters = ref(new Set());
+
 onMounted(() => {
   console.log('Loader mounted, starting animation sequence');
+  
+  // Calculate text container center position
+  const textContainer = document.querySelector('.text-container');
+  const textRect = textContainer?.getBoundingClientRect();
+  const gridContainer = document.querySelector('.grid-container');
+  const gridRect = gridContainer?.getBoundingClientRect();
+  
+  // Calculate the text container's center Y position as a percentage of the grid container
+  const centerY = textRect && gridRect ? 
+    ((textRect.top + textRect.height / 2) - gridRect.top) / gridRect.height * 100 : 50;
   
   // Generate random positions for spotlight movement
   const randomPositions = generateRandomPositions(4); // Generate 4 random positions
@@ -130,9 +161,9 @@ onMounted(() => {
   gsap.set('.text-container', { opacity: 0 });
   gsap.set('.grid-container', { 
     '--spotlight-size': '100%',
-    '--spotlight-x': '50%',
-    '--spotlight-y': '50%'
-  }); // Start with full spotlight at center
+    '--spotlight-x': '0%',
+    '--spotlight-y': `${centerY}%` // Set spotlight Y to text center
+  });
   
   const tl = gsap.timeline();
 
@@ -206,44 +237,88 @@ onMounted(() => {
     duration: 1.5,
     ease: 'power2.inOut'
   })
-  // Shrink spotlight to text size and move to right edge of text
+  // Shrink spotlight to text size and move to left edge of text
   .to('.grid-container', {
-    '--spotlight-size': '20%', // Smaller size for text scanning
-    '--spotlight-x': '80%', // Start from right edge
-    '--spotlight-y': '50%', // Center vertically
+    '--spotlight-size': '20%',
+    '--spotlight-x': '0%',
+    '--spotlight-y': `${centerY}%`, // Use text center Y
     duration: 1.5,
-    ease: 'power2.inOut'
+    ease: 'power2.inOut',
+    onStart: () => {
+      isTextCrossing.value = true;
+      letterStates.value.clear();
+      console.log('Starting text crossing animation');
+      console.log('Text to fill:', headline.value);
+    }
   })
   // Move spotlight horizontally through text and fill letters
   .to('.grid-container', {
-    '--spotlight-x': '20%', // Move to left edge
-    duration: 1.5,
-    ease: 'power2.inOut',
-    onUpdate: () => {
-      const letters = document.querySelectorAll('.headline .letter');
+    '--spotlight-x': '100%',
+    '--spotlight-y': `${centerY}%`, // Keep Y centered on text
+    duration: 3,
+    ease: 'power1.inOut',
+    onStart: () => {
+      // Log text container position and spotlight start position
+      const textContainer = document.querySelector('.text-container');
       const gridContainer = document.querySelector('.grid-container');
-      if (!gridContainer) return;
-
-      const spotlightX = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-x'));
-      const spotlightSize = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-size'));
-      
-      letters.forEach(letter => {
-        const rect = letter.getBoundingClientRect();
-        const letterCenter = rect.left + rect.width / 2;
-        const viewportWidth = window.innerWidth;
+      if (textContainer && gridContainer) {
+        const rect = textContainer.getBoundingClientRect();
+        const spotlightX = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-x'));
+        const spotlightY = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-y'));
+        const gridRect = gridContainer.getBoundingClientRect();
         
-        // Calculate distance from spotlight center to letter center
-        const spotlightCenterX = viewportWidth * (spotlightX / 100);
-        const distance = Math.abs(letterCenter - spotlightCenterX);
-        const maxDistance = viewportWidth * (spotlightSize / 100);
+        // Calculate spotlight position in viewport
+        const spotlightViewportX = gridRect.left + (gridRect.width * spotlightX / 100);
+        const spotlightViewportY = gridRect.top + (gridRect.height * spotlightY / 100);
         
-        // Fill letter if within spotlight range or if spotlight has passed
-        if (distance < maxDistance || spotlightCenterX < letterCenter) {
-          letter.classList.add('filled');
-          letter.setAttribute('fill', 'url(#gradient)');
-          letter.setAttribute('stroke', 'none');
-        }
-      });
+        console.log('Text Container Position:', {
+          left: rect.left,
+          right: rect.right,
+          top: rect.top,
+          bottom: rect.bottom,
+          width: rect.width,
+          height: rect.height
+        });
+        console.log('Spotlight Start Position:', {
+          x: spotlightX + '%',
+          y: spotlightY + '%',
+          viewportX: spotlightViewportX,
+          viewportY: spotlightViewportY
+        });
+      }
+    },
+    onUpdate: () => {
+      if (debugMode.value) {
+        // Force a check of all letters during each update
+        const words = headline.value.split(' ');
+        words.forEach((word, wordIndex) => {
+          word.split('').forEach((letter, letterIndex) => {
+            isLetterFilled(wordIndex, letterIndex);
+          });
+        });
+      }
+    },
+    onComplete: () => {
+      isTextCrossing.value = false;
+      // Log spotlight end position
+      const gridContainer = document.querySelector('.grid-container');
+      if (gridContainer) {
+        const spotlightX = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-x'));
+        const spotlightY = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-y'));
+        const gridRect = gridContainer.getBoundingClientRect();
+        
+        // Calculate spotlight position in viewport
+        const spotlightViewportX = gridRect.left + (gridRect.width * spotlightX / 100);
+        const spotlightViewportY = gridRect.top + (gridRect.height * spotlightY / 100);
+        
+        console.log('Spotlight End Position:', {
+          x: spotlightX + '%',
+          y: spotlightY + '%',
+          viewportX: spotlightViewportX,
+          viewportY: spotlightViewportY
+        });
+      }
+      console.log('Text crossing animation complete');
     }
   })
   // Move spotlight to bottom right
@@ -252,16 +327,7 @@ onMounted(() => {
     '--spotlight-y': '80%',
     '--spotlight-size': '50%',
     duration: 1.5,
-    ease: 'power2.inOut',
-    onComplete: () => {
-      // Ensure all letters remain filled at the end
-      const letters = document.querySelectorAll('.headline .letter');
-      letters.forEach(letter => {
-        letter.classList.add('filled');
-        letter.setAttribute('fill', 'url(#gradient)');
-        letter.setAttribute('stroke', 'none');
-      });
-    }
+    ease: 'power2.inOut'
   })
   // Move spotlight diagonally to final position
   .to('.grid-container', {
@@ -272,29 +338,54 @@ onMounted(() => {
     onComplete: () => {
       emit('complete');
     }
+  })
+  // Add debug logging to spotlight movement
+  .to('.grid-container', {
+    '--spotlight-x': '20%',
+    duration: 1.5,
+    ease: 'power2.inOut',
+    onUpdate: () => {
+      const gridContainer = document.querySelector('.grid-container');
+      if (gridContainer && debugMode.value) {
+        const spotlightX = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-x'));
+        const spotlightSize = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-size'));
+      }
+    }
+  });
+
+  // Add a MutationObserver to watch for class changes
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+        const letter = mutation.target as HTMLElement;
+        if (letter.classList.contains('letter')) {
+          const isFilled = letter.classList.contains('filled');
+          const letterKey = `${letter.getAttribute('data-word-index')}-${letter.getAttribute('data-letter-index')}`;
+          
+          if (isFilled && !filledLetters.value.has(letterKey)) {
+            filledLetters.value.add(letterKey);
+            console.log(`Filled class added to letter: ${letter.textContent}`, {
+              wordIndex: letter.getAttribute('data-word-index'),
+              letterIndex: letter.getAttribute('data-letter-index'),
+              position: letter.getAttribute('data-position')
+            });
+          }
+        }
+      }
+    });
+  });
+
+  // Start observing all letter elements
+  const letters = document.querySelectorAll('.letter');
+  letters.forEach(letter => {
+    observer.observe(letter, { attributes: true });
   });
 });
 
-// Simplify animateWords function to just handle headline and subheadline text
+// Simplify animateWords function to just handle subheadline text
 const animateWords = () => {
-  const headlineWords = headline.value.split(' ');
   const subheadlineWords = subheadline.value.split(' ');
   
-  // Create timeline for headline words with stroke animation
-  const headlineTl = gsap.timeline();
-  headlineWords.forEach((word, wordIndex) => {
-    const letters = word.split('');
-    letters.forEach((letter, letterIndex) => {
-      headlineTl.to(`.headline .word-${wordIndex} .letter-${letterIndex}`, {
-        strokeDashoffset: 0,
-        duration: 0.2,
-        ease: 'power2.inOut',
-        delay: 0.01,
-      });
-    });
-    headlineTl.to({}, { duration: 0.1 });
-  });
-
   // Animate subheadline words
   const subheadlineTl = gsap.timeline();
   subheadlineWords.forEach((word, index) => {
@@ -309,6 +400,45 @@ const animateWords = () => {
       delay: index * 0.1
     });
   });
+};
+
+// Update function to check if a letter should be filled based on spotlight position
+const isLetterFilled = (wordIndex: number, letterIndex: number) => {
+  const gridContainer = document.querySelector('.grid-container');
+  if (!gridContainer) return false;
+
+  // Get all words and calculate total characters before this letter
+  const words = headline.value.split(' ');
+  let totalCharsBefore = 0;
+  for (let i = 0; i < wordIndex; i++) {
+    totalCharsBefore += words[i].length;
+  }
+  totalCharsBefore += letterIndex;
+  
+  // Calculate the letter's position in the text (as a percentage)
+  const totalChars = headline.value.replace(/\s/g, '').length;
+  const letterPosition = (totalCharsBefore / totalChars) * 100;
+  
+  // Get spotlight position
+  const spotlightX = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-x'));
+  
+  // Calculate the fill threshold with a small buffer for smoother transition
+  const buffer = 2; // 2% buffer for smoother filling
+  const shouldFill = letterPosition <= (spotlightX + buffer);
+  
+  // Debug logging only during text crossing and when state changes
+  if (debugMode.value && isTextCrossing.value) {
+    const currentLetter = words[wordIndex][letterIndex];
+    const letterKey = `${wordIndex}-${letterIndex}`;
+    const lastState = letterStates.value.get(letterKey);
+    
+    if (lastState !== shouldFill) {
+      letterStates.value.set(letterKey, shouldFill);
+      console.log(`Letter "${currentLetter}" at ${letterPosition.toFixed(1)}% ${shouldFill ? 'reached' : 'left'} by line at ${spotlightX.toFixed(1)}%`);
+    }
+  }
+  
+  return shouldFill;
 };
 </script>
 
@@ -445,15 +575,17 @@ const animateWords = () => {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.15rem;
+  gap: 0.5rem;
   margin-bottom: 2rem;
+  font-size: 2.5rem;
+  font-weight: bold;
 }
 
 .subheadline {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  /* gap: 0.5rem; */
+  gap: 0.5rem;
   margin-top: 2rem;
 }
 
@@ -469,35 +601,33 @@ const animateWords = () => {
 }
 
 .word {
-  display: inline-block;
-  position: relative;
-  width: auto;
-  height: 1.2em;
-  margin: 0 0.25em;
-  overflow: visible;
+  display: inline-flex;
+  gap: 0.1em;
 }
 
 .letter {
-  font-family: inherit;
-  will-change: stroke-dashoffset, fill;
-  transition: fill 0.3s ease;
+  position: relative;
+  color: transparent;
+  -webkit-text-stroke: 2px var(--theme-primary, #88C0D0);
+  transition: all 0.3s ease;
+  display: inline-block;
+  min-width: 0.5em;
 }
 
-.headline .word {
-  font-size: 2.5rem;
-  font-weight: bold;
-  min-width: auto; /* Remove fixed min-width */
-}
-
-.headline .letter {
-  font-family: inherit;
-  will-change: stroke-dashoffset, fill;
-  transition: fill 0.3s ease;
-}
-
-.headline .letter.filled {
-  fill: url(#gradient);
-  stroke: none;
+.letter.filled {
+  color: transparent;
+  -webkit-text-stroke: 0;
+  -webkit-text-stroke-width: 0;
+  background: linear-gradient(
+    to right,
+    var(--theme-primary, #88C0D0),
+    var(--theme-secondary, #5E81AC),
+    var(--theme-primary, #88C0D0)
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shine 3s linear infinite;
 }
 
 .theme-text--gradient-animated {
@@ -510,6 +640,9 @@ const animateWords = () => {
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
+}
+
+.gradient-shine {
   animation: shine 3s linear infinite;
 }
 
@@ -517,10 +650,6 @@ const animateWords = () => {
   to {
     background-position: 200% center;
   }
-}
-
-.gradient-shine {
-  animation: shine 3s linear infinite;
 }
 
 /* For Firefox which doesn't support -webkit-text-stroke well */
@@ -537,5 +666,49 @@ const animateWords = () => {
 .is-hidden {
   opacity: 0;
   pointer-events: none;
+}
+
+/* Update debug styles to only show unfilled letters */
+.debug-highlight {
+  outline: 2px solid rgba(255, 0, 0, 0.8);
+  outline-offset: 2px;
+  transition: outline-color 0.3s ease;
+}
+
+.debug-highlight.filled {
+  outline: none;
+}
+
+/* Update spotlight overlay to be more visible during text crossing */
+.grid-container.debug-mode::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at var(--spotlight-x) var(--spotlight-y),
+    rgba(255, 255, 0, 0.2) 0%,
+    rgba(255, 255, 0, 0) var(--spotlight-size)
+  );
+  opacity: 0.3;
+  z-index: 1;
+  display: block;
+}
+
+/* Add spotlight position indicator */
+.spotlight-indicator {
+  position: absolute;
+  top: 0;
+  left: var(--spotlight-x);
+  width: 2px;
+  height: 100%;
+  background: rgba(255, 255, 0, 0.8);
+  z-index: 10;
+  pointer-events: none;
+  transform: translateX(-50%);
+  box-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
 }
 </style> 
