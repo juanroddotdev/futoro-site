@@ -8,11 +8,11 @@
       <span ref="outlineTextRef" class="outline-text">{{ text }}</span>
       
       <!-- Filled version with clip mask -->
-      <span 
+      <!-- <span 
         ref="filledTextRef" 
-        class="filled-text"
+        :class="['filled-text', { 'has-fill': currentFillPercentage > 0 }]"
         :style="{ clipPath: clipPathStyle }"
-      >{{ text }}</span>
+      >{{ text }}</span> -->
     </div>
   </div>
 </template>
@@ -20,7 +20,11 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick, onUnmounted, computed, watch } from 'vue';
 import gsap from 'gsap';
-import { textAnimations } from '@/animations/text/textAnimations';
+type Timeline = gsap.core.Timeline;
+import { textAnimations, type TextAnimationType } from '@/animations/text/textAnimations';
+
+// Add type definition for valid animations
+type AnimationType = TextAnimationType;
 
 const props = defineProps({
   text: {
@@ -32,7 +36,7 @@ const props = defineProps({
     default: 50
   },
   animation: {
-    type: String,
+    type: String as () => AnimationType,
     default: 'fadeUp'
   },
   duration: {
@@ -207,6 +211,7 @@ const animateText = () => {
           }, "<"); // "<" means "start at the same time as the previous animation"
         }
       } else if (typeof textAnimations[props.animation] === 'function') {
+        // Remove incorrect type assertion
         textAnimations[props.animation](tl, elements, {
           duration: props.duration,
           delay: props.delay,
@@ -251,29 +256,23 @@ onMounted(() => {
   // Always set initial state for both elements regardless of initiallyHidden prop
   const elements = [outlineTextRef.value, filledTextRef.value].filter(el => el !== null) as HTMLElement[];
   
-  if (props.initiallyHidden) {
-    // For fadeUp animation, set both y position and opacity
-    if (props.animation === 'fadeUp') {
-      elements.forEach(el => {
-        gsap.set(el, { y: 30, opacity: 0 });
-      });
-    } else {
-      // For other animations, just set opacity
-      elements.forEach(el => {
-        gsap.set(el, { opacity: 0 });
-      });
-    }
-  }
-  
-  // Set initial fill to 0% (completely hidden)
+  // Set initial states
   if (filledTextRef.value) {
     gsap.set(filledTextRef.value, { 
+      opacity: 0,
       clipPath: 'inset(0 0 0 100%)' // Start with no fill visible
+    });
+  }
+
+  if (outlineTextRef.value) {
+    gsap.set(outlineTextRef.value, { 
+      opacity: 1 // Ensure outline is visible
     });
   }
   
   if (props.triggerOnVisible) {
-    observer = setupIntersectionObserver();
+    const newObserver = setupIntersectionObserver();
+    if (newObserver) observer = newObserver;
   } else {
     animateText();
   }
@@ -331,6 +330,7 @@ onUnmounted(() => {
   color: transparent;
   paint-order: stroke fill;
   position: relative;
+  opacity: 1; /* Ensure outline is visible */
 }
 
 .filled-text {
@@ -340,6 +340,11 @@ onUnmounted(() => {
   color: transparent;
   background-clip: text;
   -webkit-background-clip: text;
+  opacity: 0;
+}
+
+.filled-text.has-fill {
+  opacity: 1;
   background-image: var(--theme-gradient-extended, linear-gradient(to right, #88C0D0, #81A1C1));
 }
 

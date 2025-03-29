@@ -54,10 +54,12 @@ import ProcessTimeline from '@/components/sections/ProcessTimeline.vue';
 import ServicesSection from '@/components/sections/ServicesSection.vue';
 import { useTheme } from '../composables/useTheme';
 import { useLazySection } from '../composables/useLazySection';
-import { HeroContent, getRandomHeroContent } from '@/data/heroContentData';
+import { HeroContent } from '@/data/heroContentData';
 import PaperGridBackground from '@/components/ui/backgrounds/PaperGridBackground.vue';
 
-const heroContent = ref<HeroContent>(getRandomHeroContent());
+const props = defineProps<{
+  heroContent: HeroContent;
+}>();
 
 // Get the global theme
 const { currentTheme } = useTheme();
@@ -74,10 +76,12 @@ function onSectionVisible(sectionId: string, track: boolean = true) {
   sectionLoader.markSectionLoaded(sectionId, track);
   sectionLoader.markSectionVisible(sectionId, track);
 }
+
 const onHeroMounted = () => {
   sectionLoader.markSectionLoaded('hero-section', true);
   sectionLoader.markSectionVisible('hero-section', true);
 };
+
 // Update these methods
 const onHeroPullThresholdReached = () => {
   // No console log needed

@@ -5,11 +5,11 @@
       <span ref="outlineTextRef" class="outline-text">{{ text }}</span>
       
       <!-- Filled version with clip mask -->
-      <span 
+      <!-- <span 
         ref="filledTextRef" 
         class="filled-text"
         :style="{ clipPath: `inset(0 0 0 ${100 - computedFillPercentage}%)` }"
-      >{{ text }}</span>
+      >{{ text }}</span> -->
     </div>
   </div>
 </template>
