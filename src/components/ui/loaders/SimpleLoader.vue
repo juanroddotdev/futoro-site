@@ -53,13 +53,13 @@
             >{{ letter }}</text>
           </svg>
         </div>
+        
         <div class="subheadline">
           <div v-for="(word, wordIndex) in subheadline.split(' ')" 
             :key="`subheadline-${wordIndex}`"
-            :class="`word-${wordIndex}`"
-            class="word heading--highlight theme-text--gradient-animated gradient-shine"
+            :class="`word word-${wordIndex} heading--highlight theme-text--gradient-animated gradient-shine`"
           >
-            <span class="word-text"></span>
+            {{ word }}
           </div>
         </div>
       </div>
@@ -275,7 +275,7 @@ onMounted(() => {
   });
 });
 
-// Function to animate words
+// Simplify animateWords function to just handle headline and subheadline text
 const animateWords = () => {
   const headlineWords = headline.value.split(' ');
   const subheadlineWords = subheadline.value.split(' ');
@@ -290,27 +290,25 @@ const animateWords = () => {
         duration: 0.2,
         ease: 'power2.inOut',
         delay: 0.01,
-        onStart: () => console.log(`Animating headline letter ${letterIndex + 1} of word ${wordIndex + 1}`)
       });
     });
-    // Add a smaller pause between words
     headlineTl.to({}, { duration: 0.1 });
   });
-  
-  // Create timeline for subheadline words with typewriter effect
+
+  // Animate subheadline words
   const subheadlineTl = gsap.timeline();
-  subheadlineWords.forEach((word, wordIndex) => {
-    subheadlineTl.to(`.subheadline .word-${wordIndex} .word-text`, {
-      text: { value: word, delimiter: '' },
-      duration: 0.2, // Make it a bit faster
-      ease: 'none',
-      delay: 0.02,
-      onStart: () => console.log(`Animating subheadline word ${wordIndex + 1}`)
+  subheadlineWords.forEach((word, index) => {
+    subheadlineTl.fromTo(`.subheadline .word-${index}`, {
+      opacity: 0,
+      y: 20
+    }, {
+      opacity: 1,
+      y: 0,
+      duration: 0.4,
+      ease: 'power2.out',
+      delay: index * 0.1
     });
   });
-  
-  // Start subheadline animation after headline
-  headlineTl.add(subheadlineTl, '-=0.6');
 };
 </script>
 
@@ -427,19 +425,47 @@ const animateWords = () => {
   position: relative;
   z-index: 2;
   text-align: center;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 90%;
 }
 
 .text-container {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  width: 100%;
+  position: relative;
+  max-width: 800px;
 }
 
-.headline, .subheadline {
+.headline {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.15rem;
+  margin-bottom: 2rem;
+}
+
+.subheadline {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  /* gap: 0.5rem; */
+  margin-top: 2rem;
+}
+
+.subheadline .word {
+  font-size: 1.5rem;
+  /* padding: 0.5rem 1rem; */
+  background: linear-gradient(to right, var(--theme-primary, #88C0D0), var(--theme-secondary, #5E81AC));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  opacity: 0;
+  transform: translateY(20px);
 }
 
 .word {
@@ -447,7 +473,7 @@ const animateWords = () => {
   position: relative;
   width: auto;
   height: 1.2em;
-  margin: 0 0.5em;
+  margin: 0 0.25em;
   overflow: visible;
 }
 
@@ -460,7 +486,7 @@ const animateWords = () => {
 .headline .word {
   font-size: 2.5rem;
   font-weight: bold;
-  min-width: 100px;
+  min-width: auto; /* Remove fixed min-width */
 }
 
 .headline .letter {
@@ -472,21 +498,6 @@ const animateWords = () => {
 .headline .letter.filled {
   fill: url(#gradient);
   stroke: none;
-}
-
-.subheadline .word {
-  font-size: 1.5rem;
-  min-width: 80px;
-  display: inline-block;
-  margin: 0 0.25em;
-}
-
-.subheadline .word-text {
-  display: inline-block;
-  background: linear-gradient(to right, var(--theme-primary, #88C0D0), var(--theme-secondary, #5E81AC));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
 }
 
 .theme-text--gradient-animated {
