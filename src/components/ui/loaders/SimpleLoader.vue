@@ -84,8 +84,11 @@ const verticalLines = ref(null);
 const headlineText = ref(null);
 const subheadlineText = ref(null);
 
-const debugMode = ref(true);
+const debugMode = ref(false);
 const isTextCrossing = ref(false); // Track when we're crossing the text
+
+// Add filledLetters ref for tracking
+const filledLetters = ref(new Set());
 
 // Use provided hero content or get random one, matching HeroSectionChat
 const heroContent = computed(() => props.heroContent || getRandomHeroContent());
@@ -135,13 +138,31 @@ const getLetterPosition = (wordIndex: number, letterIndex: number) => {
   return (totalCharsBefore / totalChars) * 100;
 };
 
-// Add this near the top of the script with other refs
-const letterStates = ref(new Map());
-const filledLetters = ref(new Set());
-
 onMounted(() => {
-  console.log('Loader mounted, starting animation sequence');
-  
+  // Setup MutationObserver for letter fill tracking
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      const target = mutation.target as HTMLElement;
+      if (target.classList.contains('letter')) {
+        const letter = target;
+        if (target.classList.contains('filled') && debugMode.value && isTextCrossing.value) {
+          // Removed console.log
+        }
+      }
+    });
+  });
+
+  // Start observing after a short delay to ensure elements are ready
+  setTimeout(() => {
+    const letters = document.querySelectorAll('.letter');
+    letters.forEach(letter => {
+      observer.observe(letter, {
+        attributes: true,
+        attributeFilter: ['class']
+      });
+    });
+  }, 100);
+
   // Calculate text container center position
   const textContainer = document.querySelector('.text-container');
   const textRect = textContainer?.getBoundingClientRect();
@@ -153,16 +174,16 @@ onMounted(() => {
     ((textRect.top + textRect.height / 2) - gridRect.top) / gridRect.height * 100 : 50;
   
   // Generate random positions for spotlight movement
-  const randomPositions = generateRandomPositions(4); // Generate 4 random positions
+  const randomPositions = generateRandomPositions(4);
   
-  // Set initial states for horizontal and vertical lines separately
+  // Set initial states
   gsap.set('.horizontal .grid-line', { scaleX: 0 });
   gsap.set('.vertical .grid-line', { scaleY: 0 });
   gsap.set('.text-container', { opacity: 0 });
   gsap.set('.grid-container', { 
     '--spotlight-size': '100%',
     '--spotlight-x': '0%',
-    '--spotlight-y': `${centerY}%` // Set spotlight Y to text center
+    '--spotlight-y': `${centerY}%`
   });
   
   const tl = gsap.timeline();
@@ -175,8 +196,7 @@ onMounted(() => {
       each: 0.1,
       from: "random"
     },
-    ease: 'power2.inOut',
-    onStart: () => console.log('Horizontal grid animation started')
+    ease: 'power2.inOut'
   })
   // Grid animation - vertical lines
   .to('.vertical .grid-line', {
@@ -186,8 +206,7 @@ onMounted(() => {
       each: 0.1,
       from: "random"
     },
-    ease: 'power2.inOut',
-    onStart: () => console.log('Vertical grid animation started')
+    ease: 'power2.inOut'
   }, '-=0.4') // Start vertical lines before horizontal lines finish
   // Fade in text container and start text animation earlier
   .to('.text-container', {
@@ -205,8 +224,7 @@ onMounted(() => {
   .to('.grid-container', {
     '--spotlight-size': '50%',
     duration: 1.5,
-    ease: 'power2.inOut',
-    onStart: () => console.log('Spotlight size animation started')
+    ease: 'power2.inOut'
   })
   // Move spotlight to random positions with random sizes
   .to('.grid-container', {
@@ -244,81 +262,48 @@ onMounted(() => {
     '--spotlight-y': `${centerY}%`, // Use text center Y
     duration: 1.5,
     ease: 'power2.inOut',
-    onStart: () => {
+    onComplete: () => {
       isTextCrossing.value = true;
-      letterStates.value.clear();
-      console.log('Starting text crossing animation');
-      console.log('Text to fill:', headline.value);
     }
   })
   // Move spotlight horizontally through text and fill letters
   .to('.grid-container', {
     '--spotlight-x': '100%',
     '--spotlight-y': `${centerY}%`, // Keep Y centered on text
-    duration: 3,
+    duration: 4, // Increased from 3 to 4 seconds
     ease: 'power1.inOut',
     onStart: () => {
-      // Log text container position and spotlight start position
-      const textContainer = document.querySelector('.text-container');
-      const gridContainer = document.querySelector('.grid-container');
-      if (textContainer && gridContainer) {
-        const rect = textContainer.getBoundingClientRect();
-        const spotlightX = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-x'));
-        const spotlightY = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-y'));
-        const gridRect = gridContainer.getBoundingClientRect();
-        
-        // Calculate spotlight position in viewport
-        const spotlightViewportX = gridRect.left + (gridRect.width * spotlightX / 100);
-        const spotlightViewportY = gridRect.top + (gridRect.height * spotlightY / 100);
-        
-        console.log('Text Container Position:', {
-          left: rect.left,
-          right: rect.right,
-          top: rect.top,
-          bottom: rect.bottom,
-          width: rect.width,
-          height: rect.height
-        });
-        console.log('Spotlight Start Position:', {
-          x: spotlightX + '%',
-          y: spotlightY + '%',
-          viewportX: spotlightViewportX,
-          viewportY: spotlightViewportY
-        });
-      }
+      isTextCrossing.value = true;
     },
-    onUpdate: () => {
+    onUpdate: function() {
       if (debugMode.value) {
-        // Force a check of all letters during each update
-        const words = headline.value.split(' ');
-        words.forEach((word, wordIndex) => {
-          word.split('').forEach((letter, letterIndex) => {
-            isLetterFilled(wordIndex, letterIndex);
+        const progress = this.progress();
+        const gridContainer = document.querySelector('.grid-container');
+        if (gridContainer) {
+          const spotlightX = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-x'));
+          
+          // Force update all letters based on current spotlight position
+          const words = headline.value.split(' ');
+          words.forEach((word, wordIndex) => {
+            word.split('').forEach((_, letterIndex) => {
+              const letterPosition = getLetterPosition(wordIndex, letterIndex);
+              const letter = document.querySelector(`[data-word-index="${wordIndex}"][data-letter-index="${letterIndex}"]`);
+              if (letter && letterPosition <= (spotlightX + 10)) { // Increased buffer during animation
+                letter.classList.add('filled');
+              }
+            });
           });
-        });
+        }
       }
     },
     onComplete: () => {
+      // Force fill any remaining letters
+      const letters = document.querySelectorAll('.letter');
+      letters.forEach((letter: Element) => {
+        (letter as HTMLElement).classList.add('filled');
+      });
+      
       isTextCrossing.value = false;
-      // Log spotlight end position
-      const gridContainer = document.querySelector('.grid-container');
-      if (gridContainer) {
-        const spotlightX = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-x'));
-        const spotlightY = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-y'));
-        const gridRect = gridContainer.getBoundingClientRect();
-        
-        // Calculate spotlight position in viewport
-        const spotlightViewportX = gridRect.left + (gridRect.width * spotlightX / 100);
-        const spotlightViewportY = gridRect.top + (gridRect.height * spotlightY / 100);
-        
-        console.log('Spotlight End Position:', {
-          x: spotlightX + '%',
-          y: spotlightY + '%',
-          viewportX: spotlightViewportX,
-          viewportY: spotlightViewportY
-        });
-      }
-      console.log('Text crossing animation complete');
     }
   })
   // Move spotlight to bottom right
@@ -351,34 +336,6 @@ onMounted(() => {
         const spotlightSize = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-size'));
       }
     }
-  });
-
-  // Add a MutationObserver to watch for class changes
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-        const letter = mutation.target as HTMLElement;
-        if (letter.classList.contains('letter')) {
-          const isFilled = letter.classList.contains('filled');
-          const letterKey = `${letter.getAttribute('data-word-index')}-${letter.getAttribute('data-letter-index')}`;
-          
-          if (isFilled && !filledLetters.value.has(letterKey)) {
-            filledLetters.value.add(letterKey);
-            console.log(`Filled class added to letter: ${letter.textContent}`, {
-              wordIndex: letter.getAttribute('data-word-index'),
-              letterIndex: letter.getAttribute('data-letter-index'),
-              position: letter.getAttribute('data-position')
-            });
-          }
-        }
-      }
-    });
-  });
-
-  // Start observing all letter elements
-  const letters = document.querySelectorAll('.letter');
-  letters.forEach(letter => {
-    observer.observe(letter, { attributes: true });
   });
 });
 
@@ -422,23 +379,9 @@ const isLetterFilled = (wordIndex: number, letterIndex: number) => {
   // Get spotlight position
   const spotlightX = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-x'));
   
-  // Calculate the fill threshold with a small buffer for smoother transition
-  const buffer = 2; // 2% buffer for smoother filling
-  const shouldFill = letterPosition <= (spotlightX + buffer);
-  
-  // Debug logging only during text crossing and when state changes
-  if (debugMode.value && isTextCrossing.value) {
-    const currentLetter = words[wordIndex][letterIndex];
-    const letterKey = `${wordIndex}-${letterIndex}`;
-    const lastState = letterStates.value.get(letterKey);
-    
-    if (lastState !== shouldFill) {
-      letterStates.value.set(letterKey, shouldFill);
-      console.log(`Letter "${currentLetter}" at ${letterPosition.toFixed(1)}% ${shouldFill ? 'reached' : 'left'} by line at ${spotlightX.toFixed(1)}%`);
-    }
-  }
-  
-  return shouldFill;
+  // More generous buffer and ensure letters stay filled
+  const buffer = 10; // Increased buffer size
+  return letterPosition <= (spotlightX + buffer) || spotlightX >= 90; // Fill all remaining letters sooner
 };
 </script>
 
