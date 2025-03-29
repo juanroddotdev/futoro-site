@@ -11,12 +11,12 @@
       </defs>
     </svg>
     
-    <div class="grid-container" :class="{ 'debug-mode': debugMode }" :style="{
+    <div class="grid-container" :class="{ 'debug-mode': showDebug }" :style="{
       '--spotlight-x': `${spotlightX}%`,
       '--spotlight-y': `${spotlightY}%`
     }">
       <!-- Add spotlight position indicator -->
-      <div v-if="debugMode && isTextCrossing" class="spotlight-indicator"></div>
+      <div v-if="showDebug && isTextCrossing" class="spotlight-indicator"></div>
       
       <div class="grid-lines horizontal" ref="horizontalLines">
         <div v-for="i in 20" :key="`h-${i}`" class="grid-line" />
@@ -37,7 +37,7 @@
                   class="letter"
                   :class="{ 
                     'filled': isLetterFilled(wordIndex, letterIndex),
-                    'debug-highlight': debugMode && isLetterFilled(wordIndex, letterIndex)
+                    'debug-highlight': showDebug && isLetterFilled(wordIndex, letterIndex)
                   }"
                   :data-position="getLetterPosition(wordIndex, letterIndex)"
                   :data-word-index="wordIndex"
@@ -72,6 +72,7 @@ const props = defineProps<{
   spotlightX?: number;
   spotlightY?: number;
   heroContent?: HeroContent;
+  showDebug?: boolean; // New prop for visual debugging
 }>();
 
 const emit = defineEmits<{
@@ -84,7 +85,6 @@ const verticalLines = ref(null);
 const headlineText = ref(null);
 const subheadlineText = ref(null);
 
-const debugMode = ref(false);
 const isTextCrossing = ref(false); // Track when we're crossing the text
 
 // Add filledLetters ref for tracking
@@ -145,7 +145,7 @@ onMounted(() => {
       const target = mutation.target as HTMLElement;
       if (target.classList.contains('letter')) {
         const letter = target;
-        if (target.classList.contains('filled') && debugMode.value && isTextCrossing.value) {
+        if (target.classList.contains('filled') && props.showDebug && isTextCrossing.value) {
           // Removed console.log
         }
       }
@@ -276,24 +276,21 @@ onMounted(() => {
       isTextCrossing.value = true;
     },
     onUpdate: function() {
-      if (debugMode.value) {
-        const progress = this.progress();
-        const gridContainer = document.querySelector('.grid-container');
-        if (gridContainer) {
-          const spotlightX = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-x'));
-          
-          // Force update all letters based on current spotlight position
-          const words = headline.value.split(' ');
-          words.forEach((word, wordIndex) => {
-            word.split('').forEach((_, letterIndex) => {
-              const letterPosition = getLetterPosition(wordIndex, letterIndex);
-              const letter = document.querySelector(`[data-word-index="${wordIndex}"][data-letter-index="${letterIndex}"]`);
-              if (letter && letterPosition <= (spotlightX + 10)) { // Increased buffer during animation
-                letter.classList.add('filled');
-              }
-            });
+      const gridContainer = document.querySelector('.grid-container');
+      if (gridContainer) {
+        const spotlightX = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-x'));
+        
+        // Force update all letters based on current spotlight position
+        const words = headline.value.split(' ');
+        words.forEach((word, wordIndex) => {
+          word.split('').forEach((_, letterIndex) => {
+            const letterPosition = getLetterPosition(wordIndex, letterIndex);
+            const letter = document.querySelector(`[data-word-index="${wordIndex}"][data-letter-index="${letterIndex}"]`);
+            if (letter && letterPosition <= (spotlightX + 10)) { // Increased buffer during animation
+              letter.classList.add('filled');
+            }
           });
-        }
+        });
       }
     },
     onComplete: () => {
@@ -331,7 +328,7 @@ onMounted(() => {
     ease: 'power2.inOut',
     onUpdate: () => {
       const gridContainer = document.querySelector('.grid-container');
-      if (gridContainer && debugMode.value) {
+      if (gridContainer && props.showDebug) {
         const spotlightX = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-x'));
         const spotlightSize = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-size'));
       }
@@ -555,8 +552,68 @@ const isLetterFilled = (wordIndex: number, letterIndex: number) => {
   transition: all 0.3s ease;
   display: inline-block;
   min-width: 0.5em;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: writeIn 0.3s ease forwards;
 }
 
+/* Calculate animation delay for each letter */
+.letter:nth-child(1) { animation-delay: 0.1s; }
+.letter:nth-child(2) { animation-delay: 0.2s; }
+.letter:nth-child(3) { animation-delay: 0.3s; }
+.letter:nth-child(4) { animation-delay: 0.4s; }
+.letter:nth-child(5) { animation-delay: 0.5s; }
+.letter:nth-child(6) { animation-delay: 0.6s; }
+.letter:nth-child(7) { animation-delay: 0.7s; }
+.letter:nth-child(8) { animation-delay: 0.8s; }
+.letter:nth-child(9) { animation-delay: 0.9s; }
+.letter:nth-child(10) { animation-delay: 1s; }
+.letter:nth-child(11) { animation-delay: 1.1s; }
+.letter:nth-child(12) { animation-delay: 1.2s; }
+.letter:nth-child(13) { animation-delay: 1.3s; }
+.letter:nth-child(14) { animation-delay: 1.4s; }
+.letter:nth-child(15) { animation-delay: 1.5s; }
+.letter:nth-child(16) { animation-delay: 1.6s; }
+.letter:nth-child(17) { animation-delay: 1.7s; }
+.letter:nth-child(18) { animation-delay: 1.8s; }
+.letter:nth-child(19) { animation-delay: 1.9s; }
+.letter:nth-child(20) { animation-delay: 2s; }
+
+@keyframes writeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Add a subtle writing line effect */
+.letter::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--theme-primary, #88C0D0);
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: writeLine 0.3s ease forwards;
+}
+
+@keyframes writeLine {
+  0% {
+    transform: scaleX(0);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+/* Modified filled state to work with writing animation */
 .letter.filled {
   color: transparent;
   -webkit-text-stroke: 0;
@@ -571,6 +628,13 @@ const isLetterFilled = (wordIndex: number, letterIndex: number) => {
   -webkit-background-clip: text;
   background-clip: text;
   animation: shine 3s linear infinite;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Ensure the writing line stays visible when filled */
+.letter.filled::after {
+  background: var(--theme-secondary, #5E81AC);
 }
 
 .theme-text--gradient-animated {
