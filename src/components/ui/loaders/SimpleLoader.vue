@@ -11,6 +11,12 @@
       </defs>
     </svg>
     
+    <!-- Add Vara.js -->
+    <script src="https://cdn.jsdelivr.net/gh/akzhy/vara@master/src/vara.min.js"></script>
+    
+    <!-- Add Google Fonts link -->
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+    
     <div class="grid-container" :class="{ 'debug-mode': showDebug }" :style="{
       '--spotlight-x': `${spotlightX}%`,
       '--spotlight-y': `${spotlightY}%`
@@ -29,31 +35,30 @@
     <div class="content-wrapper">
       <div class="text-container">
         <div class="headline theme-text--gradient-animated gradient-shine">
-          <span v-for="(word, wordIndex) in headline.split(' ')" 
-                :key="`word-${wordIndex}`"
-                class="word">
-            <span v-for="(letter, letterIndex) in word.split('')"
-                  :key="`letter-${letterIndex}`"
-                  class="letter"
-                  :class="{ 
-                    'filled': isLetterFilled(wordIndex, letterIndex),
-                    'debug-highlight': showDebug && isLetterFilled(wordIndex, letterIndex)
-                  }"
-                  :data-position="getLetterPosition(wordIndex, letterIndex)"
-                  :data-word-index="wordIndex"
-                  :data-letter-index="letterIndex">
-              {{ letter }}
+          <template v-for="(word, wordIndex) in headline.split(' ')" :key="`word-${wordIndex}`">
+            <span class="word">
+              <span v-for="(char, letterIndex) in word" 
+                    :key="`letter-${wordIndex}-${letterIndex}`"
+                    class="letter"
+                    :data-word-index="wordIndex"
+                    :data-letter-index="letterIndex"
+                    :style="{
+                      opacity: isLetterVisible(wordIndex, letterIndex) ? 1 : 0,
+                      transform: isLetterVisible(wordIndex, letterIndex) ? 'translateY(0)' : 'translateY(10px)'
+                    }">
+                {{ char }}
+              </span>
             </span>
-          </span>
+            <span v-if="wordIndex < headline.split(' ').length - 1" 
+                  class="space"
+                  :style="{
+                    opacity: isSpaceVisible(wordIndex) ? 1 : 0
+                  }">&nbsp;</span>
+          </template>
         </div>
         
         <div class="subheadline theme-text--gradient-animated gradient-shine">
-          <div v-for="(word, wordIndex) in subheadline.split(' ')" 
-            :key="`subheadline-${wordIndex}`"
-            :class="`word word-${wordIndex} heading--highlight`"
-          >
-            {{ word }}
-          </div>
+          <div id="vara-container"></div>
         </div>
       </div>
     </div>
@@ -99,6 +104,55 @@ const subheadline = computed(() => props.subheadline || heroContent.value.subhea
 const spotlightX = ref(props.spotlightX ?? 20);
 const spotlightY = ref(props.spotlightY ?? 20);
 
+const currentIndex = ref(0);
+const isTyping = ref(false);
+
+const isAnimationComplete = ref(false); // Add this line after other refs
+
+// Add functions to check letter visibility
+const isLetterVisible = (wordIndex: number, letterIndex: number) => {
+  const words = headline.value.split(' ');
+  let totalCharsBefore = 0;
+  
+  // Count characters including spaces up to this word
+  for (let i = 0; i < wordIndex; i++) {
+    totalCharsBefore += words[i].length + 1; // +1 for space after each word
+  }
+  totalCharsBefore += letterIndex;
+  
+  return totalCharsBefore < currentIndex.value;
+};
+
+const isSpaceVisible = (wordIndex: number) => {
+  const words = headline.value.split(' ');
+  let totalCharsBefore = 0;
+  
+  // Count characters including spaces up to this word
+  for (let i = 0; i <= wordIndex; i++) {
+    totalCharsBefore += words[i].length + 1; // +1 for space after each word
+  }
+  
+  return totalCharsBefore <= currentIndex.value;
+};
+
+// Update startTyping function to handle spaces
+const startTyping = () => {
+  if (isTyping.value) return;
+  isTyping.value = true;
+  currentIndex.value = 0;
+  
+  const typeNextChar = () => {
+    if (currentIndex.value < headline.value.length) {
+      currentIndex.value++;
+      setTimeout(typeNextChar, 100);
+    } else {
+      isTyping.value = false;
+    }
+  };
+
+  setTimeout(typeNextChar, 0);
+};
+
 // Function to generate random position between min and max
 const getRandomPosition = (min: number, max: number) => {
   return Math.random() * (max - min) + min;
@@ -125,20 +179,29 @@ const generateRandomPositions = (numPositions: number) => {
   return positions;
 };
 
-// Add function to get letter position for debugging
+// Update function to get letter position for debugging
 const getLetterPosition = (wordIndex: number, letterIndex: number) => {
-  const words = headline.value.split(' ');
+  const text = headline.value;
+  const words = text.split(' ');
   let totalCharsBefore = 0;
+  
+  // Count characters including spaces up to this word
   for (let i = 0; i < wordIndex; i++) {
-    totalCharsBefore += words[i].length;
+    totalCharsBefore += words[i].length + 1; // +1 for space after each word
   }
   totalCharsBefore += letterIndex;
   
-  const totalChars = headline.value.replace(/\s/g, '').length;
-  return (totalCharsBefore / totalChars) * 100;
+  // Calculate percentage based on total text length
+  return (totalCharsBefore / text.length) * 100;
 };
 
 onMounted(() => {
+  // Remove initial font check logs
+  const subheadlineWords = document.querySelectorAll('.subheadline .word');
+  subheadlineWords.forEach((wordElement: Element, index) => {
+    const computedStyle = window.getComputedStyle(wordElement);
+  });
+
   // Setup MutationObserver for letter fill tracking
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
@@ -215,7 +278,11 @@ onMounted(() => {
     ease: 'power2.inOut',
     onStart: () => {
       // Start word animations while grid is still animating
-      animateWords();
+      // animateWords(); // Remove this line
+    },
+    onComplete: () => {
+      // Start typing animation after text container is visible
+      startTyping();
     }
   }, '-=0.6') // Start text container fade in 0.6s before grid animation ends
   // Wait a bit before starting the spotlight animation
@@ -224,7 +291,11 @@ onMounted(() => {
   .to('.grid-container', {
     '--spotlight-size': '50%',
     duration: 1.5,
-    ease: 'power2.inOut'
+    ease: 'power2.inOut',
+    onComplete: () => {
+      // Start subheadline animation after headline typing is complete
+      animateWords();
+    }
   })
   // Move spotlight to random positions with random sizes
   .to('.grid-container', {
@@ -282,23 +353,47 @@ onMounted(() => {
         
         // Force update all letters based on current spotlight position
         const words = headline.value.split(' ');
+        let totalLettersFilled = 0;
+        
         words.forEach((word, wordIndex) => {
-          word.split('').forEach((_, letterIndex) => {
+          word.split('').forEach((char, letterIndex) => {
             const letterPosition = getLetterPosition(wordIndex, letterIndex);
             const letter = document.querySelector(`[data-word-index="${wordIndex}"][data-letter-index="${letterIndex}"]`);
-            if (letter && letterPosition <= (spotlightX + 10)) { // Increased buffer during animation
-              letter.classList.add('filled');
+            
+            if (letter) {
+              const wasFilled = letter.classList.contains('filled');
+              const shouldFill = letterPosition <= (spotlightX + 2);
+              
+              if (shouldFill && !wasFilled) {
+                letter.classList.add('filled');
+                totalLettersFilled++;
+              }
             }
           });
+        });
+
+        // Update subheadline words without logging
+        const subheadlineWords = subheadline.value.split(' ');
+        subheadlineWords.forEach((word, wordIndex) => {
+          const wordElement = document.querySelector(`.subheadline .word-${wordIndex}`) as HTMLElement;
+          if (wordElement) {
+            const wordStart = (wordIndex / subheadlineWords.length) * 100;
+            if (spotlightX >= wordStart) {
+              wordElement.style.fontFamily = 'inherit';
+            }
+          }
         });
       }
     },
     onComplete: () => {
-      // Force fill any remaining letters
+      // Force fill any remaining letters and subheadline words
       const letters = document.querySelectorAll('.letter');
       letters.forEach((letter: Element) => {
         (letter as HTMLElement).classList.add('filled');
       });
+
+      // Set animation complete flag
+      isAnimationComplete.value = true;
       
       isTextCrossing.value = false;
     }
@@ -336,11 +431,11 @@ onMounted(() => {
   });
 });
 
-// Simplify animateWords function to just handle subheadline text
+// Update animateWords function to handle subheadline text with a delay
 const animateWords = () => {
   const subheadlineWords = subheadline.value.split(' ');
   
-  // Animate subheadline words
+  // Animate subheadline words with a longer initial delay
   const subheadlineTl = gsap.timeline();
   subheadlineWords.forEach((word, index) => {
     subheadlineTl.fromTo(`.subheadline .word-${index}`, {
@@ -351,7 +446,7 @@ const animateWords = () => {
       y: 0,
       duration: 0.4,
       ease: 'power2.out',
-      delay: index * 0.1
+      delay: index * 0.2 // Increased delay between words
     });
   });
 };
@@ -379,6 +474,27 @@ const isLetterFilled = (wordIndex: number, letterIndex: number) => {
   // More generous buffer and ensure letters stay filled
   const buffer = 10; // Increased buffer size
   return letterPosition <= (spotlightX + buffer) || spotlightX >= 90; // Fill all remaining letters sooner
+};
+
+// Update isSubheadlineFilled function to be simpler and more reliable
+const isSubheadlineFilled = (wordIndex: number) => {
+  const gridContainer = document.querySelector('.grid-container');
+  if (!gridContainer) return false;
+
+  // If animation is complete, all words should be filled
+  if (isAnimationComplete.value) return true;
+
+  // Only check spotlight position if we're actually crossing text
+  if (!isTextCrossing.value) return false;
+
+  const spotlightX = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-x'));
+  const words = subheadline.value.split(' ');
+  
+  // Calculate word position based on index
+  const wordPosition = (wordIndex / words.length) * 100;
+  
+  // Fill word if spotlight has passed its position
+  return spotlightX >= wordPosition;
 };
 </script>
 
@@ -531,13 +647,13 @@ const isLetterFilled = (wordIndex: number, letterIndex: number) => {
 
 .subheadline .word {
   font-size: 1.5rem;
-  /* padding: 0.5rem 1rem; */
   background: linear-gradient(to right, var(--theme-primary, #88C0D0), var(--theme-secondary, #5E81AC));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   opacity: 0;
   transform: translateY(20px);
+  transition: font-family 0.3s ease;
 }
 
 .word {
@@ -552,10 +668,14 @@ const isLetterFilled = (wordIndex: number, letterIndex: number) => {
   transition: all 0.3s ease;
   display: inline-block;
   min-width: 0.5em;
-  opacity: 0;
-  transform: translateY(10px);
-  animation: writeIn 0.3s ease forwards;
+  opacity: 1;
+  transform: none;
 }
+
+/* Remove the old animation delays */
+.letter:nth-child(1) { animation-delay: 0s; }
+.letter:nth-child(2) { animation-delay: 0s; }
+/* ... remove all other letter delays ... */
 
 /* Calculate animation delay for each letter */
 .letter:nth-child(1) { animation-delay: 0.1s; }
@@ -590,29 +710,6 @@ const isLetterFilled = (wordIndex: number, letterIndex: number) => {
   }
 }
 
-/* Add a subtle writing line effect */
-.letter::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: var(--theme-primary, #88C0D0);
-  transform: scaleX(0);
-  transform-origin: left;
-  animation: writeLine 0.3s ease forwards;
-}
-
-@keyframes writeLine {
-  0% {
-    transform: scaleX(0);
-  }
-  100% {
-    transform: scaleX(1);
-  }
-}
-
 /* Modified filled state to work with writing animation */
 .letter.filled {
   color: transparent;
@@ -630,11 +727,6 @@ const isLetterFilled = (wordIndex: number, letterIndex: number) => {
   animation: shine 3s linear infinite;
   opacity: 1;
   transform: translateY(0);
-}
-
-/* Ensure the writing line stays visible when filled */
-.letter.filled::after {
-  background: var(--theme-secondary, #5E81AC);
 }
 
 .theme-text--gradient-animated {
