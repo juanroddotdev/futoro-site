@@ -1,6 +1,19 @@
 <template>
+  <!-- 
+    ⚠️ CORE COMPONENT STRUCTURE
+    DO NOT MODIFY OR REMOVE WITHOUT APPROVAL
+    This structure maintains the grid, spotlight, and text animations
+    
+    Component Layers (from bottom to top):
+    1. Grid Background with Spotlight
+    2. Headline Text with Letter Animation
+    3. Subheadline with:
+       - Vara Text (handwritten)
+       - Regular Text (legacy transition)
+       - Spotlight Text (new reveal)
+  -->
   <div class="preloader" :class="{ 'is-hidden': !isVisible }">
-    <!-- Add SVG defs for gradient -->
+    <!-- Gradient definition - Required for text effects -->
     <svg width="0" height="0">
       <defs>
         <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -11,9 +24,16 @@
       </defs>
     </svg>
     
-    <!-- Add Google Fonts link -->
+    <!-- Required Vara font -->
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap" rel="stylesheet">
     
+    <!-- 
+      GRID AND SPOTLIGHT SYSTEM
+      - Controls spotlight position and movement
+      - Handles grid line animations
+      - Contains debug yellow line
+      ⚠️ DO NOT MODIFY without understanding spotlight animation sequence
+    -->
     <div class="grid-container" :class="{ 'debug-mode': showDebug }" :style="{
       '--spotlight-x': `${spotlightX}%`,
       '--spotlight-y': `${spotlightY}%`
@@ -29,8 +49,18 @@
       </div>
     </div>
     
+    <!-- 
+      CONTENT WRAPPER
+      Main container for all text animations
+      Maintains proper spacing and centering
+    -->
     <div class="content-wrapper">
       <div class="text-container">
+        <!-- 
+          HEADLINE SECTION
+          Letter-by-letter typing animation with gradient fill
+          ⚠️ Timing is critical - each letter appears with 0.1s delay
+        -->
         <div class="headline theme-text--gradient-animated gradient-shine">
           <template v-for="(word, wordIndex) in headline.split(' ')" :key="`word-${wordIndex}`">
             <span class="word">
@@ -54,12 +84,31 @@
           </template>
         </div>
         
+        <!-- 
+          SUBHEADLINE SECTION
+          Contains three synchronized text layers:
+          1. Vara Text (handwritten animation)
+          2. Regular Text (legacy letter transitions)
+          3. Spotlight Text (new reveal animation)
+          
+          ⚠️ IMPORTANT: All three layers must maintain exact positioning
+          for smooth transitions. Do not modify positioning without testing
+          all animation phases.
+        -->
         <div class="theme-text--gradient-animated gradient-shine subheading-responsive heading--highlight">
+          <!-- Vara container - Initial handwritten animation -->
           <div id="vara-container"></div>
+          
+          <!-- Regular text - Legacy transition system -->
           <div class="regular-text-wrapper">
             <span v-for="(letter, index) in subheadline" :key="index" class="letter" :style="{
               display: currentSubheadlineLetter >= index ? 'inline-block' : 'none'
             }">{{ letter }}</span>
+          </div>
+          
+          <!-- Spotlight text - New reveal animation -->
+          <div class="spotlight-text-wrapper theme-text--gradient-animated gradient-shine">
+            {{ subheadline }}
           </div>
         </div>
       </div>
@@ -68,6 +117,41 @@
 </template>
 
 <script setup lang="ts">
+/* 
+  ⚠️ ANIMATION SEQUENCE DOCUMENTATION
+  DO NOT MODIFY WITHOUT APPROVAL
+  
+  Animation Timeline:
+  1. GRID INTRO (0-1.6s)
+     - Horizontal lines fade in with random stagger
+     - Vertical lines follow with overlap
+     - Text container fades in during grid animation
+  
+  2. HEADLINE TYPING (1.1-3.1s)
+     - Letter by letter appearance
+     - Each letter takes 0.1s
+     - Includes gradient fill effect
+  
+  3. VARA TEXT (3.1s)
+     - Handwritten animation starts
+     - Controlled by Vara library
+     - Must complete before spotlight
+  
+  4. SPOTLIGHT SEQUENCE (3.1-7.6s)
+     - Initial spotlight shrink
+     - Random position movements
+     - Final position for text crossing
+  
+  5. TEXT TRANSITION (7.6-13.6s)
+     - Spotlight crosses text area
+     - Reveals regular text
+     - Vara text fades out
+  
+  6. FINALE (13.6-16.6s)
+     - Spotlight moves to final position
+     - Animation completes
+*/
+
 import { ref, onMounted, computed } from 'vue';
 import gsap from 'gsap';
 import SpotlightText from '@/components/text/SpotlightText.vue';
@@ -209,6 +293,13 @@ const isLetterTransitioning = ref(false);
 const transitionStartTime = ref<Record<string, number>>({});
 const transitionEndTime = ref<Record<string, number>>({});
 
+// Add function to handle spotlight reveal effect
+const applySpotlightReveal = (element: HTMLElement, spotlightX: number) => {
+  if (!element) return;
+  const clipAmount = Math.max(0, Math.min(100, 100 - spotlightX));
+  element.style.clipPath = `inset(0 ${clipAmount}% 0 0)`;
+};
+
 onMounted(() => {
   // Remove initial font check logs
   const subheadlineWords = document.querySelectorAll('.subheadline .word');
@@ -284,23 +375,18 @@ onMounted(() => {
       from: "random"
     },
     ease: 'power2.inOut'
-  }, '-=0.4') // Start vertical lines before horizontal lines finish
-  // Fade in text container and start text animation earlier
+  }, '-=0.4')
+  // Fade in text container and start text animation
   .to('.text-container', {
     opacity: 1,
     duration: 0.5,
     ease: 'power2.inOut',
-    onStart: () => {
-      // Start word animations while grid is still animating
-      // animateWords(); // Remove this line
-    },
     onComplete: () => {
-      // Start typing animation after text container is visible
       startTyping();
     }
-  }, '-=0.6') // Start text container fade in 0.6s before grid animation ends
-  // Wait a bit before starting the spotlight animation
-  .to({}, { duration: 1.5 }) // Add a pause before spotlight starts
+  }, '-=0.6')
+  // Continue with the rest of the animations
+  .to({}, { duration: 1.5 })
   // First shrink the spotlight
   .to('.grid-container', {
     '--spotlight-size': '50%',
@@ -340,40 +426,65 @@ onMounted(() => {
     duration: 1.5,
     ease: 'power2.inOut'
   })
-  // Shrink spotlight to text size and move to left edge of text
+  // Add new simple right-to-left movement
+  .to('.grid-container', {
+    '--spotlight-x': '100%',
+    '--spotlight-y': `${centerY}%`,
+    duration: 1.5,
+    ease: 'power2.inOut'
+  })
+  .to('.grid-container', {
+    '--spotlight-x': '0%',
+    '--spotlight-y': `${centerY}%`,
+    duration: 3,
+    ease: 'power1.inOut'
+  })
+  // First text crossing (left to right)
   .to('.grid-container', {
     '--spotlight-size': '20%',
     '--spotlight-x': '0%',
-    '--spotlight-y': `${centerY}%`, // Use text center Y
+    '--spotlight-y': `${centerY}%`,
     duration: 1.5,
     ease: 'power2.inOut',
     onComplete: () => {
       isTextCrossing.value = true;
     }
   })
-  // Move spotlight horizontally through text and fill letters
   .to('.grid-container', {
     '--spotlight-x': '100%',
-    '--spotlight-y': `${centerY}%`, // Keep Y centered on text
-    duration: 6, // Back to 6 seconds for smoother animation
+    '--spotlight-y': `${centerY}%`,
+    duration: 6,
     ease: 'power1.inOut',
     onStart: () => {
       isTextCrossing.value = true;
-      currentSubheadlineLetter.value = 0; // Reset letter counter at start
+      currentSubheadlineLetter.value = 0;
     },
     onUpdate: function() {
       const gridContainer = document.querySelector('.grid-container');
       if (gridContainer) {
         const spotlightX = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-x'));
         
-        // Handle subheadline letter transitions
+        if (isTextCrossing.value) {
+          const headlineLetters = document.querySelectorAll('.headline .letter');
+          headlineLetters.forEach((letter, index) => {
+            const letterPosition = (index / headlineLetters.length) * 100;
+            if (spotlightX >= letterPosition) {
+              letter.classList.add('filled');
+            }
+          });
+
+          const spotlightTextWrapper = document.querySelector('.spotlight-text-wrapper') as HTMLElement;
+          if (spotlightTextWrapper) {
+            applySpotlightReveal(spotlightTextWrapper, spotlightX);
+          }
+        }
+        
         if (isTextCrossing.value && !isLetterTransitioning.value) {
           const text = subheadline.value;
           if (currentSubheadlineLetter.value < text.length) {
             const progress = spotlightX / 100;
             const letterProgress = (currentSubheadlineLetter.value + 1) / text.length;
-            // Start transitions earlier and complete them faster
-            const transitionPoint = 0.05 + (letterProgress * 0.4); // Changed from 0.1 and 0.7 to 0.05 and 0.4
+            const transitionPoint = 0.05 + (letterProgress * 0.4);
             
             if (progress >= transitionPoint) {
               const varaContainer = document.querySelector('#vara-container') as HTMLElement;
@@ -383,7 +494,6 @@ onMounted(() => {
               if (currentLetter && currentLetter.style.opacity !== '1') {
                 isLetterTransitioning.value = true;
                 
-                // Get Vara text object
                 const varaText = varaInstance.get(0);
                 const varaLetter = varaText.characters[currentSubheadlineLetter.value];
                 
@@ -391,10 +501,8 @@ onMounted(() => {
                   const varaRect = varaLetter.getBoundingClientRect();
                   const containerRect = varaContainer.getBoundingClientRect();
                   
-                  // Get all Vara letters
                   const allVaraLetters = varaText.characters;
                   
-                  // Find the current line's first letter by looking backwards until we find a newline or start
                   let lineStartIndex = currentSubheadlineLetter.value;
                   while (lineStartIndex > 0) {
                     const prevChar = subheadline.value[lineStartIndex - 1];
@@ -404,44 +512,37 @@ onMounted(() => {
                     lineStartIndex--;
                   }
                   
-                  // Get the first letter of the current line as baseline
                   const lineFirstVaraLetter = allVaraLetters[lineStartIndex];
                   const lineBaselineTop = lineFirstVaraLetter ? 
                     lineFirstVaraLetter.getBoundingClientRect().top - containerRect.top : 
                     varaRect.top - containerRect.top;
                   
-                  console.log(`🔄 Letter "${currentLetter.textContent}": Transition Start`);
-                  
-                  // Position the regular letter
                   currentLetter.style.display = 'block';
                   currentLetter.style.position = 'absolute';
                   currentLetter.style.left = `${varaRect.left - containerRect.left}px`;
-                  currentLetter.style.top = `${lineBaselineTop}px`; // Use line's baseline
+                  currentLetter.style.top = `${lineBaselineTop}px`;
                   currentLetter.style.opacity = '0';
                   
-                  // Force browser to apply positioning before animation
                   currentLetter.offsetHeight;
                   
                   const letterTimeline = gsap.timeline({
                     onComplete: () => {
-                      console.log(`✅ Letter "${currentLetter.textContent}": Transition Complete`);
                       isLetterTransitioning.value = false;
                       currentSubheadlineLetter.value++;
                     }
                   });
 
-                  // Simple crossfade between the two letters
                   letterTimeline
                     .to(varaLetter, {
                       opacity: 0,
-                      duration: 0.05, // Reduced from 0.1 to 0.05 seconds
+                      duration: 0.05,
                       ease: 'none'
                     })
                     .to(currentLetter, {
                       opacity: 1,
-                      duration: 0.05, // Reduced from 0.1 to 0.05 seconds
+                      duration: 0.05,
                       ease: 'none'
-                    }, '<'); // Start at same time as vara fade out
+                    }, '<');
                 }
               }
             }
@@ -450,7 +551,7 @@ onMounted(() => {
       }
     },
     onComplete: () => {
-      console.log('🎯 Spotlight Animation Complete');
+      console.log('🎯 First Spotlight Animation Complete');
       isTextCrossing.value = false;
     }
   })
@@ -470,13 +571,7 @@ onMounted(() => {
     ease: 'power2.inOut',
     onComplete: () => {
       emit('complete');
-    }
-  })
-  // Add debug logging to spotlight movement
-  .to('.grid-container', {
-    '--spotlight-x': '20%',
-    duration: 1.5,
-    ease: 'power2.inOut',
+    },
     onUpdate: () => {
       const gridContainer = document.querySelector('.grid-container');
       if (gridContainer && props.showDebug) {
@@ -600,6 +695,33 @@ let hasTransitionStarted = false; // Add flag to track transition start
 </script>
 
 <style scoped>
+/*
+  ⚠️ CORE STYLES DOCUMENTATION
+  DO NOT MODIFY OR REMOVE WITHOUT APPROVAL
+  
+  Style Categories:
+  1. LAYOUT & POSITIONING
+     - Preloader container
+     - Grid system
+     - Content wrappers
+  
+  2. GRID & SPOTLIGHT
+     - Grid lines
+     - Spotlight mask
+     - Animation positions
+  
+  3. TEXT ANIMATIONS
+     - Headline typing
+     - Vara text
+     - Regular text
+     - Spotlight reveal
+  
+  4. SHARED UTILITIES
+     - Gradients
+     - Animations
+     - Debug helpers
+*/
+
 .preloader {
   position: fixed;
   top: 0;
@@ -733,7 +855,7 @@ let hasTransitionStarted = false; // Add flag to track transition start
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.5rem;
-  margin-bottom: 8rem;
+  margin-bottom: 2rem; /* Reduce from 8rem to 2rem */
   font-size: 2.5rem;
   font-weight: bold;
 }
@@ -775,7 +897,7 @@ let hasTransitionStarted = false; // Add flag to track transition start
   position: relative;
   width: 100%;
   height: 120px;
-  margin-top: 8rem;
+  margin-top: 4rem; /* Reduce from 8rem to 4rem */
   margin-bottom: 2rem;
   font-size: clamp(1rem, 2vw + 0.5rem, 1.5rem);
   line-height: 1.5;
@@ -788,15 +910,21 @@ let hasTransitionStarted = false; // Add flag to track transition start
 }
 
 #vara-container {
+  pointer-events: none;
+  position: relative;
+  z-index: 2;
   width: 100%;
-  height: 120px;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.regular-text-wrapper {
+  visibility: hidden;
+  pointer-events: none;
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  opacity: 1;
-  transition: opacity 0.4s ease;
-  z-index: 0;
+  z-index: 1;
 }
 
 /* Add debug styles for Vara letters */
@@ -806,7 +934,7 @@ let hasTransitionStarted = false; // Add flag to track transition start
 
 .regular-text-wrapper {
   width: 100%;
-  height: auto; /* Changed from fixed height */
+  height: auto;
   min-height: 120px;
   position: absolute;
   top: 50%;
@@ -814,10 +942,14 @@ let hasTransitionStarted = false; // Add flag to track transition start
   transform: translate(-50%, -50%);
   z-index: 1;
   display: flex;
-  flex-wrap: wrap; /* Added to allow line breaks */
+  flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  white-space: pre-wrap; /* Preserve line breaks */
+  white-space: pre-wrap;
+  visibility: visible; /* Make visible again */
+  pointer-events: none;
+  opacity: 1; /* Make fully visible */
+  clip-path: inset(0 100% 0 0); /* Start fully hidden */
 }
 
 .regular-text-wrapper .letter {
@@ -1008,5 +1140,73 @@ let hasTransitionStarted = false; // Add flag to track transition start
   pointer-events: none;
   transform: translateX(-50%);
   box-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+}
+
+/* Add styles for the test container */
+.test-subheadline {
+  margin-top: 4rem;
+  font-family: 'Raleway', sans-serif;
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+  opacity: 1; /* Change to 1 since we'll use clip-path to hide/show */
+  clip-path: inset(0 100% 0 0); /* Start fully hidden from right side */
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.spotlight-text-wrapper {
+  width: 100%;
+  height: auto;
+  min-height: 120px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: none;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  white-space: pre-wrap;
+  opacity: 1;
+  clip-path: inset(0 100% 0 0);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+  background: linear-gradient(
+    to right,
+    var(--theme-primary, #88C0D0),
+    var(--theme-secondary, #5E81AC),
+    var(--theme-primary, #88C0D0)
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shine 3s linear infinite;
+}
+
+.subheading-responsive {
+  position: relative;
+  width: 100%;
+  height: 120px;
+  margin-top: 2rem; /* Reduce from 4rem to 2rem */
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: clamp(1rem, 2vw + 0.5rem, 1.5rem);
+  line-height: 1.5;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  color: var(--theme-text-primary, #E5E9F0);
+  max-width: 65ch;
+  margin-left: auto;
+  margin-right: auto;
 }
 </style> 
