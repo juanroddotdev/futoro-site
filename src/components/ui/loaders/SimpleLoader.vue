@@ -54,10 +54,10 @@
           </template>
         </div>
         
-        <div class="subheadline theme-text--gradient-animated gradient-shine">
+        <div class="theme-text--gradient-animated gradient-shine subheading-responsive heading--highlight">
           <div id="vara-container"></div>
           <div class="regular-text-wrapper">
-            <span v-for="(letter, index) in 'Futoro'" :key="index" class="letter" :style="{
+            <span v-for="(letter, index) in subheadline" :key="index" class="letter" :style="{
               display: currentSubheadlineLetter >= index ? 'inline-block' : 'none'
             }">{{ letter }}</span>
           </div>
@@ -355,136 +355,93 @@ onMounted(() => {
   .to('.grid-container', {
     '--spotlight-x': '100%',
     '--spotlight-y': `${centerY}%`, // Keep Y centered on text
-    duration: 6,
+    duration: 6, // Back to 6 seconds for smoother animation
     ease: 'power1.inOut',
     onStart: () => {
       isTextCrossing.value = true;
+      currentSubheadlineLetter.value = 0; // Reset letter counter at start
     },
     onUpdate: function() {
       const gridContainer = document.querySelector('.grid-container');
       if (gridContainer) {
         const spotlightX = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-x'));
         
-        // Restore headline letter filling
-        const words = headline.value.split(' ');
-        let totalLettersFilled = 0;
-        
-        words.forEach((word, wordIndex) => {
-          word.split('').forEach((char, letterIndex) => {
-            const letterPosition = getLetterPosition(wordIndex, letterIndex);
-            const letter = document.querySelector(`[data-word-index="${wordIndex}"][data-letter-index="${letterIndex}"]`);
+        // Handle subheadline letter transitions
+        if (isTextCrossing.value && !isLetterTransitioning.value) {
+          const text = subheadline.value;
+          if (currentSubheadlineLetter.value < text.length) {
+            const progress = spotlightX / 100;
+            const letterProgress = (currentSubheadlineLetter.value + 1) / text.length;
+            // Start transitions earlier and complete them faster
+            const transitionPoint = 0.05 + (letterProgress * 0.4); // Changed from 0.1 and 0.7 to 0.05 and 0.4
             
-            if (letter) {
-              const wasFilled = letter.classList.contains('filled');
-              const shouldFill = letterPosition <= (spotlightX + 2);
-              
-              if (shouldFill && !wasFilled) {
-                letter.classList.add('filled');
-                totalLettersFilled++;
-              }
-            }
-          });
-        });
-
-        // Per-letter transition based on spotlight position for subheadline
-        const varaContainer = document.querySelector('#vara-container') as HTMLElement;
-        const regularLetters = document.querySelectorAll('.regular-text-wrapper .letter') as NodeListOf<HTMLElement>;
-        
-        if (varaContainer && regularLetters.length && isTextCrossing.value) {
-          const progress = spotlightX / 100;
-          
-          if (!isLetterTransitioning.value) {
-            // Calculate the transition point for the current letter
-            const letterProgress = (currentSubheadlineLetter.value + 1) / regularLetters.length;
-            // Start at 20% and spread transitions over 60% of the animation (earlier start, wider spread)
-            const transitionPoint = 0.2 + (letterProgress * 0.6);
-            
-            // Check if spotlight has reached the current letter
             if (progress >= transitionPoint) {
+              const varaContainer = document.querySelector('#vara-container') as HTMLElement;
+              const regularLetters = document.querySelectorAll('.regular-text-wrapper .letter') as NodeListOf<HTMLElement>;
               const currentLetter = regularLetters[currentSubheadlineLetter.value];
-              const currentOpacity = currentLetter.style.opacity;
               
-              if (currentOpacity !== '1') {
-                const startTime = performance.now();
-                const letterKey = `letter-${currentLetter.textContent}`;
-                transitionStartTime.value[letterKey] = startTime;
+              if (currentLetter && currentLetter.style.opacity !== '1') {
+                isLetterTransitioning.value = true;
                 
                 // Get Vara text object
                 const varaText = varaInstance.get(0);
                 const varaLetter = varaText.characters[currentSubheadlineLetter.value];
                 
-                if (varaLetter) {
-                  // Get the Vara letter's position
+                if (varaLetter && varaContainer) {
                   const varaRect = varaLetter.getBoundingClientRect();
                   const containerRect = varaContainer.getBoundingClientRect();
                   
-                  // Calculate the base position for the current letter
-                  const letterWidth = 40; // Approximate width of each letter
-                  const totalWidth = letterWidth * 'Futoro'.length;
-                  const startX = -((totalWidth / 2) - (letterWidth / 2));
-                  const offset = startX + (currentSubheadlineLetter.value * letterWidth);
+                  // Get all Vara letters
+                  const allVaraLetters = varaText.characters;
                   
-                  // Log letter spacing information
-                  console.log(`[Spacing] Letter "${currentLetter.textContent}" #${currentSubheadlineLetter.value}:`, {
-                    offset,
-                    transform: `translateX(${offset}px)`,
-                    previousLetterOffset: currentSubheadlineLetter.value > 0 ? 
-                      regularLetters[currentSubheadlineLetter.value - 1].style.getPropertyValue('--letter-offset') : 'none'
-                  });
-                  
-                  // Set the offset for the regular letter
-                  currentLetter.style.setProperty('--letter-offset', `${offset}px`);
-                  
-                  // Create a GSAP timeline for smooth transition
-                  const tl = gsap.timeline();
-                  
-                  // Show the regular letter but keep it transparent initially
-                  currentLetter.style.removeProperty('opacity');
-                  currentLetter.style.display = 'inline-block';
-                  gsap.set(currentLetter, { opacity: 0 });
-                  
-                  // Animate both elements simultaneously
-                  tl.to(varaLetter, {
-                    opacity: 0,
-                    duration: 0.4,
-                    ease: 'power2.inOut'
-                  })
-                  .to(currentLetter, {
-                    opacity: 1,
-                    duration: 0.4,
-                    ease: 'power2.inOut',
-                    onComplete: () => {
-                      // Log final spacing after transition
-                      const computedStyle = window.getComputedStyle(currentLetter);
-                      console.log(`[Spacing] Letter "${currentLetter.textContent}" final position:`, {
-                        offset: currentLetter.style.getPropertyValue('--letter-offset'),
-                        transform: computedStyle.transform,
-                        left: computedStyle.left,
-                        marginLeft: computedStyle.marginLeft
-                      });
+                  // Find the current line's first letter by looking backwards until we find a newline or start
+                  let lineStartIndex = currentSubheadlineLetter.value;
+                  while (lineStartIndex > 0) {
+                    const prevChar = subheadline.value[lineStartIndex - 1];
+                    if (prevChar === '\n' || prevChar === '\r') {
+                      break;
                     }
-                  }, '<'); // Start at the same time as varaLetter animation
+                    lineStartIndex--;
+                  }
                   
-                  isLetterTransitioning.value = true;
+                  // Get the first letter of the current line as baseline
+                  const lineFirstVaraLetter = allVaraLetters[lineStartIndex];
+                  const lineBaselineTop = lineFirstVaraLetter ? 
+                    lineFirstVaraLetter.getBoundingClientRect().top - containerRect.top : 
+                    varaRect.top - containerRect.top;
                   
-                  // Add completion handler to the timeline
-                  tl.eventCallback('onComplete', () => {
-                    // Force final states
-                    gsap.set(varaLetter, { opacity: 0 });
-                    gsap.set(currentLetter, { opacity: 1 });
-                    
-                    isLetterTransitioning.value = false;
-                    if (currentSubheadlineLetter.value === 'Futoro'.length - 1) {
-                      // Fade out entire Vara container
-                      gsap.to('#vara-container', {
-                        opacity: 0,
-                        duration: 0.4,
-                        ease: 'power2.inOut'
-                      });
-                    } else {
+                  console.log(`🔄 Letter "${currentLetter.textContent}": Transition Start`);
+                  
+                  // Position the regular letter
+                  currentLetter.style.display = 'block';
+                  currentLetter.style.position = 'absolute';
+                  currentLetter.style.left = `${varaRect.left - containerRect.left}px`;
+                  currentLetter.style.top = `${lineBaselineTop}px`; // Use line's baseline
+                  currentLetter.style.opacity = '0';
+                  
+                  // Force browser to apply positioning before animation
+                  currentLetter.offsetHeight;
+                  
+                  const letterTimeline = gsap.timeline({
+                    onComplete: () => {
+                      console.log(`✅ Letter "${currentLetter.textContent}": Transition Complete`);
+                      isLetterTransitioning.value = false;
                       currentSubheadlineLetter.value++;
                     }
                   });
+
+                  // Simple crossfade between the two letters
+                  letterTimeline
+                    .to(varaLetter, {
+                      opacity: 0,
+                      duration: 0.05, // Reduced from 0.1 to 0.05 seconds
+                      ease: 'none'
+                    })
+                    .to(currentLetter, {
+                      opacity: 1,
+                      duration: 0.05, // Reduced from 0.1 to 0.05 seconds
+                      ease: 'none'
+                    }, '<'); // Start at same time as vara fade out
                 }
               }
             }
@@ -493,26 +450,7 @@ onMounted(() => {
       }
     },
     onComplete: () => {
-      console.log('=== Spotlight Animation Complete ===');
-      // Force fill any remaining letters
-      const letters = document.querySelectorAll('.letter');
-      letters.forEach((letter: Element) => {
-        (letter as HTMLElement).classList.add('filled');
-      });
-      
-      // Log final spacing between regular text letters
-      const regularLetters = document.querySelectorAll('.regular-text-wrapper .letter') as NodeListOf<HTMLElement>;
-      console.log('=== Final Letter Spacing ===');
-      regularLetters.forEach((letter, index) => {
-        const computedStyle = window.getComputedStyle(letter);
-        console.log(`Letter "${letter.textContent}": {
-          offset: ${letter.style.getPropertyValue('--letter-offset')},
-          transform: ${computedStyle.transform},
-          left: ${computedStyle.left},
-          marginLeft: ${computedStyle.marginLeft}
-        }`);
-      });
-      
+      console.log('🎯 Spotlight Animation Complete');
       isTextCrossing.value = false;
     }
   })
@@ -554,25 +492,27 @@ const animateWords = async () => {
   try {
     await loadVara();
     
-    // Initialize Vara with autoAnimation: false so we can control it
+    // Initialize Vara with the subheadline text
     varaInstance = new window.Vara(
       "#vara-container",
       "https://raw.githubusercontent.com/akzhy/Vara/master/fonts/Satisfy/SatisfySL.json",
       [
         {
-          text: "Futoro",
-          fontSize: 72,
-          strokeWidth: 2.5,
+          text: subheadline.value,
+          fontSize: 24, // Matching the max size of regular text (3rem = 48px)
+          strokeWidth: 2,
           color: 'var(--theme-primary, #88C0D0)',
           duration: 2000,
-          letterSpacing: 4,
-          y: 60, // Adjust Y position to match regular text
-          autoAnimation: false // Disable auto animation
+          letterSpacing: 2,
+          y: 35,
+          x: 0,
+          textAlign: "center",
+          autoAnimation: false
         }
       ],
       {
-        strokeWidth: 2.5,
-        fontSize: 72,
+        strokeWidth: 2,
+        fontSize: 24, // Matching the max size of regular text
         textAlign: "center"
       }
     );
@@ -587,11 +527,10 @@ const animateWords = async () => {
       // Store references to each letter's SVG group
       const varaLetters = varaText.characters;
       
-      // Add data attributes to each letter
-      'Futoro'.split('').forEach((letter, index) => {
+      // Add data attributes to each letter using subheadline
+      subheadline.value.split('').forEach((letter, index) => {
         if (varaLetters[index]) {
           varaLetters[index].setAttribute('data-letter', letter);
-          // Set initial opacity to 1
           varaLetters[index].style.opacity = '1';
         }
       });
@@ -794,7 +733,7 @@ let hasTransitionStarted = false; // Add flag to track transition start
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 8rem;
   font-size: 2.5rem;
   font-weight: bold;
 }
@@ -835,8 +774,9 @@ let hasTransitionStarted = false; // Add flag to track transition start
   justify-content: center;
   position: relative;
   width: 100%;
-  height: 120px; /* Match the height of the containers */
-  margin-top: 2rem;
+  height: 120px;
+  margin-top: 8rem;
+  margin-bottom: 2rem;
   font-size: clamp(1rem, 2vw + 0.5rem, 1.5rem);
   line-height: 1.5;
   font-weight: 500;
@@ -845,64 +785,63 @@ let hasTransitionStarted = false; // Add flag to track transition start
   max-width: 65ch;
   margin-left: auto;
   margin-right: auto;
-  overflow: visible; /* Allow debug line to be visible */
 }
 
-/* Regular text wrapper specific styles */
-.regular-text-wrapper {
+#vara-container {
   width: 100%;
   height: 120px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 1;
+  transition: opacity 0.4s ease;
+  z-index: 0;
+}
+
+/* Add debug styles for Vara letters */
+#vara-container svg path {
+  outline: 1px solid rgba(255, 0, 255, 0.5); /* Magenta border for Vara letters */
+}
+
+.regular-text-wrapper {
+  width: 100%;
+  height: auto; /* Changed from fixed height */
+  min-height: 120px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
   display: flex;
+  flex-wrap: wrap; /* Added to allow line breaks */
   justify-content: center;
   align-items: center;
-  position: absolute;
-  top: 20%;
-  left: 0;
-  transform: translateY(-30%);
-  font-weight: 600;
-  padding: 0 20px;
-  border: 2px solid rgba(136, 192, 208, 0.3);
+  white-space: pre-wrap; /* Preserve line breaks */
 }
 
 .regular-text-wrapper .letter {
+  position: absolute;
+  opacity: 0;
+  display: none;
   background: linear-gradient(
     to right,
     var(--theme-primary, #88C0D0),
-    var(--theme-secondary, #5E81AC),
-    var(--theme-primary, #88C0D0)
+    var(--theme-secondary, #5E81AC)
   );
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   animation: shine 3s linear infinite;
-  will-change: opacity;
-  display: none;
-  font-weight: 400;
-  opacity: 0;
-  transition: none;
-  visibility: visible;
-  position: relative;
-  transform: translateX(var(--letter-offset, 0px));
   font-family: 'Raleway', sans-serif;
-  font-size: 72px;
+  font-size: clamp(1rem, 2.5vw, 3rem);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0;
   margin: 0;
-  letter-spacing: -0.05em; /* Tighter letter spacing */
-  width: 40px; /* Fixed width for consistent spacing */
-  text-align: center;
-}
-
-#vara-container {
-  width: 100%;
-  height: 120px;
-  display: block;
-  position: absolute;
-  top: 0%;
-  left: 0;
-  transform: translateY(-40%);
-  opacity: 1;
-  transition: opacity 0.4s ease;
-  border: 2px solid rgba(94, 129, 172, 0.3);
+  pointer-events: none;
+  max-width: 100%; /* Added to prevent overflow */
 }
 
 .subheadline .word {
