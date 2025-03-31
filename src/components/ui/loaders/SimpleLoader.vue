@@ -100,11 +100,11 @@
           <div id="vara-container"></div>
           
           <!-- Regular text - Legacy transition system -->
-          <div class="regular-text-wrapper">
+          <!-- <div class="regular-text-wrapper">
             <span v-for="(letter, index) in subheadline" :key="index" class="letter" :style="{
               display: currentSubheadlineLetter >= index ? 'inline-block' : 'none'
             }">{{ letter }}</span>
-          </div>
+          </div> -->
           
           <!-- Spotlight text - New reveal animation -->
           <div class="spotlight-text-wrapper theme-text--gradient-animated gradient-shine">
@@ -294,10 +294,45 @@ const transitionStartTime = ref<Record<string, number>>({});
 const transitionEndTime = ref<Record<string, number>>({});
 
 // Add function to handle spotlight reveal effect
-const applySpotlightReveal = (element: HTMLElement, spotlightX: number) => {
+const applySpotlightReveal = (element: HTMLElement, spotlightX: number, isRightToLeft: boolean = true) => {
   if (!element) return;
-  const clipAmount = Math.max(0, Math.min(100, 100 - spotlightX));
-  element.style.clipPath = `inset(0 ${clipAmount}% 0 0)`;
+  const clipAmount = isRightToLeft ? 
+    Math.max(0, Math.min(100, spotlightX)) :  // For right-to-left
+    Math.max(0, Math.min(100, 100 - spotlightX));  // For left-to-right
+  element.style.clipPath = isRightToLeft ?
+    `inset(0 0 0 ${clipAmount}%)` :  // Clip from left side for right-to-left
+    `inset(0 ${clipAmount}% 0 0)`;   // Clip from right side for left-to-right
+
+  // Handle Vara letter fade-out
+  const varaContainer = document.querySelector('#vara-container');
+  if (varaContainer && varaInstance) {
+    const varaText = varaInstance.get(0);
+    if (varaText && varaText.characters) {
+      // Check all letters
+      varaText.characters.forEach((varaLetter: any, index: number) => {
+        if (varaLetter && varaLetter.style.opacity !== '0') {  // Only process visible letters
+          const varaRect = varaLetter.getBoundingClientRect();
+          const containerRect = varaContainer.getBoundingClientRect();
+          
+          // Calculate letter position as percentage
+          const letterPosition = ((varaRect.left - containerRect.left) / containerRect.width) * 100;
+          
+          // Fade out letter when spotlight passes it
+          const shouldFadeOut = isRightToLeft ? 
+            letterPosition > spotlightX :  // For right-to-left
+            letterPosition < spotlightX;   // For left-to-right
+          
+          if (shouldFadeOut) {
+            gsap.to(varaLetter, {
+              opacity: 0,
+              duration: 0.05,
+              ease: 'none'
+            });
+          }
+        }
+      });
+    }
+  }
 };
 
 onMounted(() => {
@@ -439,18 +474,35 @@ onMounted(() => {
     '--spotlight-y': `${centerY}%`,
     '--spotlight-size': '50%',
     duration: 6,
-    ease: 'power1.inOut'
+    ease: 'power1.inOut',
+    onStart: () => {
+      isTextCrossing.value = true;
+      currentSubheadlineLetter.value = 0;
+    },
+    onUpdate: function() {
+      const gridContainer = document.querySelector('.grid-container');
+      if (gridContainer) {
+        const spotlightX = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-x'));
+        
+        if (isTextCrossing.value) {
+          const spotlightTextWrapper = document.querySelector('.spotlight-text-wrapper') as HTMLElement;
+          if (spotlightTextWrapper) {
+            applySpotlightReveal(spotlightTextWrapper, spotlightX, true); // true for right-to-left
+          }
+        }
+      }
+    },
+    onComplete: () => {
+      isTextCrossing.value = false;
+    }
   })
-  // Left to Right movement (unchanged)
+  // Left to Right movement
   .to('.grid-container', {
     '--spotlight-size': '20%',
     '--spotlight-x': '0%',
     '--spotlight-y': `${centerY}%`,
     duration: 1.5,
-    ease: 'power2.inOut',
-    onComplete: () => {
-      isTextCrossing.value = true;
-    }
+    ease: 'power2.inOut'
   })
   .to('.grid-container', {
     '--spotlight-x': '100%',
@@ -468,93 +520,14 @@ onMounted(() => {
         const spotlightX = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-x'));
         
         if (isTextCrossing.value) {
-          const headlineLetters = document.querySelectorAll('.headline .letter');
-          headlineLetters.forEach((letter, index) => {
-            const letterPosition = (index / headlineLetters.length) * 100;
-            if (spotlightX >= letterPosition) {
-              letter.classList.add('filled');
-            }
-          });
-
           const spotlightTextWrapper = document.querySelector('.spotlight-text-wrapper') as HTMLElement;
           if (spotlightTextWrapper) {
-            applySpotlightReveal(spotlightTextWrapper, spotlightX);
-          }
-        }
-        
-        if (isTextCrossing.value && !isLetterTransitioning.value) {
-          const text = subheadline.value;
-          if (currentSubheadlineLetter.value < text.length) {
-            const progress = spotlightX / 100;
-            const letterProgress = (currentSubheadlineLetter.value + 1) / text.length;
-            const transitionPoint = 0.05 + (letterProgress * 0.4);
-            
-            if (progress >= transitionPoint) {
-              const varaContainer = document.querySelector('#vara-container') as HTMLElement;
-              const regularLetters = document.querySelectorAll('.regular-text-wrapper .letter') as NodeListOf<HTMLElement>;
-              const currentLetter = regularLetters[currentSubheadlineLetter.value];
-              
-              if (currentLetter && currentLetter.style.opacity !== '1') {
-                isLetterTransitioning.value = true;
-                
-                const varaText = varaInstance.get(0);
-                const varaLetter = varaText.characters[currentSubheadlineLetter.value];
-                
-                if (varaLetter && varaContainer) {
-                  const varaRect = varaLetter.getBoundingClientRect();
-                  const containerRect = varaContainer.getBoundingClientRect();
-                  
-                  const allVaraLetters = varaText.characters;
-                  
-                  let lineStartIndex = currentSubheadlineLetter.value;
-                  while (lineStartIndex > 0) {
-                    const prevChar = subheadline.value[lineStartIndex - 1];
-                    if (prevChar === '\n' || prevChar === '\r') {
-                      break;
-                    }
-                    lineStartIndex--;
-                  }
-                  
-                  const lineFirstVaraLetter = allVaraLetters[lineStartIndex];
-                  const lineBaselineTop = lineFirstVaraLetter ? 
-                    lineFirstVaraLetter.getBoundingClientRect().top - containerRect.top : 
-                    varaRect.top - containerRect.top;
-                  
-                  currentLetter.style.display = 'block';
-                  currentLetter.style.position = 'absolute';
-                  currentLetter.style.left = `${varaRect.left - containerRect.left}px`;
-                  currentLetter.style.top = `${lineBaselineTop}px`;
-                  currentLetter.style.opacity = '0';
-                  
-                  currentLetter.offsetHeight;
-                  
-                  const letterTimeline = gsap.timeline({
-                    onComplete: () => {
-                      isLetterTransitioning.value = false;
-                      currentSubheadlineLetter.value++;
-                    }
-                  });
-
-                  letterTimeline
-                  .to(varaLetter, {
-                    opacity: 0,
-                    duration: 0.05,
-                    ease: 'none'
-                  })
-                  .to(currentLetter, {
-                    opacity: 1,
-                    duration: 0.05,
-                    ease: 'none'
-                  }, '<');
-                }
-              }
-            }
+            applySpotlightReveal(spotlightTextWrapper, spotlightX, false); // false for left-to-right
           }
         }
       }
     },
     onComplete: () => {
-      console.log('🎯 First Spotlight Animation Complete');
       isTextCrossing.value = false;
     }
   })
