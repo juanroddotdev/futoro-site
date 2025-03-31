@@ -62,26 +62,22 @@
           ⚠️ Timing is critical - each letter appears with 0.1s delay
         -->
         <div class="headline theme-text--gradient-animated gradient-shine">
-          <template v-for="(word, wordIndex) in headline.split(' ')" :key="`word-${wordIndex}`">
-            <span class="word">
-              <span v-for="(char, letterIndex) in word" 
-                    :key="`letter-${wordIndex}-${letterIndex}`"
-                    class="letter"
-                    :data-word-index="wordIndex"
-                    :data-letter-index="letterIndex"
-                    :style="{
-                      opacity: isLetterVisible(wordIndex, letterIndex) ? 1 : 0,
-                      transform: isLetterVisible(wordIndex, letterIndex) ? 'translateY(0)' : 'translateY(10px)'
-                    }">
-                {{ char }}
+          <!-- Vara container for headline -->
+          <div id="headline-vara-container"></div>
+          
+          <!-- Original headline with stroke text -->
+          <div class="spotlight-text-wrapper headline-spotlight theme-text--gradient-animated gradient-shine">
+            <template v-for="(word, wordIndex) in headline.split(' ')" :key="`word-${wordIndex}`">
+              <span class="word">
+                <span v-for="(char, letterIndex) in word" 
+                      :key="`letter-${wordIndex}-${letterIndex}`"
+                      class="letter">
+                  {{ char }}
+                </span>
               </span>
-            </span>
-            <span v-if="wordIndex < headline.split(' ').length - 1" 
-                  class="space"
-                  :style="{
-                    opacity: isSpaceVisible(wordIndex) ? 1 : 0
-                  }">&nbsp;</span>
-          </template>
+              <span v-if="wordIndex < headline.split(' ').length - 1" class="space">&nbsp;</span>
+            </template>
+          </div>
         </div>
         
         <!-- 
@@ -196,6 +192,7 @@ const isTyping = ref(false);
 
 const isAnimationComplete = ref(false);
 let varaInstance: any = null;
+let headlineVaraInstance: any = null;
 
 const { loadVara } = useVara();
 
@@ -293,7 +290,101 @@ const isLetterTransitioning = ref(false);
 const transitionStartTime = ref<Record<string, number>>({});
 const transitionEndTime = ref<Record<string, number>>({});
 
-// Add function to handle spotlight reveal effect
+// Update animateWords function to handle both headline and subheadline
+const animateWords = async () => {
+  try {
+    await loadVara();
+    
+    // Initialize Vara for headline
+    headlineVaraInstance = new window.Vara(
+      "#headline-vara-container",
+      "https://raw.githubusercontent.com/akzhy/Vara/master/fonts/Satisfy/SatisfySL.json",
+      [
+        {
+          text: headline.value,
+          fontSize: 40, // Larger size for headline
+          strokeWidth: 2,
+          color: 'var(--theme-primary, #88C0D0)',
+          duration: 2000,
+          letterSpacing: 2,
+          y: 35,
+          x: 0,
+          textAlign: "center",
+          autoAnimation: false
+        }
+      ],
+      {
+        strokeWidth: 2,
+        fontSize: 40,
+        textAlign: "center"
+      }
+    );
+
+    // Initialize Vara for subheadline
+    varaInstance = new window.Vara(
+      "#vara-container",
+      "https://raw.githubusercontent.com/akzhy/Vara/master/fonts/Satisfy/SatisfySL.json",
+      [
+        {
+          text: subheadline.value,
+          fontSize: 24,
+          strokeWidth: 2,
+          color: 'var(--theme-primary, #88C0D0)',
+          duration: 2000,
+          letterSpacing: 2,
+          y: 35,
+          x: 0,
+          textAlign: "center",
+          autoAnimation: false
+        }
+      ],
+      {
+        strokeWidth: 2,
+        fontSize: 24,
+        textAlign: "center"
+      }
+    );
+
+    // When both Vara instances are ready
+    Promise.all([
+      new Promise(resolve => headlineVaraInstance.ready(resolve)),
+      new Promise(resolve => varaInstance.ready(resolve))
+    ]).then(() => {
+      console.log('=== Vara Animation Start ===');
+      isAnimationComplete.value = true;
+      
+      // Setup headline Vara
+      const headlineVaraText = headlineVaraInstance.get(0);
+      const headlineVaraLetters = headlineVaraText.characters;
+      
+      headline.value.split('').forEach((letter, index) => {
+        if (headlineVaraLetters[index]) {
+          headlineVaraLetters[index].setAttribute('data-letter', letter);
+          headlineVaraLetters[index].style.opacity = '1';
+        }
+      });
+
+      // Setup subheadline Vara
+      const varaText = varaInstance.get(0);
+      const varaLetters = varaText.characters;
+      
+      subheadline.value.split('').forEach((letter, index) => {
+        if (varaLetters[index]) {
+          varaLetters[index].setAttribute('data-letter', letter);
+          varaLetters[index].style.opacity = '1';
+        }
+      });
+
+      // Draw both immediately
+      headlineVaraInstance.draw(0);
+      varaInstance.draw(0);
+    });
+  } catch (error) {
+    console.error('Failed to load Vara:', error);
+  }
+};
+
+// Update applySpotlightReveal function to handle headline Vara
 const applySpotlightReveal = (element: HTMLElement, spotlightX: number, isRightToLeft: boolean = true) => {
   if (!element) return;
   const clipAmount = isRightToLeft ? 
@@ -303,21 +394,50 @@ const applySpotlightReveal = (element: HTMLElement, spotlightX: number, isRightT
     `inset(0 0 0 ${clipAmount}%)` :  // Clip from left side for right-to-left
     `inset(0 ${clipAmount}% 0 0)`;   // Clip from right side for left-to-right
 
-  // Handle Vara letter fade-out
+  // Handle Vara letter fade-out for headline
+  const headlineVaraContainer = document.querySelector('#headline-vara-container');
+  if (headlineVaraContainer && headlineVaraInstance) {
+    const headlineVaraText = headlineVaraInstance.get(0);
+    if (headlineVaraText && headlineVaraText.characters) {
+      headlineVaraText.characters.forEach((varaLetter: any, index: number) => {
+        if (varaLetter && varaLetter.style.opacity !== '0') {
+          const varaRect = varaLetter.getBoundingClientRect();
+          const containerRect = headlineVaraContainer.getBoundingClientRect();
+          
+          // Calculate letter position as percentage
+          const letterPosition = ((varaRect.left - containerRect.left) / containerRect.width) * 100;
+          
+          // Determine when to fade out based on direction
+          const shouldFadeOut = isRightToLeft ? 
+            letterPosition > spotlightX :  // For right-to-left
+            letterPosition < spotlightX;   // For left-to-right
+          
+          if (shouldFadeOut) {
+            gsap.to(varaLetter, {
+              opacity: 0,
+              duration: 0.05,
+              ease: 'none'
+            });
+          }
+        }
+      });
+    }
+  }
+
+  // Handle Vara letter fade-out for subheadline
   const varaContainer = document.querySelector('#vara-container');
   if (varaContainer && varaInstance) {
     const varaText = varaInstance.get(0);
     if (varaText && varaText.characters) {
-      // Check all letters
       varaText.characters.forEach((varaLetter: any, index: number) => {
-        if (varaLetter && varaLetter.style.opacity !== '0') {  // Only process visible letters
+        if (varaLetter && varaLetter.style.opacity !== '0') {
           const varaRect = varaLetter.getBoundingClientRect();
           const containerRect = varaContainer.getBoundingClientRect();
           
           // Calculate letter position as percentage
           const letterPosition = ((varaRect.left - containerRect.left) / containerRect.width) * 100;
           
-          // Fade out letter when spotlight passes it
+          // Determine when to fade out based on direction
           const shouldFadeOut = isRightToLeft ? 
             letterPosition > spotlightX :  // For right-to-left
             letterPosition < spotlightX;   // For left-to-right
@@ -334,6 +454,41 @@ const applySpotlightReveal = (element: HTMLElement, spotlightX: number, isRightT
     }
   }
 };
+
+// Add styles for headline Vara container
+#headline-vara-container {
+  pointer-events: none;
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Update headline spotlight styles */
+.headline-spotlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 2.5rem;
+  font-weight: bold;
+  clip-path: inset(0 100% 0 0);
+  pointer-events: none;
+  opacity: 0; /* Start hidden */
+  transition: opacity 0.3s ease;
+}
+
+.headline-spotlight.visible {
+  opacity: 1;
+}
 
 onMounted(() => {
   // Remove initial font check logs
@@ -461,7 +616,7 @@ onMounted(() => {
     duration: 1.5,
     ease: 'power2.inOut'
   })
-  // Right to Left movement (same spotlight animation, no text reveal)
+  // Right to Left movement
   .to('.grid-container', {
     '--spotlight-size': '20%',
     '--spotlight-x': '100%',      // Start at right
@@ -485,9 +640,16 @@ onMounted(() => {
         const spotlightX = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-x'));
         
         if (isTextCrossing.value) {
-          const spotlightTextWrapper = document.querySelector('.spotlight-text-wrapper') as HTMLElement;
+          // Apply to headline (right-to-left)
+          const headlineSpotlight = document.querySelector('.headline-spotlight') as HTMLElement;
+          if (headlineSpotlight) {
+            applySpotlightReveal(headlineSpotlight, spotlightX, true);
+          }
+          
+          // Apply to subheadline (right-to-left)
+          const spotlightTextWrapper = document.querySelector('.spotlight-text-wrapper:not(.headline-spotlight)') as HTMLElement;
           if (spotlightTextWrapper) {
-            applySpotlightReveal(spotlightTextWrapper, spotlightX, true); // true for right-to-left
+            applySpotlightReveal(spotlightTextWrapper, spotlightX, true);
           }
         }
       }
@@ -499,13 +661,13 @@ onMounted(() => {
   // Left to Right movement
   .to('.grid-container', {
     '--spotlight-size': '20%',
-    '--spotlight-x': '0%',
+    '--spotlight-x': '0%',        // Start at left
     '--spotlight-y': `${centerY}%`,
     duration: 1.5,
     ease: 'power2.inOut'
   })
   .to('.grid-container', {
-    '--spotlight-x': '100%',
+    '--spotlight-x': '100%',      // Move to right
     '--spotlight-y': `${centerY}%`,
     '--spotlight-size': '50%',
     duration: 6,
@@ -520,9 +682,16 @@ onMounted(() => {
         const spotlightX = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-x'));
         
         if (isTextCrossing.value) {
-          const spotlightTextWrapper = document.querySelector('.spotlight-text-wrapper') as HTMLElement;
+          // Apply to headline (left-to-right)
+          const headlineSpotlight = document.querySelector('.headline-spotlight') as HTMLElement;
+          if (headlineSpotlight) {
+            applySpotlightReveal(headlineSpotlight, spotlightX, false);
+          }
+          
+          // Apply to subheadline (left-to-right)
+          const spotlightTextWrapper = document.querySelector('.spotlight-text-wrapper:not(.headline-spotlight)') as HTMLElement;
           if (spotlightTextWrapper) {
-            applySpotlightReveal(spotlightTextWrapper, spotlightX, false); // false for left-to-right
+            applySpotlightReveal(spotlightTextWrapper, spotlightX, false);
           }
         }
       }
@@ -557,62 +726,6 @@ onMounted(() => {
     }
   });
 });
-
-// Update animateWords function to properly handle Vara
-const animateWords = async () => {
-  try {
-    await loadVara();
-    
-    // Initialize Vara with the subheadline text
-    varaInstance = new window.Vara(
-      "#vara-container",
-      "https://raw.githubusercontent.com/akzhy/Vara/master/fonts/Satisfy/SatisfySL.json",
-      [
-        {
-          text: subheadline.value,
-          fontSize: 24, // Matching the max size of regular text (3rem = 48px)
-          strokeWidth: 2,
-          color: 'var(--theme-primary, #88C0D0)',
-          duration: 2000,
-          letterSpacing: 2,
-          y: 35,
-          x: 0,
-          textAlign: "center",
-          autoAnimation: false
-        }
-      ],
-      {
-        strokeWidth: 2,
-        fontSize: 24, // Matching the max size of regular text
-        textAlign: "center"
-      }
-    );
-
-    // When Vara is ready
-    varaInstance.ready(() => {
-      console.log('=== Vara Animation Start ===');
-      isAnimationComplete.value = true;
-      
-      // Get the Vara text object
-      const varaText = varaInstance.get(0);
-      // Store references to each letter's SVG group
-      const varaLetters = varaText.characters;
-      
-      // Add data attributes to each letter using subheadline
-      subheadline.value.split('').forEach((letter, index) => {
-        if (varaLetters[index]) {
-          varaLetters[index].setAttribute('data-letter', letter);
-          varaLetters[index].style.opacity = '1';
-        }
-      });
-
-      // Draw the Vara text immediately
-      varaInstance.draw(0);
-    });
-  } catch (error) {
-    console.error('Failed to load Vara:', error);
-  }
-};
 
 // Add TypeScript type for Vara
 declare global {
@@ -714,15 +827,15 @@ let hasTransitionStarted = false; // Add flag to track transition start
 }
 
 .grid-container {
-  position: absolute;
-  top: 0;
-  left: 0;
+  position: relative;
   width: 100%;
-  height: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: var(--theme-background, #0A192F);
   overflow: hidden;
-  --spotlight-x: 20%;
-  --spotlight-y: 20%;
-  --spotlight-size: 100%;
 }
 
 .grid-lines {
@@ -827,11 +940,12 @@ let hasTransitionStarted = false; // Add flag to track transition start
 }
 
 .headline {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.5rem;
-  margin-bottom: 2rem; /* Reduce from 8rem to 2rem */
+  margin-bottom: 2rem;
   font-size: 2.5rem;
   font-weight: bold;
 }
@@ -1184,5 +1298,28 @@ let hasTransitionStarted = false; // Add flag to track transition start
   max-width: 65ch;
   margin-left: auto;
   margin-right: auto;
+}
+
+/* Add styles for headline spotlight */
+.headline-spotlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 2.5rem;
+  font-weight: bold;
+  clip-path: inset(0 100% 0 0);
+  pointer-events: none;
+  opacity: 0; /* Start hidden */
+  transition: opacity 0.3s ease;
+}
+
+.headline-spotlight.visible {
+  opacity: 1;
 }
 </style> 
