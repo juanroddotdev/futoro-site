@@ -82,9 +82,9 @@
           </div>
           
           <!-- Spotlight Text Layer -->
-          <div class="spotlight-text-wrapper headline-spotlight theme-text--gradient-animated gradient-shine">
+          <!-- <div class="spotlight-text-wrapper headline-spotlight theme-text--gradient-animated gradient-shine">
             {{ headline }}
-          </div>
+          </div> -->
         </div>
         
         <!-- 
@@ -102,24 +102,9 @@
           <!-- Vara container for subheadline -->
           <div id="subheadline-vara-container"></div>
           
-          <!-- Regular Text Layer -->
-          <div class="regular-text-wrapper">
-            <template v-for="(word, wordIndex) in subheadline.split(' ')" :key="`word-${wordIndex}`">
-              <span class="word">
-                <span v-for="(char, letterIndex) in word" 
-                      :key="`letter-${wordIndex}-${letterIndex}`"
-                      class="letter"
-                      :data-word-index="wordIndex"
-                      :data-letter-index="letterIndex">
-                  {{ char }}
-                </span>
-              </span>
-              <span v-if="wordIndex < subheadline.split(' ').length - 1" class="space">&nbsp;</span>
-            </template>
-          </div>
           
           <!-- Spotlight Text Layer -->
-          <div class="spotlight-text-wrapper theme-text--gradient-animated gradient-shine">
+          <div class="spotlight-text-wrapper debug theme-text--gradient-animated gradient-shine">
             {{ subheadline }}
           </div>
         </div>
@@ -161,7 +146,7 @@
   6. FINAL TRANSITIONS (12.6-15.6s)
      - Spotlight Reveal Left to Right
      - Headline Outline Text transitions to Fill Animation
-     - Subheadline Vara Text transitions to Regular Text
+     - Subheadline Vara Text transitions to spotlight Text
   
   7. FINALE (15.6-18.6s)
      - Spotlight moves to final position
@@ -484,6 +469,10 @@ const applySpotlightReveal = (element: HTMLElement, spotlightX: number, isRTL: b
       });
     }
   } else {
+    // Handle headline fill animation and subheadline Vara transition
+    const subheadlineVaraContainer = document.querySelector('#subheadline-vara-container');
+    const varaLetters = subheadlineVaraContainer?.querySelectorAll('path');
+    
     // Handle headline fill animation
     letters.forEach((letter, i) => {
       const letterElement = letter as HTMLElement;
@@ -506,6 +495,51 @@ const applySpotlightReveal = (element: HTMLElement, spotlightX: number, isRTL: b
         letterElement.classList.remove('filled');
       }
     });
+
+    // Handle subheadline Vara transition
+    if (varaLetters) {
+      const spotlightText = document.querySelector('.spotlight-text-wrapper') as HTMLElement;
+      if (spotlightText) {
+        const spotlightRect = spotlightText.getBoundingClientRect();
+        const totalWidth = spotlightRect.width;
+        
+        // Calculate which Vara letters should be visible based on spotlight position
+        varaLetters.forEach((varaLetter, i) => {
+          const letterRect = varaLetter.getBoundingClientRect();
+          const letterLeft = letterRect.left - spotlightRect.left;
+          const letterRight = letterLeft + letterRect.width;
+          const letterCenterX = (letterLeft + letterRight) / 2;
+          const letterPositionPercent = (letterCenterX / totalWidth) * 100;
+
+          // If spotlight has passed this letter's position
+          if (spotlightX > letterPositionPercent) {
+            // Fade out Vara letter
+            gsap.to(varaLetter, {
+              opacity: 0,
+              duration: transitionDuration
+            });
+            
+            if (props.showDebug && !loggedTransitions.has(`vara-${i}`)) {
+              debugLog(`Vara letter ${i + 1}/${varaLetters.length} transitioning at ${spotlightX.toFixed(1)}%`);
+              loggedTransitions.add(`vara-${i}`);
+            }
+          } else {
+            // Keep Vara letter visible
+            gsap.set(varaLetter, { opacity: 1 });
+          }
+        });
+
+        // When spotlight reaches the end, ensure all Vara letters are hidden
+        if (spotlightX >= 100) {
+          varaLetters.forEach((varaLetter, i) => {
+            gsap.to(varaLetter, {
+              opacity: 0,
+              duration: transitionDuration
+            });
+          });
+        }
+      }
+    }
   }
 };
 
@@ -576,7 +610,6 @@ onMounted(() => {
   });
   gsap.set('.outline-text-wrapper', { opacity: 0 });
   gsap.set('.spotlight-text-wrapper', { opacity: 0 });
-  gsap.set('.regular-text-wrapper', { opacity: 0 });
   
   const tl = gsap.timeline();
 
@@ -666,7 +699,7 @@ onMounted(() => {
       // Reset the tracking when starting new transition
       resetLoggedTransitions();
       // Hide spotlight text layer initially
-      gsap.set('.headline-spotlight', { opacity: 0 });
+      // gsap.set('.headline-spotlight', { opacity: 0 });
       // Show outline text wrapper but keep letters hidden
       gsap.set('.outline-text-wrapper', { opacity: 1 });
     },
@@ -698,7 +731,7 @@ onMounted(() => {
       gsap.set('#headline-vara-container path', { opacity: 0 });
       gsap.set('.outline-text-wrapper', { opacity: 1 });
       gsap.set('.outline-text-wrapper .letter', { opacity: 1 });
-      gsap.set('.headline-spotlight', { opacity: 0 });
+      // gsap.set('.headline-spotlight', { opacity: 0 });
       
       // Check visibility after a short delay
       setTimeout(checkTextLayerVisibility, 100);
@@ -716,32 +749,19 @@ onMounted(() => {
       // Show outline text wrapper for fill animation
       gsap.set('.outline-text-wrapper', { opacity: 1 });
       gsap.set('.outline-text-wrapper .letter', { opacity: 1 });
-      // Hide spotlight text initially
-      gsap.set('.headline-spotlight', { opacity: 0 });
-      // Initialize regular text wrapper
-      gsap.set('.regular-text-wrapper', { opacity: 1 });
-      gsap.set('.regular-text-wrapper .letter', { opacity: 0 });
-      // Ensure Vara text is fully visible
+      // Show spotlight text and set initial clip path
+      gsap.set('.spotlight-text-wrapper', { 
+        opacity: 1,
+        clipPath: 'inset(0 100% 0 0)'
+      });
+      // Ensure Vara text is visible
       gsap.set('#subheadline-vara-container', { opacity: 1 });
       gsap.set('#subheadline-vara-container path', { opacity: 1 });
-      
-      // Debug check elements
-      if (props.showDebug) {
-        const regularWrapper = document.querySelector('.regular-text-wrapper');
-        const regularLetters = regularWrapper?.querySelectorAll('.letter');
-        const varaContainer = document.querySelector('#subheadline-vara-container');
-        const varaLetters = varaContainer?.querySelectorAll('path');
-        
-        debugLog(`Regular wrapper found: ${!!regularWrapper}`);
-        debugLog(`Regular letters count: ${regularLetters?.length}`);
-        debugLog(`Vara container found: ${!!varaContainer}`);
-        debugLog(`Vara letters count: ${varaLetters?.length}`);
-      }
     }
   })
   .to('.grid-container', {
     '--spotlight-x': '100%',
-    duration: 2, // Increased duration for better visibility
+    duration: 1.5,
     ease: 'power1.inOut',
     onStart: () => {
       debugLog('▶️ Starting LTR movement');
@@ -751,6 +771,13 @@ onMounted(() => {
       const gridContainer = document.querySelector('.grid-container');
       if (gridContainer) {
         const spotlightX = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-x'));
+        
+        // Update spotlight text clip path based on spotlight position
+        const spotlightText = document.querySelector('.spotlight-text-wrapper') as HTMLElement;
+        if (spotlightText) {
+          const clipAmount = 100 - spotlightX;
+          spotlightText.style.clipPath = `inset(0 ${clipAmount}% 0 0)`;
+        }
         
         // Log position changes for debugging
         if (props.showDebug) {
@@ -766,26 +793,18 @@ onMounted(() => {
         if (headlineOutline) {
           applySpotlightReveal(headlineOutline, spotlightX, false);
         }
-        
-        // Update subheadline with letter-by-letter transition
-        const regularText = document.querySelector('.regular-text-wrapper') as HTMLElement;
-        if (regularText) {
-          applySpotlightReveal(regularText, spotlightX, false);
-        }
       }
     },
     onComplete: () => {
       debugLog('✅ LTR transitions complete');
-      // Ensure final state
+      // Ensure spotlight text is fully revealed
+      gsap.set('.spotlight-text-wrapper', { 
+        clipPath: 'inset(0 0% 0 0)',
+        opacity: 1
+      });
+      // Hide Vara text
       gsap.set('#subheadline-vara-container', { opacity: 0 });
       gsap.set('#subheadline-vara-container path', { opacity: 0 });
-      gsap.set('.regular-text-wrapper', { opacity: 1 });
-      gsap.set('.regular-text-wrapper .letter', { opacity: 1 });
-      
-      // Debug check final state
-      if (props.showDebug) {
-        setTimeout(checkTextLayerVisibility, 100);
-      }
     }
   })
   
@@ -963,7 +982,7 @@ let hasTransitionStarted = false; // Add flag to track transition start
 const checkTextLayerVisibility = () => {
   const varaContainer = document.querySelector('#headline-vara-container');
   const outlineWrapper = document.querySelector('.outline-text-wrapper');
-  const spotlightWrapper = document.querySelector('.headline-spotlight');
+  // const spotlightWrapper = document.querySelector('.headline-spotlight');
 
   console.log('\n📊 Text Layer Visibility Check:');
   
@@ -987,13 +1006,13 @@ const checkTextLayerVisibility = () => {
     - Visibility: ${window.getComputedStyle(outlineWrapper).visibility}`);
   }
   
-  if (spotlightWrapper) {
-    const spotlightOpacity = window.getComputedStyle(spotlightWrapper).opacity;
-    const clipPath = window.getComputedStyle(spotlightWrapper).clipPath;
-    console.log(`🔦 Spotlight Text:
-    - Opacity: ${spotlightOpacity}
-    - Clip Path: ${clipPath}`);
-  }
+  // if (spotlightWrapper) {
+  //   const spotlightOpacity = window.getComputedStyle(spotlightWrapper).opacity;
+  //   const clipPath = window.getComputedStyle(spotlightWrapper).clipPath;
+  //   console.log(`🔦 Spotlight Text:
+  //   - Opacity: ${spotlightOpacity}
+  //   - Clip Path: ${clipPath}`);
+  // }
 };
 
 </script>

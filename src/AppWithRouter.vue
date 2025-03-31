@@ -3,7 +3,7 @@
     <!-- Loader overlay -->
     <SimpleLoader 
       :heroContent="heroContent" 
-      :showDebug="true"
+      :showDebug="false"
       @complete="onLoadComplete" 
       v-if="isLoading"
       class="loader-overlay"
@@ -41,7 +41,7 @@ import { HeroContent, getRandomHeroContent } from '@/data/heroContentData';
 
 const route = useRoute();
 const { currentTheme, isThemeTransitioning, handleThemeChange } = useTheme();
-const isLoading = ref(false);
+const isLoading = ref(true);
 const heroContent = ref<HeroContent>(getRandomHeroContent());
 
 // Enhanced app style transitions
@@ -54,7 +54,7 @@ const appStyle = computed(() => ({
 // Enhanced loader completion handler with smoother transition
 const onLoadComplete = () => {
   requestAnimationFrame(() => {
-    isLoading.value = false;
+    // isLoading.value = false;
   });
 };
 </script>
