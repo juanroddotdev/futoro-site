@@ -4,10 +4,10 @@
     currentTheme,
     { 'theme-transition-active': isThemeTransitioning }
   ]">
-    <Navbar v-if="!['WireframeDemo'].includes($route.name as string)" />
+    <Navbar />
     <router-view :currentTheme="currentTheme" />
-    <ContactSection v-if="!['FloatingChatDemo', 'ChatSectionsDemo', 'Playground', 'WireframeDemo'].includes($route.name as string)" />
-    <Footer v-if="!['WireframeDemo'].includes($route.name as string)" />
+    <ContactSection />
+    <Footer />
     <ThemeSwitcher :currentTheme="currentTheme" @update:currentTheme="handleThemeChange" />
   </div>
 </template>
