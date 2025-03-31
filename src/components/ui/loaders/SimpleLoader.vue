@@ -114,50 +114,13 @@
 </template>
 
 <script setup lang="ts">
-/* 
-  ⚠️ ANIMATION SEQUENCE DOCUMENTATION
-  DO NOT MODIFY WITHOUT APPROVAL
-  
-  Animation Timeline:
-  1. GRID INTRO (0-1.6s)
-     - Horizontal lines fade in with random stagger
-     - Vertical lines follow with overlap
-     - Text container fades in during grid animation
-  
-  2. HEADLINE VARA TEXT (1.1-3.1s)
-     - Handwritten animation starts for headline
-     - Controlled by Vara library
-     - Must complete before spotlight
-  
-  3. SUBHEADLINE VARA TEXT (3.1-5.1s)
-     - Handwritten animation starts for subheadline
-     - Controlled by Vara library
-     - Must complete before spotlight
-  
-  4. SPOTLIGHT SEQUENCE (5.1-9.6s)
-     - Initial spotlight shrink
-     - Random position movements
-     - Final position for text crossing
-  
-  5. HEADLINE TRANSITION (9.6-12.6s)
-     - Spotlight Reveal Right to Left
-     - Transitions Headline Vara Text to Headline Outline Text
-  
-  6. FINAL TRANSITIONS (12.6-15.6s)
-     - Spotlight Reveal Left to Right
-     - Headline Outline Text transitions to Fill Animation
-     - Subheadline Vara Text transitions to spotlight Text
-  
-  7. FINALE (15.6-18.6s)
-     - Spotlight moves to final position
-     - Animation completes
-*/
-
 import { ref, onMounted, computed } from 'vue';
 import gsap from 'gsap';
-import SpotlightText from '@/components/text/SpotlightText.vue';
 import { HeroContent, getRandomHeroContent } from '@/data/heroContentData';
 import { useVara } from '@/composables/useVara';
+import { applySpotlightReveal } from './spotlightReveal';
+import { debugLogger } from './debugUtils';
+import { setupInitialState, createTimeline, calculateCenterY } from './timelineUtils';
 
 const props = defineProps<{
   headline?: string;
@@ -175,13 +138,8 @@ const emit = defineEmits<{
 const isVisible = ref(true);
 const horizontalLines = ref(null);
 const verticalLines = ref(null);
-const headlineText = ref(null);
-const subheadlineText = ref(null);
 
 const isTextCrossing = ref(false); // Track when we're crossing the text
-
-// Add filledLetters ref for tracking
-const filledLetters = ref(new Set());
 
 // Use provided hero content or get random one, matching HeroSectionChat
 const heroContent = computed(() => props.heroContent || getRandomHeroContent());
@@ -192,376 +150,80 @@ const subheadline = computed(() => props.subheadline || heroContent.value.subhea
 const spotlightX = ref(props.spotlightX ?? 20);
 const spotlightY = ref(props.spotlightY ?? 20);
 
-const currentIndex = ref(0);
-const isTyping = ref(false);
-
-const isAnimationComplete = ref(false);
-let varaInstance: any = null;
-
 const { loadVara } = useVara();
 
-// Add this before the component setup
-const fadedLetters = new Set();
-
-// Add tracking for logged transitions
-const loggedTransitions = new Set();
-
-// Add tracking for logged positions
-const lastLoggedPosition = ref(0);
-
-// Add functions to check letter visibility
-const isLetterVisible = (wordIndex: number, letterIndex: number) => {
-  const words = headline.value.split(' ');
-  let totalCharsBefore = 0;
-  
-  // Count characters including spaces up to this word
-  for (let i = 0; i < wordIndex; i++) {
-    totalCharsBefore += words[i].length + 1; // +1 for space after each word
-  }
-  totalCharsBefore += letterIndex;
-  
-  return totalCharsBefore < currentIndex.value;
-};
-
-const isSpaceVisible = (wordIndex: number) => {
-  const words = headline.value.split(' ');
-  let totalCharsBefore = 0;
-  
-  // Count characters including spaces up to this word
-  for (let i = 0; i <= wordIndex; i++) {
-    totalCharsBefore += words[i].length + 1; // +1 for space after each word
-  }
-  
-  return totalCharsBefore <= currentIndex.value;
-};
-
-// Update startTyping function to handle spaces
-const startTyping = () => {
-  if (isTyping.value) return;
-  isTyping.value = true;
-  currentIndex.value = 0;
-  
-  const typeNextChar = () => {
-    if (currentIndex.value < headline.value.length) {
-      currentIndex.value++;
-      setTimeout(typeNextChar, 100);
-    } else {
-      isTyping.value = false;
-    }
-  };
-
-  setTimeout(typeNextChar, 0);
-};
-
-// Function to generate random position between min and max
-const getRandomPosition = (min: number, max: number) => {
-  return Math.random() * (max - min) + min;
-};
-
-// Function to generate random spotlight positions
-const generateRandomPositions = (numPositions: number) => {
-  const positions = [];
-  // First position is always at the left edge (0%)
-  positions.push({
-    x: 0,
-    y: 50,
-    size: 50
+// Animation Callbacks
+const handleRTLStart = () => {
+  const outlineLetters = document.querySelectorAll('.outline-text-wrapper .letter');
+  outlineLetters.forEach(letter => {
+    gsap.set(letter, { opacity: 0 });
   });
-  
-  // Generate remaining random positions
-  for (let i = 1; i < numPositions; i++) {
-    positions.push({
-      x: getRandomPosition(20, 80), // Keep away from edges
-      y: getRandomPosition(20, 80),
-      size: getRandomPosition(30, 70) // Random size between 30% and 70%
+  gsap.set('#headline-vara-container', { opacity: 1 });
+  gsap.set('#headline-vara-container path', { opacity: 1 });
+  gsap.set('.outline-text-wrapper', { opacity: 1 });
+};
+
+const handleRTLUpdate = (spotlightX: number) => {
+  const headlineOutline = document.querySelector('.outline-text-wrapper') as HTMLElement;
+  if (headlineOutline) {
+    applySpotlightReveal({
+      element: headlineOutline,
+      spotlightX,
+      isRTL: true,
+      showDebug: props.showDebug
     });
   }
-  return positions;
 };
 
-// Update function to get letter position for debugging
-const getLetterPosition = (wordIndex: number, letterIndex: number) => {
-  const text = headline.value;
-  const words = text.split(' ');
-  let totalCharsBefore = 0;
-  
-  // Count characters including spaces up to this word
-  for (let i = 0; i < wordIndex; i++) {
-    totalCharsBefore += words[i].length + 1; // +1 for space after each word
+const handleRTLComplete = () => {
+  gsap.set('#headline-vara-container', { opacity: 0 });
+  gsap.set('#headline-vara-container path', { opacity: 0 });
+  gsap.set('.outline-text-wrapper', { opacity: 1 });
+  gsap.set('.outline-text-wrapper .letter', { opacity: 1 });
+  setTimeout(debugLogger.logTextLayerVisibility, 100);
+};
+
+const handleLTRStart = () => {
+  gsap.set('.outline-text-wrapper', { opacity: 1 });
+  gsap.set('.outline-text-wrapper .letter', { opacity: 1 });
+  gsap.set('.spotlight-text-wrapper', { 
+    opacity: 1,
+    clipPath: 'inset(0 100% 0 0)'
+  });
+  gsap.set('#subheadline-vara-container', { opacity: 1 });
+  gsap.set('#subheadline-vara-container path', { opacity: 1 });
+};
+
+const handleLTRUpdate = (spotlightX: number) => {
+  const spotlightText = document.querySelector('.spotlight-text-wrapper') as HTMLElement;
+  if (spotlightText) {
+    const clipAmount = 100 - spotlightX;
+    spotlightText.style.clipPath = `inset(0 ${clipAmount}% 0 0)`;
   }
-  totalCharsBefore += letterIndex;
   
-  // Calculate percentage based on total text length
-  return (totalCharsBefore / text.length) * 100;
-};
-
-// Add new refs for subheadline transition tracking
-const currentSubheadlineLetter = ref(0);
-const isLetterTransitioning = ref(false);
-
-// Add timing tracking variables
-const transitionStartTime = ref<Record<string, number>>({});
-const transitionEndTime = ref<Record<string, number>>({});
-
-// Update the applySpotlightReveal function
-const applySpotlightReveal = (element: HTMLElement, spotlightX: number, isRTL: boolean = false) => {
-  const letters = element.querySelectorAll('.letter');
-  const totalWidth = element.offsetWidth;
-  const varaContainer = document.querySelector('#headline-vara-container');
-  const varaLetters = varaContainer?.querySelectorAll('path');
-  
-  // Use fixed transition duration
-  const transitionDuration = 0.2;
-  
-  if (isRTL) {
-    // Create a mapping of visual positions to Vara indices
-    const letterToVaraMap = new Map();
-    let varaIndex = varaLetters ? varaLetters.length - 1 : 0;
-    
-    // First, map each visible letter to its corresponding Vara letter
-    for (let i = letters.length - 1; i >= 0; i--) {
-      const letterElement = letters[i] as HTMLElement;
-      if (letterElement.textContent?.trim()) {
-        letterToVaraMap.set(i, varaIndex);
-        varaIndex--;
-      }
-    }
-
-    // Process letters from right to left
-    for (let i = letters.length - 1; i >= 0; i--) {
-      const letterElement = letters[i] as HTMLElement;
-      const letterRect = letterElement.getBoundingClientRect();
-      const letterLeft = letterRect.left - element.getBoundingClientRect().left;
-      const letterRight = letterLeft + letterRect.width;
-      const letterCenterX = (letterLeft + letterRight) / 2;
-      const letterPositionPercent = (letterCenterX / totalWidth) * 100;
-
-      // Skip empty spaces in visual text
-      if (!letterElement.textContent?.trim()) continue;
-
-      const varaIndex = letterToVaraMap.get(i);
-      if (!varaLetters || !varaLetters[varaIndex]) continue;
-
-      // Calculate transition point - earlier letters should transition earlier
-      const letterPosition = i / letters.length;
-      const transitionPoint = Math.max(20, letterPositionPercent * (1 - letterPosition * 0.3));
-
-      // If spotlight has passed this letter's transition point
-      if (spotlightX < transitionPoint) {
-        const varaLetter = varaLetters[varaIndex];
-        const letterKey = `vara-${varaIndex + 1}`;
-        
-        // Only log if this letter hasn't been logged before
-        if (props.showDebug && !loggedTransitions.has(letterKey)) {
-          const letterText = letterElement.textContent || '';
-          debugLog(`Letter ${varaIndex + 1}/${varaLetters.length} "${letterText}" transitioning at spotlight ${spotlightX.toFixed(1)}%`);
-          loggedTransitions.add(letterKey);
-        }
-
-        gsap.to(varaLetter, {
-          opacity: 0,
-          duration: transitionDuration
-        });
-
-        // Fade in outline letter with debug timing
-        gsap.to(letterElement, {
-          opacity: 1,
-          duration: transitionDuration
-        });
-      } else {
-        const varaLetter = varaLetters[varaIndex];
-        gsap.set(varaLetter, { opacity: 1 });
-        gsap.set(letterElement, { opacity: 0 });
-      }
-    }
-
-    // When spotlight is at 0%, ensure all letters have transitioned
-    if (spotlightX <= 0) {
-      letters.forEach((letter, i) => {
-        const letterElement = letter as HTMLElement;
-        if (!letterElement.textContent?.trim()) return;
-        
-        const varaIndex = letterToVaraMap.get(i);
-        if (varaLetters && varaLetters[varaIndex]) {
-          const varaLetter = varaLetters[varaIndex];
-          const letterKey = `vara-${varaIndex + 1}`;
-          
-          if (!loggedTransitions.has(letterKey)) {
-            const letterText = letterElement.textContent || '';
-            debugLog(`Letter ${varaIndex + 1}/${varaLetters.length} "${letterText}" transitioning at final position`);
-            loggedTransitions.add(letterKey);
-          }
-
-          gsap.to(varaLetter, {
-            opacity: 0,
-            duration: transitionDuration
-          });
-          gsap.to(letterElement, {
-            opacity: 1,
-            duration: transitionDuration
-          });
-        }
-      });
-    }
-  } else if (element.classList.contains('regular-text-wrapper')) {
-    // Handle subheadline transition
-    const subheadlineVaraContainer = document.querySelector('#subheadline-vara-container');
-    const varaLetters = subheadlineVaraContainer?.querySelectorAll('path');
-    const words = element.querySelectorAll('.word');
-    
-    let letterCount = 0;
-    words.forEach((word, wordIndex) => {
-      const letters = word.querySelectorAll('.letter');
-      letters.forEach((letter, i) => {
-        const letterElement = letter as HTMLElement;
-        const letterRect = letterElement.getBoundingClientRect();
-        const letterLeft = letterRect.left - element.getBoundingClientRect().left;
-        const letterRight = letterLeft + letterRect.width;
-        const letterCenterX = (letterLeft + letterRight) / 2;
-        const letterPositionPercent = (letterCenterX / totalWidth) * 100;
-
-        // If spotlight has passed this letter's position
-        if (spotlightX > letterPositionPercent) {
-          // Fade in regular letter
-          gsap.to(letterElement, {
-            opacity: 1,
-            duration: transitionDuration
-          });
-          
-          // Fade out corresponding Vara letter
-          if (varaLetters && varaLetters[letterCount]) {
-            gsap.to(varaLetters[letterCount], {
-              opacity: 0,
-              duration: transitionDuration
-            });
-          }
-          
-          if (props.showDebug && !loggedTransitions.has(`subheadline-${letterCount}`)) {
-            debugLog(`Subheadline letter "${letterElement.textContent}" transitioning at ${spotlightX.toFixed(1)}%`);
-            loggedTransitions.add(`subheadline-${letterCount}`);
-          }
-        } else {
-          // Keep regular letter hidden and Vara letter visible
-          gsap.set(letterElement, { opacity: 0 });
-          if (varaLetters && varaLetters[letterCount]) {
-            gsap.set(varaLetters[letterCount], { opacity: 1 });
-          }
-        }
-        letterCount++;
-      });
+  const headlineOutline = document.querySelector('.outline-text-wrapper') as HTMLElement;
+  if (headlineOutline) {
+    applySpotlightReveal({
+      element: headlineOutline,
+      spotlightX,
+      isRTL: false,
+      showDebug: props.showDebug
     });
-
-    // When spotlight reaches the end, ensure all letters have transitioned
-    if (spotlightX >= 100) {
-      if (varaLetters) {
-        varaLetters.forEach((varaLetter, i) => {
-          gsap.to(varaLetter, {
-            opacity: 0,
-            duration: transitionDuration
-          });
-        });
-      }
-      element.querySelectorAll('.letter').forEach((letter) => {
-        gsap.to(letter, {
-          opacity: 1,
-          duration: transitionDuration
-        });
-      });
-    }
-  } else {
-    // Handle headline fill animation and subheadline Vara transition
-    const subheadlineVaraContainer = document.querySelector('#subheadline-vara-container');
-    const varaLetters = subheadlineVaraContainer?.querySelectorAll('path');
-    
-    // Handle headline fill animation
-    letters.forEach((letter, i) => {
-      const letterElement = letter as HTMLElement;
-      const letterRect = letterElement.getBoundingClientRect();
-      const letterLeft = letterRect.left - element.getBoundingClientRect().left;
-      const letterRight = letterLeft + letterRect.width;
-      const letterCenterX = (letterLeft + letterRight) / 2;
-      const letterPositionPercent = (letterCenterX / totalWidth) * 100;
-
-      // If spotlight has passed this letter's position
-      if (spotlightX > letterPositionPercent) {
-        // Add filled class for gradient animation
-        letterElement.classList.add('filled');
-        
-        if (props.showDebug && !loggedTransitions.has(`fill-${i}`)) {
-          debugLog(`Letter "${letterElement.textContent}" filled at ${spotlightX.toFixed(1)}%`);
-          loggedTransitions.add(`fill-${i}`);
-        }
-      } else {
-        letterElement.classList.remove('filled');
-      }
-    });
-
-    // Handle subheadline Vara transition
-    if (varaLetters) {
-      const spotlightText = document.querySelector('.spotlight-text-wrapper') as HTMLElement;
-      if (spotlightText) {
-        const spotlightRect = spotlightText.getBoundingClientRect();
-        const totalWidth = spotlightRect.width;
-        
-        // Calculate which Vara letters should be visible based on spotlight position
-        varaLetters.forEach((varaLetter, i) => {
-          const letterRect = varaLetter.getBoundingClientRect();
-          const letterLeft = letterRect.left - spotlightRect.left;
-          const letterRight = letterLeft + letterRect.width;
-          const letterCenterX = (letterLeft + letterRight) / 2;
-          const letterPositionPercent = (letterCenterX / totalWidth) * 100;
-
-          // If spotlight has passed this letter's position
-          if (spotlightX > letterPositionPercent) {
-            // Fade out Vara letter
-            gsap.to(varaLetter, {
-              opacity: 0,
-              duration: transitionDuration
-            });
-            
-            if (props.showDebug && !loggedTransitions.has(`vara-${i}`)) {
-              debugLog(`Vara letter ${i + 1}/${varaLetters.length} transitioning at ${spotlightX.toFixed(1)}%`);
-              loggedTransitions.add(`vara-${i}`);
-            }
-          } else {
-            // Keep Vara letter visible
-            gsap.set(varaLetter, { opacity: 1 });
-          }
-        });
-
-        // When spotlight reaches the end, ensure all Vara letters are hidden
-        if (spotlightX >= 100) {
-          varaLetters.forEach((varaLetter, i) => {
-            gsap.to(varaLetter, {
-              opacity: 0,
-              duration: transitionDuration
-            });
-          });
-        }
-      }
-    }
   }
 };
 
-// Reset the tracking when starting a new transition
-const resetLoggedTransitions = () => {
-  loggedTransitions.clear();
-};
-
-// Debug logging function
-const debugLog = (message: string, data?: any) => {
-  if (props.showDebug) {
-    console.log(`[DEBUG] ${message}`, data || '');
-  }
+const handleLTRComplete = () => {
+  gsap.set('.spotlight-text-wrapper', { 
+    clipPath: 'inset(0 0% 0 0)',
+    opacity: 1
+  });
+  gsap.set('#subheadline-vara-container', { opacity: 0 });
+  gsap.set('#subheadline-vara-container path', { opacity: 0 });
 };
 
 onMounted(() => {
-  // Remove initial font check logs
-  const subheadlineWords = document.querySelectorAll('.subheadline .word');
-  subheadlineWords.forEach((wordElement: Element, index) => {
-    const computedStyle = window.getComputedStyle(wordElement);
-  });
-
+  debugLogger.setOptions({ showDebug: props.showDebug });
+  
   // Setup MutationObserver for letter fill tracking
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
@@ -586,435 +248,26 @@ onMounted(() => {
     });
   }, 100);
 
-  // Calculate text container center position
-  const textContainer = document.querySelector('.text-container');
-  const textRect = textContainer?.getBoundingClientRect();
-  const gridContainer = document.querySelector('.grid-container');
-  const gridRect = gridContainer?.getBoundingClientRect();
+  // Calculate center Y position and setup initial state
+  const centerY = calculateCenterY();
+  setupInitialState(centerY);
   
-  // Calculate the text container's center Y position as a percentage of the grid container
-  const centerY = textRect && gridRect ? 
-    ((textRect.top + textRect.height / 2) - gridRect.top) / gridRect.height * 100 : 50;
-  
-  // Generate random positions for spotlight movement
-  const randomPositions = generateRandomPositions(4);
-  
-  // Set initial states
-  gsap.set('.horizontal .grid-line', { scaleX: 0 });
-  gsap.set('.vertical .grid-line', { scaleY: 0 });
-  gsap.set('.text-container', { opacity: 0 });
-  gsap.set('.grid-container', { 
-    '--spotlight-size': '100%',
-    '--spotlight-x': '0%',
-    '--spotlight-y': `${centerY}%`
-  });
-  gsap.set('.outline-text-wrapper', { opacity: 0 });
-  gsap.set('.spotlight-text-wrapper', { opacity: 0 });
-  
-  const tl = gsap.timeline();
-
-  // 1. GRID INTRO (0-1.6s)
-  tl.to('.horizontal .grid-line', {
-    scaleX: 1,
-    duration: 0.8,
-    stagger: {
-      each: 0.1,
-      from: "random"
-    },
-    ease: 'power2.inOut'
-  })
-  .to('.vertical .grid-line', {
-    scaleY: 1,
-    duration: 0.8,
-    stagger: {
-      each: 0.1,
-      from: "random"
-    },
-    ease: 'power2.inOut'
-  }, '-=0.4')
-  .to('.text-container', {
-    opacity: 1,
-    duration: 0.5,
-    ease: 'power2.inOut'
-  }, '-=0.6')
-  
-  // 2. HEADLINE VARA TEXT (1.1-3.1s)
-  .add(() => {
-    initHeadlineVara();
-  })
-  .to({}, { duration: 2 }) // Wait for Vara animation
-  
-  // 3. SUBHEADLINE VARA TEXT (3.1-5.1s)
-  .add(() => {
-    initSubheadlineVara();
-  })
-  .to({}, { duration: 2 }) // Wait for Vara animation
-  
-  // 4. SPOTLIGHT SEQUENCE (5.1-9.6s)
-  .to('.grid-container', {
-    '--spotlight-size': '50%',
-    duration: 1.5,
-    ease: 'power2.inOut'
-  })
-  .to('.grid-container', {
-    '--spotlight-x': randomPositions[0].x + '%',
-    '--spotlight-y': randomPositions[0].y + '%',
-    '--spotlight-size': randomPositions[0].size + '%',
-    duration: 1,
-    ease: 'power2.inOut'
-  })
-  .to('.grid-container', {
-    '--spotlight-x': randomPositions[1].x + '%',
-    '--spotlight-y': randomPositions[1].y + '%',
-    '--spotlight-size': randomPositions[1].size + '%',
-    duration: 1,
-    ease: 'power2.inOut'
-  })
-  
-  // 5. HEADLINE TRANSITION (9.6-12.6s)
-  .to('.grid-container', {
-    '--spotlight-size': '20%',
-    '--spotlight-x': '100%',
-    '--spotlight-y': `${centerY}%`,
-    duration: props.showDebug ? 2 : 1.5, // Longer duration for debug
-    ease: 'power2.inOut',
-    onStart: () => {
-      debugLog('🎯 Spotlight positioned for RTL headline transition');
-      // Initialize outline letters to be hidden
-      const outlineLetters = document.querySelectorAll('.outline-text-wrapper .letter');
-      outlineLetters.forEach(letter => {
-        gsap.set(letter, { opacity: 0 });
-      });
-      // Ensure Vara text is fully visible
-      gsap.set('#headline-vara-container', { opacity: 1 });
-      gsap.set('#headline-vara-container path', { opacity: 1 });
-    }
-  })
-  .to('.grid-container', {
-    '--spotlight-x': '0%',
-    duration: 1.5, // Use standard duration
-    ease: 'power1.inOut',
-    onStart: () => {
-      debugLog('▶️ Starting RTL movement');
-      // Reset the tracking when starting new transition
-      resetLoggedTransitions();
-      // Hide spotlight text layer initially
-      // gsap.set('.headline-spotlight', { opacity: 0 });
-      // Show outline text wrapper but keep letters hidden
-      gsap.set('.outline-text-wrapper', { opacity: 1 });
-    },
-    onUpdate: function() {
-      const gridContainer = document.querySelector('.grid-container');
-      if (gridContainer) {
-        const spotlightX = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-x'));
-        
-        // Only log significant position changes (every 10%)
-        if (props.showDebug) {
-          const currentThreshold = Math.floor(spotlightX / 10) * 10;
-          if (currentThreshold !== lastLoggedPosition.value) {
-            debugLog(`⭐ Spotlight at ${currentThreshold}%`);
-            lastLoggedPosition.value = currentThreshold;
-          }
-        }
-
-        // Apply letter-by-letter transition
-        const headlineOutline = document.querySelector('.outline-text-wrapper') as HTMLElement;
-        if (headlineOutline) {
-          applySpotlightReveal(headlineOutline, spotlightX, true);
-        }
-      }
-    },
-    onComplete: () => {
-      console.log('✅ RTL headline transition complete');
-      // Ensure final state is correct
-      gsap.set('#headline-vara-container', { opacity: 0 });
-      gsap.set('#headline-vara-container path', { opacity: 0 });
-      gsap.set('.outline-text-wrapper', { opacity: 1 });
-      gsap.set('.outline-text-wrapper .letter', { opacity: 1 });
-      // gsap.set('.headline-spotlight', { opacity: 0 });
-      
-      // Check visibility after a short delay
-      setTimeout(checkTextLayerVisibility, 100);
-    }
-  })
-  
-  // 6. FINAL TRANSITIONS (12.6-15.6s)
-  .to('.grid-container', {
-    '--spotlight-x': '0%',
-    '--spotlight-y': `${centerY}%`,
-    duration: 1.5,
-    ease: 'power2.inOut',
-    onStart: () => {
-      debugLog('🔄 Starting final transitions');
-      // Show outline text wrapper for fill animation
-      gsap.set('.outline-text-wrapper', { opacity: 1 });
-      gsap.set('.outline-text-wrapper .letter', { opacity: 1 });
-      // Show spotlight text and set initial clip path
-      gsap.set('.spotlight-text-wrapper', { 
-        opacity: 1,
-        clipPath: 'inset(0 100% 0 0)'
-      });
-      // Ensure Vara text is visible
-      gsap.set('#subheadline-vara-container', { opacity: 1 });
-      gsap.set('#subheadline-vara-container path', { opacity: 1 });
-    }
-  })
-  .to('.grid-container', {
-    '--spotlight-x': '100%',
-    duration: 1.5,
-    ease: 'power1.inOut',
-    onStart: () => {
-      debugLog('▶️ Starting LTR movement');
-      resetLoggedTransitions();
-    },
-    onUpdate: function() {
-      const gridContainer = document.querySelector('.grid-container');
-      if (gridContainer) {
-        const spotlightX = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-x'));
-        
-        // Update spotlight text clip path based on spotlight position
-        const spotlightText = document.querySelector('.spotlight-text-wrapper') as HTMLElement;
-        if (spotlightText) {
-          const clipAmount = 100 - spotlightX;
-          spotlightText.style.clipPath = `inset(0 ${clipAmount}% 0 0)`;
-        }
-        
-        // Log position changes for debugging
-        if (props.showDebug) {
-          const currentThreshold = Math.floor(spotlightX / 10) * 10;
-          if (currentThreshold !== lastLoggedPosition.value) {
-            debugLog(`⭐ Spotlight at ${currentThreshold}%`);
-            lastLoggedPosition.value = currentThreshold;
-          }
-        }
-        
-        // Apply fill animation to headline
-        const headlineOutline = document.querySelector('.outline-text-wrapper') as HTMLElement;
-        if (headlineOutline) {
-          applySpotlightReveal(headlineOutline, spotlightX, false);
-        }
-      }
-    },
-    onComplete: () => {
-      debugLog('✅ LTR transitions complete');
-      // Ensure spotlight text is fully revealed
-      gsap.set('.spotlight-text-wrapper', { 
-        clipPath: 'inset(0 0% 0 0)',
-        opacity: 1
-      });
-      // Hide Vara text
-      gsap.set('#subheadline-vara-container', { opacity: 0 });
-      gsap.set('#subheadline-vara-container path', { opacity: 0 });
-    }
-  })
-  
-  // 7. FINALE (15.6-18.6s)
-  .to('.grid-container', {
-    '--spotlight-x': '80%',
-    '--spotlight-y': '80%',
-    '--spotlight-size': '50%',
-    duration: 1.5,
-    ease: 'power2.inOut'
-  })
-  .to('.grid-container', {
-    '--spotlight-x': '20%',
-    '--spotlight-y': '20%',
-    duration: 1.5,
-    ease: 'power2.inOut',
-    onComplete: () => {
-      emit('complete');
-    }
+  // Create and start the animation timeline
+  createTimeline({
+    showDebug: props.showDebug,
+    centerY,
+    headline: headline.value,
+    subheadline: subheadline.value,
+    loadVara,
+    onComplete: () => emit('complete'),
+    onRTLStart: handleRTLStart,
+    onRTLUpdate: handleRTLUpdate,
+    onRTLComplete: handleRTLComplete,
+    onLTRStart: handleLTRStart,
+    onLTRUpdate: handleLTRUpdate,
+    onLTRComplete: handleLTRComplete
   });
 });
-
-// Add new function for headline Vara animation
-const initHeadlineVara = async () => {
-  try {
-    await loadVara();
-    
-    // Initialize Vara with the headline text
-    const headlineVaraInstance = new window.Vara(
-      "#headline-vara-container",
-      "https://raw.githubusercontent.com/akzhy/Vara/master/fonts/Satisfy/SatisfySL.json",
-      [
-        {
-          text: headline.value,
-          fontSize: 48, // Larger size for headline
-          strokeWidth: 2,
-          color: 'var(--theme-primary, #88C0D0)',
-          duration: 2000,
-          letterSpacing: 2,
-          y: 35,
-          x: 0,
-          textAlign: "center",
-          autoAnimation: false
-        }
-      ],
-      {
-        strokeWidth: 2,
-        fontSize: 48,
-        textAlign: "center"
-      }
-    );
-
-    headlineVaraInstance.ready(() => {
-      const varaText = headlineVaraInstance.get(0);
-      const varaLetters = varaText.characters;
-      
-      headline.value.split('').forEach((letter, index) => {
-        if (varaLetters[index]) {
-          varaLetters[index].setAttribute('data-letter', letter);
-          varaLetters[index].style.opacity = '1';
-        }
-      });
-
-      headlineVaraInstance.draw(0);
-    });
-  } catch (error) {
-    console.error('Failed to load headline Vara:', error);
-  }
-};
-
-// Update existing animateWords function to be subheadline-specific
-const initSubheadlineVara = async () => {
-  try {
-    await loadVara();
-    
-    // Initialize Vara with the subheadline text
-    varaInstance = new window.Vara(
-      "#subheadline-vara-container",
-      "https://raw.githubusercontent.com/akzhy/Vara/master/fonts/Satisfy/SatisfySL.json",
-      [
-        {
-          text: subheadline.value,
-          fontSize: 24,
-          strokeWidth: 2,
-          color: 'var(--theme-primary, #88C0D0)',
-          duration: 2000,
-          letterSpacing: 2,
-          y: 35,
-          x: 0,
-          textAlign: "center",
-          autoAnimation: false
-        }
-      ],
-      {
-        strokeWidth: 2,
-        fontSize: 24,
-        textAlign: "center"
-      }
-    );
-
-    varaInstance.ready(() => {
-      const varaText = varaInstance.get(0);
-      const varaLetters = varaText.characters;
-      
-      subheadline.value.split('').forEach((letter, index) => {
-        if (varaLetters[index]) {
-          varaLetters[index].setAttribute('data-letter', letter);
-          varaLetters[index].style.opacity = '1';
-        }
-      });
-
-      varaInstance.draw(0);
-    });
-  } catch (error) {
-    console.error('Failed to load subheadline Vara:', error);
-  }
-};
-
-// Add TypeScript type for Vara
-declare global {
-  interface Window {
-    Vara: any;
-  }
-}
-
-// Update function to check if a letter should be filled based on spotlight position
-const isLetterFilled = (wordIndex: number, letterIndex: number) => {
-  const gridContainer = document.querySelector('.grid-container');
-  if (!gridContainer) return false;
-
-  // Get all words and calculate total characters before this letter
-  const words = headline.value.split(' ');
-  let totalCharsBefore = 0;
-  for (let i = 0; i < wordIndex; i++) {
-    totalCharsBefore += words[i].length;
-  }
-  totalCharsBefore += letterIndex;
-  
-  // Calculate the letter's position in the text (as a percentage)
-  const totalChars = headline.value.replace(/\s/g, '').length;
-  const letterPosition = (totalCharsBefore / totalChars) * 100;
-  
-  // Get spotlight position
-  const spotlightX = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-x'));
-  
-  // More generous buffer and ensure letters stay filled
-  const buffer = 10; // Increased buffer size
-  return letterPosition <= (spotlightX + buffer) || spotlightX >= 90; // Fill all remaining letters sooner
-};
-
-// Update isSubheadlineFilled function to be simpler and more reliable
-const isSubheadlineFilled = (wordIndex: number) => {
-  const gridContainer = document.querySelector('.grid-container');
-  if (!gridContainer) return false;
-
-  // If animation is complete, all words should be filled
-  if (isAnimationComplete.value) return true;
-
-  // Only check spotlight position if we're actually crossing text
-  if (!isTextCrossing.value) return false;
-
-  const spotlightX = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-x'));
-  const words = subheadline.value.split(' ');
-  
-  // Calculate word position based on index
-  const wordPosition = (wordIndex / words.length) * 100;
-  
-  // Fill word if spotlight has passed its position
-  return spotlightX >= wordPosition;
-};
-
-let hasTransitionStarted = false; // Add flag to track transition start
-
-// Add a function to check text layer visibility
-const checkTextLayerVisibility = () => {
-  const varaContainer = document.querySelector('#headline-vara-container');
-  const outlineWrapper = document.querySelector('.outline-text-wrapper');
-  // const spotlightWrapper = document.querySelector('.headline-spotlight');
-
-  console.log('\n📊 Text Layer Visibility Check:');
-  
-  if (varaContainer) {
-    const varaOpacity = window.getComputedStyle(varaContainer).opacity;
-    const varaLetters = varaContainer.querySelectorAll('path');
-    const visibleVaraLetters = Array.from(varaLetters).filter(letter => 
-      window.getComputedStyle(letter).opacity !== '0'
-    ).length;
-    
-    console.log(`📜 Vara Container:
-    - Opacity: ${varaOpacity}
-    - Visible Letters: ${visibleVaraLetters}/${varaLetters.length}`);
-  }
-  
-  if (outlineWrapper) {
-    const outlineOpacity = window.getComputedStyle(outlineWrapper).opacity;
-    console.log(`✏️ Outline Text:
-    - Opacity: ${outlineOpacity}
-    - Display: ${window.getComputedStyle(outlineWrapper).display}
-    - Visibility: ${window.getComputedStyle(outlineWrapper).visibility}`);
-  }
-  
-  // if (spotlightWrapper) {
-  //   const spotlightOpacity = window.getComputedStyle(spotlightWrapper).opacity;
-  //   const clipPath = window.getComputedStyle(spotlightWrapper).clipPath;
-  //   console.log(`🔦 Spotlight Text:
-  //   - Opacity: ${spotlightOpacity}
-  //   - Clip Path: ${clipPath}`);
-  // }
-};
-
 </script>
 
 <style scoped>

@@ -1,0 +1,36 @@
+⚠️ ANIMATION SEQUENCE DOCUMENTATION
+DO NOT MODIFY WITHOUT APPROVAL
+
+Animation Timeline:
+1. GRID INTRO (0-1.6s)
+   - Horizontal lines fade in with random stagger
+   - Vertical lines follow with overlap
+   - Text container fades in during grid animation
+
+2. HEADLINE VARA TEXT (1.1-3.1s)
+   - Handwritten animation starts for headline
+   - Controlled by Vara library
+   - Must complete before spotlight
+
+3. SUBHEADLINE VARA TEXT (3.1-5.1s)
+   - Handwritten animation starts for subheadline
+   - Controlled by Vara library
+   - Must complete before spotlight
+
+4. SPOTLIGHT SEQUENCE (5.1-9.6s)
+   - Initial spotlight shrink
+   - Random position movements
+   - Final position for text crossing
+
+5. HEADLINE TRANSITION (9.6-12.6s)
+   - Spotlight Reveal Right to Left
+   - Transitions Headline Vara Text to Headline Outline Text
+
+6. FINAL TRANSITIONS (12.6-15.6s)
+   - Spotlight Reveal Left to Right
+   - Headline Outline Text transitions to Fill Animation
+   - Subheadline Vara Text transitions to spotlight Text
+
+7. FINALE (15.6-18.6s)
+   - Spotlight moves to final position
+   - Animation completes 
