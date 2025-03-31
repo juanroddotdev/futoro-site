@@ -1,5 +1,5 @@
 <template>
-  <SimpleLoader :heroContent="heroContent" @complete="onLoadComplete" />
+  <SimpleLoader :heroContent="heroContent" :showDebug="false" @complete="onLoadComplete" />
   <GradientDefinitions />
   <div id="app" :class="[
     currentTheme,
