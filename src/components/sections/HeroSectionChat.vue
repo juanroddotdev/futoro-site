@@ -22,7 +22,6 @@
             :triggerOnVisible="true" 
             :restartOnVisible="true" 
           />
-      
         </h1>
       </template>
       <template #subheadline>
@@ -109,6 +108,9 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-
-
+.hero-section-chat {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+}
 </style>

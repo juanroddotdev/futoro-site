@@ -1,15 +1,29 @@
 <template>
-  <SimpleLoader :heroContent="heroContent" :showDebug="false" @complete="onLoadComplete" />
-  <GradientDefinitions />
-  <div id="app" :class="[
-    currentTheme,
-    { 'theme-transition-active': isThemeTransitioning }
-  ]" :style="appStyle">
-    <Navbar v-if="!['WireframeDemo'].includes($route.name as string)" />
-    <router-view :currentTheme="currentTheme" :heroContent="heroContent" />
-    <ContactSection v-if="!['FloatingChatDemo', 'ChatSectionsDemo', 'Playground', 'WireframeDemo'].includes($route.name as string)" />
-    <Footer v-if="!['WireframeDemo'].includes($route.name as string)" />
-    <ThemeSwitcher :currentTheme="currentTheme" @update:currentTheme="handleThemeChange" />
+  <div class="app-container" :class="currentTheme">
+    <!-- Loader overlay -->
+    <SimpleLoader 
+      :heroContent="heroContent" 
+      :showDebug="true"
+      @complete="onLoadComplete" 
+      v-if="isLoading"
+      class="loader-overlay"
+    />
+    
+    <!-- Main app content -->
+    <div id="app" 
+      :class="[
+        currentTheme,
+        { 'theme-transition-active': isThemeTransitioning }
+      ]" 
+      :style="appStyle"
+    >
+      <GradientDefinitions />
+      <Navbar />
+      <router-view :currentTheme="currentTheme" :heroContent="heroContent" />
+      <ContactSection />
+      <Footer />
+      <ThemeSwitcher :currentTheme="currentTheme" @update:currentTheme="handleThemeChange" />
+    </div>
   </div>
 </template>
 
@@ -27,16 +41,61 @@ import { HeroContent, getRandomHeroContent } from '@/data/heroContentData';
 
 const route = useRoute();
 const { currentTheme, isThemeTransitioning, handleThemeChange } = useTheme();
-const isLoading = ref(true);
+const isLoading = ref(false);
 const heroContent = ref<HeroContent>(getRandomHeroContent());
 
+// Enhanced app style transitions
 const appStyle = computed(() => ({
   opacity: isLoading.value ? 0 : 1,
-  transform: isLoading.value ? 'translateY(20px)' : 'none',
-  transition: 'opacity 0.5s ease, transform 0.5s ease'
+  transition: 'opacity 0.8s ease',
+  pointerEvents: isLoading.value ? 'none' as const : 'auto' as const
 }));
 
+// Enhanced loader completion handler with smoother transition
 const onLoadComplete = () => {
-  isLoading.value = false;
+  requestAnimationFrame(() => {
+    isLoading.value = false;
+  });
 };
 </script>
+
+<style scoped>
+.app-container {
+  position: relative;
+  min-height: 100vh;
+  background-color: rgb(17, 24, 39); /* Match loader background */
+}
+
+/* Theme-specific background colors */
+.app-container.theme-nord {
+  background-color: rgb(17, 24, 39);
+}
+
+.app-container.theme-monokai {
+  background-color: #272822;
+}
+
+.app-container.theme-github-dark {
+  background-color: #0d1117;
+}
+
+.app-container.theme-github-light {
+  background-color: #ffffff;
+}
+
+#app {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  will-change: opacity;
+}
+
+.loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+}
+</style>

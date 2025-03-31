@@ -712,30 +712,54 @@ onMounted(() => {
     duration: 1.5,
     ease: 'power2.inOut',
     onStart: () => {
+      debugLog('🔄 Starting final transitions');
       // Show outline text wrapper for fill animation
       gsap.set('.outline-text-wrapper', { opacity: 1 });
       gsap.set('.outline-text-wrapper .letter', { opacity: 1 });
       // Hide spotlight text initially
       gsap.set('.headline-spotlight', { opacity: 0 });
-      // Initialize regular text letters to be hidden
+      // Initialize regular text wrapper
+      gsap.set('.regular-text-wrapper', { opacity: 1 });
       gsap.set('.regular-text-wrapper .letter', { opacity: 0 });
       // Ensure Vara text is fully visible
+      gsap.set('#subheadline-vara-container', { opacity: 1 });
       gsap.set('#subheadline-vara-container path', { opacity: 1 });
+      
+      // Debug check elements
+      if (props.showDebug) {
+        const regularWrapper = document.querySelector('.regular-text-wrapper');
+        const regularLetters = regularWrapper?.querySelectorAll('.letter');
+        const varaContainer = document.querySelector('#subheadline-vara-container');
+        const varaLetters = varaContainer?.querySelectorAll('path');
+        
+        debugLog(`Regular wrapper found: ${!!regularWrapper}`);
+        debugLog(`Regular letters count: ${regularLetters?.length}`);
+        debugLog(`Vara container found: ${!!varaContainer}`);
+        debugLog(`Vara letters count: ${varaLetters?.length}`);
+      }
     }
   })
   .to('.grid-container', {
     '--spotlight-x': '100%',
-    duration: 1.5,
+    duration: 2, // Increased duration for better visibility
     ease: 'power1.inOut',
     onStart: () => {
+      debugLog('▶️ Starting LTR movement');
       resetLoggedTransitions();
-      // Show regular text wrapper but keep letters hidden initially
-      gsap.set('.regular-text-wrapper', { opacity: 1 });
     },
     onUpdate: function() {
       const gridContainer = document.querySelector('.grid-container');
       if (gridContainer) {
         const spotlightX = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-x'));
+        
+        // Log position changes for debugging
+        if (props.showDebug) {
+          const currentThreshold = Math.floor(spotlightX / 10) * 10;
+          if (currentThreshold !== lastLoggedPosition.value) {
+            debugLog(`⭐ Spotlight at ${currentThreshold}%`);
+            lastLoggedPosition.value = currentThreshold;
+          }
+        }
         
         // Apply fill animation to headline
         const headlineOutline = document.querySelector('.outline-text-wrapper') as HTMLElement;
@@ -748,6 +772,19 @@ onMounted(() => {
         if (regularText) {
           applySpotlightReveal(regularText, spotlightX, false);
         }
+      }
+    },
+    onComplete: () => {
+      debugLog('✅ LTR transitions complete');
+      // Ensure final state
+      gsap.set('#subheadline-vara-container', { opacity: 0 });
+      gsap.set('#subheadline-vara-container path', { opacity: 0 });
+      gsap.set('.regular-text-wrapper', { opacity: 1 });
+      gsap.set('.regular-text-wrapper .letter', { opacity: 1 });
+      
+      // Debug check final state
+      if (props.showDebug) {
+        setTimeout(checkTextLayerVisibility, 100);
       }
     }
   })
