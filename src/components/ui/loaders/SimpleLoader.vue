@@ -426,20 +426,22 @@ onMounted(() => {
     duration: 1.5,
     ease: 'power2.inOut'
   })
-  // Add new simple right-to-left movement
+  // Right to Left movement (same spotlight animation, no text reveal)
   .to('.grid-container', {
-    '--spotlight-x': '100%',
+    '--spotlight-size': '20%',
+    '--spotlight-x': '100%',      // Start at right
     '--spotlight-y': `${centerY}%`,
     duration: 1.5,
     ease: 'power2.inOut'
   })
   .to('.grid-container', {
-    '--spotlight-x': '0%',
+    '--spotlight-x': '0%',        // Move to left
     '--spotlight-y': `${centerY}%`,
-    duration: 3,
+    '--spotlight-size': '50%',
+    duration: 6,
     ease: 'power1.inOut'
   })
-  // First text crossing (left to right)
+  // Left to Right movement (unchanged)
   .to('.grid-container', {
     '--spotlight-size': '20%',
     '--spotlight-x': '0%',
@@ -453,6 +455,7 @@ onMounted(() => {
   .to('.grid-container', {
     '--spotlight-x': '100%',
     '--spotlight-y': `${centerY}%`,
+    '--spotlight-size': '50%',
     duration: 6,
     ease: 'power1.inOut',
     onStart: () => {
@@ -533,16 +536,16 @@ onMounted(() => {
                   });
 
                   letterTimeline
-                    .to(varaLetter, {
-                      opacity: 0,
-                      duration: 0.05,
-                      ease: 'none'
-                    })
-                    .to(currentLetter, {
-                      opacity: 1,
-                      duration: 0.05,
-                      ease: 'none'
-                    }, '<');
+                  .to(varaLetter, {
+                    opacity: 0,
+                    duration: 0.05,
+                    ease: 'none'
+                  })
+                  .to(currentLetter, {
+                    opacity: 1,
+                    duration: 0.05,
+                    ease: 'none'
+                  }, '<');
                 }
               }
             }
