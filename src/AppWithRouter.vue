@@ -4,7 +4,7 @@
     <SimpleLoader 
       :heroContent="heroContent" 
       :showDebug="false"
-      :pauseAnimations="true"
+      :pauseAnimations="false"
       @complete="onLoadComplete" 
       v-if="isLoading"
       class="loader-overlay"
