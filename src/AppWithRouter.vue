@@ -4,10 +4,14 @@
     <SimpleLoader 
       :heroContent="heroContent" 
       :showDebug="false"
+      :pauseAnimations="true"
       @complete="onLoadComplete" 
       v-if="isLoading"
       class="loader-overlay"
     />
+    
+    <!-- Wireframe overlay -->
+    <HeroSectionChatWireframe v-if="isLoading" />
     
     <!-- Main app content -->
     <div id="app" 
@@ -38,6 +42,7 @@ import GradientDefinitions from '@/components/ui/GradientDefinitions.vue';
 import SimpleLoader from '@/components/ui/loaders/SimpleLoader.vue';
 import { useTheme } from './composables/useTheme';
 import { HeroContent, getRandomHeroContent } from '@/data/heroContentData';
+import HeroSectionChatWireframe from '@/components/sections/HeroSectionChatWireframe.vue';
 
 const route = useRoute();
 const { currentTheme, isThemeTransitioning, handleThemeChange } = useTheme();

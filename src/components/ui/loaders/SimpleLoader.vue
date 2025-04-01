@@ -130,7 +130,8 @@ const props = defineProps<{
   spotlightX?: number;
   spotlightY?: number;
   heroContent?: HeroContent;
-  showDebug?: boolean; // New prop for visual debugging
+  showDebug?: boolean;
+  pauseAnimations?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -354,30 +355,31 @@ onMounted(() => {
   const centerY = calculateCenterY();
   setupInitialState(centerY);
   
-  // Create and start the animation timeline
-  createTimeline({
-    showDebug: props.showDebug,
-    centerY,
-    headline: headline.value,
-    subheadline: subheadline.value,
-    loadVara,
-    onComplete: () => emit('complete'),
-    onRTLStart: () => {
-      // Enable debugging only during RTL phase
-      debugLogger.setOptions({ showDebug: props.showDebug });
-      handleRTLStart();
-    },
-    onRTLUpdate: handleRTLUpdate,
-    onRTLComplete: () => {
-      handleRTLComplete();
-      // Disable debugging after RTL phase
-      debugLogger.setOptions({ showDebug: false });
-    },
-    onLTRStart: handleLTRStart,
-    onLTRUpdate: handleLTRUpdate,
-    onLTRComplete: handleLTRComplete,
-    onVaraReady: handleVaraReady
-  });
+  // Only start animations if not paused
+  if (!props.pauseAnimations) {
+    // Create and start the animation timeline
+    createTimeline({
+      showDebug: props.showDebug,
+      centerY,
+      headline: headline.value,
+      subheadline: subheadline.value,
+      loadVara,
+      onComplete: () => emit('complete'),
+      onRTLStart: () => {
+        debugLogger.setOptions({ showDebug: props.showDebug });
+        handleRTLStart();
+      },
+      onRTLUpdate: handleRTLUpdate,
+      onRTLComplete: () => {
+        handleRTLComplete();
+        debugLogger.setOptions({ showDebug: false });
+      },
+      onLTRStart: handleLTRStart,
+      onLTRUpdate: handleLTRUpdate,
+      onLTRComplete: handleLTRComplete,
+      onVaraReady: handleVaraReady
+    });
+  }
 });
 </script>
 
