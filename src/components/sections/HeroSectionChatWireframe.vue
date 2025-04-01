@@ -1,9 +1,9 @@
 <template>
   <div class="hero-section-chat-wireframe">
     <!-- Add the section container structure -->
-    <div class="section-container">
-      <div class="section-inner content-left">
-        <div class="content-area">
+        <div class="section-container">
+          <div class="section-inner content-left">
+            <div class="content-area">
           <!-- SVG container for final position -->
           <div class="final-svg-container">
             <svg id="final-headline-svg" class="final-svg" viewBox="0 0 1200 200" preserveAspectRatio="xMidYMid meet">
@@ -531,18 +531,28 @@ onMounted(() => {
   overflow: visible; /* Allow pencil effect to show */
 }
 
-.text-container {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  width: 100%;
-  max-width: 832px;
-  margin: 0 auto;
-  padding: 20px;
+/* Wireframe container structure */
+.wireframe-overlay {
   position: fixed;
-  top: 166px;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10002;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.text-container {
+  position: relative;
+  width: 832px; /* Fixed width */
+  height: 424px; /* Fixed height: 200px per SVG + 24px gap */
+  margin: 0 auto;
+  display: grid;
+  grid-template-rows: 200px 24px 200px; /* Fixed heights with gap */
+  align-items: center;
   transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 10002;
 }
@@ -551,8 +561,8 @@ onMounted(() => {
 .subheadline-svg {
   width: 100%;
   height: 200px;
+  position: relative;
   transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
-  display: block;
 }
 
 /* Update transition styles */
@@ -574,7 +584,7 @@ onMounted(() => {
 }
 
 .subheadline-svg.transition-to-content {
-  top: 220px; /* 200px height + 20px gap */
+  top: 224px; /* 200px height + 24px gap */
   transform: scale(0.8);
 }
 
@@ -582,6 +592,25 @@ onMounted(() => {
   transform: translate(-50%, -50%) scale(0.8);
   opacity: 0.8;
   visibility: visible;
+}
+
+/* Responsive adjustments */
+@media (max-width: 872px) {
+  .text-container {
+    width: calc(100% - 40px);
+    min-width: 320px;
+    height: 324px; /* Reduced height for mobile */
+    grid-template-rows: 150px 24px 150px; /* Smaller SVGs on mobile */
+  }
+
+  .headline-svg,
+  .subheadline-svg {
+    height: 150px;
+  }
+
+  .subheadline-svg.transition-to-content {
+    top: 174px; /* 150px height + 24px gap */
+  }
 }
 
 .test-path {
@@ -619,19 +648,6 @@ path.start-animation {
 
 .navbar-path {
   stroke: rgba(255, 255, 255, 0.8);
-}
-
-/* Update wireframe overlay to ensure proper containment */
-.wireframe-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 10002;
-  pointer-events: none;
-  padding: 20px;
-  box-sizing: border-box;
 }
 
 /* Wireframe headline container styles */
@@ -806,20 +822,6 @@ path.start-animation {
   &.right {
     align-self: flex-end;
     border-radius: 20px 20px 4px 20px;
-  }
-}
-
-/* Ensure container stays centered at smaller screen sizes */
-@media (max-width: 872px) {
-  .text-container {
-    width: calc(100% - 40px);
-    min-width: 320px;
-    padding: 10px; /* Reduce padding on mobile */
-  }
-
-  .headline-svg,
-  .subheadline-svg {
-    height: 150px; /* Slightly smaller on mobile */
   }
 }
 </style> 
