@@ -49,10 +49,22 @@ export const isLetterFilled = (
 ): boolean => {
   // Get all words and calculate total characters before this letter
   const words = text.split(' ');
+  
+  // Guard against invalid indices
+  if (wordIndex >= words.length) {
+    return false;
+  }
+  
   let totalCharsBefore = 0;
-  for (let i = 0; i < wordIndex; i++) {
+  for (let i = 0; i < wordIndex && i < words.length; i++) {
     totalCharsBefore += words[i].length;
   }
+  
+  // Guard against invalid letter index
+  if (letterIndex >= words[wordIndex].length) {
+    return false;
+  }
+  
   totalCharsBefore += letterIndex;
   
   // Calculate the letter's position in the text (as a percentage)

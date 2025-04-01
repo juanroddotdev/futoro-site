@@ -34,7 +34,8 @@ declare global {
  */
 export const initHeadlineVara = async (
   headline: string,
-  loadVara: () => Promise<typeof window.Vara>
+  loadVara: () => Promise<typeof window.Vara>,
+  onReady?: (positions: { x: number; index: number }[]) => void
 ): Promise<void> => {
   try {
     await loadVara();
@@ -76,6 +77,22 @@ export const initHeadlineVara = async (
       });
 
       headlineVaraInstance.draw(0);
+      
+      // Calculate positions immediately after drawing
+      const varaContainer = document.querySelector('#headline-vara-container') as HTMLElement;
+      if (varaContainer) {
+        const letters = varaContainer.querySelectorAll('path');
+        const containerRect = varaContainer.getBoundingClientRect();
+        
+        const positions = Array.from(letters).map((letter: SVGPathElement, index: number) => {
+          const letterRect = letter.getBoundingClientRect();
+          const x = letterRect.left + letterRect.width / 2 - containerRect.left;
+          return { x, index };
+        });
+        
+        // Call onReady with the calculated positions
+        onReady?.(positions);
+      }
     });
   } catch (error) {
     console.error('Failed to load headline Vara:', error);

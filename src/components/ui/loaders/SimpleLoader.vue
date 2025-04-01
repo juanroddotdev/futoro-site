@@ -118,9 +118,9 @@ import { ref, onMounted, computed } from 'vue';
 import gsap from 'gsap';
 import { HeroContent, getRandomHeroContent } from '@/data/heroContentData';
 import { useVara } from '@/composables/useVara';
-import { applySpotlightReveal } from './spotlightReveal';
-import { debugLogger } from './debugUtils';
-import { setupInitialState, createTimeline, calculateCenterY } from './timelineUtils';
+import { applySpotlightReveal } from './utils/spotlightReveal';
+import { debugLogger } from './utils/debugUtils';
+import { setupInitialState, createTimeline, calculateCenterY } from './utils/timelineUtils';
 
 const props = defineProps<{
   headline?: string;
@@ -138,6 +138,12 @@ const emit = defineEmits<{
 const isVisible = ref(true);
 const horizontalLines = ref(null);
 const verticalLines = ref(null);
+const letterPositions = ref<{ x: number; letterIndex: number }[]>([]);
+const varaLetters = ref<Element[]>([]);
+const containerRightEdge = ref<number>(0);
+const varaContainer = ref<HTMLElement | null>(null);
+const letterPaths = ref<NodeListOf<Element> | null>(null);
+const outlineLetterPositions = ref<{ element: Element; xPercent: number }[]>([]);
 
 const isTextCrossing = ref(false); // Track when we're crossing the text
 
@@ -152,35 +158,190 @@ const spotlightY = ref(props.spotlightY ?? 20);
 
 const { loadVara } = useVara();
 
+// Add these refs at the top with other refs
+const rtlPerformanceData = ref({
+  totalUpdates: 0,
+  totalProcessingTime: 0,
+  maxProcessingTime: 0,
+  totalPathsProcessed: 0,
+  totalLettersProcessed: 0
+});
+
+const outlinePerformanceData = ref({
+  totalUpdates: 0,
+  totalProcessingTime: 0,
+  maxProcessingTime: 0,
+  totalLettersProcessed: 0
+});
+
 // Animation Callbacks
 const handleRTLStart = () => {
-  const outlineLetters = document.querySelectorAll('.outline-text-wrapper .letter');
-  outlineLetters.forEach(letter => {
-    gsap.set(letter, { opacity: 0 });
-  });
+  // Show Vara text
   gsap.set('#headline-vara-container', { opacity: 1 });
   gsap.set('#headline-vara-container path', { opacity: 1 });
-  gsap.set('.outline-text-wrapper', { opacity: 1 });
-};
-
-const handleRTLUpdate = (spotlightX: number) => {
-  const headlineOutline = document.querySelector('.outline-text-wrapper') as HTMLElement;
-  if (headlineOutline) {
-    applySpotlightReveal({
-      element: headlineOutline,
-      spotlightX,
-      isRTL: true,
-      showDebug: props.showDebug
-    });
+  
+  // Keep outline wrapper hidden initially
+  gsap.set('.outline-text-wrapper', { opacity: 0 });
+  gsap.set('.outline-text-wrapper .letter', { opacity: 0 });
+  
+  if (props.showDebug) {
+    debugLogger.log('🖋️ Vara text visible, starting animation');
   }
 };
 
-const handleRTLComplete = () => {
-  gsap.set('#headline-vara-container', { opacity: 0 });
-  gsap.set('#headline-vara-container path', { opacity: 0 });
+// Calculate letter positions once when Vara is ready
+const handleVaraReady = (positions: { x: number; index: number }[]) => {
+  const headlineContainer = document.querySelector('.headline') as HTMLElement;
+  varaContainer.value = document.querySelector('#headline-vara-container') as HTMLElement;
+  
+  if (!varaContainer.value || !headlineContainer) return;
+
+  // Store letter paths once
+  letterPaths.value = varaContainer.value.querySelectorAll('path');
+
+  // Calculate container width percentage once
+  const containerRect = headlineContainer.getBoundingClientRect();
+  const screenWidth = window.innerWidth;
+  containerRightEdge.value = (containerRect.width / screenWidth) * 100;
+  
+  // Calculate outline letter positions once
+  const outlineLetters = document.querySelectorAll('.outline-text-wrapper .letter');
+  outlineLetterPositions.value = Array.from(outlineLetters).map(letter => {
+    const letterRect = letter.getBoundingClientRect();
+    const containerLeft = headlineContainer.getBoundingClientRect().left;
+    // Calculate position relative to container's left edge
+    const letterX = letterRect.left - containerLeft;
+    const letterXPercent = (letterX / containerRect.width) * 100;
+    return { element: letter, xPercent: letterXPercent };
+  });
+  
+  if (props.showDebug) {
+    debugLogger.log(`📏 Container width: ${containerRightEdge.value.toFixed(2)}% of screen`);
+    debugLogger.log(`📝 Found ${outlineLetterPositions.value.length} outline letters`);
+    outlineLetterPositions.value.forEach(({ xPercent }, i) => {
+      debugLogger.log(`Letter ${i + 1} position: ${xPercent.toFixed(2)}%`);
+    });
+  }
+  
+  // Group paths by letter index
+  const pathsByLetter = new Map<number, { x: number; index: number }[]>();
+  positions.forEach(({ x, index }) => {
+    const letterIndex = Math.floor(index / 2); // Assuming 2 paths per letter
+    if (!pathsByLetter.has(letterIndex)) {
+      pathsByLetter.set(letterIndex, []);
+    }
+    pathsByLetter.get(letterIndex)?.push({ x, index });
+  });
+
+  // Convert to array of letter positions, using average x position for each letter
+  const letterPositionsArray = Array.from(pathsByLetter.entries()).map(([letterIndex, paths]) => {
+    const avgX = paths.reduce((sum, { x }) => sum + x, 0) / paths.length;
+    const percentage = (avgX / containerRect.width) * 100;
+    return { x: percentage, letterIndex };
+  });
+
+  letterPositions.value = letterPositionsArray;
+};
+
+const handleRTLUpdate = (spotlightX: number) => {
+  const startTime = performance.now();
+  let processedCount = 0;
+  
+  if (!varaContainer.value || !letterPaths.value) return;
+  
+  // Only proceed if spotlight has reached the container's right edge
+  if (spotlightX > containerRightEdge.value) return;
+  
+  // Show outline wrapper when we start the RTL phase
   gsap.set('.outline-text-wrapper', { opacity: 1 });
+  
+  // Handle Vara text transitions
+  letterPaths.value.forEach((path, index) => {
+    processedCount++;
+    const letterIndex = Math.floor(index / 2);
+    const shouldBeVisible = spotlightX <= letterPositions.value[letterIndex]?.x;
+    
+    if (shouldBeVisible && path.getAttribute('data-transitioning') !== 'true') {
+      path.setAttribute('data-transitioning', 'true');
+      gsap.to(path, {
+        opacity: 0,
+        duration: 0.1,
+        onComplete: () => {
+          path.setAttribute('data-transitioning', 'false');
+        }
+      });
+    }
+  });
+
+  // Collect performance data
+  const duration = performance.now() - startTime;
+  rtlPerformanceData.value.totalUpdates++;
+  rtlPerformanceData.value.totalProcessingTime += duration;
+  rtlPerformanceData.value.maxProcessingTime = Math.max(rtlPerformanceData.value.maxProcessingTime, duration);
+  rtlPerformanceData.value.totalPathsProcessed += processedCount;
+
+  // Handle outline text transitions
+  handleOutlineTextTransition(spotlightX);
+};
+
+const handleOutlineTextTransition = (spotlightX: number) => {
+  const startTime = performance.now();
+  let processedCount = 0;
+  
+  outlineLetterPositions.value.forEach(({ element, xPercent }) => {
+    processedCount++;
+    
+    const shouldBeVisible = spotlightX <= xPercent && spotlightX >= xPercent - 40;
+    
+    if (shouldBeVisible && 
+        element.getAttribute('data-transitioning') !== 'true' && 
+        element.getAttribute('data-visible') !== 'true') {
+      element.setAttribute('data-transitioning', 'true');
+      gsap.to(element, {
+        opacity: 1,
+        duration: 0.1,
+        onComplete: () => {
+          element.setAttribute('data-transitioning', 'false');
+          element.setAttribute('data-visible', 'true');
+        }
+      });
+    }
+  });
+  
+  // Collect performance data
+  const duration = performance.now() - startTime;
+  outlinePerformanceData.value.totalUpdates++;
+  outlinePerformanceData.value.totalProcessingTime += duration;
+  outlinePerformanceData.value.maxProcessingTime = Math.max(outlinePerformanceData.value.maxProcessingTime, duration);
+  outlinePerformanceData.value.totalLettersProcessed += processedCount;
+};
+
+const handleRTLComplete = () => {
+  // Hide any remaining Vara letters
+  gsap.set('#headline-vara-container path', { opacity: 0 });
+  // Ensure all outline letters are visible
   gsap.set('.outline-text-wrapper .letter', { opacity: 1 });
-  setTimeout(debugLogger.logTextLayerVisibility, 100);
+  
+  if (props.showDebug) {
+    debugLogger.log('🔄 Vara text hidden, outline text fully visible');
+    
+    // Log final performance assessment
+    debugLogger.log(`📊 Final Performance Assessment:
+[RTL Update]
+- Total updates: ${rtlPerformanceData.value.totalUpdates}
+- Average processing time: ${(rtlPerformanceData.value.totalProcessingTime / rtlPerformanceData.value.totalUpdates).toFixed(2)}ms
+- Max processing time: ${rtlPerformanceData.value.maxProcessingTime.toFixed(2)}ms
+- Total paths processed: ${rtlPerformanceData.value.totalPathsProcessed}
+- Average paths per update: ${(rtlPerformanceData.value.totalPathsProcessed / rtlPerformanceData.value.totalUpdates).toFixed(1)}
+
+[Outline Transition]
+- Total updates: ${outlinePerformanceData.value.totalUpdates}
+- Average processing time: ${(outlinePerformanceData.value.totalProcessingTime / outlinePerformanceData.value.totalUpdates).toFixed(2)}ms
+- Max processing time: ${outlinePerformanceData.value.maxProcessingTime.toFixed(2)}ms
+- Total letters processed: ${outlinePerformanceData.value.totalLettersProcessed}
+- Average letters per update: ${(outlinePerformanceData.value.totalLettersProcessed / outlinePerformanceData.value.totalUpdates).toFixed(1)}
+`);
+  }
 };
 
 const handleLTRStart = () => {
@@ -207,7 +368,7 @@ const handleLTRUpdate = (spotlightX: number) => {
       element: headlineOutline,
       spotlightX,
       isRTL: false,
-      showDebug: props.showDebug
+      showDebug: false // Force debug off for LTR
     });
   }
 };
@@ -222,14 +383,14 @@ const handleLTRComplete = () => {
 };
 
 onMounted(() => {
-  debugLogger.setOptions({ showDebug: props.showDebug });
-  
+  // Only enable debugging for RTL phase
+  debugLogger.setOptions({ showDebug: false });
+
   // Setup MutationObserver for letter fill tracking
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       const target = mutation.target as HTMLElement;
       if (target.classList.contains('letter')) {
-        const letter = target;
         if (target.classList.contains('filled') && props.showDebug && isTextCrossing.value) {
           // Removed console.log
         }
@@ -260,12 +421,21 @@ onMounted(() => {
     subheadline: subheadline.value,
     loadVara,
     onComplete: () => emit('complete'),
-    onRTLStart: handleRTLStart,
+    onRTLStart: () => {
+      // Enable debugging only during RTL phase
+      debugLogger.setOptions({ showDebug: props.showDebug });
+      handleRTLStart();
+    },
     onRTLUpdate: handleRTLUpdate,
-    onRTLComplete: handleRTLComplete,
+    onRTLComplete: () => {
+      handleRTLComplete();
+      // Disable debugging after RTL phase
+      debugLogger.setOptions({ showDebug: false });
+    },
     onLTRStart: handleLTRStart,
     onLTRUpdate: handleLTRUpdate,
-    onLTRComplete: handleLTRComplete
+    onLTRComplete: handleLTRComplete,
+    onVaraReady: handleVaraReady
   });
 });
 </script>

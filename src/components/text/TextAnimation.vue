@@ -389,7 +389,7 @@ const runAnimation = () => {
   emit('animation-start');
   
   if (!containerRef.value) {
-    console.warn('TextAnimation: Container ref is not available');
+    // console.warn('TextAnimation: Container ref is not available');
     return;
   }
   
@@ -438,9 +438,9 @@ const runAnimation = () => {
           duration: props.duration
         },
         delay: props.delay,
-        onStart: () => console.log('TextAnimation: Timeline started'),
+        onStart: () => {},
         onComplete: () => {
-          console.log('TextAnimation: Timeline completed');
+          // console.log('TextAnimation: Timeline completed');
           // If word effects are enabled, do that next
           if (props.wordEffects) {
             setTimeout(() => {

@@ -4,7 +4,6 @@ import gsap from 'gsap';
 import { debugLogger } from './debugUtils';
 import { initHeadlineVara, initSubheadlineVara } from './varaAnimation';
 import { generateRandomPositions } from './positionUtils';
-
 interface TimelineOptions {
   showDebug?: boolean;
   centerY?: number;
@@ -21,11 +20,12 @@ interface TimelineCallbacks {
   onLTRStart?: () => void;
   onLTRUpdate?: (spotlightX: number) => void;
   onLTRComplete?: () => void;
+  onVaraReady?: (positions: { x: number; index: number }[]) => void;
 }
 
 /**
  * Sets up the initial state for the animation
- */
+*/
 export const setupInitialState = (centerY: number): void => {
   gsap.set('.horizontal .grid-line', { scaleX: 0 });
   gsap.set('.vertical .grid-line', { scaleY: 0 });
@@ -41,7 +41,7 @@ export const setupInitialState = (centerY: number): void => {
 
 /**
  * Creates and returns the main animation timeline
- */
+*/
 export const createTimeline = ({
   showDebug = false,
   centerY = 50,
@@ -54,7 +54,8 @@ export const createTimeline = ({
   onRTLComplete,
   onLTRStart,
   onLTRUpdate,
-  onLTRComplete
+  onLTRComplete,
+  onVaraReady
 }: TimelineOptions & TimelineCallbacks): gsap.core.Timeline => {
   const tl = gsap.timeline();
   
@@ -85,7 +86,7 @@ export const createTimeline = ({
   
   // 2. HEADLINE VARA TEXT (1.1-3.1s)
   .add(() => {
-    initHeadlineVara(headline, loadVara);
+    initHeadlineVara(headline, loadVara, onVaraReady);
   })
   .to({}, { duration: 2 })
   
@@ -105,7 +106,7 @@ export const createTimeline = ({
     '--spotlight-size': '20%',
     '--spotlight-x': '100%',
     '--spotlight-y': `${centerY}%`,
-    duration: showDebug ? 2 : 1.5,
+    duration: showDebug ? 3 : 3,
     ease: 'power2.inOut',
     onStart: () => {
       debugLogger.log('🎯 Spotlight positioned for RTL headline transition');
@@ -116,12 +117,8 @@ export const createTimeline = ({
   // 5. HEADLINE TRANSITION (9.6-12.6s)
   .to('.grid-container', {
     '--spotlight-x': '0%',
-    duration: 1.5,
+    duration: showDebug ? 3 : 3,
     ease: 'power1.inOut',
-    onStart: () => {
-      debugLogger.startTransition('RTL');
-      onRTLStart?.();
-    },
     onUpdate: function() {
       const gridContainer = document.querySelector('.grid-container');
       if (gridContainer) {

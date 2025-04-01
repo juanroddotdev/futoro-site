@@ -1,4 +1,6 @@
 import gsap from 'gsap';
+import { debugLogger } from './debugUtils';
+import { isLetterFilled } from './letterStateUtils';
 
 // Types
 interface SpotlightRevealOptions {
@@ -7,7 +9,11 @@ interface SpotlightRevealOptions {
   isRTL: boolean;
   showDebug?: boolean;
   transitionDuration?: number;
+  onLetterTransition?: (letter: HTMLElement) => void;
 }
+
+// Track revealed letters across function calls
+const revealedLetters = new Set<number>();
 
 // Utility functions
 function calculateLetterPosition(letter: HTMLElement, container: HTMLElement): number {
@@ -19,9 +25,28 @@ function calculateLetterPosition(letter: HTMLElement, container: HTMLElement): n
   return (letterCenterX / containerRect.width) * 100;
 }
 
+/**
+ * Determines if a Vara letter should transition out during RTL movement
+ * Returns true when the letter should be hidden (transitioned out)
+ */
+function shouldVaraLetterTransitionOut(
+  letterElement: HTMLElement,
+  spotlightX: number,
+  container: HTMLElement
+): boolean {
+  const letterPosition = calculateLetterPosition(letterElement, container);
+  // Add a small buffer (5%) to ensure smooth transition
+  const buffer = 5;
+  // Letter should transition out when spotlight passes over it
+  return spotlightX < letterPosition + buffer;
+}
+
 function updateVaraLetterVisibility(varaLetter: Element, isVisible: boolean, duration: number) {
   if (isVisible) {
-    gsap.set(varaLetter, { opacity: 1 });
+    gsap.to(varaLetter, {
+      opacity: 1,
+      duration
+    });
   } else {
     gsap.to(varaLetter, {
       opacity: 0,
@@ -30,15 +55,10 @@ function updateVaraLetterVisibility(varaLetter: Element, isVisible: boolean, dur
   }
 }
 
-function logTransition(letterKey: string, message: string, spotlightX: number, showDebug: boolean) {
-  if (showDebug) {
-    console.log(`[DEBUG] ${message} at spotlight ${spotlightX.toFixed(1)}%`);
-  }
-}
-
 // RTL Transition handlers
 function handleRTLHeadlineTransition(options: SpotlightRevealOptions) {
-  const { element, spotlightX, showDebug, transitionDuration = 0.2 } = options;
+  console.log('handleRTLHeadlineTransition');
+  const { element, spotlightX, showDebug, transitionDuration = 0.2, onLetterTransition } = options;
   const letters = element.querySelectorAll('.letter');
   const varaContainer = document.querySelector('#headline-vara-container');
   const varaLetters = varaContainer?.querySelectorAll('path');
@@ -58,57 +78,48 @@ function handleRTLHeadlineTransition(options: SpotlightRevealOptions) {
     }
   }
 
-  // Process letters from right to left
+  // Reset tracking when spotlight starts from the right
+  if (spotlightX >= 100) {
+    revealedLetters.clear();
+  }
+
+  // Process letters from right to left to match spotlight movement
   for (let i = letters.length - 1; i >= 0; i--) {
     const letterElement = letters[i] as HTMLElement;
     if (!letterElement.textContent?.trim()) continue;
 
-    const letterPositionPercent = calculateLetterPosition(letterElement, element);
+    // Skip letters we've already transitioned to prevent flickering
+    if (revealedLetters.has(i)) continue;
+
     const varaIndex = letterToVaraMap.get(i);
     if (!varaLetters[varaIndex]) continue;
 
-    // Calculate transition point - earlier letters should transition earlier
-    const letterPosition = i / letters.length;
-    const transitionPoint = Math.max(20, letterPositionPercent * (1 - letterPosition * 0.3));
+    const varaLetter = varaLetters[varaIndex];
+    
+    // Use our new function to determine Vara letter visibility
+    const shouldHideVara = shouldVaraLetterTransitionOut(letterElement, spotlightX, element);
+    
+    if (shouldHideVara && !revealedLetters.has(i)) {
+      if (showDebug) {
+        debugLogger.log(`Letter ${varaIndex + 1}/${varaLetters.length} "${letterElement.textContent}" transitioning at ${Math.floor(spotlightX)}%`);
+      }
 
-    if (spotlightX < transitionPoint) {
-      const varaLetter = varaLetters[varaIndex];
-      const letterKey = `vara-${varaIndex + 1}`;
-      
-      logTransition(letterKey, `Letter ${varaIndex + 1}/${varaLetters.length} "${letterElement.textContent}" transitioning`, spotlightX, showDebug ?? false);
-
+      // Hide Vara letter and show outline letter
       updateVaraLetterVisibility(varaLetter, false, transitionDuration);
       gsap.to(letterElement, {
         opacity: 1,
-        duration: transitionDuration
+        duration: transitionDuration,
+        onComplete: () => {
+          revealedLetters.add(i);
+          onLetterTransition?.(letterElement);
+        }
       });
-    } else {
-      const varaLetter = varaLetters[varaIndex];
-      updateVaraLetterVisibility(varaLetter, true, transitionDuration);
-      gsap.set(letterElement, { opacity: 0 });
     }
   }
 
-  // Ensure all letters have transitioned when spotlight is at 0%
+  // Reset tracking when spotlight reaches the left side
   if (spotlightX <= 0) {
-    letters.forEach((letter, i) => {
-      const letterElement = letter as HTMLElement;
-      if (!letterElement.textContent?.trim()) return;
-      
-      const varaIndex = letterToVaraMap.get(i);
-      if (varaLetters[varaIndex]) {
-        const varaLetter = varaLetters[varaIndex];
-        const letterKey = `vara-${varaIndex + 1}`;
-        
-        logTransition(letterKey, `Letter ${varaIndex + 1}/${varaLetters.length} "${letterElement.textContent}" transitioning at final position`, spotlightX, showDebug ?? false);
-
-        updateVaraLetterVisibility(varaLetter, false, transitionDuration);
-        gsap.to(letterElement, {
-          opacity: 1,
-          duration: transitionDuration
-        });
-      }
-    });
+    revealedLetters.clear();
   }
 }
 
@@ -123,10 +134,6 @@ function handleLTRHeadlineFill(options: SpotlightRevealOptions) {
 
     if (spotlightX > letterPositionPercent) {
       letterElement.classList.add('filled');
-      
-      if (showDebug) {
-        logTransition(`fill-${i}`, `Letter "${letterElement.textContent}" filled`, spotlightX, showDebug ?? false);
-      }
     } else {
       letterElement.classList.remove('filled');
     }
@@ -147,9 +154,6 @@ function handleSubheadlineTransition(options: SpotlightRevealOptions) {
 
     if (spotlightX > letterPositionPercent) {
       updateVaraLetterVisibility(varaLetter, false, transitionDuration);
-      if (showDebug) {
-        logTransition(`vara-${i}`, `Vara letter ${i + 1}/${varaLetters.length} transitioning`, spotlightX, showDebug);
-      }
     } else {
       updateVaraLetterVisibility(varaLetter, true, transitionDuration);
     }

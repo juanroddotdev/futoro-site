@@ -125,34 +125,25 @@ class DebugLogger {
     const outlineWrapper = document.querySelector('.outline-text-wrapper');
     const spotlightWrapper = document.querySelector('.spotlight-text-wrapper');
 
-    this.log('\n📊 Text Layer Visibility Check:');
+    this.log('\n📊 Text Layer Status:');
     
     if (varaContainer) {
-      const varaOpacity = window.getComputedStyle(varaContainer).opacity;
       const varaLetters = varaContainer.querySelectorAll('path');
       const visibleVaraLetters = Array.from(varaLetters).filter(letter => 
         window.getComputedStyle(letter).opacity !== '0'
       ).length;
       
-      this.log(`📜 Vara Container:
-      - Opacity: ${varaOpacity}
-      - Visible Letters: ${visibleVaraLetters}/${varaLetters.length}`);
+      this.log(`📜 Vara: ${visibleVaraLetters}/${varaLetters.length} letters visible`);
     }
     
     if (outlineWrapper) {
       const outlineOpacity = window.getComputedStyle(outlineWrapper).opacity;
-      this.log(`✏️ Outline Text:
-      - Opacity: ${outlineOpacity}
-      - Display: ${window.getComputedStyle(outlineWrapper).display}
-      - Visibility: ${window.getComputedStyle(outlineWrapper).visibility}`);
+      this.log(`✏️ Outline: ${outlineOpacity} opacity`);
     }
     
     if (spotlightWrapper) {
       const spotlightOpacity = window.getComputedStyle(spotlightWrapper).opacity;
-      const clipPath = window.getComputedStyle(spotlightWrapper).clipPath;
-      this.log(`🔦 Spotlight Text:
-      - Opacity: ${spotlightOpacity}
-      - Clip Path: ${clipPath}`);
+      this.log(`🔦 Spotlight: ${spotlightOpacity} opacity`);
     }
   }
 

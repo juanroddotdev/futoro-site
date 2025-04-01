@@ -63,7 +63,6 @@ const props = defineProps<{
 
 // Get the global theme
 const { currentTheme } = useTheme();
-console.log('currentTheme:', currentTheme);
 
 // Use the section loader
 const sectionLoader = useLazySection();
