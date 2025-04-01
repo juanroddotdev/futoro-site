@@ -14,6 +14,14 @@ interface TransitionData {
   type: string;
 }
 
+interface PerformanceData {
+  totalUpdates: number;
+  totalProcessingTime: number;
+  maxProcessingTime: number;
+  totalElementsProcessed: number;
+  name: string;
+}
+
 class DebugLogger {
   private static instance: DebugLogger;
   private showDebug: boolean;
@@ -22,6 +30,7 @@ class DebugLogger {
   private timestamp: boolean;
   private transitions: Map<string, TransitionData>;
   private lastLoggedPosition: number;
+  private performanceData: Map<string, PerformanceData>;
 
   private constructor(options: DebugOptions = {}) {
     this.showDebug = options.showDebug ?? false;
@@ -30,6 +39,7 @@ class DebugLogger {
     this.timestamp = options.timestamp ?? true;
     this.transitions = new Map();
     this.lastLoggedPosition = 0;
+    this.performanceData = new Map();
   }
 
   public static getInstance(options?: DebugOptions): DebugLogger {
@@ -147,9 +157,51 @@ class DebugLogger {
     }
   }
 
+  public startPerformanceTracking(name: string): void {
+    if (!this.showDebug) return;
+    
+    this.performanceData.set(name, {
+      totalUpdates: 0,
+      totalProcessingTime: 0,
+      maxProcessingTime: 0,
+      totalElementsProcessed: 0,
+      name
+    });
+  }
+
+  public trackPerformance(name: string, duration: number, elementsProcessed: number): void {
+    if (!this.showDebug) return;
+    
+    const data = this.performanceData.get(name);
+    if (!data) return;
+
+    data.totalUpdates++;
+    data.totalProcessingTime += duration;
+    data.maxProcessingTime = Math.max(data.maxProcessingTime, duration);
+    data.totalElementsProcessed += elementsProcessed;
+  }
+
+  public logPerformanceSummary(): void {
+    if (!this.showDebug) return;
+
+    let summary = '📊 Final Performance Assessment:\n';
+    
+    this.performanceData.forEach((data) => {
+      summary += `\n[${data.name}]\n`;
+      summary += `- Total updates: ${data.totalUpdates}\n`;
+      summary += `- Average processing time: ${(data.totalProcessingTime / data.totalUpdates).toFixed(2)}ms\n`;
+      summary += `- Max processing time: ${data.maxProcessingTime.toFixed(2)}ms\n`;
+      summary += `- Total elements processed: ${data.totalElementsProcessed}\n`;
+      summary += `- Average elements per update: ${(data.totalElementsProcessed / data.totalUpdates).toFixed(1)}\n`;
+    });
+
+    this.log(summary);
+  }
+
   public reset(): void {
     this.transitions.clear();
     this.lastLoggedPosition = 0;
+    this.performanceData.clear();
   }
 }
 

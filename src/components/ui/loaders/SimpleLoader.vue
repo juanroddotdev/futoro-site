@@ -121,6 +121,8 @@ import { useVara } from '@/composables/useVara';
 import { applySpotlightReveal } from './utils/spotlightReveal';
 import { debugLogger } from './utils/debugUtils';
 import { setupInitialState, createTimeline, calculateCenterY } from './utils/timelineUtils';
+import { calculateLetterPositions } from './utils/letterUtils';
+import { PerformanceTracker } from './utils/performanceUtils';
 
 const props = defineProps<{
   headline?: string;
@@ -158,23 +160,9 @@ const spotlightY = ref(props.spotlightY ?? 20);
 
 const { loadVara } = useVara();
 
-// Add these refs at the top with other refs
-const rtlPerformanceData = ref({
-  totalUpdates: 0,
-  totalProcessingTime: 0,
-  maxProcessingTime: 0,
-  totalPathsProcessed: 0,
-  totalLettersProcessed: 0
-});
+// Remove the performance data refs and add the tracker
+const performanceTracker = new PerformanceTracker();
 
-const outlinePerformanceData = ref({
-  totalUpdates: 0,
-  totalProcessingTime: 0,
-  maxProcessingTime: 0,
-  totalLettersProcessed: 0
-});
-
-// Animation Callbacks
 const handleRTLStart = () => {
   // Show Vara text
   gsap.set('#headline-vara-container', { opacity: 1 });
@@ -186,10 +174,12 @@ const handleRTLStart = () => {
   
   if (props.showDebug) {
     debugLogger.log('🖋️ Vara text visible, starting animation');
+    // Initialize performance tracking
+    performanceTracker.startTracking('RTL Update');
+    performanceTracker.startTracking('Outline Transition');
   }
 };
 
-// Calculate letter positions once when Vara is ready
 const handleVaraReady = (positions: { x: number; index: number }[]) => {
   const headlineContainer = document.querySelector('.headline') as HTMLElement;
   varaContainer.value = document.querySelector('#headline-vara-container') as HTMLElement;
@@ -199,21 +189,13 @@ const handleVaraReady = (positions: { x: number; index: number }[]) => {
   // Store letter paths once
   letterPaths.value = varaContainer.value.querySelectorAll('path');
 
-  // Calculate container width percentage once
-  const containerRect = headlineContainer.getBoundingClientRect();
-  const screenWidth = window.innerWidth;
-  containerRightEdge.value = (containerRect.width / screenWidth) * 100;
+  // Calculate all letter positions using the utility function
+  const { letterPositions: letterPositionsArray, containerRightEdge: containerEdge, outlineLetterPositions: outlinePositions } = 
+    calculateLetterPositions(positions, headlineContainer, window.innerWidth);
   
-  // Calculate outline letter positions once
-  const outlineLetters = document.querySelectorAll('.outline-text-wrapper .letter');
-  outlineLetterPositions.value = Array.from(outlineLetters).map(letter => {
-    const letterRect = letter.getBoundingClientRect();
-    const containerLeft = headlineContainer.getBoundingClientRect().left;
-    // Calculate position relative to container's left edge
-    const letterX = letterRect.left - containerLeft;
-    const letterXPercent = (letterX / containerRect.width) * 100;
-    return { element: letter, xPercent: letterXPercent };
-  });
+  containerRightEdge.value = containerEdge;
+  outlineLetterPositions.value = outlinePositions;
+  letterPositions.value = letterPositionsArray;
   
   if (props.showDebug) {
     debugLogger.log(`📏 Container width: ${containerRightEdge.value.toFixed(2)}% of screen`);
@@ -222,25 +204,6 @@ const handleVaraReady = (positions: { x: number; index: number }[]) => {
       debugLogger.log(`Letter ${i + 1} position: ${xPercent.toFixed(2)}%`);
     });
   }
-  
-  // Group paths by letter index
-  const pathsByLetter = new Map<number, { x: number; index: number }[]>();
-  positions.forEach(({ x, index }) => {
-    const letterIndex = Math.floor(index / 2); // Assuming 2 paths per letter
-    if (!pathsByLetter.has(letterIndex)) {
-      pathsByLetter.set(letterIndex, []);
-    }
-    pathsByLetter.get(letterIndex)?.push({ x, index });
-  });
-
-  // Convert to array of letter positions, using average x position for each letter
-  const letterPositionsArray = Array.from(pathsByLetter.entries()).map(([letterIndex, paths]) => {
-    const avgX = paths.reduce((sum, { x }) => sum + x, 0) / paths.length;
-    const percentage = (avgX / containerRect.width) * 100;
-    return { x: percentage, letterIndex };
-  });
-
-  letterPositions.value = letterPositionsArray;
 };
 
 const handleRTLUpdate = (spotlightX: number) => {
@@ -273,12 +236,9 @@ const handleRTLUpdate = (spotlightX: number) => {
     }
   });
 
-  // Collect performance data
+  // Track performance
   const duration = performance.now() - startTime;
-  rtlPerformanceData.value.totalUpdates++;
-  rtlPerformanceData.value.totalProcessingTime += duration;
-  rtlPerformanceData.value.maxProcessingTime = Math.max(rtlPerformanceData.value.maxProcessingTime, duration);
-  rtlPerformanceData.value.totalPathsProcessed += processedCount;
+  performanceTracker.track('RTL Update', duration, processedCount);
 
   // Handle outline text transitions
   handleOutlineTextTransition(spotlightX);
@@ -308,12 +268,9 @@ const handleOutlineTextTransition = (spotlightX: number) => {
     }
   });
   
-  // Collect performance data
+  // Track performance
   const duration = performance.now() - startTime;
-  outlinePerformanceData.value.totalUpdates++;
-  outlinePerformanceData.value.totalProcessingTime += duration;
-  outlinePerformanceData.value.maxProcessingTime = Math.max(outlinePerformanceData.value.maxProcessingTime, duration);
-  outlinePerformanceData.value.totalLettersProcessed += processedCount;
+  performanceTracker.track('Outline Transition', duration, processedCount);
 };
 
 const handleRTLComplete = () => {
@@ -324,23 +281,7 @@ const handleRTLComplete = () => {
   
   if (props.showDebug) {
     debugLogger.log('🔄 Vara text hidden, outline text fully visible');
-    
-    // Log final performance assessment
-    debugLogger.log(`📊 Final Performance Assessment:
-[RTL Update]
-- Total updates: ${rtlPerformanceData.value.totalUpdates}
-- Average processing time: ${(rtlPerformanceData.value.totalProcessingTime / rtlPerformanceData.value.totalUpdates).toFixed(2)}ms
-- Max processing time: ${rtlPerformanceData.value.maxProcessingTime.toFixed(2)}ms
-- Total paths processed: ${rtlPerformanceData.value.totalPathsProcessed}
-- Average paths per update: ${(rtlPerformanceData.value.totalPathsProcessed / rtlPerformanceData.value.totalUpdates).toFixed(1)}
-
-[Outline Transition]
-- Total updates: ${outlinePerformanceData.value.totalUpdates}
-- Average processing time: ${(outlinePerformanceData.value.totalProcessingTime / outlinePerformanceData.value.totalUpdates).toFixed(2)}ms
-- Max processing time: ${outlinePerformanceData.value.maxProcessingTime.toFixed(2)}ms
-- Total letters processed: ${outlinePerformanceData.value.totalLettersProcessed}
-- Average letters per update: ${(outlinePerformanceData.value.totalLettersProcessed / outlinePerformanceData.value.totalUpdates).toFixed(1)}
-`);
+    debugLogger.log(performanceTracker.getSummary());
   }
 };
 
