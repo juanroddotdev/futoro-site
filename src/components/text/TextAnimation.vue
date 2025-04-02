@@ -22,6 +22,9 @@ import { TextPlugin } from 'gsap/TextPlugin';
 
 gsap.registerPlugin(TextPlugin);
 
+// Add instance tracking
+const activeInstances = new Set<string>();
+
 interface EffectStyle {
   gradientClass?: string;
   customStyles?: Record<string, string>;
@@ -111,6 +114,15 @@ const props = defineProps({
   wordEffectDelay: {
     type: Number,
     default: 1
+  },
+  // Add wordEffectClasses prop
+  wordEffectClasses: {
+    type: Array,
+    default: () => []
+  },
+  instanceId: {
+    type: String,
+    default: () => `text-animation-${Math.random().toString(36).substr(2, 9)}`
   }
 });
 
@@ -121,11 +133,21 @@ const firstPartRef = ref<HTMLElement | null>(null);
 const secondPartRef = ref<HTMLElement | null>(null);
 const suffixRef = ref<HTMLElement | null>(null);
 const hasAnimated = ref(false);
+const isAnimating = ref(false);
 let observer: IntersectionObserver | null = null;
 
 // Function to apply word effects
 const applyWordEffects = () => {
   if (!props.wordEffects || !containerRef.value || props.wordTargets.length === 0) {
+    // Release animation lock if no word effects
+    isAnimating.value = false;
+    activeInstances.delete(props.instanceId);
+    console.log('TextAnimation: Animation lock released (no word effects)', {
+      timestamp: new Date().toISOString(),
+      isAnimating: isAnimating.value,
+      instanceId: props.instanceId,
+      activeInstances: Array.from(activeInstances)
+    });
     emit('animation-complete');
     return;
   }
@@ -157,7 +179,12 @@ const applyWordEffects = () => {
       const effectStyle = props.wordEffectStyles[wordIndex] || {};
       const gradientClass = effectStyle.gradientClass || 'theme-text--gradient';
       
-      const wordClass = `word-effect word-${effectType} word-index-${wordIndex} ${gradientClass}`;
+      // Add the specific class for this word based on its index
+      const additionalClasses = Array.isArray(props.wordEffectClasses[wordIndex]) 
+        ? props.wordEffectClasses[wordIndex].join(' ') 
+        : props.wordEffectClasses[wordIndex] || '';
+      
+      const wordClass = `word-effect word-${effectType} word-index-${wordIndex} ${gradientClass} ${additionalClasses}`;
       
       newHTML = newHTML.replace(
         new RegExp(`\\b${word}\\b`, 'g'), // Use word boundary for exact match
@@ -204,7 +231,18 @@ const applyWordEffects = () => {
         }
       });
       
+      // Release animation lock after word effects complete
+      isAnimating.value = false;
+      activeInstances.delete(props.instanceId);
+      console.log('TextAnimation: Animation lock released (word effects complete)', {
+        timestamp: new Date().toISOString(),
+        isAnimating: isAnimating.value,
+        instanceId: props.instanceId,
+        activeInstances: Array.from(activeInstances)
+      });
+      
       emit('word-effect-complete');
+      emit('animation-complete');
     }
   });
   
@@ -250,9 +288,6 @@ const applyWordEffects = () => {
         break;
     }
   });
-  
-  // Final animation to complete the sequence
-  tl.call(() => emit('animation-complete'));
 };
 
 // Individual effect functions
@@ -385,90 +420,147 @@ const applySqueezeEffect = (
 };
 
 const runAnimation = () => {
+  // Check if any other instance is animating
+  if (activeInstances.size > 0 && !activeInstances.has(props.instanceId)) {
+    console.log('TextAnimation: Another instance is animating, skipping', {
+      timestamp: new Date().toISOString(),
+      instanceId: props.instanceId,
+      activeInstances: Array.from(activeInstances)
+    });
+    return;
+  }
+
+  // If already animating, don't start again
+  if (isAnimating.value) {
+    console.log('TextAnimation: Animation already in progress, skipping', {
+      timestamp: new Date().toISOString(),
+      instanceId: props.instanceId
+    });
+    return;
+  }
+
+  // Add this instance to active instances
+  activeInstances.add(props.instanceId);
+  
+  // Set animation lock
+  isAnimating.value = true;
+  console.log('TextAnimation: Animation lock set', {
+    timestamp: new Date().toISOString(),
+    isAnimating: isAnimating.value,
+    instanceId: props.instanceId,
+    activeInstances: Array.from(activeInstances)
+  });
+  
   // Emit that animation is starting
   emit('animation-start');
-  console.log('TextAnimation: Starting animation', props.animation);
+  console.log('TextAnimation: Starting animation', {
+    animation: props.animation,
+    delay: props.delay,
+    duration: props.duration,
+    timestamp: new Date().toISOString()
+  });
   
   if (!containerRef.value) {
     console.warn('TextAnimation: Container ref is not available');
+    isAnimating.value = false; // Release lock if error
     return;
   }
-  
-  nextTick().then(() => {
-    if (containerRef.value) {
-      // Add animated class to make it visible if initially hidden
-      if (props.initiallyHidden) {
-        containerRef.value.classList.add('animated');
-      }
-      
-      // Create an array of all elements that should be animated
-      const elements = [
-        firstPartRef.value,
-        secondPartRef.value,
-        suffixRef.value
-      ].filter(Boolean) as HTMLElement[];
-      
-      console.log('TextAnimation: Found elements', elements.length);
-      
-      // If using outline-to-fill effect, add the outline class initially
-      if (props.animation === 'outlineToFill') {
-        console.log('TextAnimation: Applying outline-to-fill effect');
-        elements.forEach(el => {
-          if (el) {
-            el.classList.add('outline-gradient');
-            // Remove any gradient-text class if it exists
-            el.classList.remove('gradient-text', 'theme-text--gradient');
+
+  // Add initial delay before starting any animation
+  setTimeout(() => {
+    nextTick().then(() => {
+      if (containerRef.value) {
+        // Add animated class to make it visible if initially hidden
+        if (props.initiallyHidden) {
+          containerRef.value.classList.add('animated');
+          console.log('TextAnimation: Added animated class', {
+            timestamp: new Date().toISOString()
+          });
+        }
+        
+        // Create an array of all elements that should be animated
+        const elements = [
+          firstPartRef.value,
+          secondPartRef.value,
+          suffixRef.value
+        ].filter(Boolean) as HTMLElement[];
+        
+        console.log('TextAnimation: Found elements', {
+          count: elements.length,
+          elements: elements.map(el => el.textContent),
+          timestamp: new Date().toISOString()
+        });
+        
+        // Create a timeline for the animation
+        const tl = gsap.timeline({
+          defaults: {
+            ease: props.ease,
+            duration: props.duration
+          },
+          onStart: () => console.log('TextAnimation: Timeline started', {
+            timestamp: new Date().toISOString(),
+            delay: props.delay,
+            duration: props.duration,
+            isAnimating: isAnimating.value,
+            instanceId: props.instanceId
+          }),
+          onComplete: () => {
+            console.log('TextAnimation: Timeline completed', {
+              timestamp: new Date().toISOString(),
+              totalDuration: props.duration,
+              isAnimating: isAnimating.value,
+              instanceId: props.instanceId
+            });
+            
+            // If word effects are enabled, start them after the delay
+            if (props.wordEffects) {
+              setTimeout(() => {
+                console.log('TextAnimation: Starting word effects', {
+                  timestamp: new Date().toISOString(),
+                  delay: props.wordEffectDelay,
+                  duration: props.wordEffectDuration,
+                  isAnimating: isAnimating.value,
+                  instanceId: props.instanceId
+                });
+                applyWordEffects();
+              }, props.wordEffectDelay * 1000);
+            } else {
+              // Release animation lock after completion
+              isAnimating.value = false;
+              activeInstances.delete(props.instanceId);
+              console.log('TextAnimation: Animation lock released', {
+                timestamp: new Date().toISOString(),
+                isAnimating: isAnimating.value,
+                instanceId: props.instanceId,
+                activeInstances: Array.from(activeInstances)
+              });
+              emit('animation-complete');
+            }
           }
         });
+        
+        // Apply animation with options
+        console.log('TextAnimation: Applying animation', {
+          animation: props.animation,
+          options: {
+            duration: props.duration,
+            ease: props.ease
+          },
+          timestamp: new Date().toISOString(),
+          isAnimating: isAnimating.value
+        });
+        textAnimations.applyAnimation(props.animation as TextAnimationType, elements, {
+          duration: props.duration,
+          ease: props.ease
+        });
+        
+        hasAnimated.value = true;
+      } else {
+        console.warn('TextAnimation: No container found to animate');
+        isAnimating.value = false; // Release lock if error
       }
-      
-      // Store original text for each element
-      elements.forEach(el => {
-        if (el && !el.getAttribute('data-original-text')) {
-          el.setAttribute('data-original-text', el.textContent || '');
-        }
-      });
-      
-      // Kill any existing animations
-      elements.forEach(el => {
-        if (el) gsap.killTweensOf(el);
-      });
-      
-      // Create a timeline for the animation
-      const tl = gsap.timeline({
-        defaults: {
-          ease: props.ease,
-          duration: props.duration
-        },
-        delay: props.delay,
-        onStart: () => console.log('TextAnimation: Timeline started'),
-        onComplete: () => {
-          console.log('TextAnimation: Timeline completed');
-          // If word effects are enabled, do that next
-          if (props.wordEffects) {
-            setTimeout(() => {
-              applyWordEffects();
-            }, 100); // Small delay to ensure DOM is ready
-          } else {
-            // Otherwise, just emit completion
-            emit('animation-complete');
-          }
-        }
-      });
-      
-      // Apply animation with options
-      console.log('TextAnimation: Applying animation', props.animation);
-      textAnimations.applyAnimation(props.animation as TextAnimationType, elements, {
-        duration: props.duration,
-        delay: props.delay,
-        ease: props.ease
-      });
-      
-      hasAnimated.value = true;
-    } else {
-      console.warn('TextAnimation: No container found to animate');
-    }
-  });
+    });
+  }, props.delay * 1000); // Convert seconds to milliseconds
 };
 
 const setupObserver = () => {
@@ -476,31 +568,62 @@ const setupObserver = () => {
   if (observer) {
     observer.disconnect();
   }
+
+  // Add debounce timer
+  let debounceTimer: number | null = null;
+  const DEBOUNCE_DELAY = 300; // 300ms debounce
   
   // Create new observer
   observer = new IntersectionObserver((entries) => {
     const [entry] = entries;
     
-    if (entry.isIntersecting) {
-      // If element is visible
-      if (!hasAnimated.value || props.restartOnVisible) {
-        runAnimation();
+    // Clear any existing debounce timer
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+    
+    // Set new debounce timer
+    debounceTimer = window.setTimeout(() => {
+      if (entry.isIntersecting) {
+        console.log('TextAnimation: Element became visible (debounced)', {
+          timestamp: new Date().toISOString(),
+          hasAnimated: hasAnimated.value,
+          restartOnVisible: props.restartOnVisible,
+          isAnimating: isAnimating.value
+        });
         
-        // If we don't want to restart, disconnect after first animation
-        if (!props.restartOnVisible) {
-          observer?.disconnect();
+        // If element is visible and not currently animating
+        if ((!hasAnimated.value || props.restartOnVisible) && !isAnimating.value) {
+          runAnimation();
+          
+          // If we don't want to restart, disconnect after first animation
+          if (!props.restartOnVisible) {
+            observer?.disconnect();
+          }
+        }
+      } else {
+        // Only reset if not currently animating
+        if (props.restartOnVisible && !isAnimating.value) {
+          hasAnimated.value = false;
+          console.log('TextAnimation: Element no longer visible (debounced), reset animation state', {
+            timestamp: new Date().toISOString(),
+            isAnimating: isAnimating.value
+          });
         }
       }
-    } else {
-      // Element is not visible, reset hasAnimated if restartOnVisible is true
-      if (props.restartOnVisible) {
-        hasAnimated.value = false;
-      }
-    }
-  }, { threshold: 0.2 }); // Trigger when 20% visible
+    }, DEBOUNCE_DELAY);
+  }, { 
+    threshold: 0.1,
+    rootMargin: '50px'
+  });
   
   if (containerRef.value) {
     observer.observe(containerRef.value);
+    console.log('TextAnimation: Observer set up with debounce and animation lock', {
+      timestamp: new Date().toISOString(),
+      threshold: 0.1,
+      debounceDelay: DEBOUNCE_DELAY
+    });
   }
 };
 
@@ -533,6 +656,15 @@ onMounted(() => {
 onUnmounted(() => {
   if (observer) {
     observer.disconnect();
+  }
+  if (isAnimating.value) {
+    isAnimating.value = false;
+    activeInstances.delete(props.instanceId);
+    console.log('TextAnimation: Cleanup on unmount', {
+      timestamp: new Date().toISOString(),
+      instanceId: props.instanceId,
+      activeInstances: Array.from(activeInstances)
+    });
   }
 });
 
@@ -581,5 +713,49 @@ watch(() => props.resetKey, runAnimation);
 .word-bounce, .word-shake {
   display: inline-block;
   position: relative;
+}
+
+
+
+.gradient-theme-cool {
+  --party-color-1: #00FFFF;  /* Cyan */
+  --party-color-2: #FF1493;  /* Deep Pink */
+  --party-color-3: #00FF00;  /* Lime */
+  background-image: linear-gradient(90deg,
+    var(--theme-primary),
+    var(--party-color-1),
+    var(--party-color-2),
+    var(--party-color-3),
+    var(--theme-secondary)
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-size: 300% auto;
+  animation: party-gradient 3s ease-in-out infinite;
+}
+
+@keyframes fire-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes party-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 </style>

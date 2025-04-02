@@ -77,8 +77,21 @@ let startTimer = null;
 const createEmbers = () => {
   if (!props.targetElement || !emberContainer.value) return;
   
+  // Get current timestamp for timing comparison
+  const startTime = Date.now();
+  const startTimeISO = new Date().toISOString();
+  
   // Emit that ember effect is starting
   emit('ember-start');
+  
+  console.log('EmberAnimation: Starting ember effect', {
+    timestamp: startTimeISO,
+    startTime,
+    effectType: props.effectType,
+    targetElement: props.targetElement.textContent,
+    delay: props.startDelay,
+    duration: props.duration
+  });
   
   const container = emberContainer.value;
   
@@ -105,7 +118,30 @@ const createEmbers = () => {
   container.innerHTML = '';
   
   // Create ember particles using the imported functions
-  animationTimeline = gsap.timeline();
+  animationTimeline = gsap.timeline({
+    onStart: () => {
+      const timelineStartTime = Date.now();
+      console.log('EmberAnimation: Timeline started', {
+        timestamp: new Date().toISOString(),
+        startTime,
+        timelineStartTime,
+        timeSinceStart: timelineStartTime - startTime,
+        effectType: props.effectType,
+        targetElement: props.targetElement.textContent
+      });
+    },
+    onComplete: () => {
+      const endTime = Date.now();
+      console.log('EmberAnimation: Timeline completed', {
+        timestamp: new Date().toISOString(),
+        startTime,
+        endTime,
+        totalDuration: endTime - startTime,
+        effectType: props.effectType,
+        targetElement: props.targetElement.textContent
+      });
+    }
+  });
   
   // Get the appropriate effect creator and animator
   const effectCreator = effectTypes[props.effectType].create;
@@ -144,13 +180,16 @@ const updatePosition = () => {
 let resizeObserver = null;
 
 onMounted(() => {
-  
   // Skip the timeout completely if startDelay is 0
   if (props.startDelay <= 0) {
     nextTick(() => {
       createEmbers();
     });
   } else {
+    console.log('EmberAnimation: Setting up delayed start', {
+      timestamp: new Date().toISOString(),
+      startDelay: props.startDelay
+    });
     startTimer = setTimeout(() => {
       createEmbers();
     }, props.startDelay * 1000);
@@ -168,8 +207,11 @@ onMounted(() => {
 
 // Watch for changes to targetElement and recreate embers
 watch(() => props.targetElement, (newVal) => {
-  
   if (newVal) {
+    console.log('EmberAnimation: Target element changed', {
+      timestamp: new Date().toISOString(),
+      newElement: newVal.textContent
+    });
     
     // Kill previous animation if exists
     if (animationTimeline) {
@@ -189,6 +231,12 @@ watch(() => props.targetElement, (newVal) => {
 // Watch for changes to the active prop
 watch(() => props.active, (newVal) => {
   if (newVal && props.targetElement) {
+    console.log('EmberAnimation: Active state changed', {
+      timestamp: new Date().toISOString(),
+      newActive: newVal,
+      targetElement: props.targetElement.textContent
+    });
+    
     // Kill previous animation if exists
     if (animationTimeline) {
       animationTimeline.kill();

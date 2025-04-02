@@ -233,15 +233,15 @@ export const textAnimations = {
 
   // Fade up animation
   fadeUp: (tl: gsap.core.Timeline, elements: HTMLElement[], options?: TextAnimationOptions) => {
-    elements.forEach(el => gsap.set(el, { y: 30, opacity: 0 }));
+    elements.forEach(el => gsap.set(el, { y: 100, opacity: 0 }));
     
     elements.forEach((el, index) => {
       tl.to(el, { 
         y: 0, 
         opacity: 1, 
-        duration: options?.duration || 0.7,
-        ease: options?.ease || "power2.out"
-      }, index > 0 ? '<0.15' : undefined);
+        duration: options?.duration || 1.2,
+        ease: options?.ease || "power3.out"
+      }, index > 0 ? '<0.3' : undefined);
     });
     
     return tl;

@@ -22,3 +22,47 @@
     -webkit-filter: hue-rotate(360deg);
   }
 }
+@keyframes fire-gradient {
+  0% {
+    background-position: 0% 60%;
+  }
+  20% {
+    background-position: 40% 80%;
+  }
+  30% {
+    background-position: 60% 80%;
+  }
+  40% {
+    background-position: 70% 100%;
+  }
+  50% {
+    background-position: 60% 80%;
+  }
+  60% {
+    background-position: 40% 80%;
+  }
+  70% {
+    background-position: 40% 50%;
+  }
+  80% {
+    background-position: 0% 50%;
+  }
+  90% {
+    background-position: 50% 60%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes party-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}

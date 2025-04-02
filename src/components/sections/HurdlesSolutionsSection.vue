@@ -1,22 +1,23 @@
 <template>
   <div class="progressive-reveal overflow-visible" ref="sectionContainerRef">
     <AnimatedOutlineToFillText
-      class="heading-responsive solutions-heading font-bold text-center mb-20"
+      class="heading-responsive solutions-heading font-bold text-center"
       text="Website Solutions"
-      :fillPercentage="48"
       animation="fadeUp"
-      :duration="5"
-      :delay="0.3"
+      :duration="1.5"
+      :delay="0"
       :initiallyHidden="true"
       :triggerOnVisible="true"
       :animateFill="true"
-      :fillDuration="1.2"
+      :fillDuration="0.4"
+      :fillDelay=".25"
       :fluidFill="true"
       fluidFillDirection="right-to-left"
-      :fluidFillDuration="2.0"
+      :fluidFillDuration="1.0"
       fluidFillOverflow="fade"
       :transparentFill="true"
-      :transparentFillDuration="5.0"
+      :transparentFillDuration="2.5"
+      ease="power2.inOut"
     />
     <TextAnimation
       ref="splitTextRef"
@@ -25,25 +26,47 @@
       secondPart="To Fantastic"
       animation="split"
       :useGradient="true"
-      :delay="3"
-      :duration="3"
+      :delay="1.0"
+      :duration="0.6"
       :initiallyHidden="true"
       :wordEffects="true"
-      :wordTargets="['Frustration']"
-      :wordEffectClasses="['frustration-word']"
-      :wordEffectDuration="2"
-      :wordEffectDelay="0.3"
+      :wordTargets="['Frustration', 'Fantastic']"
+      :wordEffectClasses="[
+        ['frustration-word', 'gradient-theme-fire'],
+        ['gradient-theme-cool'],
+      ]"
+      :wordEffectDuration="1.5"
+      :wordEffectDelay="0.8"
+      ease="power3.inOut"
+      @word-effect-start="handleWordEffectStart"
     />
     <!-- Add ember effect for "Frustration" word -->
     <EmberAnimation
       :targetElement="frustrationElement"
       effectType="ember"
-      :particleCount="20"
-      :duration="2.5"
+      :particleCount="30"
+      :duration="0.8"
       :colors="['#ff4500', '#ff7800', '#ffaa33', '#ffcc00']"
       :relativeToParent="true"
-      :startDelay="emberDelay"
-      :active="frustrationElement !== null"
+      :startDelay="0"
+      :active="true"
+      ease="power2.inOut"
+      @ember-start="handleEmberStart"
+    />
+    <EmberAnimation
+      :targetElement="toFantasticRef"
+      effectType="firework"
+      :particleCount="60"
+      :duration="0.8"
+      :colors="['#00aaff', '#00ccff', '#00eeff', '#00ffff']"
+      :relativeToParent="false"
+      :startDelay="0"
+      :offsetX="100"
+      :offsetY="-200"
+      :originX="50"
+      :originY="0"
+      :active="true"
+      ease="power2.inOut"
       @ember-start="handleEmberStart"
     />
 
@@ -80,7 +103,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, onUnmounted } from "vue";
+import { ref, onMounted, computed, onUnmounted, nextTick } from "vue";
 import type { Ref } from "vue";
 import ChatScrollSection from "@/components/sections/ChatScrollSection.vue";
 import StickyScrollableCardsSection from "@/components/sections/StickyScrollableCardsSection.vue";
@@ -97,7 +120,7 @@ import AnimatedOutlineToFillText from "@/components/text/AnimatedOutlineToFillTe
 
 const frustrationElement = ref<HTMLElement | null>(null);
 // Computed value for ember delay
-const emberDelay = ref(0.5);
+const emberDelay = ref(0);
 const emberStartTime = ref<number | null>(null);
 
 // Reference to the main container
@@ -105,6 +128,7 @@ const sectionContainerRef = ref<HTMLElement | null>(null);
 const introSectionRef = ref(null);
 const splitTextRef = ref<HTMLElement | null>(null);
 const toFantasticRef = ref<HTMLElement | null>(null);
+const fantasticWrapperRef = ref<HTMLElement | null>(null);
 
 // Computed property to reverse the solutions array
 const reversedSolutions = computed(() => [...solutions].reverse());
@@ -122,15 +146,48 @@ const solutionsContainerHeight = computed(() =>
   })
 );
 
+const handleWordEffectStart = () => {
+  // Find the frustration element when word effects start
+  nextTick(() => {
+    frustrationElement.value = document.querySelector(".frustration-word");
+    toFantasticRef.value = document.querySelector(".gradient-theme-cool");
+    console.log("Found frustration element:", frustrationElement.value);
+    console.log("Found fantastic element:", toFantasticRef.value);
+    
+    // Debug position
+    if (toFantasticRef.value) {
+      const rect = toFantasticRef.value.getBoundingClientRect();
+      console.log("Fantastic word position:", {
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height
+      });
+    }
+
+    // Add a delay before starting ember effects
+    setTimeout(() => {
+      // Force the ember effects to start
+      if (frustrationElement.value) {
+        const emberEvent = new CustomEvent('ember-start');
+        frustrationElement.value.dispatchEvent(emberEvent);
+      }
+      if (toFantasticRef.value) {
+        const fireworkEvent = new CustomEvent('ember-start');
+        toFantasticRef.value.dispatchEvent(fireworkEvent);
+      }
+    }, 250); // Reduced from 500ms to 250ms
+  });
+};
+
 const handleEmberStart = () => {
   emberStartTime.value = Date.now();
+  console.log("Ember animation started");
 };
+
 // Lifecycle hooks
 onMounted(() => {
-  // Find the frustration element after component is mounted
-  setTimeout(() => {
-    frustrationElement.value = document.querySelector(".frustration-word");
-  }, 500);
+  // No need for timeout here, we'll find the element when word effects start
 });
 </script>
 
