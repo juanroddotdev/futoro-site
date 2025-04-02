@@ -1,0 +1,58 @@
+/* Styles specific to the collide-stack animation */
+.collide-stack-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  overflow: visible;
+
+  /* Create a positioning context for absolute positioning */
+  position: relative;
+
+  /* Special handling for collide animation */
+  &.animating-first-part {
+    justify-content: flex-start;
+    
+    /* Center the container itself */
+    width: fit-content;
+    margin: 0 auto;
+    
+    /* Ensure second part doesn't affect layout while hidden */
+    span:nth-child(2) {
+      position: absolute;
+      visibility: hidden;
+      pointer-events: none;
+    }
+  }
+
+  /* When second part is animating */
+  &.animating-second-part {
+    justify-content: flex-start;
+    width: fit-content;
+    margin: 0 auto;
+
+    span:nth-child(2) {
+      position: absolute;
+      visibility: visible;
+      pointer-events: auto;
+      left: 100%; /* Position it right after the first part */
+      margin-left: 0.5rem; /* Add some gap */
+    }
+  }
+}
+
+/* Ensure text parts are positioned correctly */
+.collide-stack-container span {
+  display: inline-block;
+  position: relative;
+  white-space: nowrap;
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Semi-transparent border for visualization */
+  padding: 0.25rem; /* Add some padding to better see the borders */
+}
+
+/* Remove margin when using absolute positioning */
+.collide-stack-container.animating-second-part span + span {
+  margin-left: 0;
+} 

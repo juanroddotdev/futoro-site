@@ -15,7 +15,7 @@
       @mounted="onHeroMounted"
     /> -->
     <HeroSectionNoChat :heroContent="heroContent" @mounted="onHeroMounted" />
-    <SectionSeparator width="100%" color="var(--theme-secondary, #ffffff)" type="squiggly" />
+    <!-- <SectionSeparator width="100%" color="var(--theme-secondary, #ffffff)" type="squiggly" /> -->
     <!-- Hurdles and Solutions Section -->
     <LazySection
       id="hurdles-solutions"

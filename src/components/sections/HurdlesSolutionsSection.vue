@@ -14,10 +14,10 @@
     />
     <TextAnimation
       ref="splitTextRef"
-      class="text-4xl font-bold text-center gradient-text heading-responsive"
+      class="font-bold text-center gradient-text heading-responsive"
       firstPart="From Frustration"
       secondPart="To Fantastic"
-      animation="split"
+      animation="collide-stack"
       :useGradient="true"
       :delay="3"
       :duration="3"

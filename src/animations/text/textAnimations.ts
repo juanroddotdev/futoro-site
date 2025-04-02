@@ -1,5 +1,6 @@
 import gsap from 'gsap';
 import { TextPlugin } from 'gsap/TextPlugin';
+import { CollideStackAnimation } from './collideStackAnimation';
 
 // Register GSAP plugins
 gsap.registerPlugin(TextPlugin);
@@ -16,7 +17,8 @@ export type TextAnimationType =
   | 'fadeUp'
   | 'slideInLeft'
   | 'slideInRight'
-  | 'outlineToFill';
+  | 'outlineToFill'
+  | 'collide-stack';
 
 export interface TextAnimationOptions {
   duration?: number;
@@ -336,6 +338,12 @@ export const textAnimations = {
     return tl;
   },
 
+  // Collide-stack animation
+  'collide-stack': (tl: gsap.core.Timeline, elements: HTMLElement[], options?: TextAnimationOptions) => {
+    const animation = new CollideStackAnimation(tl, elements, options);
+    return animation.animate();
+  },
+
   // Apply animation based on type
   applyAnimation: (
     animationType: TextAnimationType, 
@@ -370,6 +378,8 @@ export const textAnimations = {
         return textAnimations.slideInRight(tl, elements, options);
       case 'outlineToFill':
         return textAnimations.outlineToFill(tl, elements, options);
+      case 'collide-stack':
+        return textAnimations['collide-stack'](tl, elements, options);
       default:
         return textAnimations.fade(tl, elements, options);
     }

@@ -8,19 +8,16 @@ export function useLazySection() {
   // Register a section as loaded
   function markSectionLoaded(sectionId: string, track: boolean) {
     loadedSections.value.add(sectionId);
-    console.log(`[SectionLoader] Section ${sectionId} loaded. Total loaded: ${loadedSections.value.size}`);
   }
 
   // Register a section as visible
   function markSectionVisible(sectionId: string, track: boolean) {
     visibleSections.value.add(sectionId);
-    console.log(`[SectionLoader] Section ${sectionId} visible. Currently visible: ${Array.from(visibleSections.value).join(', ')}`);
   }
 
   // Register a section as hidden
   function markSectionHidden(sectionId: string) {
     visibleSections.value.delete(sectionId);
-    console.log(`[SectionLoader] Section ${sectionId} hidden. Currently visible: ${Array.from(visibleSections.value).join(', ')}`);
   }
 
   // Check if a section is loaded
