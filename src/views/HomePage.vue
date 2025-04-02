@@ -2,66 +2,80 @@
   <div class="main-content">
     <!-- Fixed grid overlay that stays in viewport -->
     <div class="viewport-grid">
-      <PaperGridBackground :theme="currentTheme.replace('theme-', '')" :floating="true" :spotlight="true" />
+      <PaperGridBackground
+        :theme="currentTheme.replace('theme-', '')"
+        :floating="true"
+        :spotlight="true"
+      />
     </div>
-    
+
     <!-- Hero Section -->
-    <HeroSectionChat 
+    <!-- <HeroSectionChat 
       :heroContent="heroContent"
       @mounted="onHeroMounted"
-    />
-    
+    /> -->
+    <HeroSectionNoChat :heroContent="heroContent" @mounted="onHeroMounted" />
+    <!-- <SectionSeparator width="100%" color="var(--theme-secondary, #ffffff)" type="squiggly" /> -->
     <!-- Hurdles and Solutions Section -->
-    <LazySection id="hurdles-solutions" 
-    :trackSection="false" 
-    @visible="onSectionVisible('hurdles-solutions', false)">
+    <LazySection
+      id="hurdles-solutions"
+      :trackSection="false"
+      @visible="onSectionVisible('hurdles-solutions', false)"
+    >
       <HurdlesSolutionsSection />
-      
+
       <template #placeholder>
         <div class="section-placeholder">Loading...</div>
       </template>
     </LazySection>
 
     <!-- Services section - use default slot instead of content slot -->
-    <LazySection id="services" 
-    @visible="onSectionVisible('services', false)"
-    :trackSection="false" >
+    <LazySection
+      id="services"
+      @visible="onSectionVisible('services', false)"
+      :trackSection="false"
+    >
       <ServicesSection />
-      
+
       <template #placeholder>
         <div class="section-placeholder">Loading...</div>
       </template>
     </LazySection>
     <!-- Timeline section - use default slot instead of content slot -->
-    <LazySection id="timeline" :trackSection="false"  @visible="onSectionVisible('timeline', false)">
-       <ProcessTimeline />
-      
+    <LazySection
+      id="timeline"
+      :trackSection="false"
+      @visible="onSectionVisible('timeline', false)"
+    >
+      <ProcessTimeline />
+
       <template #placeholder>
         <div class="section-placeholder">Loading...</div>
       </template>
     </LazySection>
-    
+
     <!-- We'll add more sections as we go -->
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
-import HeroSectionChat from '@/components/sections/HeroSectionChat.vue';
-import HurdlesSolutionsSection from '@/components/sections/HurdlesSolutionsSection.vue';
-import LazySection from '@/components/LazySection.vue';
-import ProcessTimeline from '@/components/sections/ProcessTimeline.vue';
-import ServicesSection from '@/components/sections/ServicesSection.vue';
-import { useTheme } from '../composables/useTheme';
-import { useLazySection } from '../composables/useLazySection';
-import { HeroContent, getRandomHeroContent } from '@/data/heroContentData';
-import PaperGridBackground from '@/components/ui/backgrounds/PaperGridBackground.vue';
-
+import { ref, onMounted, computed } from "vue";
+import HeroSectionChat from "@/components/sections/HeroSectionChat.vue";
+import HurdlesSolutionsSection from "@/components/sections/HurdlesSolutionsSection.vue";
+import LazySection from "@/components/LazySection.vue";
+import ProcessTimeline from "@/components/sections/ProcessTimeline.vue";
+import ServicesSection from "@/components/sections/ServicesSection.vue";
+import { useTheme } from "../composables/useTheme";
+import { useLazySection } from "../composables/useLazySection";
+import { HeroContent, getRandomHeroContent } from "@/data/heroContentData";
+import PaperGridBackground from "@/components/ui/backgrounds/PaperGridBackground.vue";
+import HeroSectionNoChat from "@/components/sections/HeroSectionNoChat.vue";
+import SectionSeparator from "@/components/ui/SectionSeparator.vue";
 const heroContent = ref<HeroContent>(getRandomHeroContent());
 
 // Get the global theme
 const { currentTheme } = useTheme();
-console.log('currentTheme:', currentTheme);
+console.log("currentTheme:", currentTheme);
 
 // Use the section loader
 const sectionLoader = useLazySection();
@@ -75,8 +89,8 @@ function onSectionVisible(sectionId: string, track: boolean = true) {
   sectionLoader.markSectionVisible(sectionId, track);
 }
 const onHeroMounted = () => {
-  sectionLoader.markSectionLoaded('hero-section', true);
-  sectionLoader.markSectionVisible('hero-section', true);
+  sectionLoader.markSectionLoaded("hero-section", true);
+  sectionLoader.markSectionVisible("hero-section", true);
 };
 // Update these methods
 const onHeroPullThresholdReached = () => {

@@ -105,6 +105,10 @@ body {
 .heading-responsive {
   font-size: clamp(map-get($fontSize, '2xl'), 6vw, map-get($fontSize, '4xl'));
 }
+.heading-responsive-large {
+  font-size: clamp(map-get($fontSize, '2xl'), 8vw, map-get($fontSize, '4xl'));
+  line-height: .9;
+}
 
 .subheading-responsive {
   font-size: clamp(map-get($fontSize, 'base'), 2.5vw, map-get($fontSize, 'xl'));

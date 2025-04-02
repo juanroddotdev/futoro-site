@@ -374,32 +374,33 @@
 
 @each $theme-name, $theme-map in $themes {
   .theme-#{$theme-name} {
-    // Fire gradient - warm oranges and reds
     .gradient-theme-fire {
       background-image: linear-gradient(90deg, 
         map-get($theme-map, 'primary'), 
-        adjust-for-theme(#FF4500, $theme-map), // Orange-Red
-        adjust-for-theme(#FF8C00, $theme-map), // Dark Orange
+        adjust-for-theme(#FF4500, $theme-map),
+        adjust-for-theme(#FF8C00, $theme-map),
         map-get($theme-map, 'secondary')
       );
       background-clip: text;
       -webkit-background-clip: text;
       color: transparent;
       background-size: 200% auto;
+      animation: fire-gradient 2s ease-in-out infinite;
     }
-    
-    // Cool gradient - blues and cyans
+
     .gradient-theme-cool {
-      background-image: linear-gradient(90deg, 
-        map-get($theme-map, 'primary'), 
-        adjust-for-theme(#4682B4, $theme-map), // Steel Blue
-        adjust-for-theme(#00BFFF, $theme-map), // Deep Sky Blue
+      background-image: linear-gradient(90deg,
+        map-get($theme-map, 'primary'),
+        adjust-for-theme(#00FFFF, $theme-map),
+        adjust-for-theme(#FF1493, $theme-map),
+        adjust-for-theme(#00FF00, $theme-map),
         map-get($theme-map, 'secondary')
       );
       background-clip: text;
       -webkit-background-clip: text;
       color: transparent;
-      background-size: 200% auto;
+      background-size: 300% auto;
+      animation: party-gradient 3s ease-in-out infinite;
     }
   }
 }
