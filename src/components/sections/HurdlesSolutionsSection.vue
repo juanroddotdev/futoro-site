@@ -7,13 +7,19 @@
       :duration="1.5"
       :delay="0"
       :initiallyHidden="true"
-      :triggerOnVisible="true"
+      :triggerOnVisible="false"
+      :triggerOnScroll="true"
+      :scrub="2"
+      scrollStart="top bottom"
+      scrollEnd="bottom top"
+      fillScrollStart="top center"
+      fillScrollEnd="bottom center"
       :animateFill="true"
-      :fillDuration="0.4"
-      :fillDelay=".25"
+      :fillDuration="2.0"
+      :fillDelay="1.0"
       :fluidFill="true"
       fluidFillDirection="right-to-left"
-      :fluidFillDuration="1.0"
+      :fluidFillDuration="3.0"
       fluidFillOverflow="fade"
       :transparentFill="true"
       :transparentFillDuration="2.5"
@@ -26,7 +32,6 @@
       secondPart="To Fantastic"
       animation="split"
       :useGradient="true"
-      :delay="1.0"
       :duration="0.6"
       :initiallyHidden="true"
       :wordEffects="true"
@@ -38,6 +43,11 @@
       :wordEffectDuration="1.5"
       :wordEffectDelay="0.8"
       ease="power3.inOut"
+      :triggerOnVisible="false"
+      :triggerOnScroll="true"
+      :scrub="true"
+      scrollStart="top center"
+      scrollEnd="bottom center"
       @word-effect-start="handleWordEffectStart"
     />
     <!-- Add ember effect for "Frustration" word -->
@@ -151,19 +161,10 @@ const handleWordEffectStart = () => {
   nextTick(() => {
     frustrationElement.value = document.querySelector(".frustration-word");
     toFantasticRef.value = document.querySelector(".gradient-theme-cool");
-    console.log("Found frustration element:", frustrationElement.value);
-    console.log("Found fantastic element:", toFantasticRef.value);
-    
-    // Debug position
-    if (toFantasticRef.value) {
-      const rect = toFantasticRef.value.getBoundingClientRect();
-      console.log("Fantastic word position:", {
-        top: rect.top,
-        left: rect.left,
-        width: rect.width,
-        height: rect.height
-      });
-    }
+    console.log("HurdlesSection: Word effects starting", {
+      frustrationElement: frustrationElement.value?.textContent,
+      fantasticElement: toFantasticRef.value?.textContent
+    });
 
     // Add a delay before starting ember effects
     setTimeout(() => {
@@ -176,18 +177,23 @@ const handleWordEffectStart = () => {
         const fireworkEvent = new CustomEvent('ember-start');
         toFantasticRef.value.dispatchEvent(fireworkEvent);
       }
-    }, 250); // Reduced from 500ms to 250ms
+    }, 250);
   });
 };
 
 const handleEmberStart = () => {
   emberStartTime.value = Date.now();
-  console.log("Ember animation started");
+  console.log("HurdlesSection: Ember animation started", {
+    timestamp: emberStartTime.value
+  });
 };
 
 // Lifecycle hooks
 onMounted(() => {
-  // No need for timeout here, we'll find the element when word effects start
+  console.log("HurdlesSection: Component mounted", {
+    sectionContainer: sectionContainerRef.value,
+    splitTextRef: splitTextRef.value
+  });
 });
 </script>
 

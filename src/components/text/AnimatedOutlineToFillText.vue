@@ -82,6 +82,38 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
+  triggerOnScroll: {
+    type: Boolean,
+    default: false
+  },
+  scrollStart: {
+    type: String,
+    default: 'top bottom'
+  },
+  scrollEnd: {
+    type: String,
+    default: 'bottom top'
+  },
+  scrub: {
+    type: [Boolean, Number],
+    default: false
+  },
+  fillScrollStart: {
+    type: String,
+    default: 'top center'
+  },
+  fillScrollEnd: {
+    type: String,
+    default: 'bottom center'
+  },
+  fluidFill: {
+    type: Boolean,
+    default: false
+  },
+  fluidFillDuration: {
+    type: Number,
+    default: 2.0
+  },
 });
 
 const emit = defineEmits(["animation-complete"]);
@@ -100,158 +132,147 @@ const clipPathStyle = computed(() => {
   return !isFilled.value ? fill : unfill;
 });
 
-// Animation logic
-const animateText = () => {
-  if (hasAnimated.value) return;
+// Remove the old animateText function and replace with runAnimation
+const runAnimation = () => {
+  console.log('AnimatedOutlineToFill: Running animation', {
+    triggerOnScroll: props.triggerOnScroll,
+    animateFill: props.animateFill,
+    scrub: props.scrub
+  });
 
-  nextTick(() => {
-    const elements = [outlineTextRef.value, filledTextRef.value].filter(
-      (el) => el !== null
-    ) as HTMLElement[];
+  const elements = [outlineTextRef.value, filledTextRef.value].filter(
+    (el) => el !== null
+  ) as HTMLElement[];
 
-    if (elements.length > 0) {
-      // Kill any existing animations
-      elements.forEach((el) => {
-        if (el) gsap.killTweensOf(el);
-      });
+  // Set initial state
+  elements.forEach((el) => {
+    gsap.set(el, { y: 100, opacity: 0 });
+  });
 
-      // Create a timeline for the animation
-      const tl = gsap.timeline({
-        defaults: {
-          ease: props.ease,
-          duration: props.duration,
+  // Set initial fill state
+  if (filledTextRef.value) {
+    gsap.set(filledTextRef.value, {
+      clipPath: "inset(0 0 0 100%)"
+    });
+  }
+
+  // Create main timeline for fade-up
+  const mainTimeline = gsap.timeline({
+    scrollTrigger: props.triggerOnScroll ? {
+      trigger: containerRef.value,
+      start: props.scrollStart,
+      end: props.scrollEnd,
+      scrub: props.scrub,
+      toggleActions: "play pause reverse pause",
+      onEnter: () => {
+        console.log('AnimatedOutlineToFill: Main scroll trigger entered');
+      }
+    } : null
+  });
+
+  // Add fade-up animation to main timeline
+  mainTimeline.to(elements, {
+    y: 0,
+    opacity: 1,
+    duration: props.duration || 1.2,
+    ease: "power3.out",
+    onStart: () => console.log('AnimatedOutlineToFill: Fade-up animation started'),
+    onComplete: () => console.log('AnimatedOutlineToFill: Fade-up animation completed')
+  }, 0); // Start at 0
+
+  // Create fill timeline
+  if (props.animateFill) {
+    console.log('AnimatedOutlineToFill: Setting up fill animation', {
+      fillScrollStart: props.fillScrollStart,
+      fillScrollEnd: props.fillScrollEnd,
+      scrub: props.scrub
+    });
+
+    const fillTimeline = gsap.timeline({
+      scrollTrigger: props.triggerOnScroll ? {
+        trigger: containerRef.value,
+        start: props.fillScrollStart,
+        end: props.fillScrollEnd,
+        scrub: props.scrub,
+        toggleActions: "play pause reverse pause",
+        onEnter: () => {
+          console.log('AnimatedOutlineToFill: Fill scroll trigger entered');
         },
-        delay: props.delay,
-        onComplete: () => {
-          emit("animation-complete");
-        },
-      });
-
-      // Handle different animation types
-      if (props.animation === "fadeUp") {
-        // Make sure both elements are set to the same initial state
-        elements.forEach((el) => {
-          gsap.set(el, { y: 100, opacity: 0 });
-        });
-
-        // If animateFill is true, set initial clip path to hide the fill completely
-        if (props.animateFill && filledTextRef.value) {
-          gsap.set(filledTextRef.value, {
-            clipPath: "inset(0 0 0 100%)", // Start with no fill visible
+        onUpdate: (self) => {
+          console.log('AnimatedOutlineToFill: Fill scroll update', {
+            progress: self.progress,
+            direction: self.direction
           });
         }
+      } : null
+    });
 
-        // Animate both elements together as a single unit
-        tl.to(elements, {
-          y: 0,
-          opacity: 1,
-          duration: props.duration || 1.2,
-          ease: "power3.out",
-        }, 0); // Start at 0
+    // Start fill animation during the fade-up
+    fillTimeline.to(currentFillPercentage, {
+      value: 100,
+      duration: props.fillDuration,
+      ease: "power2.inOut",
+      delay: props.fillDelay,
+      onComplete: () => {
+        isFilled.value = !isFilled.value;
+        currentFillPercentage.value = 100;
+      },
+    }, props.fillDelay); // Start at fillDelay seconds
 
-        // Start fill animation during the fade-up
-        tl.to(currentFillPercentage, {
-          value: 100,
-          duration: props.fillDuration,
-          ease: "power2.inOut",
-          delay: props.fillDelay,
-          onComplete: () => {
-            isFilled.value = !isFilled.value;
-            currentFillPercentage.value = 100;
-          },
-        }, props.fillDelay); // Start at fillDelay seconds
+    fillTimeline.to(currentFillPercentage, {
+      value: 0,
+      duration: props.fillDuration,
+      ease: "power2.inOut"
+    }, `>${props.fillDelay}`); // Start after previous fill animation
 
-        tl.to(currentFillPercentage, {
-          value: 0,
-          duration: props.fillDuration,
-          ease: "power2.inOut"
-        }, `>${props.fillDelay}`); // Start after previous fill animation
+    // Add fluid fill if enabled
+    if (props.fluidFill) {
+      fillTimeline.to(currentFillPercentage, {
+        value: 100,
+        duration: props.fluidFillDuration || 2.0,
+        ease: "power2.inOut"
+      }, `>${props.fillDelay}`);
 
-        tl.to(currentFillPercentage, {
-          value: 100,
-          duration: props.fillDuration,
-          ease: "power2.inOut",
-          onComplete: () => {
-            isFilled.value = !isFilled.value;
-            currentFillPercentage.value = 100;
-          },
-        }, `>${props.fillDelay}`); // Start after previous fill animation
-      } else if (typeof textAnimations[props.animation] === "function") {
-        textAnimations[props.animation](tl, elements, {
-          duration: props.duration,
-          delay: props.delay,
-          ease: props.ease,
-        });
-      }
-
-      hasAnimated.value = true;
+      fillTimeline.to(currentFillPercentage, {
+        value: 0,
+        duration: props.fluidFillDuration || 2.0,
+        ease: "power2.inOut"
+      }, `>${props.fillDelay}`);
     }
-  });
+  }
 };
 
-// Set up intersection observer for triggering animation when element is visible
-const setupIntersectionObserver = () => {
-  if (!containerRef.value) return;
-
-  const observer = new IntersectionObserver(
-    (entries) => {
-      const [entry] = entries;
-      if (entry.isIntersecting && !hasAnimated.value) {
-        animateText();
-        observer.disconnect();
-      }
-    },
-    {
-      threshold: 0.1,
-    }
-  );
-
-  observer.observe(containerRef.value);
-
-  return observer;
-};
-
-let observer: IntersectionObserver | null = null;
-
+// Modify onMounted to only set initial state
 onMounted(() => {
-  // Always set initial state for both elements regardless of initiallyHidden prop
+  console.log('AnimatedOutlineToFill: Component mounted');
+  
+  // Set initial state
   const elements = [outlineTextRef.value, filledTextRef.value].filter(
     (el) => el !== null
   ) as HTMLElement[];
 
   if (props.initiallyHidden) {
-    // For fadeUp animation, set both y position and opacity
-    if (props.animation === "fadeUp") {
-      elements.forEach((el) => {
-        gsap.set(el, { y: 100, opacity: 0 });
-      });
-    } else {
-      // For other animations, just set opacity
-      elements.forEach((el) => {
-        gsap.set(el, { opacity: 0 });
-      });
-    }
-  }
-
-  // Set initial fill to 0% (completely hidden)
-  if (filledTextRef.value) {
-    gsap.set(filledTextRef.value, {
-      clipPath: "inset(0 0 0 100%)", // Start with no fill visible
+    elements.forEach((el) => {
+      gsap.set(el, { y: 100, opacity: 0 });
     });
   }
 
-  if (props.triggerOnVisible) {
-    observer = setupIntersectionObserver() || null;
+  if (filledTextRef.value) {
+    gsap.set(filledTextRef.value, {
+      clipPath: "inset(0 0 0 100%)"
+    });
+  }
+
+  // Only run animation setup if not scroll triggered
+  if (!props.triggerOnScroll) {
+    runAnimation();
   } else {
-    animateText();
+    // For scroll-triggered animations, just set up the scroll triggers
+    gsap.delayedCall(0, runAnimation);
   }
 });
 
-onUnmounted(() => {
-  if (observer) {
-    observer.disconnect();
-  }
-});
+// Remove onUnmounted since we don't need to clean up observer anymore
 </script>
 
 <style scoped>
@@ -313,3 +334,4 @@ onUnmounted(() => {
   }
 }
 </style>
+
