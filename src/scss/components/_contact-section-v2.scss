@@ -116,7 +116,6 @@
   position: relative;
   z-index: 1;
   min-height: 100vh;
-  margin-bottom: 100vh;
   
   @each $theme-name, $theme-map in $themes {
     .theme-#{$theme-name} & {
@@ -137,5 +136,5 @@
 
 .footer {
   position: relative;
-  z-index: 1;
+  z-index: 3;
 }

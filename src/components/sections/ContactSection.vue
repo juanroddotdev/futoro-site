@@ -50,15 +50,15 @@ onMounted(() => {
 </template>
 
 <style lang="scss">
+@import '@/scss/components/_contact-section-v2.scss';
+
 .contact-v2 {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  z-index: 0;
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 2rem;
 }
 </style>
