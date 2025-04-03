@@ -104,6 +104,10 @@ const emit = defineEmits<{
 
 // Emit mounted event when component is mounted
 onMounted(() => {
+  console.log("HeroSection: Component mounted", {
+    heroContent: heroContent.value,
+    containerHeight: calculateHeroContainerHeight(heroMessages.value.length)
+  });
   emit('mounted');
 });
 </script>
