@@ -54,6 +54,9 @@
       </template>
     </LazySection>
 
+    <!-- Contact Section -->
+    <ContactSection />
+
     <!-- We'll add more sections as we go -->
   </div>
 </template>
@@ -71,6 +74,8 @@ import { HeroContent, getRandomHeroContent } from "@/data/heroContentData";
 import PaperGridBackground from "@/components/ui/backgrounds/PaperGridBackground.vue";
 import HeroSectionNoChat from "@/components/sections/HeroSectionNoChat.vue";
 import SectionSeparator from "@/components/ui/SectionSeparator.vue";
+import ContactSection from "@/components/sections/ContactSection.vue";
+
 const heroContent = ref<HeroContent>(getRandomHeroContent());
 
 // Get the global theme
@@ -106,6 +111,7 @@ const onHeroUnlock = () => {
 <style lang="scss">
 .main-content {
   position: relative; /* Create positioning context */
+  z-index: 3;
 }
 
 .viewport-grid {
@@ -127,5 +133,20 @@ const onHeroUnlock = () => {
 /* Make grid paper overlay fill its container */
 ::v-deep(.grid-paper-overlay) {
   height: 100%;
+}
+
+/* Ensure content appears above grid and contact */
+.hero-section,
+HurdlesSolutionsSection,
+ServicesSection,
+ProcessTimeline {
+  position: relative;
+  z-index: 3;
+}
+
+/* Contact section should be above the grid but below other content */
+.contact-section {
+  position: relative;
+  z-index: 2;
 }
 </style>
