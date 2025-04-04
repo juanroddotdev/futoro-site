@@ -76,3 +76,129 @@
     }
   }
 }
+.rotating-text {
+    transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); // Increased from 0.4s to 0.8s
+    
+    .touch-circle-btn:hover & {
+      transform: scale(0);
+      opacity: 0;
+    }
+  }
+  @keyframes suckToCenter {
+    0% {
+      transform: translate(var(--x), var(--y));
+      opacity: 1;
+    }
+    100% {
+      transform: translate(0, 0) scale(0);
+      opacity: 0;
+    }
+  }
+  .touch-circle-btn {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    
+    .default-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); // Increased from 0.4s to 0.8s
+      transform-origin: center center;
+      
+      span {
+        display: block;
+        text-align: center;
+      }
+    }
+    
+    .hover-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 0;
+      transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); // Increased from 0.4s to 0.8s
+      transform-origin: center center;
+    }
+    
+    &:hover {
+      .default-text {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+      }
+      
+      .floating-text {
+        animation: suckToCenter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; // Increased from 0.4s to 0.8s
+      }
+      
+      .hover-text {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+        transition-delay: 0.4s; // Increased from 0.2s to 0.4s
+      }
+    }
+  }
+  
+  .floating-text {
+    position: absolute;
+    font-size: 0.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    opacity: 0;
+    transform: translate(var(--x), var(--y));
+    animation: floatText 4.8s linear infinite;
+    animation-delay: var(--delay);
+    pointer-events: none;
+  }
+  
+  @keyframes floatText {
+    0%, 100% {
+      opacity: 0;
+      transform: translate(var(--x), var(--y));
+    }
+    25%, 75% {
+      opacity: 1;
+      transform: translate(var(--x), var(--y)) translateY(-10px);
+    }
+  }
+  @keyframes rotate {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .floating-texts {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .timeline-progress {
+    position: absolute;
+    top: 0;
+    background-color: var(--color-accent);
+    z-index: 1;
+    transition: height 0.1s linear;
+  }
+  
+  .rotating-text {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    animation: rotate 10s linear infinite;
+    
+    .circle-text {
+      fill: currentColor;
+      font-size: 1.8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+  }

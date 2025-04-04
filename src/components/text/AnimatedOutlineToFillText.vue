@@ -134,11 +134,6 @@ const clipPathStyle = computed(() => {
 
 // Remove the old animateText function and replace with runAnimation
 const runAnimation = () => {
-  console.log('AnimatedOutlineToFill: Running animation', {
-    triggerOnScroll: props.triggerOnScroll,
-    animateFill: props.animateFill,
-    scrub: props.scrub
-  });
 
   const elements = [outlineTextRef.value, filledTextRef.value].filter(
     (el) => el !== null
@@ -165,7 +160,6 @@ const runAnimation = () => {
       scrub: props.scrub,
       toggleActions: "play pause reverse pause",
       onEnter: () => {
-        console.log('AnimatedOutlineToFill: Main scroll trigger entered');
       }
     } : null
   });
@@ -176,17 +170,12 @@ const runAnimation = () => {
     opacity: 1,
     duration: props.duration || 1.2,
     ease: "power3.out",
-    onStart: () => console.log('AnimatedOutlineToFill: Fade-up animation started'),
-    onComplete: () => console.log('AnimatedOutlineToFill: Fade-up animation completed')
+    onStart: () =>{},
+    onComplete: () => {} 
   }, 0); // Start at 0
 
   // Create fill timeline
   if (props.animateFill) {
-    console.log('AnimatedOutlineToFill: Setting up fill animation', {
-      fillScrollStart: props.fillScrollStart,
-      fillScrollEnd: props.fillScrollEnd,
-      scrub: props.scrub
-    });
 
     const fillTimeline = gsap.timeline({
       scrollTrigger: props.triggerOnScroll ? {
@@ -196,13 +185,10 @@ const runAnimation = () => {
         scrub: props.scrub,
         toggleActions: "play pause reverse pause",
         onEnter: () => {
-          console.log('AnimatedOutlineToFill: Fill scroll trigger entered');
+         
         },
         onUpdate: (self) => {
-          console.log('AnimatedOutlineToFill: Fill scroll update', {
-            progress: self.progress,
-            direction: self.direction
-          });
+          
         }
       } : null
     });
@@ -244,7 +230,7 @@ const runAnimation = () => {
 
 // Modify onMounted to only set initial state
 onMounted(() => {
-  console.log('AnimatedOutlineToFill: Component mounted');
+
   
   // Set initial state
   const elements = [outlineTextRef.value, filledTextRef.value].filter(

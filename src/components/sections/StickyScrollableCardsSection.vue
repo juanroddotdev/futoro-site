@@ -11,7 +11,7 @@
   >
     <div class="header-container" :class="headerContainerClass">
       <TextAnimation 
-        class="section-title gradient-text"
+        class="section-title gradient-text heading-responsive font-grotesk font-semibold"
         :firstPart="title"  
         :animation="titleAnimation"
         :useGradient="true" 
@@ -174,7 +174,6 @@ function handleScroll() {
         padding: 4px 20px;
         bottom:  220px;
         .section-title {
-          font-size: 4.5rem;
           margin-block: 0;
           text-align: center;
         }
