@@ -10,6 +10,9 @@
       class="loader-overlay"
     />
     
+    <!-- Wireframe overlay -->
+    <HeroSectionChatWireframe v-if="isLoading" />
+    
     <!-- Main app content -->
     <div id="app" 
       :class="[
@@ -39,6 +42,7 @@ import GradientDefinitions from '@/components/ui/GradientDefinitions.vue';
 import { SimpleLoader } from '@/components/simple-loader';
 import { useTheme } from './composables/useTheme';
 import { HeroContent, getRandomHeroContent } from '@/components/simple-loader/heroContentData';
+import HeroSectionChatWireframe from '@/components/sections/HeroSectionChatWireframe.vue';
 
 const route = useRoute();
 const { currentTheme, isThemeTransitioning, handleThemeChange } = useTheme();
