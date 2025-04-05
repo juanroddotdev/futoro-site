@@ -11,7 +11,7 @@
     <div class="grid grid-cols-5 gap-4">
       <div class="col-span-2 sticky-heading-container">
         <TextAnimation 
-          class="sticky-heading text-5xl heading-responsive-large font-bold text-center my-16 gradient-text"
+          class="sticky-heading heading-responsive-large font-bold text-center my-16 gradient-text"
           firstPart="How I" 
           secondPart="Can Help" 
           animation="split"

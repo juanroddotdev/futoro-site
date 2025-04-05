@@ -161,10 +161,6 @@ const handleWordEffectStart = () => {
   nextTick(() => {
     frustrationElement.value = document.querySelector(".frustration-word");
     toFantasticRef.value = document.querySelector(".gradient-theme-cool");
-    console.log("HurdlesSection: Word effects starting", {
-      frustrationElement: frustrationElement.value?.textContent,
-      fantasticElement: toFantasticRef.value?.textContent
-    });
 
     // Add a delay before starting ember effects
     setTimeout(() => {
@@ -183,17 +179,11 @@ const handleWordEffectStart = () => {
 
 const handleEmberStart = () => {
   emberStartTime.value = Date.now();
-  console.log("HurdlesSection: Ember animation started", {
-    timestamp: emberStartTime.value
-  });
 };
 
 // Lifecycle hooks
 onMounted(() => {
-  console.log("HurdlesSection: Component mounted", {
-    sectionContainer: sectionContainerRef.value,
-    splitTextRef: splitTextRef.value
-  });
+  
 });
 </script>
 

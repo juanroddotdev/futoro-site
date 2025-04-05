@@ -13,10 +13,11 @@
 
 .sticky-heading {
   position: sticky;
-  width: 60%;
+  width: 80%;
   text-align: left;
   top: 100px; /* Adjust this value to control vertical position when sticky */
   align-self: flex-start;
+  justify-content: flex-start;
   z-index: 10; /* Ensure it stays on top */
   transition: opacity 0.3s ease; /* Smooth transition for visibility changes */
 }

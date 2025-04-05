@@ -157,12 +157,6 @@ const applyWordEffects = () => {
     // Release animation lock if no word effects
     isAnimating.value = false;
     activeInstances.delete(props.instanceId);
-    console.log('TextAnimation: Animation lock released (no word effects)', {
-      timestamp: new Date().toISOString(),
-      isAnimating: isAnimating.value,
-      instanceId: props.instanceId,
-      activeInstances: Array.from(activeInstances)
-    });
     emit('animation-complete');
     return;
   }
@@ -249,12 +243,6 @@ const applyWordEffects = () => {
       // Release animation lock after word effects complete
       isAnimating.value = false;
       activeInstances.delete(props.instanceId);
-      console.log('TextAnimation: Animation lock released (word effects complete)', {
-        timestamp: new Date().toISOString(),
-        isAnimating: isAnimating.value,
-        instanceId: props.instanceId,
-        activeInstances: Array.from(activeInstances)
-      });
       
       emit('word-effect-complete');
       emit('animation-complete');
@@ -435,12 +423,6 @@ const applySqueezeEffect = (
 };
 
 const runAnimation = () => {
-  console.log('TextAnimation: runAnimation called', {
-    instanceId: props.instanceId,
-    triggerOnScroll: props.triggerOnScroll,
-    triggerOnVisible: props.triggerOnVisible,
-    initiallyHidden: props.initiallyHidden
-  });
 
   if (activeInstances.size > 0 && !activeInstances.has(props.instanceId)) {
     return;
@@ -462,7 +444,6 @@ const runAnimation = () => {
 
   // Remove initially-hidden class immediately when animation starts
   if (containerRef.value.classList.contains('initially-hidden')) {
-    console.log('TextAnimation: Removing initially-hidden class');
     containerRef.value.classList.remove('initially-hidden');
   }
 
@@ -473,10 +454,6 @@ const runAnimation = () => {
     suffixRef.value
   ].filter(Boolean) as HTMLElement[];
 
-  console.log('TextAnimation: Elements to animate', {
-    count: elements.length,
-    elements: elements.map(el => el.textContent)
-  });
 
   // Set initial state
   elements.forEach(el => {
@@ -487,9 +464,6 @@ const runAnimation = () => {
   });
 
   if (props.triggerOnScroll) {
-    console.log('TextAnimation: Setting up scroll-based animation', {
-      animation: props.animation
-    });
     const mainTimeline = gsap.timeline({
       scrollTrigger: {
         trigger: containerRef.value,
@@ -498,33 +472,14 @@ const runAnimation = () => {
         scrub: props.scrub,
         toggleActions: "play pause reverse pause",
         onEnter: () => {
-          console.log('TextAnimation: Scroll trigger entered', {
-            trigger: containerRef.value?.getBoundingClientRect(),
-            viewport: {
-              height: window.innerHeight,
-              width: window.innerWidth
-            }
-          });
           // Also ensure initially-hidden is removed on scroll trigger
           if (containerRef.value?.classList.contains('initially-hidden')) {
             containerRef.value.classList.remove('initially-hidden');
           }
         },
         onLeave: () => {
-          console.log('TextAnimation: Scroll trigger left', {
-            trigger: containerRef.value?.getBoundingClientRect(),
-            viewport: {
-              height: window.innerHeight,
-              width: window.innerWidth
-            }
-          });
         },
         onUpdate: (self) => {
-          console.log('TextAnimation: Scroll trigger update', {
-            progress: self.progress,
-            direction: self.direction,
-            isActive: self.isActive
-          });
         }
       }
     });
@@ -570,13 +525,12 @@ const runAnimation = () => {
         duration: props.duration || 0.6,
         ease: props.ease || "power3.out",
         stagger: 0.1,
-        onStart: () => console.log('TextAnimation: Main animation started'),
-        onComplete: () => console.log('TextAnimation: Main animation completed')
+        onStart: () => {},
+        onComplete: () => {}
       });
     }
 
     if (props.wordEffects) {
-      console.log('TextAnimation: Setting up word effects');
       const wordEffectsTimeline = gsap.timeline({
         scrollTrigger: {
           trigger: containerRef.value,
@@ -584,35 +538,32 @@ const runAnimation = () => {
           end: props.scrollEnd,
           scrub: props.scrub,
           toggleActions: "play pause reverse pause",
-          onEnter: () => console.log('TextAnimation: Word effects scroll trigger entered'),
-          onLeave: () => console.log('TextAnimation: Word effects scroll trigger left')
+          onEnter: () => {},
+          onLeave: () => {}
         }
       });
 
       wordEffectsTimeline.call(() => {
-        console.log('TextAnimation: Word effects triggered');
         applyWordEffects();
       }, [], props.wordEffectDelay);
     }
   } else {
-    console.log('TextAnimation: Setting up immediate animation');
     const tl = gsap.timeline({
       defaults: {
         ease: props.ease,
         duration: props.duration
       },
       onStart: () => {
-        console.log('TextAnimation: Immediate animation started');
         // Also ensure initially-hidden is removed when immediate animation starts
         if (containerRef.value?.classList.contains('initially-hidden')) {
           containerRef.value.classList.remove('initially-hidden');
         }
       },
       onComplete: () => {
-        console.log('TextAnimation: Immediate animation completed');
+        
         if (props.wordEffects) {
           setTimeout(() => {
-            console.log('TextAnimation: Starting word effects');
+           
             applyWordEffects();
           }, props.wordEffectDelay * 1000);
         } else {
@@ -632,12 +583,6 @@ const runAnimation = () => {
 };
 
 onMounted(() => {
-  console.log('TextAnimation: Component mounted', {
-    instanceId: props.instanceId,
-    triggerOnScroll: props.triggerOnScroll,
-    triggerOnVisible: props.triggerOnVisible,
-    initiallyHidden: props.initiallyHidden
-  });
 
   // Set initial state
   const elements = [
@@ -647,7 +592,6 @@ onMounted(() => {
   ].filter(Boolean) as HTMLElement[];
 
   if (props.initiallyHidden) {
-    console.log('TextAnimation: Setting initial hidden state');
     elements.forEach(el => {
       gsap.set(el, { opacity: 0, y: 50 });
     });
@@ -655,13 +599,8 @@ onMounted(() => {
 
   // Run animation based on trigger type
   if (props.triggerOnVisible) {
-    console.log('TextAnimation: Setting up visibility observer');
     const observer = new IntersectionObserver((entries) => {
       const [entry] = entries;
-      console.log('TextAnimation: Visibility changed', {
-        isIntersecting: entry.isIntersecting,
-        hasAnimated: hasAnimated.value
-      });
       
       if (entry.isIntersecting && !hasAnimated.value) {
         runAnimation();
@@ -676,7 +615,6 @@ onMounted(() => {
       observer.observe(containerRef.value);
     }
   } else {
-    console.log('TextAnimation: Running immediate animation');
     runAnimation();
   }
 });

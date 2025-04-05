@@ -84,15 +84,6 @@ const createEmbers = () => {
   // Emit that ember effect is starting
   emit('ember-start');
   
-  console.log('EmberAnimation: Starting ember effect', {
-    timestamp: startTimeISO,
-    startTime,
-    effectType: props.effectType,
-    targetElement: props.targetElement.textContent,
-    delay: props.startDelay,
-    duration: props.duration
-  });
-  
   const container = emberContainer.value;
   
   // Position the ember container
@@ -118,30 +109,7 @@ const createEmbers = () => {
   container.innerHTML = '';
   
   // Create ember particles using the imported functions
-  animationTimeline = gsap.timeline({
-    onStart: () => {
-      const timelineStartTime = Date.now();
-      console.log('EmberAnimation: Timeline started', {
-        timestamp: new Date().toISOString(),
-        startTime,
-        timelineStartTime,
-        timeSinceStart: timelineStartTime - startTime,
-        effectType: props.effectType,
-        targetElement: props.targetElement.textContent
-      });
-    },
-    onComplete: () => {
-      const endTime = Date.now();
-      console.log('EmberAnimation: Timeline completed', {
-        timestamp: new Date().toISOString(),
-        startTime,
-        endTime,
-        totalDuration: endTime - startTime,
-        effectType: props.effectType,
-        targetElement: props.targetElement.textContent
-      });
-    }
-  });
+  animationTimeline = gsap.timeline();
   
   // Get the appropriate effect creator and animator
   const effectCreator = effectTypes[props.effectType].create;
@@ -186,10 +154,6 @@ onMounted(() => {
       createEmbers();
     });
   } else {
-    console.log('EmberAnimation: Setting up delayed start', {
-      timestamp: new Date().toISOString(),
-      startDelay: props.startDelay
-    });
     startTimer = setTimeout(() => {
       createEmbers();
     }, props.startDelay * 1000);
@@ -208,11 +172,6 @@ onMounted(() => {
 // Watch for changes to targetElement and recreate embers
 watch(() => props.targetElement, (newVal) => {
   if (newVal) {
-    console.log('EmberAnimation: Target element changed', {
-      timestamp: new Date().toISOString(),
-      newElement: newVal.textContent
-    });
-    
     // Kill previous animation if exists
     if (animationTimeline) {
       animationTimeline.kill();
@@ -231,12 +190,6 @@ watch(() => props.targetElement, (newVal) => {
 // Watch for changes to the active prop
 watch(() => props.active, (newVal) => {
   if (newVal && props.targetElement) {
-    console.log('EmberAnimation: Active state changed', {
-      timestamp: new Date().toISOString(),
-      newActive: newVal,
-      targetElement: props.targetElement.textContent
-    });
-    
     // Kill previous animation if exists
     if (animationTimeline) {
       animationTimeline.kill();

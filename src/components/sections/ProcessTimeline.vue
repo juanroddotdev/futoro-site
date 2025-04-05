@@ -1,56 +1,74 @@
 <script setup lang="ts">
-import { onMounted, computed, ref, onUnmounted } from "vue";
+import { onMounted, computed, ref, onUnmounted, watch } from "vue";
 import { timelineAnimations } from "@/animations/processTimeline";
 import { steps as defaultSteps, alternativeSteps, type ProcessSteps } from "@/data/howItWorksSteps";
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { gsap } from "gsap";
+import ScrollTrigger from "gsap/ScrollTrigger";
 
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger);
 
+// =============================================
+// Types and Interfaces
+// =============================================
 interface Props {
-  useAlternative?: boolean;
+  useAlternative?: boolean; // Toggle between default and alternative step sets
 }
 
+// =============================================
+// Props and State Management
+// =============================================
 const props = withDefaults(defineProps<Props>(), {
   useAlternative: false
 });
 
+// Computed property to determine which step set to use
 const steps = computed<ProcessSteps>(() => 
   props.useAlternative ? alternativeSteps : defaultSteps
 );
 
-// Track active step
-const activeStepId = ref<number | null>(null);
-const timelineProgress = ref(0);
-const timelineItems = ref<Element[]>([]);
-const scrollTriggers = ref<ScrollTrigger[]>([]);
+// State management for timeline tracking
+const activeStepId = ref<number | null>(null); // Currently active step
+const timelineProgress = ref(0); // Overall timeline progress (0-1)
+const timelineItems = ref<Element[]>([]); // DOM elements for each timeline item
+const scrollTriggers = ref<ScrollTrigger[]>([]); // GSAP scroll triggers
+const timelineContainer = ref<HTMLElement | null>(null);
 
+// =============================================
+// Navigation Handlers
+// =============================================
+/**
+ * Handles the contact button click by smoothly scrolling to the contact section
+ */
 const handleContactClick = () => {
   const contactSection = document.querySelector('#contact');
   contactSection?.scrollIntoView({ behavior: 'smooth' });
 };
 
-// Add this computed property to the script section
-const isDevelopment = computed(() => import.meta.env.DEV);
 
-// Track when timeline reaches each step
+// =============================================
+// Timeline Step Tracking
+// =============================================
+/**
+ * Sets up scroll triggers for each timeline step
+ * Tracks when steps enter/leave the viewport and updates active step accordingly
+ */
 function setupStepTracking() {
+  // Get all timeline items from the DOM
   timelineItems.value = Array.from(document.querySelectorAll('.timeline-item'));
   
+  // Create scroll triggers for each timeline item
   timelineItems.value.forEach((item, index) => {
     const step = steps.value[index];
     const trigger = ScrollTrigger.create({
       trigger: item,
-      start: 'top 70%',
-      end: 'bottom 30%',
+      start: 'top 70%', // Start when top of item is 70% down viewport
+      end: 'bottom 30%', // End when bottom of item is 30% down viewport
       onEnter: () => {
         activeStepId.value = step.id;
-        console.log(`Timeline reached step ${step.id}: ${step.step || step.title}`);
       },
       onEnterBack: () => {
         activeStepId.value = step.id;
-        console.log(`Timeline returned to step ${step.id}: ${step.step || step.title}`);
       },
       onLeave: () => {
         // Only update if this is the active step
@@ -72,27 +90,29 @@ function setupStepTracking() {
           }
         }
       },
-      markers: false // Set to true for debugging
+      markers: false // Disable markers
     });
     
     scrollTriggers.value.push(trigger);
   });
   
   // Track overall timeline progress
-  const timelineContainer = document.querySelector('.timeline-container');
-  if (timelineContainer) {
+  if (timelineContainer.value) {
     ScrollTrigger.create({
-      trigger: timelineContainer,
-      start: 'top 80%',
-      end: 'bottom 20%',
+      trigger: timelineContainer.value,
+      start: 'top center',
+      end: 'bottom center',
       onUpdate: (self) => {
         timelineProgress.value = self.progress;
       },
-      markers: false // Set to true for debugging
+      markers: false // Disable markers
     });
   }
 }
 
+// =============================================
+// Lifecycle Hooks
+// =============================================
 onMounted(() => {
   // Initialize main timeline animation
   timelineAnimations.initMainTimeline();
@@ -104,35 +124,86 @@ onMounted(() => {
   
   // Setup step tracking
   setupStepTracking();
+
+  if (!timelineContainer.value) return;
+
+  // Create a master timeline for the entire process
+  const masterTimeline = gsap.timeline({
+    scrollTrigger: {
+      trigger: timelineContainer.value,
+      start: 'top top',
+      end: 'bottom bottom',
+      onUpdate: (self) => {
+        timelineProgress.value = self.progress;
+      }
+    }
+  });
+
+  // Create a separate ScrollTrigger for the progress line
+  const progressLine = document.querySelector('.timeline-progress');
+  if (progressLine) {
+    ScrollTrigger.create({
+      trigger: timelineContainer.value,
+      start: 'top center',
+      end: 'bottom center',
+      onUpdate: (self) => {
+        // Calculate the height needed to reach the viewport center
+        const viewportCenter = window.innerHeight / 2;
+        const containerRect = timelineContainer.value?.getBoundingClientRect();
+        
+        if (containerRect) {
+          // Calculate the position of the viewport center relative to the container
+          const viewportCenterRelativeToContainer = viewportCenter - containerRect.top;
+          
+          // Calculate the height needed for the progress line to reach the viewport center
+          const heightToCenter = viewportCenterRelativeToContainer;
+          
+          // Apply the height to the progress line
+          if (heightToCenter > 0) {
+            gsap.to(progressLine, {
+              height: heightToCenter,
+              duration: 0.3,
+              ease: 'power1.out'
+            });
+          }
+        }
+      }
+    });
+  }
 });
 
 onUnmounted(() => {
   // Clean up ScrollTriggers to prevent memory leaks
   scrollTriggers.value.forEach(trigger => trigger.kill());
+  ScrollTrigger.getAll().forEach(trigger => trigger.kill());
 });
 </script>
 
 <template>
   <section id="howItWorks" class="section py-32">
+    <!-- Section Header -->
     <div class="text-center mb-24">
       <h2 class="heading-responsive text-5xl heading--accent">How It Works</h2>
       <p class="body-text text-md max-w-2xl mx-auto mt-4">
         A streamlined process designed to deliver exceptional results for your web project
       </p>
-      <!-- Optional: Display active step for debugging -->
-      <div v-if="isDevelopment" class="mt-4 text-sm">
-        <span class="font-bold">Active Step:</span> {{ activeStepId !== null ? activeStepId : 'None' }}
-        <span class="ml-4 font-bold">Progress:</span> {{ Math.round(timelineProgress * 100) }}%
-      </div>
     </div>
 
-    <div class="timeline-container max-w-4xl mx-auto relative">
-      <!-- Timeline line with progress indicator -->
+    <!-- Timeline Container -->
+    <div class="timeline-container max-w-4xl mx-auto relative" ref="timelineContainer">
+      <!-- Timeline Lines -->
       <div class="timeline-line absolute left-1/2 transform -translate-x-1/2 h-full w-1"></div>
+      
+      <!-- Progress Line - Using a different approach -->
       <div class="timeline-progress absolute left-1/2 transform -translate-x-1/2 w-1"
-           :style="{ height: `${timelineProgress * 100}%`, backgroundColor: 'var(--color-accent)' }"></div>
+           :style="{ 
+             backgroundColor: 'var(--color-accent)',
+             position: 'absolute',
+             top: '0',
+             transform: 'translate(-50%, 0)'
+           }"></div>
 
-      <!-- Timeline items -->
+      <!-- Timeline Items -->
       <div class="relative">
         <div v-for="(step, index) in steps" 
              :key="step.id"
@@ -143,18 +214,18 @@ onUnmounted(() => {
              ]"
              :style="{ width: 'calc(50% - 4rem)' }"
         >
-          <!-- Stem line from main timeline -->
+          <!-- Connecting Stem Line -->
           <div class="timeline-stem absolute h-1"
                :class="[
                  index % 2 === 0 ? 'left-[-2rem]' : 'right-[-2rem]',
                  'w-[4rem]'
                ]"
-               :style="{ top: 'calc(0.2rem + 1px)' }"
+               :style="{ top: index === 0 ? '0px' : 'calc(0.2rem + 1px)' }"
           ></div>
 
-          <!-- Content -->
-          <div class="timeline-card bg-opacity-30 rounded-xl p-6 backdrop-blur-sm relative">
-            <!-- Number in corner -->
+          <!-- Step Content Card -->
+          <div class="timeline-card item hover-card-themed p-6 relative">
+            <!-- Step Number -->
             <div class="timeline-number absolute -top-3 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm"
                  :class="[
                    index % 2 === 0 ? '-left-3' : '-right-3',
@@ -162,28 +233,25 @@ onUnmounted(() => {
               {{ step.id }}
             </div>
 
-            <h3 class="timeline-title text-lg font-semibold mb-4 theme-text--gradient"
+            <!-- Step Title and Description -->
+            <h3 class="text-md font-semibold gradient-text mb-3"
                 :class="index % 2 === 0 ? 'gradient-normal' : 'gradient-reverse'"
             >{{ step.step || step.title }}</h3>
             <ul class="space-y-2" :class="index % 2 === 1 ? 'pl-4' : 'pl-4'">
               <li v-for="(bullet, bulletIndex) in step.description" 
                   :key="bulletIndex"
-                  class="timeline-bullet text-sm body-text list-none"
+                  class="timeline-bullet theme-text--neutral list-none body-text-md"
                   :data-step-id="step.id"
                   :data-bullet-index="bulletIndex">
                 {{ bullet }}
               </li>
             </ul>
-            
-            <!-- Emoji icon -->
-            <div class="flex mt-4" :class="[step.id % 2 === 0 ? 'justify-start' : 'justify-end']">
-              <span class="text-4xl opacity-80">{{ step.icon }}</span>
-            </div>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- Call to Action Button -->
     <div class="flex justify-center mt-24 relative">
       <button 
         type="button"
@@ -216,153 +284,5 @@ onUnmounted(() => {
 </template>
 
 <style lang="scss" scoped>
-// Add styles for active timeline items
-.timeline-item {
-  transition: transform 0.3s ease;
-  
-  &--active {
-    .timeline-card {
-      box-shadow: 0 0 15px rgba(var(--color-accent-rgb), 0.5);
-      transform: scale(1.03);
-    }
-    
-    .timeline-number {
-      background-color: var(--color-accent);
-      color: var(--color-background);
-    }
-  }
-}
-
-// Add styles for timeline progress indicator
-.timeline-progress {
-  position: absolute;
-  top: 0;
-  background-color: var(--color-accent);
-  z-index: 1;
-  transition: height 0.1s linear;
-}
-
-.rotating-text {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  animation: rotate 10s linear infinite;
-  
-  .circle-text {
-    fill: currentColor;
-    font-size: 1.8rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-}
-
-@keyframes rotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.floating-texts {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.floating-text {
-  position: absolute;
-  font-size: 0.5rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  opacity: 0;
-  transform: translate(var(--x), var(--y));
-  animation: floatText 4.8s linear infinite;
-  animation-delay: var(--delay);
-  pointer-events: none;
-}
-
-@keyframes floatText {
-  0%, 100% {
-    opacity: 0;
-    transform: translate(var(--x), var(--y));
-  }
-  25%, 75% {
-    opacity: 1;
-    transform: translate(var(--x), var(--y)) translateY(-10px);
-  }
-}
-
-.touch-circle-btn {
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-  
-  .default-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); // Increased from 0.4s to 0.8s
-    transform-origin: center center;
-    
-    span {
-      display: block;
-      text-align: center;
-    }
-  }
-  
-  .hover-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    opacity: 0;
-    transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); // Increased from 0.4s to 0.8s
-    transform-origin: center center;
-  }
-  
-  &:hover {
-    .default-text {
-      transform: translate(-50%, -50%) scale(0);
-      opacity: 0;
-    }
-    
-    .floating-text {
-      animation: suckToCenter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; // Increased from 0.4s to 0.8s
-    }
-    
-    .hover-text {
-      transform: translate(-50%, -50%) scale(1);
-      opacity: 1;
-      transition-delay: 0.4s; // Increased from 0.2s to 0.4s
-    }
-  }
-}
-
-@keyframes suckToCenter {
-  0% {
-    transform: translate(var(--x), var(--y));
-    opacity: 1;
-  }
-  100% {
-    transform: translate(0, 0) scale(0);
-    opacity: 0;
-  }
-}
-
-// Ensure the rotating text also gets sucked in slower
-.rotating-text {
-  transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); // Increased from 0.4s to 0.8s
-  
-  .touch-circle-btn:hover & {
-    transform: scale(0);
-    opacity: 0;
-  }
-}
+// Add your scoped styles here
 </style>
