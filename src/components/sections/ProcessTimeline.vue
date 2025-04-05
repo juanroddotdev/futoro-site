@@ -90,7 +90,7 @@ function setupStepTracking() {
           }
         }
       },
-      markers: false // Set to true for debugging
+      markers: false // Disable markers
     });
     
     scrollTriggers.value.push(trigger);
@@ -105,7 +105,7 @@ function setupStepTracking() {
       onUpdate: (self) => {
         timelineProgress.value = self.progress;
       },
-      markers: true // Temporarily enable markers for debugging
+      markers: false // Disable markers
     });
   }
 }
@@ -201,15 +201,6 @@ onUnmounted(() => {
              position: 'absolute',
              top: '0',
              transform: 'translate(-50%, 0)'
-           }"></div>
-
-      <!-- Viewport Center Indicator (for debugging) -->
-      <div class="viewport-center-indicator absolute left-1/2 transform -translate-x-1/2 w-1 h-1 bg-red-500"
-           :style="{ 
-             position: 'fixed',
-             top: '50%',
-             transform: 'translate(-50%, -50%)',
-             zIndex: 10
            }"></div>
 
       <!-- Timeline Items -->
