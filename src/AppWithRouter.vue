@@ -38,7 +38,7 @@ import ThemeSwitcher from '@/components/ui/theme/ThemeSwitcher.vue';
 import GradientDefinitions from '@/components/ui/GradientDefinitions.vue';
 import { SimpleLoader } from '@/components/simple-loader';
 import { useTheme } from './composables/useTheme';
-import { HeroContent, getRandomHeroContent } from '@/data/heroContentData';
+import { HeroContent, getRandomHeroContent } from '@/components/simple-loader/heroContentData';
 
 const route = useRoute();
 const { currentTheme, isThemeTransitioning, handleThemeChange } = useTheme();
