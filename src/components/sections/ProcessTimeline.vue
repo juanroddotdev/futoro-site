@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { onMounted, computed, ref, onUnmounted } from "vue";
+import { onMounted, computed, ref, onUnmounted, watch } from "vue";
 import { timelineAnimations } from "@/animations/processTimeline";
 import { steps as defaultSteps, alternativeSteps, type ProcessSteps } from "@/data/howItWorksSteps";
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { gsap } from "gsap";
+import ScrollTrigger from "gsap/ScrollTrigger";
 
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger);
@@ -32,6 +32,7 @@ const activeStepId = ref<number | null>(null); // Currently active step
 const timelineProgress = ref(0); // Overall timeline progress (0-1)
 const timelineItems = ref<Element[]>([]); // DOM elements for each timeline item
 const scrollTriggers = ref<ScrollTrigger[]>([]); // GSAP scroll triggers
+const timelineContainer = ref<HTMLElement | null>(null);
 
 // =============================================
 // Navigation Handlers
@@ -44,10 +45,6 @@ const handleContactClick = () => {
   contactSection?.scrollIntoView({ behavior: 'smooth' });
 };
 
-// =============================================
-// Environment Detection
-// =============================================
-const isDevelopment = computed(() => import.meta.env.DEV);
 
 // =============================================
 // Timeline Step Tracking
@@ -100,16 +97,15 @@ function setupStepTracking() {
   });
   
   // Track overall timeline progress
-  const timelineContainer = document.querySelector('.timeline-container');
-  if (timelineContainer) {
+  if (timelineContainer.value) {
     ScrollTrigger.create({
-      trigger: timelineContainer,
-      start: 'top 80%',
-      end: 'bottom 20%',
+      trigger: timelineContainer.value,
+      start: 'top center',
+      end: 'bottom center',
       onUpdate: (self) => {
         timelineProgress.value = self.progress;
       },
-      markers: false
+      markers: true // Temporarily enable markers for debugging
     });
   }
 }
@@ -128,11 +124,58 @@ onMounted(() => {
   
   // Setup step tracking
   setupStepTracking();
+
+  if (!timelineContainer.value) return;
+
+  // Create a master timeline for the entire process
+  const masterTimeline = gsap.timeline({
+    scrollTrigger: {
+      trigger: timelineContainer.value,
+      start: 'top top',
+      end: 'bottom bottom',
+      onUpdate: (self) => {
+        timelineProgress.value = self.progress;
+      }
+    }
+  });
+
+  // Create a separate ScrollTrigger for the progress line
+  const progressLine = document.querySelector('.timeline-progress');
+  if (progressLine) {
+    ScrollTrigger.create({
+      trigger: timelineContainer.value,
+      start: 'top center',
+      end: 'bottom center',
+      onUpdate: (self) => {
+        // Calculate the height needed to reach the viewport center
+        const viewportCenter = window.innerHeight / 2;
+        const containerRect = timelineContainer.value?.getBoundingClientRect();
+        
+        if (containerRect) {
+          // Calculate the position of the viewport center relative to the container
+          const viewportCenterRelativeToContainer = viewportCenter - containerRect.top;
+          
+          // Calculate the height needed for the progress line to reach the viewport center
+          const heightToCenter = viewportCenterRelativeToContainer;
+          
+          // Apply the height to the progress line
+          if (heightToCenter > 0) {
+            gsap.to(progressLine, {
+              height: heightToCenter,
+              duration: 0.3,
+              ease: 'power1.out'
+            });
+          }
+        }
+      }
+    });
+  }
 });
 
 onUnmounted(() => {
   // Clean up ScrollTriggers to prevent memory leaks
   scrollTriggers.value.forEach(trigger => trigger.kill());
+  ScrollTrigger.getAll().forEach(trigger => trigger.kill());
 });
 </script>
 
@@ -147,11 +190,27 @@ onUnmounted(() => {
     </div>
 
     <!-- Timeline Container -->
-    <div class="timeline-container max-w-4xl mx-auto relative">
-      <!-- Timeline Progress Line -->
+    <div class="timeline-container max-w-4xl mx-auto relative" ref="timelineContainer">
+      <!-- Timeline Lines -->
       <div class="timeline-line absolute left-1/2 transform -translate-x-1/2 h-full w-1"></div>
+      
+      <!-- Progress Line - Using a different approach -->
       <div class="timeline-progress absolute left-1/2 transform -translate-x-1/2 w-1"
-           :style="{ height: `${timelineProgress * 100}%`, backgroundColor: 'var(--color-accent)' }"></div>
+           :style="{ 
+             backgroundColor: 'var(--color-accent)',
+             position: 'absolute',
+             top: '0',
+             transform: 'translate(-50%, 0)'
+           }"></div>
+
+      <!-- Viewport Center Indicator (for debugging) -->
+      <div class="viewport-center-indicator absolute left-1/2 transform -translate-x-1/2 w-1 h-1 bg-red-500"
+           :style="{ 
+             position: 'fixed',
+             top: '50%',
+             transform: 'translate(-50%, -50%)',
+             zIndex: 10
+           }"></div>
 
       <!-- Timeline Items -->
       <div class="relative">
