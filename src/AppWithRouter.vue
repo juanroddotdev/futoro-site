@@ -1,17 +1,25 @@
 <template>
   <div class="app-container" :class="currentTheme">
-    <!-- Loader overlay -->
-    <SimpleLoader 
+    <!-- New Loader -->
+    <HeroSectionLoader 
       :heroContent="heroContent" 
-      :showDebug="false"
+      :showDebug="true"
       :pauseAnimations="false"
       @complete="onLoadComplete" 
       v-if="isLoading"
       class="loader-overlay"
     />
     
-    <!-- Wireframe overlay -->
-    <HeroSectionChatWireframe v-if="isLoading" />
+    <!-- Old loaders (hidden) -->
+    <!-- <SimpleLoader 
+      :heroContent="heroContent" 
+      :showDebug="true"
+      :pauseAnimations="false"
+      @complete="onLoadComplete" 
+      v-if="false"
+      class="loader-overlay"
+    />
+    <HeroSectionChatWireframe v-if="false" /> -->
     
     <!-- Main app content -->
     <div id="app" 
@@ -41,8 +49,9 @@ import ThemeSwitcher from '@/components/ui/theme/ThemeSwitcher.vue';
 import GradientDefinitions from '@/components/ui/GradientDefinitions.vue';
 import { SimpleLoader } from '@/components/simple-loader';
 import { useTheme } from './composables/useTheme';
-import { HeroContent, getRandomHeroContent } from '@/components/simple-loader/heroContentData';
+import { HeroContent, getRandomHeroContent } from '@/data/heroContentData';
 import HeroSectionChatWireframe from '@/components/sections/HeroSectionChatWireframe.vue';
+import HeroSectionLoader from '@/components/sections/HeroSectionLoader.vue';
 
 const route = useRoute();
 const { currentTheme, isThemeTransitioning, handleThemeChange } = useTheme();

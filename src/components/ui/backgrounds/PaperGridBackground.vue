@@ -5,7 +5,8 @@ const props = defineProps<{
   spotlight?: boolean,
   spotlightX?: number,
   spotlightY?: number,
-  fixed?: boolean
+  fixed?: boolean,
+  useParentMask?: boolean
 }>();
 
 // Calculate the SVG path for the visibility boundary
@@ -48,7 +49,7 @@ const calculateRadialGradientBoundary = () => {
       props.theme ? `theme-${props.theme}` : '',
       { 
         'grid-paper-overlay--floating': props.floating,
-        'grid-paper-overlay--spotlight': props.spotlight,
+        'grid-paper-overlay--spotlight': props.spotlight && !props.useParentMask,
         'grid-paper-overlay--fixed': props.fixed
       }
     ]"
@@ -142,14 +143,14 @@ const calculateRadialGradientBoundary = () => {
   &--spotlight {
     &::before {
       mask-image: radial-gradient(
-        circle at var(--spotlight-x) var(--spotlight-y), // Dynamic spotlight position
-        #1a1b26 0%,
+        circle at var(--spotlight-x) var(--spotlight-y),
+        rgba(0, 0, 0, 1) 0%,
         rgba(0, 0, 0, 0.8) 20%,
         rgba(0, 0, 0, 0) 50%
       );
       -webkit-mask-image: radial-gradient(
         circle at var(--spotlight-x) var(--spotlight-y),
-        #1a1b26 0%,
+        rgba(0, 0, 0, 1) 0%,
         rgba(0, 0, 0, 0.8) 20%,
         rgba(0, 0, 0, 0) 50%
       );

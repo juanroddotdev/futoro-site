@@ -4,23 +4,20 @@ import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
 gsap.registerPlugin(MotionPathPlugin);
 
 export function usePencilAnimation() {
-  const animatePencilAlongPath = (path: SVGPathElement, dot: SVGElement) => {
+  const animatePencilAlongPath = (path: SVGPathElement, dot: SVGCircleElement) => {
     gsap.set(dot, { opacity: 1 });
-
+    
     gsap.to(dot, {
-      duration: 0.3,
+      duration: 2,
       motionPath: {
         path: path,
         align: path,
-        autoRotate: true,
-        alignOrigin: [0.5, 0.5]
+        alignOrigin: [0.5, 0.5],
+        autoRotate: true
       },
-      ease: 'none',
+      ease: "none",
       onComplete: () => {
-        gsap.to(dot, {
-          duration: 0.3,
-          opacity: 0
-        });
+        gsap.set(dot, { opacity: 0 });
       }
     });
   };

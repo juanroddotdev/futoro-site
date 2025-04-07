@@ -1,28 +1,22 @@
-import { ref } from 'vue'
 import Vivus from 'vivus'
+import { ref } from 'vue'
 
-interface VivusInstances {
-  navbar: Vivus | null
-  headline: Vivus | null
-  subheadline: Vivus | null
-  finalHeadline: Vivus | null
-  finalSubheadline: Vivus | null
+interface VivusOptions {
+  duration: number
+  type: 'delayed' | 'sync' | 'oneByOne' | 'script' | 'scenario' | 'scenario-sync'
+  start: 'manual' | 'autostart' | 'inViewport'
+  onReady?: () => void
+  onStart?: () => void
+  onComplete?: () => void
 }
 
 export function useVivusInstances() {
-  const instances = ref<VivusInstances>({
-    navbar: null,
-    headline: null,
-    subheadline: null,
-    finalHeadline: null,
-    finalSubheadline: null
-  })
+  const instances = ref<Vivus[]>([])
 
-  const createVivusInstance = (
-    element: SVGElement,
-    options: Vivus.VivusOptions
-  ) => {
-    return new Vivus(element as unknown as HTMLElement, options)
+  const createVivusInstance = (element: SVGElement, options: VivusOptions) => {
+    const vivus = new Vivus(element as unknown as HTMLElement, options)
+    instances.value.push(vivus)
+    return vivus
   }
 
   return {

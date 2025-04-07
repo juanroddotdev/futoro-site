@@ -24,8 +24,8 @@
       </defs>
     </svg>
     
-    <!-- Required Vara font -->
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+
+  
     
     <!-- 
       GRID AND SPOTLIGHT SYSTEM
@@ -82,9 +82,20 @@
           </div>
           
           <!-- Spotlight Text Layer -->
-          <!-- <div class="spotlight-text-wrapper headline-spotlight theme-text--gradient-animated gradient-shine">
-            {{ headline }}
-          </div> -->
+          <h1 class="spotlight-text-wrapper headline-spotlight theme-text--gradient-animated gradient-shine heading--accent mb-4 mt-2 heading-responsive-large">
+            <template v-for="(word, wordIndex) in headline.split(' ')" :key="`word-${wordIndex}`">
+              <span class="word">
+                <span v-for="(char, letterIndex) in word" 
+                      :key="`letter-${wordIndex}-${letterIndex}`"
+                      class="letter"
+                      :data-word-index="wordIndex"
+                      :data-letter-index="letterIndex">
+                  {{ char }}
+                </span>
+              </span>
+              <span v-if="wordIndex < headline.split(' ').length - 1" class="space">&nbsp;</span>
+            </template>
+          </h1>
         </div>
         
         <!-- 
@@ -102,13 +113,64 @@
           <!-- Vara container for subheadline -->
           <div id="subheadline-vara-container"></div>
           
+          <!-- Regular Text Layer -->
+          <div class="regular-text-wrapper">
+            <template v-for="(word, wordIndex) in subheadline.split(' ')" :key="`word-${wordIndex}`">
+              <span class="word">
+                <span v-for="(char, letterIndex) in word" 
+                      :key="`letter-${wordIndex}-${letterIndex}`"
+                      class="letter"
+                      :data-word-index="wordIndex"
+                      :data-letter-index="letterIndex">
+                  {{ char }}
+                </span>
+              </span>
+              <span v-if="wordIndex < subheadline.split(' ').length - 1" class="space">&nbsp;</span>
+            </template>
+          </div>
           
           <!-- Spotlight Text Layer -->
-          <div class="spotlight-text-wrapper debug theme-text--gradient-animated gradient-shine">
-            {{ subheadline }}
-          </div>
+          <p class="spotlight-text-wrapper theme-text--gradient-animated gradient-shine heading--highlight mb-8 subheading-responsive">
+            <template v-for="(word, wordIndex) in subheadline.split(' ')" :key="`word-${wordIndex}`">
+              <span class="word">
+                <span v-for="(char, letterIndex) in word" 
+                      :key="`letter-${wordIndex}-${letterIndex}`"
+                      class="letter"
+                      :data-word-index="wordIndex"
+                      :data-letter-index="letterIndex">
+                  {{ char }}
+                </span>
+              </span>
+              <span v-if="wordIndex < subheadline.split(' ').length - 1" class="space">&nbsp;</span>
+            </template>
+          </p>
         </div>
       </div>
+    </div>
+
+    <!-- Add pause controls -->
+    <div class="pause-controls" v-if="showDebug">
+      <div class="pause-options">
+        <label>
+          <input type="checkbox" v-model="isPausedAfterVara">
+          Pause after Vara
+        </label>
+        <label>
+          <input type="checkbox" v-model="isPausedAfterRTL">
+          Pause after RTL
+        </label>
+        <label>
+          <input type="checkbox" v-model="isPausedAfterLTR">
+          Pause after LTR
+        </label>
+      </div>
+      <button 
+        v-if="timeline?.paused()" 
+        @click="resumeAnimation"
+        class="resume-button"
+      >
+        Resume Animation
+      </button>
     </div>
   </div>
 </template>
@@ -148,6 +210,12 @@ const varaContainer = ref<HTMLElement | null>(null);
 const letterPaths = ref<NodeListOf<Element> | null>(null);
 const outlineLetterPositions = ref<{ element: Element; xPercent: number }[]>([]);
 
+// Add pause state controls
+const isPausedAfterVara = ref(false);
+const isPausedAfterRTL = ref(false);
+const isPausedAfterLTR = ref(false);
+const timeline = ref<gsap.core.Timeline | null>(null);
+
 const isTextCrossing = ref(false); // Track when we're crossing the text
 
 // Use provided hero content or get random one, matching HeroSectionChat
@@ -168,16 +236,25 @@ const handleRTLStart = () => {
   // Show Vara text
   gsap.set('#headline-vara-container', { opacity: 1 });
   gsap.set('#headline-vara-container path', { opacity: 1 });
+  gsap.set('#subheadline-vara-container', { opacity: 1 });
+  gsap.set('#subheadline-vara-container path', { opacity: 1 });
   
   // Keep outline wrapper hidden initially
   gsap.set('.outline-text-wrapper', { opacity: 0 });
   gsap.set('.outline-text-wrapper .letter', { opacity: 0 });
+  gsap.set('.regular-text-wrapper', { opacity: 0 });
+  gsap.set('.regular-text-wrapper .letter', { opacity: 0 });
   
   if (props.showDebug) {
     debugLogger.log('🖋️ Vara text visible, starting animation');
     // Initialize performance tracking
     performanceTracker.startTracking('RTL Update');
     performanceTracker.startTracking('Outline Transition');
+  }
+
+  // Pause after Vara if enabled
+  if (isPausedAfterVara.value && timeline.value) {
+    timeline.value.pause();
   }
 };
 
@@ -218,6 +295,7 @@ const handleRTLUpdate = (spotlightX: number) => {
   
   // Show outline wrapper when we start the RTL phase
   gsap.set('.outline-text-wrapper', { opacity: 1 });
+  gsap.set('.regular-text-wrapper', { opacity: 1 });
   
   // Handle Vara text transitions
   letterPaths.value.forEach((path, index) => {
@@ -277,51 +355,106 @@ const handleOutlineTextTransition = (spotlightX: number) => {
 const handleRTLComplete = () => {
   // Hide any remaining Vara letters
   gsap.set('#headline-vara-container path', { opacity: 0 });
+  gsap.set('#subheadline-vara-container path', { opacity: 0 });
   // Ensure all outline letters are visible
   gsap.set('.outline-text-wrapper .letter', { opacity: 1 });
+  gsap.set('.regular-text-wrapper .letter', { opacity: 1 });
   
   if (props.showDebug) {
     debugLogger.log('🔄 Vara text hidden, outline text fully visible');
     debugLogger.log(performanceTracker.getSummary());
   }
+
+  // Pause after RTL if enabled
+  if (isPausedAfterRTL.value && timeline.value) {
+    timeline.value.pause();
+  }
 };
 
 const handleLTRStart = () => {
-  gsap.set('.outline-text-wrapper', { opacity: 1 });
-  gsap.set('.outline-text-wrapper .letter', { opacity: 1 });
-  gsap.set('.spotlight-text-wrapper', { 
+  // Keep outline text visible for headline
+  gsap.set('.outline-text-wrapper', { 
     opacity: 1,
-    clipPath: 'inset(0 100% 0 0)'
+    clipPath: 'inset(0 0% 0 0)' 
   });
-  gsap.set('#subheadline-vara-container', { opacity: 1 });
+  gsap.set('.outline-text-wrapper .letter', { opacity: 1 });
+  
+  // Keep Vara text visible for subheadline
+  gsap.set('#subheadline-vara-container', { 
+    opacity: 1,
+    clipPath: 'inset(0 0% 0 0)' 
+  });
   gsap.set('#subheadline-vara-container path', { opacity: 1 });
+
+  // Hide headline Vara
+  gsap.set('#headline-vara-container', { opacity: 0 });
+  gsap.set('#headline-vara-container path', { opacity: 0 });
+
+  // Initialize spotlight text - make letters visible but clipped
+  gsap.set('.spotlight-text-wrapper', { opacity: 1 });
+  gsap.set('.spotlight-text-wrapper .letter', { opacity: 1 });
+  gsap.set('.spotlight-text-wrapper', { clipPath: 'inset(0 100% 0 0)' });
 };
 
 const handleLTRUpdate = (spotlightX: number) => {
-  const spotlightText = document.querySelector('.spotlight-text-wrapper') as HTMLElement;
-  if (spotlightText) {
-    const clipAmount = 100 - spotlightX;
-    spotlightText.style.clipPath = `inset(0 ${clipAmount}% 0 0)`;
+  // Get all text elements that need transitioning
+  const headlineSpotlight = document.querySelector('.headline-spotlight') as HTMLElement;
+  const subheadlineSpotlight = document.querySelector('.subheading-responsive .spotlight-text-wrapper') as HTMLElement;
+  const outlineText = document.querySelector('.outline-text-wrapper') as HTMLElement;
+  const varaText = document.querySelector('#subheadline-vara-container') as HTMLElement;
+
+  // Calculate clip amounts
+  const spotlightClipAmount = Math.max(0, 100 - spotlightX);
+  const originalTextClipAmount = Math.min(100, spotlightX);
+
+  // Update spotlight text clip-path (reveal from left)
+  if (headlineSpotlight) {
+    headlineSpotlight.style.clipPath = `inset(0 ${spotlightClipAmount}% 0 0)`;
   }
-  
-  const headlineOutline = document.querySelector('.outline-text-wrapper') as HTMLElement;
-  if (headlineOutline) {
-    applySpotlightReveal({
-      element: headlineOutline,
-      spotlightX,
-      isRTL: false,
-      showDebug: false // Force debug off for LTR
-    });
+  if (subheadlineSpotlight) {
+    subheadlineSpotlight.style.clipPath = `inset(0 ${spotlightClipAmount}% 0 0)`;
+  }
+
+  // Update original text clip-path (hide from left)
+  if (outlineText) {
+    outlineText.style.clipPath = `inset(0 0 0 ${originalTextClipAmount}%)`;
+  }
+  if (varaText) {
+    varaText.style.clipPath = `inset(0 0 0 ${originalTextClipAmount}%)`;
   }
 };
 
 const handleLTRComplete = () => {
+  // Show spotlight text fully
   gsap.set('.spotlight-text-wrapper', { 
     clipPath: 'inset(0 0% 0 0)',
     opacity: 1
   });
-  gsap.set('#subheadline-vara-container', { opacity: 0 });
-  gsap.set('#subheadline-vara-container path', { opacity: 0 });
+  gsap.set('.spotlight-text-wrapper .letter', { opacity: 1 });
+
+  // Hide outline text for headline
+  gsap.set('.outline-text-wrapper', { 
+    clipPath: 'inset(0 0 0 100%)',
+    opacity: 0 
+  });
+
+  // Hide Vara text for subheadline
+  gsap.set('#subheadline-vara-container', { 
+    clipPath: 'inset(0 0 0 100%)',
+    opacity: 0 
+  });
+
+  // Pause after LTR if enabled
+  if (isPausedAfterLTR.value && timeline.value) {
+    timeline.value.pause();
+  }
+};
+
+// Add resume function
+const resumeAnimation = () => {
+  if (timeline.value) {
+    timeline.value.resume();
+  }
 };
 
 onMounted(() => {
@@ -358,7 +491,7 @@ onMounted(() => {
   // Only start animations if not paused
   if (!props.pauseAnimations) {
     // Create and start the animation timeline
-    createTimeline({
+    timeline.value = createTimeline({
       showDebug: props.showDebug,
       centerY,
       headline: headline.value,
@@ -410,7 +543,6 @@ onMounted(() => {
      - Animations
      - Debug helpers
 */
-
 .preloader {
   position: fixed;
   top: 0;
@@ -604,7 +736,7 @@ onMounted(() => {
 #subheadline-vara-container {
   position: absolute;
   top: 0;
-  left: 0;
+  left: 10px;
   width: 100%;
   height: 100%;
   display: flex;
@@ -625,6 +757,8 @@ onMounted(() => {
   align-items: center;
   z-index: 2;
   opacity: 0;
+  clip-path: inset(0 0% 0 0);
+  transition: clip-path 0.1s ease;
 }
 
 .outline-text-wrapper .letter {
@@ -636,20 +770,87 @@ onMounted(() => {
 .spotlight-text-wrapper {
   position: absolute;
   top: 0;
-  left: 0;
+  left: 10px;
   width: 100%;
   height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1;
-  opacity: 0;
+  opacity: 1;
   clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.1s ease;
 }
 
-.spotlight-text-wrapper.headline-spotlight {
-  font-size: 2.5rem;
-  font-weight: bold;
+.spotlight-text-wrapper .word {
+  display: inline-flex;
+  align-items: center;
+}
+
+.spotlight-text-wrapper .space {
+  display: inline-block;
+  width: 0.4em;
+}
+
+.spotlight-text-wrapper .letter {
+  display: inline-block;
+  opacity: 1;
+  color: var(--theme-primary, #88C0D0);
+  transition: opacity 0.3s ease;
+}
+
+.spotlight-text-wrapper.headline-spotlight .letter {
+  color: white;
+  -webkit-text-stroke: 2px var(--theme-primary, #88C0D0);
+}
+
+.spotlight-text-wrapper:not(.headline-spotlight) {
+  font-size: clamp(1rem, 2vw + 0.5rem, 1.5rem);
+  line-height: 1.5;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  max-width: 65ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.heading-responsive-large {
+  font-size: clamp(2rem, 5vw + 1rem, 3.5rem);
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.subheading-responsive {
+  font-size: clamp(1rem, 2vw + 0.5rem, 1.5rem);
+  line-height: 1.5;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  max-width: 65ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.heading--accent {
+  position: relative;
+  z-index: 10;
+}
+
+.heading--highlight {
+  position: relative;
+  z-index: 10;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.mt-2 {
+  margin-top: 0.5rem;
+}
+
+.mb-8 {
+  margin-bottom: 2rem;
 }
 
 .regular-text-wrapper {
@@ -680,16 +881,6 @@ onMounted(() => {
   display: inline-block;
   opacity: 0;
   transition: opacity 0.3s ease;
-}
-
-.subheading-responsive {
-  position: relative;
-  width: 100%;
-  min-height: 120px;
-  margin-top: 2rem;
-  margin-bottom: 2rem;
-  font-size: clamp(1rem, 2vw + 0.5rem, 1.5rem);
-  line-height: 1.5;
 }
 
 /* Debug styles for Vara letters */
@@ -833,7 +1024,7 @@ onMounted(() => {
   position: relative;
   width: 100%;
   height: 120px;
-  margin-top: 2rem; /* Reduce from 4rem to 2rem */
+  margin-top: 1rem; /* Reduce from 4rem to 2rem */
   margin-bottom: 2rem;
   display: flex;
   justify-content: center;
@@ -863,5 +1054,44 @@ onMounted(() => {
   font-weight: bold;
   clip-path: inset(0 100% 0 0);
   pointer-events: none;
+}
+
+.pause-controls {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 1rem;
+  border-radius: 8px;
+  color: white;
+}
+
+.pause-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.pause-options label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.resume-button {
+  background: var(--theme-primary, #88C0D0);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.resume-button:hover {
+  opacity: 0.9;
 }
 </style> 

@@ -543,6 +543,7 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
+
 }
 
 .text-container {
@@ -555,6 +556,7 @@ onMounted(() => {
   align-items: center;
   transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 10002;
+  gap: 40px;
 }
 
 .headline-svg,

@@ -22,5 +22,8 @@ export default defineConfig({
     commonjsOptions: {
       transformMixedEsModules: true
     }
-  }
+  },
+  // Add font file handling
+  assetsInclude: ['**/*.ttf', '**/*.woff', '**/*.woff2'],
+  publicDir: 'public'
 })
