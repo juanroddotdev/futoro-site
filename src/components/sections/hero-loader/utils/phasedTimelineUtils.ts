@@ -4,6 +4,7 @@
 import gsap from 'gsap';
 import { debugLogger } from './debugUtils';
 import { initHeadlineVara, initSubheadlineVara } from './varaAnimationUtils';
+import { handleRTLHeadlineTransition } from './phasedSpotlightReveal';
 
 // Helper function for more efficient logging with debounce
 let lastLogTime = 0;
@@ -398,10 +399,7 @@ export const addTextAnimationsPhase = (
  * Phase 4: Spotlight Sequence
  * Moves the spotlight from initial position to right center of viewport edge
  */
-export const addSpotlightSequencePhase = (
-  tl: gsap.core.Timeline,
-  options?: SpotlightSequenceOptions
-) => {
+export const addSpotlightSequencePhase = (tl: gsap.core.Timeline, options?: SpotlightSequenceOptions) => {
   console.log('Phase 4: Adding spotlight sequence phase');
   
   // Call onSpotlightStart callback if provided
@@ -409,36 +407,60 @@ export const addSpotlightSequencePhase = (
     options.onSpotlightStart();
   }
 
-  // Adjust spotlight size
+  // Position spotlight at right edge first
   tl.to('.grid-container', {
-    '--spotlight-size': '300px',
-    duration: 1.5,
+    '--spotlight-x': '100%',
+    '--spotlight-y': '50%',
+    duration: 0.5,
     ease: 'power2.inOut'
   }, '+=0.1');
 
-  // Move spotlight to center left
+  // Adjust spotlight size and brightness
   tl.to('.grid-container', {
-    '--spotlight-x': '20%',
-    '--spotlight-y': '50%',
+    '--spotlight-size': '300px',
+    '--spotlight-brightness': '1.5', // Increase brightness
+    duration: 1.5,
+    ease: 'power2.inOut'
+  });
+
+  // RTL Movement - Move spotlight from right to left
+  tl.to('.grid-container', {
+    '--spotlight-x': '0%',
     duration: 3,
     ease: 'power2.inOut',
+    onStart: () => {
+      console.log('RTL Phase: Starting right-to-left movement');
+      // Show Vara text initially
+      gsap.set('#headline-vara-container', { opacity: 1 });
+      gsap.set('#headline-vara-container path', { opacity: 1 });
+    },
     onUpdate: function() {
-      // Get current values from CSS variables
+      // Get current spotlight position
       const gridContainer = document.querySelector('.grid-container');
       if (gridContainer) {
         const x = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-x'));
-        const y = parseFloat(getComputedStyle(gridContainer).getPropertyValue('--spotlight-y'));
         if (options?.onSpotlightUpdate) {
-          options.onSpotlightUpdate(x, y);
+          options.onSpotlightUpdate(x, 50); // y is fixed at 50%
         }
+        
+        // Use our simplified RTL transition handler
+        handleRTLHeadlineTransition({
+          spotlightX: x,
+          showDebug: true,
+          transitionDuration: 0.2
+        });
+      }
+    },
+    onComplete: () => {
+      console.log('RTL Phase: Completed right-to-left movement');
+      // Ensure all Vara text is hidden
+      gsap.set('#headline-vara-container path', { opacity: 0 });
+      
+      if (options?.onSpotlightComplete) {
+        options.onSpotlightComplete();
       }
     }
   });
-
-  // Call onSpotlightComplete callback if provided
-  if (options?.onSpotlightComplete) {
-    tl.call(options.onSpotlightComplete);
-  }
 
   console.log('Phase 4: Spotlight sequence phase added');
   return tl;

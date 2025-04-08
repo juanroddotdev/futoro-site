@@ -27,6 +27,7 @@
         { 'theme-transition-active': isThemeTransitioning }
       ]" 
       :style="appStyle"
+      v-if="false"
     >
       <GradientDefinitions />
       <Navbar />

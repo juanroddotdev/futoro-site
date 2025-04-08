@@ -70,20 +70,20 @@
           <svg id="headline-svg" class="wireframe-svg" viewBox="0 0 1200 200" preserveAspectRatio="xMidYMid meet">
             <SvgFilters />
             <path class="headline-container-path" 
-              d="M10,10 L1190,10 L1190,190 L10,190 L10,10" 
+              d="M0,0 L1200,0 L1200,200 L0,200 L0,0" 
               v-bind="getDataAttributes(animationTimings.headline.container)"
               fill="none" stroke="white" stroke-width="2" />
-            <circle class="headline-pencil-dot" cx="10" cy="10" r="3" fill="#ffffff" opacity="0" />
+            <circle class="headline-pencil-dot" cx="0" cy="0" r="3" fill="#ffffff" opacity="0" />
             
             <!-- Headline Text Content -->
             <g class="headline-content">
               <!-- Vara container for headline -->
-              <foreignObject x="10" y="10" width="1180" height="180">
+              <foreignObject x="0" y="0" width="1200" height="200">
                 <div id="headline-vara-container" xmlns="http://www.w3.org/1999/xhtml"></div>
               </foreignObject>
               
               <!-- Outline Text Layer -->
-              <foreignObject x="10" y="10" width="1180" height="180">
+              <foreignObject x="0" y="0" width="1200" height="200">
                 <div class="outline-text-wrapper" xmlns="http://www.w3.org/1999/xhtml">
                   <template v-for="(word, wordIndex) in headline.split(' ')" :key="`word-${wordIndex}`">
                     <span class="word">
@@ -182,7 +182,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, computed, watch, onUnmounted } from 'vue';
 import gsap from 'gsap';
 import Vivus from 'vivus';
 import { useVara } from '@/composables/useVara';
@@ -206,6 +206,8 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'complete'): void;
+  (e: 'pause'): void;
+  (e: 'resume'): void;
 }>();
 
 // State
@@ -325,10 +327,58 @@ const resumeAnimation = () => {
 
 const showDebug = ref(false);
 
+// Update the font size calculation
+const calculateResponsiveFontSize = (containerWidth: number, text: string) => {
+  // Base size for reference width of 1200px and height of 200px
+  const baseSize = 72;
+  const baseWidth = 1200;
+  const baseHeight = 200;
+  
+  // Calculate size based on container width and text length
+  const textLength = text.length;
+  const scaleFactor = Math.min(containerWidth / baseWidth, 1);
+  
+  // Adjust for text length - longer text should be smaller
+  const lengthFactor = Math.min(1, 25 / textLength);
+  
+  // Calculate final size
+  const fontSize = Math.floor(baseSize * scaleFactor * lengthFactor);
+  
+  // Ensure font size doesn't exceed container height
+  const maxSize = Math.floor(baseHeight * 0.4); // 40% of container height
+  return Math.min(fontSize, maxSize);
+};
+
+// Add this before onMounted
+const updateVaraFontSize = () => {
+  if (!headlineVaraInstance.value) return;
+  
+  const container = document.querySelector('#headline-vara-container');
+  if (!container) return;
+  
+  const containerWidth = container.clientWidth;
+  const fontSize = calculateResponsiveFontSize(containerWidth, headline.value);
+  
+  // Update Vara instance with new font size
+  headlineVaraInstance.value.setFontSize(fontSize);
+};
+
+// Add debounced resize handler
+let resizeTimeout: number | null = null;
+const handleResize = () => {
+  if (resizeTimeout) {
+    window.clearTimeout(resizeTimeout);
+  }
+  
+  resizeTimeout = window.setTimeout(() => {
+    updateVaraFontSize();
+  }, 250);
+};
+
 onMounted(async () => {
   // Set start time
   startTime.value = Date.now();
-  console.log(`[HeroSectionLoader] Component mounted at ${new Date().toISOString()}`);
+  console.log(`[HeroSectionLoader] Component mounted`);
   
   // Initialize Vivus instances
   const navbarSvg = document.querySelector('#navbar-svg') as SVGElement;
@@ -346,13 +396,17 @@ onMounted(async () => {
       return Promise.resolve();
     },
     onContainersDrawn: async () => {
+      // Get container width for responsive sizing
+      const container = document.querySelector('#headline-vara-container');
+      const containerWidth = container?.clientWidth || 1180;
+      
       // Initialize Vara text instances after containers are drawn
       headlineVaraInstance.value = await loadVara('#headline-vara-container', {
-        fontSize: 72,
+        fontSize: calculateResponsiveFontSize(containerWidth, headline.value),
         strokeWidth: 2,
         textAlign: 'center',
         text: headline.value,
-        y: 20,
+        y: 100,
         duration: 2000,
         delay: 1000,
         letterSpacing: 0.1,
@@ -385,8 +439,7 @@ onMounted(async () => {
       console.log('Spotlight movement completed');
     },
     onComplete: () => {
-      console.log('Animation completed');
-      emit('complete');
+      console.log('Animation completed - staying on loader for debugging');
     }
   });
 
@@ -442,6 +495,19 @@ onMounted(async () => {
     console.log('Starting timeline');
     timeline.play();
   }
+
+  // Add resize listener
+  window.addEventListener('resize', handleResize);
+});
+
+onUnmounted(() => {
+  // Remove resize listener
+  window.removeEventListener('resize', handleResize);
+  
+  // Clear timeout if it exists
+  if (resizeTimeout) {
+    window.clearTimeout(resizeTimeout);
+  }
 });
 </script>
 
@@ -485,6 +551,23 @@ onMounted(async () => {
     rgba(0, 0, 0, 0) 50%
   );
   animation: grid-float 3s linear infinite;
+  --spotlight-brightness: 1;
+  --spotlight-focus: 0;
+  filter: brightness(var(--spotlight-brightness));
+  transition: --spotlight-focus 0.5s ease;
+}
+
+.grid-lines.focused {
+  mask-image: radial-gradient(
+    circle at var(--spotlight-x) var(--spotlight-y),
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at var(--spotlight-x) var(--spotlight-y),
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0) 100%
+  );
 }
 
 .grid-lines.horizontal .grid-line,
@@ -590,6 +673,7 @@ onMounted(async () => {
   width: 100%;
   height: auto;
   display: block;
+  overflow: visible;
 }
 
 #navbar-svg {
@@ -657,7 +741,6 @@ onMounted(async () => {
 /* Text Styles */
 .word {
   font-size: 72px;
-  font-family: 'Satisfy', cursive;
   dominant-baseline: middle;
   text-anchor: middle;
 }
@@ -680,22 +763,48 @@ onMounted(async () => {
   align-items: center;
   z-index: 2;
   opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
+  clip-path: inset(0 0% 0 0);
+  transition: clip-path 0.1s ease;
 }
 
 .outline-text-wrapper .letter {
   color: transparent;
   -webkit-text-stroke: 2px var(--theme-primary, #88C0D0);
-  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+/* Modified filled state specifically for headline letters */
+.outline-text-wrapper .letter.filled {
+  color: transparent;
+  -webkit-text-stroke: 0;
+  -webkit-text-stroke-width: 0;
+  background: linear-gradient(
+    to right,
+    var(--theme-primary, #88C0D0),
+    var(--theme-secondary, #5E81AC),
+    var(--theme-primary, #88C0D0)
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shine 3s linear infinite;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes shine {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
 }
 
 #headline-vara-container,
 #subheadline-vara-container {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  inset: 0;
   width: 100%;
   height: 100%;
   display: flex;
@@ -704,13 +813,18 @@ onMounted(async () => {
   z-index: 3;
   opacity: 1;
   visibility: visible;
+  overflow: visible;
 }
 
 #headline-vara-container svg,
 #subheadline-vara-container svg {
+  width: 100%;
   height: 100%;
+  max-height: 200px;
   opacity: 1;
   visibility: visible;
+  overflow: visible;
+  object-fit: contain;
 }
 
 .spotlight-text-wrapper {
@@ -834,5 +948,80 @@ onMounted(async () => {
   100% {
     transform: translate(20px, 20px);
   }
+}
+
+/* RTL Transition Styles */
+.outline-text-wrapper {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.outline-text-wrapper .word {
+  display: flex;
+  margin: 0 0.25rem;
+}
+
+.outline-text-wrapper .letter {
+  position: relative;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  color: white;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.outline-text-wrapper .letter.focused {
+  opacity: 1;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+}
+
+#headline-vara-container {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+#headline-vara-container path {
+  transition: opacity 0.2s ease;
+}
+
+.spotlight-text-wrapper {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.spotlight-text-wrapper .word {
+  display: flex;
+  margin: 0 0.25rem;
+}
+
+.spotlight-text-wrapper .letter {
+  position: relative;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.spotlight-text-wrapper .letter.focused {
+  opacity: 1;
+}
+
+.headline-content {
+  transform-origin: center;
 }
 </style> 
