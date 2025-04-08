@@ -12,50 +12,14 @@
     </div>
 
     <!-- Grid and Spotlight System -->
-    <div 
-      class="grid-container" 
-      :style="{
-        '--spotlight-x': `${spotlightX}%`,
-        '--spotlight-y': `${spotlightY}%`,
-        '--spotlight-size': '20%'
-      }"
-    >
-      <!-- Debug controls -->
-      <div class="pause-controls" v-if="showDebug">
-        <div class="pause-options">
-          <label>
-            <input type="checkbox" v-model="isPausedAfterVara">
-            Pause after Vara
-          </label>
-          <label>
-            <input type="checkbox" v-model="isPausedAfterRTL">
-            Pause after RTL
-          </label>
-          <label>
-            <input type="checkbox" v-model="isPausedAfterLTR">
-            Pause after LTR
-          </label>
-        </div>
-        <button 
-          v-if="timeline?.paused()" 
-          @click="resumeAnimation"
-          class="resume-button"
-        >
-          Resume Animation
-        </button>
+    <div class="grid-container" :class="{ 'debug-mode': showDebug }">
+      <div class="grid-lines horizontal">
+        <div v-for="i in 20" :key="`h-${i}`" class="grid-line" />
       </div>
-
-      <!-- Use PaperGridBackground with default spotlight disabled -->
-      <div class="masked-grid">
-        <PaperGridBackground
-          :theme="currentTheme"
-          :floating="true"
-          :spotlight="false"
-        />
+      <div class="grid-lines vertical">
+        <div v-for="i in 20" :key="`v-${i}`" class="grid-line" />
       </div>
-
-      <!-- Debug circle overlay - always visible -->
-      <div class="debug-circle-overlay"></div>
+      <div v-if="showDebug" class="spotlight-indicator"></div>
     </div>
 
     <!-- Content Container -->
@@ -227,6 +191,9 @@ import { usePencilAnimation } from '@/composables/usePencilAnimation';
 import SvgFilters from '@/components/svg/SvgFilters.vue';
 import { HeroContent, getRandomHeroContent } from '@/data/heroContentData';
 import PaperGridBackground from '@/components/ui/backgrounds/PaperGridBackground.vue';
+import { createPhasedTimeline, buildCompleteTimeline } from './hero-loader/utils/phasedTimelineUtils';
+import { createPhasedSpotlight } from './hero-loader/utils/phasedSpotlightEffect';
+import { setupGridInitialState } from './hero-loader/utils/phasedTimelineUtils';
 
 const props = defineProps<{
   headline?: string;
@@ -243,8 +210,6 @@ const emit = defineEmits<{
 
 // State
 const isVisible = ref(true);
-const spotlightX = ref(20);
-const spotlightY = ref(20);
 const timeline = ref<gsap.core.Timeline | null>(null);
 const startTime = ref<number | null>(null);
 const headlineVaraInstance = ref<any>(null);
@@ -266,45 +231,19 @@ const { loadVara } = useVara();
 const { instances: vivusInstances, createVivusInstance } = useVivusInstances();
 const { animatePencilAlongPath } = usePencilAnimation();
 
-// Animation handlers
-const handleRTLStart = () => {
-  gsap.set('.outline-text-wrapper .letter', { opacity: 1 });
-};
+// Add spotlight position refs
+const spotlightX = ref(20);
+const spotlightY = ref(20);
 
-const handleRTLUpdate = (progress: number) => {
-  spotlightX.value = 100 - (progress * 100);
-  spotlightY.value = 50;
-};
-
-const handleRTLComplete = () => {
-  if (isPausedAfterRTL.value) {
-    timeline.value?.pause();
+// Add a function to update the spotlight position
+const updateSpotlightPosition = (x: number, y: number) => {
+  const gridContainer = document.querySelector('.grid-container') as HTMLElement;
+  if (gridContainer) {
+    gridContainer.style.setProperty('--spotlight-x', `${x}%`);
+    gridContainer.style.setProperty('--spotlight-y', `${y}%`);
   }
-};
-
-const handleLTRStart = () => {
-  gsap.set('.spotlight-text-wrapper', { clipPath: 'inset(0 100% 0 0)' });
-};
-
-const handleLTRUpdate = (progress: number) => {
-  spotlightX.value = progress * 100;
-  spotlightY.value = 50;
-  gsap.set('.spotlight-text-wrapper', {
-    clipPath: `inset(0 ${100 - (progress * 100)}% 0 0)`
-  });
-};
-
-const handleLTRComplete = () => {
-  if (isPausedAfterLTR.value) {
-    timeline.value?.pause();
-  }
-  gsap.set('.outline-text-wrapper .letter', { opacity: 0 });
-};
-
-const resumeAnimation = () => {
-  if (timeline.value) {
-    timeline.value.resume();
-  }
+  spotlightX.value = x;
+  spotlightY.value = y;
 };
 
 // Animation timing configuration
@@ -378,6 +317,14 @@ const getTimelineDuration = (timing: { start: number; duration: number }) => {
   return timing.duration;
 };
 
+const resumeAnimation = () => {
+  if (timeline.value) {
+    timeline.value.resume();
+  }
+};
+
+const showDebug = ref(false);
+
 onMounted(async () => {
   // Set start time
   startTime.value = Date.now();
@@ -388,45 +335,68 @@ onMounted(async () => {
   const headlineSvg = document.querySelector('#headline-svg') as SVGElement;
   const subheadlineSvg = document.querySelector('#subheadline-svg') as SVGElement;
 
-  // Initialize Vara text instances
-  console.log('Initializing headline Vara text...');
-  headlineVaraInstance.value = await loadVara('#headline-vara-container', {
-    fontSize: 72,
-    strokeWidth: 2,
-    textAlign: 'center',
-    text: headline.value,
-    y: 20,
-    duration: 2000,
-    delay: 1000,
-    letterSpacing: 0.1,
-    autoAnimation: true,
-    color: 'var(--theme-primary, #88C0D0)',
-    font: '/futoro-site/fonts/Satisfy/SatisfySL.json',
-  });
-  console.log('Headline Vara instance created:', headlineVaraInstance.value);
+  // Setup initial state for grid animations only
+  setupGridInitialState();
 
-  console.log('Initializing subheadline Vara text...');
-  subheadlineVaraInstance.value = await loadVara('#subheadline-vara-container', {
-    fontSize: 36,
-    strokeWidth: 2,
-    textAlign: 'center',
-    text: subheadline.value,
-    y: 20,
-    duration: 2000,
-    letterSpacing: 0.1,
-    autoAnimation: true,
-    color: 'var(--theme-primary, #88C0D0)',
-    font: '/futoro-site/fonts/Satisfy/SatisfySL.json',
-    delay: 1000
-  });
-  console.log('Subheadline Vara instance created:', subheadlineVaraInstance.value);
+  // Build the complete timeline with all phases
+  const timeline = buildCompleteTimeline({
+    headline: headlineVaraInstance.value,
+    subheadline: subheadlineVaraInstance.value,
+    loadVara: async () => {
+      return Promise.resolve();
+    },
+    onContainersDrawn: async () => {
+      // Initialize Vara text instances after containers are drawn
+      headlineVaraInstance.value = await loadVara('#headline-vara-container', {
+        fontSize: 72,
+        strokeWidth: 2,
+        textAlign: 'center',
+        text: headline.value,
+        y: 20,
+        duration: 2000,
+        delay: 1000,
+        letterSpacing: 0.1,
+        autoAnimation: true,
+        color: 'var(--theme-primary, #88C0D0)',
+        font: '/futoro-site/fonts/Satisfy/SatisfySL.json',
+      });
 
+      subheadlineVaraInstance.value = await loadVara('#subheadline-vara-container', {
+        fontSize: 36,
+        strokeWidth: 2,
+        textAlign: 'center',
+        text: subheadline.value,
+        y: 20,
+        duration: 2000,
+        letterSpacing: 0.1,
+        autoAnimation: true,
+        color: 'var(--theme-primary, #88C0D0)',
+        font: '/futoro-site/fonts/Satisfy/SatisfySL.json',
+        delay: 1000
+      });
+    },
+    onSpotlightStart: () => {
+      console.log('Spotlight movement started');
+    },
+    onSpotlightUpdate: (x, y) => {
+      updateSpotlightPosition(x, y);
+    },
+    onSpotlightComplete: () => {
+      console.log('Spotlight movement completed');
+    },
+    onComplete: () => {
+      console.log('Animation completed');
+      emit('complete');
+    }
+  });
+
+  // Initialize Vivus instances
   const navbarVivus = createVivusInstance(navbarSvg, {
     type: 'scenario',
     start: 'autostart',
     duration: 100,
     onReady: () => {
-      console.log(`[Navbar] Vivus instance ready at ${new Date().toISOString()}, elapsed: ${Date.now() - startTime.value!}ms`);
+      // console.log(`[Navbar] Vivus instance ready at ${new Date().toISOString()}, elapsed: ${Date.now() - startTime.value!}ms`);
     }
   });
 
@@ -435,7 +405,7 @@ onMounted(async () => {
     start: 'autostart',
     duration: 100,
     onReady: () => {
-      console.log(`[Headline] Vivus instance ready at ${new Date().toISOString()}, elapsed: ${Date.now() - startTime.value!}ms`);
+      // console.log(`[Headline] Vivus instance ready at ${new Date().toISOString()}, elapsed: ${Date.now() - startTime.value!}ms`);
     }
   });
 
@@ -444,7 +414,7 @@ onMounted(async () => {
     start: 'autostart',
     duration: 100,
     onReady: () => {
-      console.log(`[Subheadline] Vivus instance ready at ${new Date().toISOString()}, elapsed: ${Date.now() - startTime.value!}ms`);
+      // console.log(`[Subheadline] Vivus instance ready at ${new Date().toISOString()}, elapsed: ${Date.now() - startTime.value!}ms`);
     }
   });
 
@@ -456,39 +426,21 @@ onMounted(async () => {
   const headlinePencilDot = document.querySelector('.headline-pencil-dot') as SVGCircleElement;
   const subheadlinePencilDot = document.querySelector('.subheadline-pencil-dot') as SVGCircleElement;
 
-  // Create main timeline
-  timeline.value = gsap.timeline({
-    paused: props.pauseAnimations,
-    onStart: () => {
-      console.log(`[Animation] 🚀 Timeline started at ${new Date().toISOString()}`);
-      console.log(`[Animation] Moving spotlight from left to right`);
-    },
-    onComplete: () => {
-      console.log(`[Animation] 🏁 Movement complete at ${new Date().toISOString()}`);
-      emit('complete');
-    }
+  // Initialize the spotlight effect
+  const spotlightEffect = createPhasedSpotlight({
+    initialX: 20,
+    initialY: 20,
+    initialSize: 100,
+    debug: true
   });
 
-  // Just move spotlight from left to right
-  timeline.value
-    .to('.grid-container', {
-      '--spotlight-x': '80%',
-      '--spotlight-y': '20%',
-      duration: 1.5,
-      ease: 'none',
-      onStart: () => {
-        console.log(`[Animation] ➡️ Moving spotlight right`);
-        console.log(`[Animation] Starting position: x=${spotlightX.value}%, y=${spotlightY.value}%`);
-      },
-      onComplete: () => {
-        console.log(`[Animation] ✅ Movement complete`);
-        console.log(`[Animation] Final position: x=${spotlightX.value}%, y=${spotlightY.value}%`);
-      }
-    });
+  // Update the spotlight position refs
+  updateSpotlightPosition(spotlightEffect.spotlightX, spotlightEffect.spotlightY);
 
-  // Start animation if not paused
-  if (!props.pauseAnimations) {
-    timeline.value.play();
+  // Start the main timeline if not paused
+  if (!isPausedAfterVara.value) {
+    console.log('Starting timeline');
+    timeline.play();
   }
 });
 </script>
@@ -500,7 +452,7 @@ onMounted(async () => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgb(17, 24, 39);
+  background: rgb(26, 27, 38);
   z-index: 9999;
   display: flex;
   flex-direction: column;
@@ -511,19 +463,101 @@ onMounted(async () => {
 
 .grid-container {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  overflow: visible;
-  --spotlight-x: 20%;
-  --spotlight-y: 20%;
-  --spotlight-size: 100%;
-  isolation: isolate;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 10;
 }
 
 .grid-lines {
-  display: none;
+  position: absolute;
+  inset: 0;
+  mask-image: radial-gradient(
+    circle at var(--spotlight-x) var(--spotlight-y),
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.8) 20%,
+    rgba(0, 0, 0, 0) 50%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at var(--spotlight-x) var(--spotlight-y),
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.8) 20%,
+    rgba(0, 0, 0, 0) 50%
+  );
+  animation: grid-float 3s linear infinite;
+}
+
+.grid-lines.horizontal .grid-line,
+.grid-lines.vertical .grid-line {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.grid-lines.horizontal .grid-line {
+  width: 100%;
+  height: 1px;
+}
+
+.grid-lines.horizontal .grid-line:nth-child(1) { top: 5%; }
+.grid-lines.horizontal .grid-line:nth-child(2) { top: 10%; }
+.grid-lines.horizontal .grid-line:nth-child(3) { top: 15%; }
+.grid-lines.horizontal .grid-line:nth-child(4) { top: 20%; }
+.grid-lines.horizontal .grid-line:nth-child(5) { top: 25%; }
+.grid-lines.horizontal .grid-line:nth-child(6) { top: 30%; }
+.grid-lines.horizontal .grid-line:nth-child(7) { top: 35%; }
+.grid-lines.horizontal .grid-line:nth-child(8) { top: 40%; }
+.grid-lines.horizontal .grid-line:nth-child(9) { top: 45%; }
+.grid-lines.horizontal .grid-line:nth-child(10) { top: 50%; }
+.grid-lines.horizontal .grid-line:nth-child(11) { top: 55%; }
+.grid-lines.horizontal .grid-line:nth-child(12) { top: 60%; }
+.grid-lines.horizontal .grid-line:nth-child(13) { top: 65%; }
+.grid-lines.horizontal .grid-line:nth-child(14) { top: 70%; }
+.grid-lines.horizontal .grid-line:nth-child(15) { top: 75%; }
+.grid-lines.horizontal .grid-line:nth-child(16) { top: 80%; }
+.grid-lines.horizontal .grid-line:nth-child(17) { top: 85%; }
+.grid-lines.horizontal .grid-line:nth-child(18) { top: 90%; }
+.grid-lines.horizontal .grid-line:nth-child(19) { top: 95%; }
+.grid-lines.horizontal .grid-line:nth-child(20) { top: 100%; }
+
+.grid-lines.vertical .grid-line {
+  height: 100%;
+  width: 1px;
+}
+
+.grid-lines.vertical .grid-line:nth-child(1) { left: 5%; }
+.grid-lines.vertical .grid-line:nth-child(2) { left: 10%; }
+.grid-lines.vertical .grid-line:nth-child(3) { left: 15%; }
+.grid-lines.vertical .grid-line:nth-child(4) { left: 20%; }
+.grid-lines.vertical .grid-line:nth-child(5) { left: 25%; }
+.grid-lines.vertical .grid-line:nth-child(6) { left: 30%; }
+.grid-lines.vertical .grid-line:nth-child(7) { left: 35%; }
+.grid-lines.vertical .grid-line:nth-child(8) { left: 40%; }
+.grid-lines.vertical .grid-line:nth-child(9) { left: 45%; }
+.grid-lines.vertical .grid-line:nth-child(10) { left: 50%; }
+.grid-lines.vertical .grid-line:nth-child(11) { left: 55%; }
+.grid-lines.vertical .grid-line:nth-child(12) { left: 60%; }
+.grid-lines.vertical .grid-line:nth-child(13) { left: 65%; }
+.grid-lines.vertical .grid-line:nth-child(14) { left: 70%; }
+.grid-lines.vertical .grid-line:nth-child(15) { left: 75%; }
+.grid-lines.vertical .grid-line:nth-child(16) { left: 80%; }
+.grid-lines.vertical .grid-line:nth-child(17) { left: 85%; }
+.grid-lines.vertical .grid-line:nth-child(18) { left: 90%; }
+.grid-lines.vertical .grid-line:nth-child(19) { left: 95%; }
+.grid-lines.vertical .grid-line:nth-child(20) { left: 100%; }
+
+.debug-mode .grid-lines {
+  mask-image: none;
+}
+
+.spotlight-indicator {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: red;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  left: var(--spotlight-x);
+  top: var(--spotlight-y);
 }
 
 .content-wrapper {
@@ -632,15 +666,57 @@ onMounted(async () => {
   font-size: 36px;
 }
 
+.outline-text-wrapper,
+.regular-text-wrapper,
+.spotlight-text-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  z-index: 2;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .outline-text-wrapper .letter {
   color: transparent;
   -webkit-text-stroke: 2px var(--theme-primary, #88C0D0);
   opacity: 0;
 }
 
+#headline-vara-container,
+#subheadline-vara-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3;
+  opacity: 1;
+  visibility: visible;
+}
+
+#headline-vara-container svg,
+#subheadline-vara-container svg {
+  height: 100%;
+  opacity: 1;
+  visibility: visible;
+}
+
 .spotlight-text-wrapper {
   clip-path: inset(0 100% 0 0);
   transition: clip-path 0.1s ease;
+  z-index: 1;
 }
 
 .spotlight-text-wrapper .letter {
@@ -651,6 +727,13 @@ onMounted(async () => {
 .spotlight-text-wrapper.headline-spotlight .letter {
   color: white;
   -webkit-text-stroke: 2px var(--theme-primary, #88C0D0);
+}
+
+/* Hide Vara text when spotlight text is visible */
+.spotlight-text-wrapper:not([style*="clip-path: inset(0 100% 0 0)"]) ~ #headline-vara-container,
+.spotlight-text-wrapper:not([style*="clip-path: inset(0 100% 0 0)"]) ~ #subheadline-vara-container {
+  opacity: 0;
+  visibility: hidden;
 }
 
 /* Debug Controls */
@@ -683,103 +766,17 @@ onMounted(async () => {
 
 /* Debug circle overlay */
 .debug-circle-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 10;
-  background: radial-gradient(
-    circle at var(--spotlight-x) var(--spotlight-y),
-    transparent 0%,
-    transparent calc(var(--spotlight-size) * 0.95),
-    rgba(255, 255, 0, 1) calc(var(--spotlight-size) * 0.95),
-    rgba(255, 255, 0, 1) var(--spotlight-size),
-    transparent var(--spotlight-size)
-  );
+  display: none;
 }
 
 /* Add masking to the grid container's wrapper */
 .masked-grid {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  mask-image: radial-gradient(
-    circle at var(--spotlight-x) var(--spotlight-y),
-    rgba(0, 0, 0, 1) 0%,
-    rgba(0, 0, 0, 1) var(--spotlight-size),
-    rgba(0, 0, 0, 0) var(--spotlight-size)
-  );
-  -webkit-mask-image: radial-gradient(
-    circle at var(--spotlight-x) var(--spotlight-y),
-    rgba(0, 0, 0, 1) 0%,
-    rgba(0, 0, 0, 1) var(--spotlight-size),
-    rgba(0, 0, 0, 0) var(--spotlight-size)
-  );
+  display: none;
 }
 
 .is-hidden {
   opacity: 0;
   pointer-events: none;
-}
-
-#headline-vara-container,
-#subheadline-vara-container {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 3;
-}
-
-#headline-vara-container svg,
-#subheadline-vara-container svg {
-  height: 100%;
-}
-
-.outline-text-wrapper {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  z-index: 2;
-  opacity: 0;
-  clip-path: inset(0 0% 0 0);
-  transition: clip-path 0.1s ease;
-}
-
-.outline-text-wrapper .letter {
-  color: transparent;
-  -webkit-text-stroke: 2px var(--theme-primary, #88C0D0);
-  transition: all 0.3s ease;
-}
-
-.spotlight-text-wrapper {
-  position: absolute;
-  top: 0;
-  left: 10px;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1;
-  opacity: 1;
-  clip-path: inset(0 100% 0 0);
-  transition: clip-path 0.1s ease;
 }
 
 .spotlight-text-wrapper .word {
@@ -802,20 +799,6 @@ onMounted(async () => {
 .spotlight-text-wrapper.headline-spotlight .letter {
   color: white;
   -webkit-text-stroke: 2px var(--theme-primary, #88C0D0);
-}
-
-.regular-text-wrapper {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  z-index: 2;
-  opacity: 0;
 }
 
 .regular-text-wrapper .word {
@@ -842,5 +825,14 @@ onMounted(async () => {
 .masked-grid :deep(.grid-paper-overlay) {
   width: 100%;
   height: 100%;
+}
+
+@keyframes grid-float {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(20px, 20px);
+  }
 }
 </style> 

@@ -12,14 +12,13 @@
     
     <!-- Old loaders (hidden) -->
     <!-- <SimpleLoader 
-      :heroContent="heroContent" 
       :showDebug="true"
       :pauseAnimations="false"
       @complete="onLoadComplete" 
-      v-if="false"
+      v-if="true"
       class="loader-overlay"
     />
-    <HeroSectionChatWireframe v-if="false" /> -->
+    <HeroSectionChatWireframe v-if="true" /> -->
     
     <!-- Main app content -->
     <div id="app" 

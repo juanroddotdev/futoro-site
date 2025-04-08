@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import './scss/main.scss'
 import AppWithRouter from './AppWithRouter.vue'
+// import App from './App.vue'
 import router from './router'
 import globalComponents from './plugins/globalComponents'
 import vivusPlugin from './plugins/vivus'
@@ -8,6 +9,7 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 const app = createApp(AppWithRouter)
+// const app = createApp(App)
 
 // Register global components
 app.use(globalComponents)
