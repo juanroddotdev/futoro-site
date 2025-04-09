@@ -1,8 +1,70 @@
 <template>
   <div class="hero-section-loader" :class="{ 'is-hidden': !isVisible }">
+    <!-- Single Debug Panel -->
+    <div class="debug-panel" :class="{ 'is-visible': showDebug }">
+      <div class="debug-panel-header">
+        <button @click="toggleDebug">{{ showDebug ? 'Hide' : 'Show' }} Debug Panel</button>
+      </div>
+      
+      <div v-if="showDebug" class="debug-panel-content">
+        <!-- Animation Controls -->
+        <div class="control-section">
+          <h3>Animation Controls</h3>
+          <div class="control-group">
+            <label>
+              <input type="checkbox" v-model="isPausedAfterVara">
+              Pause after Vara
+            </label>
+            <label>
+              <input type="checkbox" v-model="isPausedAfterOutline">
+              Pause after Outline
+            </label>
+            <label>
+              <input type="checkbox" v-model="isPausedAfterSpotlight">
+              Pause after Spotlight
+            </label>
+          </div>
+        </div>
+
+        <!-- Eraser Controls -->
+        <div class="control-section">
+          <h3>Eraser Controls</h3>
+          <div class="control-group">
+            <label>
+              <input type="checkbox" v-model="showEraserEffect">
+              Enable Eraser Effect
+            </label>
+            <label>
+              <input type="checkbox" v-model="showEraserDebug">
+              Show Eraser Rectangles
+            </label>
+            <button 
+              @click="triggerEraserEffect"
+              class="eraser-button"
+              :disabled="!showEraserEffect"
+            >
+              Trigger Eraser Effect
+            </button>
+          </div>
+        </div>
+
+        <!-- Timeline Controls -->
+        <div class="control-section" v-if="timeline?.paused()">
+          <button @click="resumeAnimation" class="resume-button">
+            Resume Animation
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Debug Toggle Button -->
     <button class="debug-toggle" @click="toggleDebug">
       {{ showDebug ? 'Hide Debug' : 'Show Debug' }}
+    </button>
+    
+    <!-- Eraser Debug Toggle Button -->
+    <button v-if="showDebug" class="eraser-debug-toggle" @click="toggleEraserDebug">
+      {{ showEraserDebug ? 'Hide Eraser' : 'Show Eraser' }}
     </button>
     
     <!-- PaperGridBackground for comparison -->
@@ -32,40 +94,50 @@
       <!-- Navbar Container -->
       <svg id="navbar-svg" class="wireframe-svg" viewBox="0 0 1200 120" preserveAspectRatio="xMidYMid meet">
         <SvgFilters />
-        <!-- Container draws first -->
-        <path class="navbar-container-path" 
-          d="M10,10 L1190,10 L1190,110 L10,110 L10,10" 
-          v-bind="getDataAttributes(animationTimings.navbar.container)"
-          fill="none" stroke="white" stroke-width="2" />
+        <defs>
+          <mask id="eraser-mask-navbar">
+            <rect x="0" y="0" width="1200" height="120" fill="white" />
+            <rect class="eraser-rect" x="1200" y="-100" width="300" height="400" fill="black" />
+          </mask>
+        </defs>
+        
+        <!-- All content goes in this group -->
+        <g class="content-group" mask="url(#eraser-mask-navbar)">
+          <!-- Container draws first -->
+          <path class="navbar-container-path" 
+            d="M10,10 L1190,10 L1190,110 L10,110 L10,10" 
+            v-bind="getDataAttributes(animationTimings.navbar.container)"
+            fill="none" stroke="white" stroke-width="2" />
 
-        <!-- Logo and nav items draw in sequence -->
-        <path class="navbar-logo-path" 
-          d="M32,38 L152,38 L152,62 L32,62 L32,38" 
-          v-bind="getDataAttributes(animationTimings.navbar.logo)"
-          fill="none" stroke="white" stroke-width="2" />
+          <!-- Logo and nav items draw in sequence -->
+          <path class="navbar-logo-path" 
+            d="M32,38 L152,38 L152,62 L32,62 L32,38" 
+            v-bind="getDataAttributes(animationTimings.navbar.logo)"
+            fill="none" stroke="white" stroke-width="2" />
 
-        <path class="navbar-link-1-path" 
-          d="M600,38 L680,38 L680,62 L600,62 L600,38" 
-          v-bind="getDataAttributes(animationTimings.navbar.link1)"
-          fill="none" stroke="white" stroke-width="2" />
+          <path class="navbar-link-1-path" 
+            d="M600,38 L680,38 L680,62 L600,62 L600,38" 
+            v-bind="getDataAttributes(animationTimings.navbar.link1)"
+            fill="none" stroke="white" stroke-width="2" />
 
-        <path class="navbar-link-2-path" 
-          d="M720,38 L800,38 L800,62 L720,62 L720,38" 
-          v-bind="getDataAttributes(animationTimings.navbar.link2)"
-          fill="none" stroke="white" stroke-width="2" />
+          <path class="navbar-link-2-path" 
+            d="M720,38 L800,38 L800,62 L720,62 L720,38" 
+            v-bind="getDataAttributes(animationTimings.navbar.link2)"
+            fill="none" stroke="white" stroke-width="2" />
 
-        <path class="navbar-link-3-path" 
-          d="M840,38 L920,38 L920,62 L840,62 L840,38" 
-          v-bind="getDataAttributes(animationTimings.navbar.link3)"
-          fill="none" stroke="white" stroke-width="2" />
+          <path class="navbar-link-3-path" 
+            d="M840,38 L920,38 L920,62 L840,62 L840,38" 
+            v-bind="getDataAttributes(animationTimings.navbar.link3)"
+            fill="none" stroke="white" stroke-width="2" />
 
-        <path class="navbar-cta-path" 
-          d="M960,35 L1060,35 C1080,35 1080,65 1060,65 L960,65 C940,65 940,35 960,35"
-          v-bind="getDataAttributes(animationTimings.navbar.cta)"
-          fill="none" stroke="white" stroke-width="2" />
+          <path class="navbar-cta-path" 
+            d="M960,35 L1060,35 C1080,35 1080,65 1060,65 L960,65 C940,65 940,35 960,35"
+            v-bind="getDataAttributes(animationTimings.navbar.cta)"
+            fill="none" stroke="white" stroke-width="2" />
 
-        <!-- Pencil effect -->
-        <circle class="pencil-dot" cx="10" cy="10" r="3" fill="#ffffff" opacity="0" />
+          <!-- Pencil effect -->
+          <circle class="pencil-dot" cx="10" cy="10" r="3" fill="#ffffff" opacity="0" />
+        </g>
       </svg>
 
       <!-- Text Container -->
@@ -75,61 +147,61 @@
           <svg id="headline-svg" class="wireframe-svg" viewBox="0 0 1200 200" preserveAspectRatio="xMidYMid meet">
             <SvgFilters />
             <defs>
-              <linearGradient id="headline-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" style="stop-color:var(--theme-secondary, #88C0D0)" />
-                <stop offset="25%" style="stop-color:var(--theme-accent, #A3BE8C)" />
-                <stop offset="50%" style="stop-color:var(--theme-highlight, #BF616A)" />
-                <stop offset="75%" style="stop-color:var(--theme-accent, #A3BE8C)" />
-                <stop offset="100%" style="stop-color:var(--theme-secondary, #88C0D0)" />
-              </linearGradient>
+              <mask id="eraser-mask-headline">
+                <rect x="0" y="0" width="1200" height="200" fill="white" />
+                <rect class="eraser-rect" x="1200" y="-100" width="300" height="400" fill="black" />
+              </mask>
             </defs>
-            <path class="headline-container-path" 
-              d="M0,0 L1200,0 L1200,200 L0,200 L0,0" 
-              v-bind="getDataAttributes(animationTimings.headline.container)"
-              fill="none" stroke="white" stroke-width="2" />
-            <circle class="headline-pencil-dot" cx="0" cy="0" r="3" fill="#ffffff" opacity="0" />
             
-            <!-- Headline Text Content -->
-            <g class="headline-content">
-              <!-- Vara container for headline -->
-              <foreignObject x="0" y="0" width="1200" height="200">
-                <div id="headline-vara-container" xmlns="http://www.w3.org/1999/xhtml"></div>
-              </foreignObject>
+            <g mask="url(#eraser-mask-headline)">
+              <path class="headline-container-path" 
+                d="M0,0 L1200,0 L1200,200 L0,200 L0,0" 
+                v-bind="getDataAttributes(animationTimings.headline.container)"
+                fill="none" stroke="white" stroke-width="2" />
+              <circle class="headline-pencil-dot" cx="0" cy="0" r="3" fill="#ffffff" opacity="0" />
               
-              <!-- Outline Text Layer -->
-              <foreignObject x="0" y="0" width="1200" height="200">
-                <div class="outline-text-wrapper" xmlns="http://www.w3.org/1999/xhtml">
-                  <template v-for="(word, wordIndex) in headline.split(' ')" :key="`word-${wordIndex}`">
-                    <span class="word">
-                      <span v-for="(char, letterIndex) in word" 
-                            :key="`letter-${wordIndex}-${letterIndex}`"
-                            class="letter"
-                            :data-word-index="wordIndex"
-                            :data-letter-index="letterIndex">
-                        {{ char }}
+              <!-- Headline Text Content -->
+              <g class="headline-content">
+                <!-- Vara container for headline -->
+                <foreignObject x="0" y="0" width="1200" height="200">
+                  <div id="headline-vara-container" xmlns="http://www.w3.org/1999/xhtml"></div>
+                </foreignObject>
+                
+                <!-- Outline Text Layer -->
+                <foreignObject x="0" y="0" width="1200" height="200">
+                  <div class="outline-text-wrapper" xmlns="http://www.w3.org/1999/xhtml">
+                    <template v-for="(word, wordIndex) in headline.split(' ')" :key="`word-${wordIndex}`">
+                      <span class="word">
+                        <span v-for="(char, letterIndex) in word" 
+                              :key="`letter-${wordIndex}-${letterIndex}`"
+                              class="letter"
+                              :data-word-index="wordIndex"
+                              :data-letter-index="letterIndex">
+                          {{ char }}
+                        </span>
                       </span>
-                    </span>
-                    <span v-if="wordIndex < headline.split(' ').length - 1" class="space">&nbsp;</span>
-                  </template>
-                </div>
-              </foreignObject>
-              
-              <!-- Spotlight Text Layer - Replaced with TextAnimation component -->
-              <foreignObject x="0" y="0" width="1200" height="200">
-                <div class="spotlight-text-wrapper" xmlns="http://www.w3.org/1999/xhtml">
-                  <h1 class="heading--accent mb-4 mt-2 heading-responsive-large theme-text--gradient-animated gradient-shine">
-                    <TextAnimation 
-                      :firstPart="headline" 
-                      animation="fadeUp" 
-                      :useGradient="true"
-                      :duration="3" 
-                      :initiallyHidden="true" 
-                      :triggerOnVisible="true" 
-                      :restartOnVisible="true" 
-                    />
-                  </h1>
-                </div>
-              </foreignObject>
+                      <span v-if="wordIndex < headline.split(' ').length - 1" class="space">&nbsp;</span>
+                    </template>
+                  </div>
+                </foreignObject>
+                
+                <!-- Spotlight Text Layer - Replaced with TextAnimation component -->
+                <foreignObject x="0" y="0" width="1200" height="200">
+                  <div class="spotlight-text-wrapper" xmlns="http://www.w3.org/1999/xhtml">
+                    <h1 class="heading--accent mb-4 mt-2 heading-responsive-large theme-text--gradient-animated gradient-shine">
+                      <TextAnimation 
+                        :firstPart="headline" 
+                        animation="fadeUp" 
+                        :useGradient="true"
+                        :duration="3" 
+                        :initiallyHidden="true" 
+                        :triggerOnVisible="true" 
+                        :restartOnVisible="true" 
+                      />
+                    </h1>
+                  </div>
+                </foreignObject>
+              </g>
             </g>
           </svg>
         </div>
@@ -139,93 +211,72 @@
           <svg id="subheadline-svg" class="wireframe-svg" viewBox="0 0 1200 200" preserveAspectRatio="xMidYMid meet">
             <SvgFilters />
             <defs>
-              <linearGradient id="subheadline-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" style="stop-color:var(--theme-secondary, #88C0D0)" />
-                <stop offset="100%" style="stop-color:var(--theme-accent, #A3BE8C)" />
-              </linearGradient>
+              <mask id="eraser-mask-subheadline">
+                <rect x="0" y="0" width="1200" height="200" fill="white" />
+                <rect class="eraser-rect" x="1200" y="-100" width="300" height="400" fill="black" />
+              </mask>
             </defs>
-            <path class="subheadline-container-path" 
-              d="M10,10 L1190,10 L1190,190 L10,190 L10,10" 
-              v-bind="getDataAttributes(animationTimings.subheadline.container)"
-              fill="none" stroke="white" stroke-width="2" />
-            <circle class="subheadline-pencil-dot" cx="10" cy="10" r="3" fill="#ffffff" opacity="0" />
             
-            <!-- Subheadline Text Content -->
-            <g class="subheadline-content">
-              <!-- Vara container for subheadline -->
-              <foreignObject x="10" y="10" width="1180" height="180">
-                <div id="subheadline-vara-container" xmlns="http://www.w3.org/1999/xhtml"></div>
-              </foreignObject>
+            <g mask="url(#eraser-mask-subheadline)">
+              <path class="subheadline-container-path" 
+                d="M10,10 L1190,10 L1190,190 L10,190 L10,10" 
+                v-bind="getDataAttributes(animationTimings.subheadline.container)"
+                fill="none" stroke="white" stroke-width="2" />
+              <circle class="subheadline-pencil-dot" cx="10" cy="10" r="3" fill="#ffffff" opacity="0" />
               
-              <!-- Outline Text Layer -->
-              <foreignObject x="0" y="0" width="1200" height="200">
-                <div class="outline-text-wrapper" xmlns="http://www.w3.org/1999/xhtml">
-                  <template v-for="(word, wordIndex) in subheadline.split(' ')" :key="`word-${wordIndex}`">
-                    <span class="word">
-                      <span v-for="(char, letterIndex) in word" 
-                            :key="`letter-${wordIndex}-${letterIndex}`"
-                            class="letter"
-                            :data-word-index="wordIndex"
-                            :data-letter-index="letterIndex">
-                        {{ char }}
+              <!-- Subheadline Text Content -->
+              <g class="subheadline-content">
+                <!-- Vara container for subheadline -->
+                <foreignObject x="10" y="10" width="1180" height="180">
+                  <div id="subheadline-vara-container" xmlns="http://www.w3.org/1999/xhtml"></div>
+                </foreignObject>
+                
+                <!-- Outline Text Layer -->
+                <foreignObject x="0" y="0" width="1200" height="200">
+                  <div class="outline-text-wrapper" xmlns="http://www.w3.org/1999/xhtml">
+                    <template v-for="(word, wordIndex) in subheadline.split(' ')" :key="`word-${wordIndex}`">
+                      <span class="word">
+                        <span v-for="(char, letterIndex) in word" 
+                              :key="`letter-${wordIndex}-${letterIndex}`"
+                              class="letter"
+                              :data-word-index="wordIndex"
+                              :data-letter-index="letterIndex">
+                          {{ char }}
+                        </span>
                       </span>
-                    </span>
-                    <span v-if="wordIndex < subheadline.split(' ').length - 1" class="space">&nbsp;</span>
-                  </template>
-                </div>
-              </foreignObject>
-              
-              <!-- Subheadline Spotlight Text Layer -->
-              <foreignObject x="0" y="0" width="1200" height="200">
-                <div class="spotlight-text-wrapper" xmlns="http://www.w3.org/1999/xhtml" style="clip-path: inset(0 100% 0 0);">
-                  <p class="mb-8 subheading-responsive heading--highlight">
-                    <TextAnimation 
-                      :firstPart="subheadline" 
-                      animation="fade" 
-                      :useGradient="true"
-                      :duration="3" 
-                      :initiallyHidden="true" 
-                      :triggerOnVisible="true" 
-                      :restartOnVisible="true" 
-                    />
-                  </p>
-                </div>
-              </foreignObject>
+                      <span v-if="wordIndex < subheadline.split(' ').length - 1" class="space">&nbsp;</span>
+                    </template>
+                  </div>
+                </foreignObject>
+                
+                <!-- Subheadline Spotlight Text Layer -->
+                <foreignObject x="0" y="0" width="1200" height="200">
+                  <div class="spotlight-text-wrapper" xmlns="http://www.w3.org/1999/xhtml" style="clip-path: inset(0 100% 0 0);">
+                    <p class="mb-8 subheading-responsive heading--highlight">
+                      <TextAnimation 
+                        :firstPart="subheadline" 
+                        animation="fade" 
+                        :useGradient="true"
+                        :duration="3" 
+                        :initiallyHidden="true" 
+                        :triggerOnVisible="true" 
+                        :restartOnVisible="true" 
+                      />
+                    </p>
+                  </div>
+                </foreignObject>
+              </g>
             </g>
           </svg>
         </div>
       </div>
-    </div>
-    
-    <!-- Pause Controls -->
-    <div class="pause-controls" v-if="showDebug">
-      <div class="pause-options">
-        <label>
-          <input type="checkbox" v-model="isPausedAfterVara">
-          Pause after Vara
-        </label>
-        <label>
-          <input type="checkbox" v-model="isPausedAfterOutline">
-          Pause after Outline
-        </label>
-        <label>
-          <input type="checkbox" v-model="isPausedAfterSpotlight">
-          Pause after Spotlight Text
-        </label>
-      </div>
-      <button 
-        v-if="timeline?.paused()" 
-        @click="resumeAnimation"
-        class="resume-button"
-      >
-        Resume Animation
-      </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch, onUnmounted } from 'vue';
+import gsap from 'gsap';
 
 import { useVara } from '@/composables/useVara';
 import { useVivusInstances } from '@/composables/useVivusInstances';
@@ -260,6 +311,8 @@ const startTime = ref<number | null>(null);
 const headlineVaraInstance = ref<any>(null);
 const subheadlineVaraInstance = ref<any>(null);
 const usePaperGrid = ref(false);
+const showEraserEffect = ref(false);
+const showEraserDebug = ref(false);
 
 // Pause controls
 const isPausedAfterVara = ref(false);
@@ -289,6 +342,60 @@ const updateSpotlightPosition = (x: number, y: number) => {
   }
   spotlightX.value = x;
   spotlightY.value = y;
+};
+
+// Add a function to trigger the eraser effect
+const triggerEraserEffect = () => {
+  try {
+    console.log('🔄 TRIGGERING ERASER EFFECT:', new Date().toISOString());
+    
+    // Reset eraser rectangles to starting position
+    gsap.set('.eraser-rect', { 
+      x: 1200,
+      y: 0,
+      rotation: -45,
+      transformOrigin: 'center center'
+    });
+    
+    // Create a new timeline for the eraser effect
+    const eraserTimeline = gsap.timeline();
+    
+    // Function to create eraser animation for each SVG
+    const createEraserAnimation = (selector: string, delay = 0) => {
+      eraserTimeline.to(`${selector} .eraser-rect`, {
+        x: -400,
+        duration: 1.5,
+        ease: 'power2.inOut',
+        delay,
+        onStart: () => {
+          // Add debug class if debug mode is on
+          if (showEraserDebug.value) {
+            document.querySelector(`${selector} .eraser-rect`)?.classList.add('debug');
+          }
+        },
+        onComplete: () => {
+          // Hide the content after eraser passes
+          const element = document.querySelector(selector);
+          if (element) {
+            gsap.to(element.querySelector('g'), { 
+              opacity: 0,
+              duration: 0.3
+            });
+          }
+        }
+      });
+    };
+    
+    // Sequence the eraser animations
+    createEraserAnimation('#navbar-svg', 0);
+    createEraserAnimation('#headline-svg', 0.2);
+    createEraserAnimation('#subheadline-svg', 0.4);
+    
+    // Play the eraser timeline
+    eraserTimeline.play();
+  } catch (error) {
+    console.error('Error triggering eraser effect:', error);
+  }
 };
 
 // Animation timing configuration
@@ -343,6 +450,13 @@ const animationTimings = {
   finale: {
     spotlight1: { start: 7.8, duration: 0.75 },
     spotlight2: { start: 8.55, duration: 0.75 }
+  },
+  
+  // Phase 8: Eraser Effect (9.3-10.3s)
+  eraser: {
+    navbar: { start: 9.3, duration: 0.5 },
+    headline: { start: 9.5, duration: 0.5 },
+    subheadline: { start: 9.7, duration: 0.5 }
   }
 };
 
@@ -372,6 +486,21 @@ const resumeAnimation = () => {
 const showDebug = ref(false);
 const toggleDebug = () => {
   showDebug.value = !showDebug.value;
+};
+
+// Eraser debug toggle
+const toggleEraserDebug = () => {
+  showEraserDebug.value = !showEraserDebug.value;
+  
+  // Toggle visibility of eraser rectangles
+  const eraserRects = document.querySelectorAll('.eraser-rect');
+  eraserRects.forEach(rect => {
+    if (showEraserDebug.value) {
+      rect.classList.add('debug');
+    } else {
+      rect.classList.remove('debug');
+    }
+  });
 };
 
 // Update the font size calculation
@@ -437,6 +566,10 @@ onMounted(async () => {
   // Setup initial state for grid animations only
   setupGridInitialState();
   console.log('✅ GRID INITIAL STATE SETUP COMPLETED:', new Date().toISOString());
+
+  // Initialize eraser rectangles
+  gsap.set('.eraser-rect', { x: 1200 });
+  console.log('✅ ERASER RECTANGLES INITIALIZED:', new Date().toISOString());
 
   // Build the complete timeline with all phases
   console.log('Building timeline...');
@@ -612,6 +745,31 @@ onUnmounted(() => {
   align-items: center;
   opacity: 1;
   transition: opacity 0.8s ease;
+}
+
+/* Eraser Effect Styles */
+.eraser-rect {
+  transition: transform 1.5s ease;
+  transform-origin: center;
+}
+
+#navbar-svg,
+#headline-svg,
+#subheadline-svg {
+  mask: none;
+  -webkit-mask: none;
+}
+
+#navbar-svg g,
+#headline-svg g,
+#subheadline-svg g {
+  transition: opacity 0.5s ease;
+}
+
+/* Debug styles for eraser rectangles */
+.eraser-rect.debug {
+  fill: red !important;
+  opacity: 0.5 !important;
 }
 
 .grid-container {
@@ -978,189 +1136,6 @@ onUnmounted(() => {
   visibility: hidden;
 }
 
-/* Debug Controls */
-.pause-controls {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  z-index: 9999;
-  background: rgba(0, 0, 0, 0.8);
-  padding: 1rem;
-  border-radius: 8px;
-  color: white;
-}
-
-.pause-options {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.pause-options label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-}
-
-.resume-button {
-  margin-top: 1rem;
-  background: var(--theme-primary, #88C0D0);
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-/* Debug circle overlay */
-.debug-circle-overlay {
-  display: none;
-}
-
-/* Add masking to the grid container's wrapper */
-.masked-grid {
-  display: none;
-}
-
-.is-hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.spotlight-text-wrapper .word {
-  display: inline-flex;
-  align-items: center;
-}
-
-.spotlight-text-wrapper .space {
-  display: inline-block;
-  width: 0.4em;
-}
-
-.spotlight-text-wrapper .letter {
-  display: inline-block;
-  opacity: 1;
-  color: var(--theme-primary, #88C0D0);
-  transition: opacity 0.3s ease;
-}
-
-.spotlight-text-wrapper .letter.focused {
-  color: white;
-  -webkit-text-stroke: 2px var(--theme-primary, #88C0D0);
-}
-
-.regular-text-wrapper .word {
-  display: inline-flex;
-  align-items: center;
-}
-
-.regular-text-wrapper .space {
-  display: inline-block;
-  width: 0.4em;
-}
-
-.regular-text-wrapper .letter {
-  display: inline-block;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.hidden {
-  display: none;
-}
-
-/* Ensure PaperGridBackground fills the masked container */
-.masked-grid :deep(.grid-paper-overlay) {
-  width: 100%;
-  height: 100%;
-}
-
-@keyframes grid-float {
-  0% {
-    transform: translate(0, 0);
-  }
-  100% {
-    transform: translate(20px, 20px);
-  }
-}
-
-/* RTL Transition Styles */
-.outline-text-wrapper {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  opacity: 1;
-  transition: opacity 0.3s ease;
-}
-
-.outline-text-wrapper .word {
-  display: flex;
-  margin: 0 0.25rem;
-}
-
-.outline-text-wrapper .letter {
-  position: relative;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  color: transparent;
-  -webkit-text-stroke: 2px var(--theme-primary, #88C0D0);
-  /* text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); */
-}
-
-.outline-text-wrapper .letter.focused {
-  opacity: 1;
-  /* text-shadow: 0 0 20px rgba(255, 255, 255, 0.8); */
-}
-
-#headline-vara-container {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  opacity: 1;
-  transition: opacity 0.3s ease;
-}
-
-#headline-vara-container path {
-  transition: opacity 0.2s ease;
-}
-
-.spotlight-text-wrapper {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.spotlight-text-wrapper .word {
-  display: flex;
-  margin: 0 0.25rem;
-}
-
-.spotlight-text-wrapper .letter {
-  position: relative;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.spotlight-text-wrapper .letter.focused {
-  opacity: 1;
-}
-
-.headline-content {
-  transform-origin: center;
-}
-
 /* Debug Toggle Button */
 .debug-toggle {
   position: fixed;
@@ -1174,5 +1149,164 @@ onUnmounted(() => {
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
+}
+
+/* Debug Controls */
+.debug-controls {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 1rem;
+  border-radius: 8px;
+  color: white;
+}
+
+.debug-controls button {
+  margin-right: 0.5rem;
+  background: var(--theme-primary, #88C0D0);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* New Debug Panel Styles */
+.debug-panel {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  background: rgba(26, 27, 38, 0.95);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  width: 300px;
+  transition: all 0.3s ease;
+}
+
+.debug-panel-header {
+  padding: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.debug-panel-header button {
+  width: 100%;
+  background: var(--theme-primary, #88C0D0);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.debug-panel-content {
+  padding: 16px;
+}
+
+.control-section {
+  margin-bottom: 20px;
+}
+
+.control-section:last-child {
+  margin-bottom: 0;
+}
+
+.control-section h3 {
+  color: var(--theme-primary, #88C0D0);
+  font-size: 14px;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.control-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.control-group input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.eraser-button,
+.resume-button {
+  width: 100%;
+  background: var(--theme-accent, #A3BE8C);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.eraser-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.resume-button {
+  background: var(--theme-highlight, #BF616A);
+}
+
+/* ... rest of existing styles ... */
+
+/* Eraser Effect Styles */
+.wireframe-svg {
+  position: relative;
+  z-index: 1;
+  overflow: visible !important;
+}
+
+.content-group {
+  position: relative;
+  z-index: 1;
+}
+
+.eraser-rect {
+  position: relative;
+  z-index: 10;
+  pointer-events: none;
+  transition: none; /* Remove transition to ensure GSAP handles all animation */
+}
+
+/* Debug styles for eraser rectangles */
+.eraser-rect.debug {
+  fill: red !important;
+  opacity: 0.5 !important;
+  stroke: white !important;
+  stroke-width: 2px !important;
+  visibility: visible !important;
+}
+
+/* Ensure content is visible */
+.content-group {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease;
+}
+
+/* Add debug outline for development */
+.wireframe-svg.debug-mode {
+  outline: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.debug .eraser-rect {
+  visibility: visible !important;
 }
 </style> 

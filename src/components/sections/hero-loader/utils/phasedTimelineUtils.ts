@@ -26,6 +26,8 @@ export interface PhasedTimelineCallbacks {
   onSpotlightStart?: () => void;
   onSpotlightUpdate?: (x: number, y: number) => void;
   onSpotlightComplete?: () => void;
+  onEraserStart?: () => void;
+  onEraserComplete?: () => void;
 }
 
 export interface SpotlightSequenceOptions {
@@ -39,6 +41,12 @@ export interface FinalTransitionsOptions {
   onLTRStart?: () => void;
   onLTRUpdate?: (x: number, y: number) => void;
   onLTRComplete?: () => void;
+  onComplete?: () => void;
+}
+
+export interface EraserEffectOptions {
+  onEraserStart?: () => void;
+  onEraserComplete?: () => void;
   onComplete?: () => void;
 }
 
@@ -438,42 +446,48 @@ export const addSpotlightSequencePhase = (tl: gsap.core.Timeline, options?: Spot
 export const addHeadlineAndSubheadlineTransitionsPhase = (
   tl: gsap.core.Timeline,
   options: {
+    onRTLStart?: () => void;
+    onRTLUpdate?: (x: number, y: number) => void;
+    onRTLComplete?: () => void;
     onComplete?: () => void;
   } = {}
 ): gsap.core.Timeline => {
+  const { onRTLStart, onRTLUpdate, onRTLComplete, onComplete } = options;
   
-  // Create a label for the start of this phase
-  tl.addLabel('headlineAndSubheadlineStart', '>');
+  // Add a label for the headline and subheadline transitions phase
+  tl.addLabel('headlineAndSubheadlineTransitionsPhase', '>');
   
-  // Start both transitions at the same time
-  const headlineTween = gsap.to('.headline-section .spotlight-text-wrapper', {
+  // Call the onRTLStart callback
+  if (onRTLStart) {
+    tl.call(onRTLStart, [], 'headlineAndSubheadlineTransitionsPhase');
+  }
+  
+  // Animate the headline and subheadline transitions
+  tl.to('.outline-text-wrapper', {
     clipPath: 'inset(0 0% 0 0)',
-    duration: 3.0,
+    duration: 1.5,
     ease: 'power2.inOut',
-    onStart: () => {
-      console.log('🔄 HEADLINE TRANSITION STARTED:', new Date().toISOString());
+    onUpdate: () => {
+      if (onRTLUpdate) {
+        // Calculate the current position of the transition
+        const progress = tl.progress();
+        const phaseProgress = (progress - tl.getLabelTime('headlineAndSubheadlineTransitionsPhase')) / 1.5;
+        const x = 100 - (phaseProgress * 100);
+        const y = 50;
+        onRTLUpdate(x, y);
+      }
     },
     onComplete: () => {
-      console.log('✅ HEADLINE TRANSITION COMPLETED:', new Date().toISOString());
+      if (onRTLComplete) {
+        onRTLComplete();
+      }
     }
-  });
+  }, 'headlineAndSubheadlineTransitionsPhase');
   
-  const subheadlineTween = gsap.to('.subheadline-section .spotlight-text-wrapper', {
-    clipPath: 'inset(0 0% 0 0)',
-    duration: 3.0,
-    ease: 'power2.inOut',
-    onStart: () => {
-      console.log('🔄 SUBHEADLINE TRANSITION STARTED:', new Date().toISOString());
-    },
-    onComplete: () => {
-      console.log('✅ SUBHEADLINE TRANSITION COMPLETED:', new Date().toISOString());
-    }
-  });
-  
-  // Add both tweens to the timeline at the same position
-  tl.add(headlineTween, 'headlineAndSubheadlineStart')
-    .add(subheadlineTween, 'headlineAndSubheadlineStart')
-    .addLabel('headlineAndSubheadlineComplete', '>+=3.0');
+  // Call the onComplete callback
+  if (onComplete) {
+    tl.call(onComplete, [], '>');
+  }
   
   return tl;
 };
@@ -558,6 +572,80 @@ export const addFinalePhase = (
 };
 
 /**
+ * Phase 8: Adds the eraser effect animation to the timeline
+ * This phase erases the content from right to left
+ */
+export const addEraserEffectPhase = (
+  tl: gsap.core.Timeline,
+  options?: EraserEffectOptions
+): gsap.core.Timeline => {
+  const { onEraserStart, onEraserComplete, onComplete } = options || {};
+  
+  // Add a label for the eraser phase
+  tl.addLabel('eraserPhase', '>');
+  
+  // Call the onEraserStart callback
+  if (onEraserStart) {
+    tl.call(onEraserStart, [], 'eraserPhase');
+  }
+  
+  // Animate the eraser rectangles from right to left
+  tl.to('.eraser-rect', {
+    x: -1300,
+    duration: 0.5,
+    ease: 'power2.inOut',
+    stagger: 0.2,
+    onComplete: () => {
+      if (onEraserComplete) {
+        onEraserComplete();
+      }
+    }
+  }, 'eraserPhase');
+  
+  // Call the onComplete callback
+  if (onComplete) {
+    tl.call(onComplete, [], '>');
+  }
+  
+  return tl;
+};
+
+/**
+ * Phase 1: Adds the grid intro animation to the timeline
+ */
+export const addGridIntroPhase = (
+  tl: gsap.core.Timeline
+): gsap.core.Timeline => {
+  // Add a label for the grid intro phase
+  tl.addLabel('gridIntroPhase', '>');
+  
+  // Animate the horizontal grid lines
+  tl.to('.horizontal .grid-line', {
+    scaleX: 1,
+    duration: 0.4,
+    ease: 'power2.out',
+    stagger: 0.02
+  }, 'gridIntroPhase');
+  
+  // Animate the vertical grid lines
+  tl.to('.vertical .grid-line', {
+    scaleY: 1,
+    duration: 0.4,
+    ease: 'power2.out',
+    stagger: 0.02
+  }, 'gridIntroPhase+=0.2');
+  
+  // Fade in the text container
+  tl.to('.text-container', {
+    opacity: 1,
+    duration: 0.25,
+    ease: 'power2.out'
+  }, 'gridIntroPhase+=0.4');
+  
+  return tl;
+};
+
+/**
  * Builds the complete timeline with all phases
  * This function creates a timeline and adds all phases to it
  */
@@ -568,52 +656,51 @@ export const buildCompleteTimeline = (
   // Create the base timeline
   const tl = createPhasedTimeline(options);
   
+  // Add Phase 1: Grid Intro
+  addGridIntroPhase(tl);
+  
   // Add Phase 2: Wireframe Containers
   addWireframeContainersPhase(tl, {
-    onComplete: () => {
-      console.log('✅ WIREFRAME CONTAINERS COMPLETED:', new Date().toISOString());
-    },
     onContainersDrawn: options.onContainersDrawn
   });
   
   // Add Phase 3: Text Animations
-  addTextAnimationsPhase(tl, {
-    onComplete: () => {
-      console.log('✅ TEXT ANIMATIONS COMPLETED:', new Date().toISOString());
-    }
-  });
+  addTextAnimationsPhase(tl);
   
-  // Add Phase 4: Spotlight Sequence - start immediately after text animations
+  // Add Phase 4: Spotlight Sequence
   addSpotlightSequencePhase(tl, {
-    onSpotlightStart: options.onRTLStart,
-    onSpotlightUpdate: options.onRTLUpdate,
-    onSpotlightComplete: options.onRTLComplete,
-    onComplete: () => {
-      console.log('✅ SPOTLIGHT SEQUENCE COMPLETED:', new Date().toISOString());
-    }
+    onSpotlightStart: options.onSpotlightStart,
+    onSpotlightUpdate: options.onSpotlightUpdate,
+    onSpotlightComplete: options.onSpotlightComplete
   });
   
-  // Add Phase 5: Headline and Subheadline Transitions (in parallel)
+  // Add Phase 5: Headline and Subheadline Transitions
   addHeadlineAndSubheadlineTransitionsPhase(tl, {
-    onComplete: () => {
-      console.log('✅ HEADLINE AND SUBHEADLINE TRANSITIONS COMPLETED:', new Date().toISOString());
-    }
+    onRTLStart: options.onRTLStart,
+    onRTLUpdate: options.onRTLUpdate,
+    onRTLComplete: options.onRTLComplete
   });
   
   // Add Phase 6: Final Transitions
   addFinalTransitionsPhase(tl, {
     onLTRStart: options.onLTRStart,
     onLTRUpdate: options.onLTRUpdate,
-    onLTRComplete: options.onLTRComplete,
-    onComplete: () => {
-      console.log('✅ FINAL TRANSITIONS COMPLETED:', new Date().toISOString());
-    }
+    onLTRComplete: options.onLTRComplete
   });
   
   // Add Phase 7: Finale
   addFinalePhase(tl, {
     onComplete: () => {
       console.log('✅ FINALE COMPLETED:', new Date().toISOString());
+    }
+  });
+  
+  // Add Phase 8: Eraser Effect
+  addEraserEffectPhase(tl, {
+    onEraserStart: options.onEraserStart,
+    onEraserComplete: options.onEraserComplete,
+    onComplete: () => {
+      console.log('✅ ERASER EFFECT COMPLETED:', new Date().toISOString());
       options.onComplete?.();
     }
   });
