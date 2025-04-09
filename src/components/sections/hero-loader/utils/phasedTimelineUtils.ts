@@ -104,6 +104,7 @@ export const createPhasedTimeline = ({
   const tl = gsap.timeline({
     paused: true,
     onStart: () => {
+      // Remove the onContainersDrawn callback from here
     },
     onComplete: () => {
       onComplete?.();
@@ -150,7 +151,7 @@ export const createPhasedTimeline = ({
     onStart: () => {
     },
     onComplete: () => {
-      onContainersDrawn?.();
+      // Remove the onContainersDrawn callback from here
     }
   }, '-=0.6')
   .addLabel('gridIntroComplete', '>');
@@ -180,11 +181,12 @@ export const addWireframeContainersPhase = (
   tl: gsap.core.Timeline,
   options: {
     onComplete?: () => void;
+    onContainersDrawn?: () => void;
   } = {}
 ): gsap.core.Timeline => {
   
-  // Add label for the start of this phase
-  tl.addLabel('wireframeContainersStart', '>');
+  // Add label for the start of this phase - start immediately after timeline start
+  tl.addLabel('wireframeContainersStart', 0);
   
   // Animate navbar container
   tl.to('.navbar-container-path', {
@@ -192,18 +194,24 @@ export const addWireframeContainersPhase = (
     duration: 0.2,
     ease: 'power2.inOut',
     onStart: () => {
+      console.log('🔄 NAVBAR CONTAINER DRAWING STARTED:', new Date().toISOString());
     },
     onComplete: () => {
+      console.log('✅ NAVBAR CONTAINER DRAWING COMPLETED:', new Date().toISOString());
+      // Execute the onContainersDrawn callback here, right after the first container drawing completes
+      options.onContainersDrawn?.();
     }
-  })
+  }, 'wireframeContainersStart')
   // Animate navbar logo
   .to('.navbar-logo-path', {
     strokeDashoffset: 0,
     duration: 0.15,
     ease: 'power2.inOut',
     onStart: () => {
+      console.log('🔄 NAVBAR LOGO DRAWING STARTED:', new Date().toISOString());
     },
     onComplete: () => {
+      console.log('✅ NAVBAR LOGO DRAWING COMPLETED:', new Date().toISOString());
     }
   }, '-=0.1')
   // Animate navbar links
@@ -212,8 +220,10 @@ export const addWireframeContainersPhase = (
     duration: 0.15,
     ease: 'power2.inOut',
     onStart: () => {
+      console.log('🔄 NAVBAR LINK 1 DRAWING STARTED:', new Date().toISOString());
     },
     onComplete: () => {
+      console.log('✅ NAVBAR LINK 1 DRAWING COMPLETED:', new Date().toISOString());
     }
   }, '-=0.1')
   .to('.navbar-link-2-path', {
@@ -221,8 +231,10 @@ export const addWireframeContainersPhase = (
     duration: 0.15,
     ease: 'power2.inOut',
     onStart: () => {
+      console.log('🔄 NAVBAR LINK 2 DRAWING STARTED:', new Date().toISOString());
     },
     onComplete: () => {
+      console.log('✅ NAVBAR LINK 2 DRAWING COMPLETED:', new Date().toISOString());
     }
   }, '-=0.1')
   .to('.navbar-link-3-path', {
@@ -230,8 +242,10 @@ export const addWireframeContainersPhase = (
     duration: 0.15,
     ease: 'power2.inOut',
     onStart: () => {
+      console.log('🔄 NAVBAR LINK 3 DRAWING STARTED:', new Date().toISOString());
     },
     onComplete: () => {
+      console.log('✅ NAVBAR LINK 3 DRAWING COMPLETED:', new Date().toISOString());
     }
   }, '-=0.1')
   .to('.navbar-cta-path', {
@@ -239,8 +253,10 @@ export const addWireframeContainersPhase = (
     duration: 0.15,
     ease: 'power2.inOut',
     onStart: () => {
+      console.log('🔄 NAVBAR CTA DRAWING STARTED:', new Date().toISOString());
     },
     onComplete: () => {
+      console.log('✅ NAVBAR CTA DRAWING COMPLETED:', new Date().toISOString());
     }
   }, '-=0.1')
   // Animate headline container
@@ -249,8 +265,10 @@ export const addWireframeContainersPhase = (
     duration: 0.3,
     ease: 'power2.inOut',
     onStart: () => {
+      console.log('🔄 HEADLINE CONTAINER DRAWING STARTED:', new Date().toISOString());
     },
     onComplete: () => {
+      console.log('✅ HEADLINE CONTAINER DRAWING COMPLETED:', new Date().toISOString());
     }
   }, '-=0.15')
   // Animate subheadline container
@@ -259,8 +277,10 @@ export const addWireframeContainersPhase = (
     duration: 0.3,
     ease: 'power2.inOut',
     onStart: () => {
+      console.log('🔄 SUBHEADLINE CONTAINER DRAWING STARTED:', new Date().toISOString());
     },
     onComplete: () => {
+      console.log('✅ SUBHEADLINE CONTAINER DRAWING COMPLETED:', new Date().toISOString());
       options.onComplete?.();
     }
   }, '-=0.25')
@@ -291,8 +311,10 @@ export const addTextAnimationsPhase = (
     duration: 0.5,
     ease: 'power2.inOut',
     onStart: () => {
+      console.log('🔄 HEADLINE VARA ANIMATION STARTED:', new Date().toISOString());
     },
     onComplete: () => {
+      console.log('✅ HEADLINE VARA ANIMATION COMPLETED:', new Date().toISOString());
     }
   }, 'textAnimationsStart');
   
@@ -302,13 +324,15 @@ export const addTextAnimationsPhase = (
     duration: 0.5,
     ease: 'power2.inOut',
     onStart: () => {
+      console.log('🔄 SUBHEADLINE VARA ANIMATION STARTED:', new Date().toISOString());
     },
     onComplete: () => {
+      console.log('✅ SUBHEADLINE VARA ANIMATION COMPLETED:', new Date().toISOString());
     }
   }, 'textAnimationsStart+=0.5');
   
-  // Add a label for the completion of the text animations phase
-  tl.addLabel('textAnimationsComplete', '+=0.5');
+  // Add a label for the completion of the text animations phase - remove the offset
+  tl.addLabel('textAnimationsComplete', '>');
   
   // Call the onComplete callback if provided
   if (options?.onComplete) {
@@ -329,20 +353,40 @@ export const addSpotlightSequencePhase = (tl: gsap.core.Timeline, options?: Spot
     options.onSpotlightStart();
   }
 
-  // Position spotlight at right edge first
+  // Store the current time when the spotlight is at the top left position
+  const topLeftTime = Date.now();
+  console.log('📍 SPOTLIGHT AT TOP LEFT POSITION:', new Date().toISOString());
+  
+  // Add a label for the start of the spotlight movement at exactly 4.5 seconds
+  tl.addLabel('spotlightMovementStart', 4.5);
+
+  // Position spotlight at right edge first - minimal duration
   tl.to('.grid-container', {
     '--spotlight-x': '100%',
     '--spotlight-y': '50%',
     duration: 0.5,
-    ease: 'power2.inOut'
-  }, '+=0.1');
+    ease: 'power2.inOut',
+    onStart: () => {
+      console.log('🔄 SPOTLIGHT MOVEMENT TO RIGHT STARTED:', new Date().toISOString());
+      console.log('⏱️ TIME SINCE TOP LEFT POSITION:', Date.now() - topLeftTime, 'ms');
+    },
+    onComplete: () => {
+      console.log('✅ SPOTLIGHT MOVEMENT TO RIGHT COMPLETED:', new Date().toISOString());
+    }
+  }, 'spotlightMovementStart'); // Use the absolute time label
 
-  // Adjust spotlight size and brightness
+  // Adjust spotlight size and brightness - minimal duration
   tl.to('.grid-container', {
     '--spotlight-size': '300px',
     '--spotlight-brightness': '1.5', // Increase brightness
-    duration: 1.5,
-    ease: 'power2.inOut'
+    duration: 0.2,
+    ease: 'power2.inOut',
+    onStart: () => {
+      console.log('🔄 SPOTLIGHT SIZE ADJUSTMENT STARTED:', new Date().toISOString());
+    },
+    onComplete: () => {
+      console.log('✅ SPOTLIGHT SIZE ADJUSTMENT COMPLETED:', new Date().toISOString());
+    }
   });
 
   // RTL Movement - Move spotlight from right to left
@@ -351,6 +395,7 @@ export const addSpotlightSequencePhase = (tl: gsap.core.Timeline, options?: Spot
     duration: 3,
     ease: 'power2.inOut',
     onStart: () => {
+      console.log('🔄 RTL TRANSITION STARTED:', new Date().toISOString());
       // Show Vara text initially
       gsap.set('#headline-vara-container', { opacity: 1 });
       gsap.set('#headline-vara-container path', { opacity: 1 });
@@ -373,6 +418,7 @@ export const addSpotlightSequencePhase = (tl: gsap.core.Timeline, options?: Spot
       }
     },
     onComplete: () => {
+      console.log('✅ RTL TRANSITION COMPLETED:', new Date().toISOString());
       // Ensure all Vara text is hidden
       gsap.set('#headline-vara-container path', { opacity: 0 });
       
@@ -386,32 +432,48 @@ export const addSpotlightSequencePhase = (tl: gsap.core.Timeline, options?: Spot
 };
 
 /**
- * Phase 5: Adds the headline transition to the timeline
- * This phase handles the RTL (right-to-left) transition
+ * Phase 5: Adds the headline and subheadline transitions to the timeline
+ * This phase handles the headline and subheadline text transitions in parallel
  */
-export const addHeadlineTransitionPhase = (
+export const addHeadlineAndSubheadlineTransitionsPhase = (
   tl: gsap.core.Timeline,
   options: {
     onComplete?: () => void;
   } = {}
 ): gsap.core.Timeline => {
   
-  // Add label for the start of this phase
-  tl.addLabel('headlineTransitionStart', '>');
+  // Create a label for the start of this phase
+  tl.addLabel('headlineAndSubheadlineStart', '>');
   
-  // Transition headline text
-  tl.to('.headline-section .spotlight-text-wrapper', {
+  // Start both transitions at the same time
+  const headlineTween = gsap.to('.headline-section .spotlight-text-wrapper', {
     clipPath: 'inset(0 0% 0 0)',
     duration: 3.0,
     ease: 'power2.inOut',
     onStart: () => {
+      console.log('🔄 HEADLINE TRANSITION STARTED:', new Date().toISOString());
     },
     onComplete: () => {
-      options.onComplete?.();
+      console.log('✅ HEADLINE TRANSITION COMPLETED:', new Date().toISOString());
     }
-  })
-  .addLabel('headlineTransitionComplete', '>');
+  });
   
+  const subheadlineTween = gsap.to('.subheadline-section .spotlight-text-wrapper', {
+    clipPath: 'inset(0 0% 0 0)',
+    duration: 3.0,
+    ease: 'power2.inOut',
+    onStart: () => {
+      console.log('🔄 SUBHEADLINE TRANSITION STARTED:', new Date().toISOString());
+    },
+    onComplete: () => {
+      console.log('✅ SUBHEADLINE TRANSITION COMPLETED:', new Date().toISOString());
+    }
+  });
+  
+  // Add both tweens to the timeline at the same position
+  tl.add(headlineTween, 'headlineAndSubheadlineStart')
+    .add(subheadlineTween, 'headlineAndSubheadlineStart')
+    .addLabel('headlineAndSubheadlineComplete', '>+=3.0');
   
   return tl;
 };
@@ -428,9 +490,10 @@ export const addFinalTransitionsPhase = (
   // Move spotlight from right to left
   tl.to('.grid-container', {
     '--spotlight-x': '80%',
-    duration: 1.5,
+    duration: 0.75,
     ease: 'power2.inOut',
     onStart: () => {
+      console.log('🔄 LTR TRANSITION STARTED:', new Date().toISOString());
     },
     onUpdate: function() {
       // Get current spotlight position
@@ -450,16 +513,17 @@ export const addFinalTransitionsPhase = (
       }
     },
     onComplete: () => {
+      console.log('✅ LTR TRANSITION COMPLETED:', new Date().toISOString());
       if (options?.onLTRComplete) {
         options.onLTRComplete();
       }
     }
-  }, '+=0.1');
+  });
 
   // Move spotlight back to center
   tl.to('.grid-container', {
     '--spotlight-x': '50%',
-    duration: 1.5,
+    duration: 0.75,
     ease: 'power2.inOut'
   });
 
@@ -494,37 +558,6 @@ export const addFinalePhase = (
 };
 
 /**
- * Phase 8: Adds the subheadline transition to the timeline
- * This phase handles the subheadline text transition
- */
-export const addSubheadlineTransitionPhase = (
-  tl: gsap.core.Timeline,
-  options: {
-    onComplete?: () => void;
-  } = {}
-): gsap.core.Timeline => {
-  
-  // Add label for the start of this phase
-  tl.addLabel('subheadlineTransitionStart', '>');
-  
-  // Transition subheadline text using clip-path reveal instead of fade
-  tl.to('.subheadline-section .spotlight-text-wrapper', {
-    clipPath: 'inset(0 0% 0 0)',
-    duration: 3.0,
-    ease: 'power2.inOut',
-    onStart: () => {
-    },
-    onComplete: () => {
-      options.onComplete?.();
-    }
-  })
-  .addLabel('subheadlineTransitionComplete', '>');
-  
-  
-  return tl;
-};
-
-/**
  * Builds the complete timeline with all phases
  * This function creates a timeline and adds all phases to it
  */
@@ -538,52 +571,52 @@ export const buildCompleteTimeline = (
   // Add Phase 2: Wireframe Containers
   addWireframeContainersPhase(tl, {
     onComplete: () => {
-    }
+      console.log('✅ WIREFRAME CONTAINERS COMPLETED:', new Date().toISOString());
+    },
+    onContainersDrawn: options.onContainersDrawn
   });
   
   // Add Phase 3: Text Animations
   addTextAnimationsPhase(tl, {
     onComplete: () => {
+      console.log('✅ TEXT ANIMATIONS COMPLETED:', new Date().toISOString());
     }
   });
   
-  // Add Phase 4: Spotlight Sequence
+  // Add Phase 4: Spotlight Sequence - start immediately after text animations
   addSpotlightSequencePhase(tl, {
     onSpotlightStart: options.onRTLStart,
     onSpotlightUpdate: options.onRTLUpdate,
     onSpotlightComplete: options.onRTLComplete,
     onComplete: () => {
+      console.log('✅ SPOTLIGHT SEQUENCE COMPLETED:', new Date().toISOString());
     }
   });
   
-  // Add Phase 5: Headline Transition
-  addHeadlineTransitionPhase(tl, {
+  // Add Phase 5: Headline and Subheadline Transitions (in parallel)
+  addHeadlineAndSubheadlineTransitionsPhase(tl, {
     onComplete: () => {
+      console.log('✅ HEADLINE AND SUBHEADLINE TRANSITIONS COMPLETED:', new Date().toISOString());
     }
   });
   
-  // Add Phase 6: Subheadline Transition
-  addSubheadlineTransitionPhase(tl, {
-    onComplete: () => {
-    }
-  });
-  
-  // Add Phase 7: Final Transitions
+  // Add Phase 6: Final Transitions
   addFinalTransitionsPhase(tl, {
     onLTRStart: options.onLTRStart,
     onLTRUpdate: options.onLTRUpdate,
     onLTRComplete: options.onLTRComplete,
     onComplete: () => {
+      console.log('✅ FINAL TRANSITIONS COMPLETED:', new Date().toISOString());
     }
   });
   
-  // Add Phase 8: Finale
+  // Add Phase 7: Finale
   addFinalePhase(tl, {
     onComplete: () => {
+      console.log('✅ FINALE COMPLETED:', new Date().toISOString());
       options.onComplete?.();
     }
   });
-  
   
   return tl;
 }; 

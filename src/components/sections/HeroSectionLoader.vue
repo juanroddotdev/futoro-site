@@ -226,8 +226,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch, onUnmounted } from 'vue';
-import gsap from 'gsap';
-import Vivus from 'vivus';
+
 import { useVara } from '@/composables/useVara';
 import { useVivusInstances } from '@/composables/useVivusInstances';
 import { usePencilAnimation } from '@/composables/usePencilAnimation';
@@ -294,56 +293,56 @@ const updateSpotlightPosition = (x: number, y: number) => {
 
 // Animation timing configuration
 const animationTimings = {
-  // Phase 1: Grid Intro (0-1.6s)
+  // Phase 1: Grid Intro (0-0.8s)
   grid: {
-    horizontal: { start: 0, duration: 0.8 },
-    vertical: { start: 0.4, duration: 0.8 },
-    textContainer: { start: 0.8, duration: 0.5 }
+    horizontal: { start: 0, duration: 0.4 },
+    vertical: { start: 0.2, duration: 0.4 },
+    textContainer: { start: 0.4, duration: 0.25 }
   },
   
   // Phase 2: Wireframe Containers
   navbar: {
-    container: { start: 0, duration: 0.2 },
-    logo: { start: 0.1, duration: 0.15 },
-    link1: { start: 0.15, duration: 0.15 },
-    link2: { start: 0.2, duration: 0.15 },
-    link3: { start: 0.25, duration: 0.15 },
-    cta: { start: 0.3, duration: 0.15 }
+    container: { start: 0, duration: 0.1 },
+    logo: { start: 0.05, duration: 0.075 },
+    link1: { start: 0.075, duration: 0.075 },
+    link2: { start: 0.1, duration: 0.075 },
+    link3: { start: 0.125, duration: 0.075 },
+    cta: { start: 0.15, duration: 0.075 }
   },
   headline: {
-    container: { start: 0.15, duration: 0.3 }
+    container: { start: 0.075, duration: 0.15 }
   },
   subheadline: {
-    container: { start: 0.25, duration: 0.3 }
+    container: { start: 0.125, duration: 0.15 }
   },
   
   // Phase 3: Text Animations
   text: {
-    headline: { start: 1.1, duration: 2.0 },
-    subheadline: { start: 3.1, duration: 2.0 }
+    headline: { start: 0.55, duration: 1.0 },
+    subheadline: { start: 1.55, duration: 1.0 }
   },
   
-  // Phase 4: Spotlight Sequence (5.1-9.6s)
+  // Phase 4: Spotlight Sequence (2.55-4.8s)
   spotlight: {
-    sizeAdjust: { start: 5.1, duration: 1.5 },
-    positionRTL: { start: 6.6, duration: 3.0 }
+    sizeAdjust: { start: 2.55, duration: 0.75 },
+    positionRTL: { start: 3.3, duration: 1.5 }
   },
   
-  // Phase 5: Headline Transition (9.6-12.6s)
+  // Phase 5: Headline Transition (4.8-6.3s)
   transition: {
-    rtl: { start: 9.6, duration: 3.0 }
+    rtl: { start: 4.8, duration: 1.5 }
   },
   
-  // Phase 6: Final Transitions (12.6-15.6s)
+  // Phase 6: Final Transitions (6.3-7.8s)
   final: {
-    ltr: { start: 12.6, duration: 1.5 },
-    ltrMove: { start: 14.1, duration: 1.5 }
+    ltr: { start: 6.3, duration: 0.75 },
+    ltrMove: { start: 7.05, duration: 0.75 }
   },
   
-  // Phase 7: Finale (15.6-18.6s)
+  // Phase 7: Finale (7.8-9.3s)
   finale: {
-    spotlight1: { start: 15.6, duration: 1.5 },
-    spotlight2: { start: 17.1, duration: 1.5 }
+    spotlight1: { start: 7.8, duration: 0.75 },
+    spotlight2: { start: 8.55, duration: 0.75 }
   }
 };
 
@@ -425,6 +424,7 @@ const handleResize = () => {
 
 onMounted(async () => {
   console.log('Component mounted, isPausedAfterVara:', isPausedAfterVara.value);
+  console.log('🔄 ANIMATION INITIALIZATION STARTED:', new Date().toISOString());
   
   // Set start time
   startTime.value = Date.now();
@@ -436,6 +436,7 @@ onMounted(async () => {
 
   // Setup initial state for grid animations only
   setupGridInitialState();
+  console.log('✅ GRID INITIAL STATE SETUP COMPLETED:', new Date().toISOString());
 
   // Build the complete timeline with all phases
   console.log('Building timeline...');
@@ -449,12 +450,14 @@ onMounted(async () => {
     onContainersDrawn: async () => {
       console.log('Containers drawn, isPausedAfterVara:', isPausedAfterVara.value);
       console.log('Timeline value exists:', !!timeline.value);
+      console.log('✅ CONTAINERS DRAWN CALLBACK EXECUTED:', new Date().toISOString());
       
       // Get container width for responsive sizing
       const container = document.querySelector('#headline-vara-container');
       const containerWidth = container?.clientWidth || 1180;
       
       // Initialize Vara text instances after containers are drawn
+      console.log('🔄 VARA TEXT INITIALIZATION STARTED:', new Date().toISOString());
       headlineVaraInstance.value = await loadVara('#headline-vara-container', {
         fontSize: calculateResponsiveFontSize(containerWidth, headline.value),
         strokeWidth: 2,
@@ -468,6 +471,7 @@ onMounted(async () => {
         color: 'var(--theme-primary, #88C0D0)',
         font: '/futoro-site/fonts/Satisfy/SatisfySL.json',
       });
+      console.log('✅ HEADLINE VARA INITIALIZED:', new Date().toISOString());
 
       subheadlineVaraInstance.value = await loadVara('#subheadline-vara-container', {
         fontSize: 36,
@@ -482,6 +486,7 @@ onMounted(async () => {
         font: '/futoro-site/fonts/Satisfy/SatisfySL.json',
         delay: 1000
       });
+      console.log('✅ SUBHEADLINE VARA INITIALIZED:', new Date().toISOString());
       
       // Pause after Vara if enabled
       if (isPausedAfterVara.value && timeline.value) {
@@ -493,12 +498,14 @@ onMounted(async () => {
     },
     onSpotlightStart: () => {
       // Spotlight movement started
+      console.log('🔄 SPOTLIGHT MOVEMENT STARTED:', new Date().toISOString());
     },
     onSpotlightUpdate: (x, y) => {
       updateSpotlightPosition(x, y);
     },
     onSpotlightComplete: () => {
       // Spotlight movement completed
+      console.log('✅ SPOTLIGHT MOVEMENT COMPLETED:', new Date().toISOString());
       
       // Pause after Outline if enabled
       if (isPausedAfterOutline.value && timeline.value) {
@@ -507,6 +514,7 @@ onMounted(async () => {
     },
     onComplete: () => {
       // Animation completed
+      console.log('✅ ANIMATION COMPLETED:', new Date().toISOString());
       
       // Pause after Spotlight Text if enabled
       if (isPausedAfterSpotlight.value && timeline.value) {
@@ -516,12 +524,13 @@ onMounted(async () => {
   });
 
   // Initialize Vivus instances
+  console.log('🔄 VIVUS INSTANCES INITIALIZATION STARTED:', new Date().toISOString());
   const navbarVivus = createVivusInstance(navbarSvg, {
     type: 'scenario',
     start: 'autostart',
     duration: 100,
     onReady: () => {
-      // console.log(`[Navbar] Vivus instance ready at ${new Date().toISOString()}, elapsed: ${Date.now() - startTime.value!}ms`);
+      console.log(`[Navbar] Vivus instance ready at ${new Date().toISOString()}, elapsed: ${Date.now() - startTime.value!}ms`);
     }
   });
 
@@ -530,7 +539,7 @@ onMounted(async () => {
     start: 'autostart',
     duration: 100,
     onReady: () => {
-      // console.log(`[Headline] Vivus instance ready at ${new Date().toISOString()}, elapsed: ${Date.now() - startTime.value!}ms`);
+      console.log(`[Headline] Vivus instance ready at ${new Date().toISOString()}, elapsed: ${Date.now() - startTime.value!}ms`);
     }
   });
 
@@ -539,9 +548,10 @@ onMounted(async () => {
     start: 'autostart',
     duration: 100,
     onReady: () => {
-      // console.log(`[Subheadline] Vivus instance ready at ${new Date().toISOString()}, elapsed: ${Date.now() - startTime.value!}ms`);
+      console.log(`[Subheadline] Vivus instance ready at ${new Date().toISOString()}, elapsed: ${Date.now() - startTime.value!}ms`);
     }
   });
+  console.log('✅ VIVUS INSTANCES INITIALIZED:', new Date().toISOString());
 
   // Get path elements for pencil animation
   const navbarPath = document.querySelector('.navbar-container-path') as SVGPathElement;
@@ -552,12 +562,14 @@ onMounted(async () => {
   const subheadlinePencilDot = document.querySelector('.subheadline-pencil-dot') as SVGCircleElement;
 
   // Initialize the spotlight effect
+  console.log('🔄 SPOTLIGHT EFFECT INITIALIZATION STARTED:', new Date().toISOString());
   const spotlightEffect = createPhasedSpotlight({
     initialX: 20,
     initialY: 20,
     initialSize: 100,
     debug: true
   });
+  console.log('✅ SPOTLIGHT EFFECT INITIALIZED:', new Date().toISOString());
 
   // Update the spotlight position refs
   updateSpotlightPosition(spotlightEffect.spotlightX, spotlightEffect.spotlightY);
@@ -565,6 +577,7 @@ onMounted(async () => {
   // Start the main timeline if not paused
   if (!isPausedAfterVara.value) {
     console.log('Starting timeline (not paused)');
+    console.log('🔄 TIMELINE PLAYBACK STARTED:', new Date().toISOString());
     timeline.value?.play();
   } else {
     console.log('Timeline created but not started (paused)');
@@ -850,7 +863,7 @@ onUnmounted(() => {
 
 .outline-text-wrapper .letter.focused {
   opacity: 1;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  /* text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); */
 }
 
 /* Modified filled state specifically for headline letters */
@@ -1095,12 +1108,12 @@ onUnmounted(() => {
   transition: opacity 0.2s ease;
   color: transparent;
   -webkit-text-stroke: 2px var(--theme-primary, #88C0D0);
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  /* text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); */
 }
 
 .outline-text-wrapper .letter.focused {
   opacity: 1;
-  text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+  /* text-shadow: 0 0 20px rgba(255, 255, 255, 0.8); */
 }
 
 #headline-vara-container {
