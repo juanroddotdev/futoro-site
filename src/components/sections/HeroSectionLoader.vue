@@ -1,5 +1,10 @@
 <template>
   <div class="hero-section-loader" :class="{ 'is-hidden': !isVisible }">
+    <!-- Debug Toggle Button -->
+    <button class="debug-toggle" @click="toggleDebug">
+      {{ showDebug ? 'Hide Debug' : 'Show Debug' }}
+    </button>
+    
     <!-- PaperGridBackground for comparison -->
     <div class="paper-grid-comparison" :style="{ display: usePaperGrid ? 'block' : 'none' }">
       <PaperGridBackground 
@@ -69,6 +74,15 @@
         <div class="headline-section">
           <svg id="headline-svg" class="wireframe-svg" viewBox="0 0 1200 200" preserveAspectRatio="xMidYMid meet">
             <SvgFilters />
+            <defs>
+              <linearGradient id="headline-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:var(--theme-secondary, #88C0D0)" />
+                <stop offset="25%" style="stop-color:var(--theme-accent, #A3BE8C)" />
+                <stop offset="50%" style="stop-color:var(--theme-highlight, #BF616A)" />
+                <stop offset="75%" style="stop-color:var(--theme-accent, #A3BE8C)" />
+                <stop offset="100%" style="stop-color:var(--theme-secondary, #88C0D0)" />
+              </linearGradient>
+            </defs>
             <path class="headline-container-path" 
               d="M0,0 L1200,0 L1200,200 L0,200 L0,0" 
               v-bind="getDataAttributes(animationTimings.headline.container)"
@@ -100,22 +114,21 @@
                 </div>
               </foreignObject>
               
-              <!-- Spotlight Text Layer -->
-              <foreignObject x="10" y="10" width="1180" height="180">
-                <h1 class="spotlight-text-wrapper headline-spotlight theme-text--gradient-animated gradient-shine heading--accent mb-4 mt-2 heading-responsive-large" xmlns="http://www.w3.org/1999/xhtml">
-                  <template v-for="(word, wordIndex) in headline.split(' ')" :key="`word-${wordIndex}`">
-                    <span class="word">
-                      <span v-for="(char, letterIndex) in word" 
-                            :key="`letter-${wordIndex}-${letterIndex}`"
-                            class="letter"
-                            :data-word-index="wordIndex"
-                            :data-letter-index="letterIndex">
-                        {{ char }}
-                      </span>
-                    </span>
-                    <span v-if="wordIndex < headline.split(' ').length - 1" class="space">&nbsp;</span>
-                  </template>
-                </h1>
+              <!-- Spotlight Text Layer - Replaced with TextAnimation component -->
+              <foreignObject x="0" y="0" width="1200" height="200">
+                <div class="spotlight-text-wrapper" xmlns="http://www.w3.org/1999/xhtml">
+                  <h1 class="heading--accent mb-4 mt-2 heading-responsive-large theme-text--gradient-animated gradient-shine">
+                    <TextAnimation 
+                      :firstPart="headline" 
+                      animation="fadeUp" 
+                      :useGradient="true"
+                      :duration="3" 
+                      :initiallyHidden="true" 
+                      :triggerOnVisible="true" 
+                      :restartOnVisible="true" 
+                    />
+                  </h1>
+                </div>
               </foreignObject>
             </g>
           </svg>
@@ -125,6 +138,12 @@
         <div class="subheadline-section">
           <svg id="subheadline-svg" class="wireframe-svg" viewBox="0 0 1200 200" preserveAspectRatio="xMidYMid meet">
             <SvgFilters />
+            <defs>
+              <linearGradient id="subheadline-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:var(--theme-secondary, #88C0D0)" />
+                <stop offset="100%" style="stop-color:var(--theme-accent, #A3BE8C)" />
+              </linearGradient>
+            </defs>
             <path class="subheadline-container-path" 
               d="M10,10 L1190,10 L1190,190 L10,190 L10,10" 
               v-bind="getDataAttributes(animationTimings.subheadline.container)"
@@ -138,9 +157,9 @@
                 <div id="subheadline-vara-container" xmlns="http://www.w3.org/1999/xhtml"></div>
               </foreignObject>
               
-              <!-- Regular Text Layer -->
-              <foreignObject x="10" y="10" width="1180" height="180">
-                <div class="regular-text-wrapper" xmlns="http://www.w3.org/1999/xhtml">
+              <!-- Outline Text Layer -->
+              <foreignObject x="0" y="0" width="1200" height="200">
+                <div class="outline-text-wrapper" xmlns="http://www.w3.org/1999/xhtml">
                   <template v-for="(word, wordIndex) in subheadline.split(' ')" :key="`word-${wordIndex}`">
                     <span class="word">
                       <span v-for="(char, letterIndex) in word" 
@@ -156,27 +175,51 @@
                 </div>
               </foreignObject>
               
-              <!-- Spotlight Text Layer -->
-              <foreignObject x="10" y="10" width="1180" height="180">
-                <p class="spotlight-text-wrapper theme-text--gradient-animated gradient-shine heading--highlight mb-8 subheading-responsive" xmlns="http://www.w3.org/1999/xhtml">
-                  <template v-for="(word, wordIndex) in subheadline.split(' ')" :key="`word-${wordIndex}`">
-                    <span class="word">
-                      <span v-for="(char, letterIndex) in word" 
-                            :key="`letter-${wordIndex}-${letterIndex}`"
-                            class="letter"
-                            :data-word-index="wordIndex"
-                            :data-letter-index="letterIndex">
-                        {{ char }}
-                      </span>
-                    </span>
-                    <span v-if="wordIndex < subheadline.split(' ').length - 1" class="space">&nbsp;</span>
-                  </template>
-                </p>
+              <!-- Subheadline Spotlight Text Layer -->
+              <foreignObject x="0" y="0" width="1200" height="200">
+                <div class="spotlight-text-wrapper" xmlns="http://www.w3.org/1999/xhtml" style="clip-path: inset(0 100% 0 0);">
+                  <p class="mb-8 subheading-responsive heading--highlight">
+                    <TextAnimation 
+                      :firstPart="subheadline" 
+                      animation="fade" 
+                      :useGradient="true"
+                      :duration="3" 
+                      :initiallyHidden="true" 
+                      :triggerOnVisible="true" 
+                      :restartOnVisible="true" 
+                    />
+                  </p>
+                </div>
               </foreignObject>
             </g>
           </svg>
         </div>
       </div>
+    </div>
+    
+    <!-- Pause Controls -->
+    <div class="pause-controls" v-if="showDebug">
+      <div class="pause-options">
+        <label>
+          <input type="checkbox" v-model="isPausedAfterVara">
+          Pause after Vara
+        </label>
+        <label>
+          <input type="checkbox" v-model="isPausedAfterOutline">
+          Pause after Outline
+        </label>
+        <label>
+          <input type="checkbox" v-model="isPausedAfterSpotlight">
+          Pause after Spotlight Text
+        </label>
+      </div>
+      <button 
+        v-if="timeline?.paused()" 
+        @click="resumeAnimation"
+        class="resume-button"
+      >
+        Resume Animation
+      </button>
     </div>
   </div>
 </template>
@@ -194,6 +237,7 @@ import PaperGridBackground from '@/components/ui/backgrounds/PaperGridBackground
 import { createPhasedTimeline, buildCompleteTimeline } from './hero-loader/utils/phasedTimelineUtils';
 import { createPhasedSpotlight } from './hero-loader/utils/phasedSpotlightEffect';
 import { setupGridInitialState } from './hero-loader/utils/phasedTimelineUtils';
+import TextAnimation from '@/components/text/TextAnimation.vue';
 
 const props = defineProps<{
   headline?: string;
@@ -220,8 +264,8 @@ const usePaperGrid = ref(false);
 
 // Pause controls
 const isPausedAfterVara = ref(false);
-const isPausedAfterRTL = ref(false);
-const isPausedAfterLTR = ref(false);
+const isPausedAfterOutline = ref(false);
+const isPausedAfterSpotlight = ref(false);
 
 // Content
 const heroContent = computed(() => props.heroContent || getRandomHeroContent());
@@ -325,7 +369,11 @@ const resumeAnimation = () => {
   }
 };
 
+// Debug toggle
 const showDebug = ref(false);
+const toggleDebug = () => {
+  showDebug.value = !showDebug.value;
+};
 
 // Update the font size calculation
 const calculateResponsiveFontSize = (containerWidth: number, text: string) => {
@@ -376,9 +424,10 @@ const handleResize = () => {
 };
 
 onMounted(async () => {
+  console.log('Component mounted, isPausedAfterVara:', isPausedAfterVara.value);
+  
   // Set start time
   startTime.value = Date.now();
-  console.log(`[HeroSectionLoader] Component mounted`);
   
   // Initialize Vivus instances
   const navbarSvg = document.querySelector('#navbar-svg') as SVGElement;
@@ -389,13 +438,18 @@ onMounted(async () => {
   setupGridInitialState();
 
   // Build the complete timeline with all phases
-  const timeline = buildCompleteTimeline({
+  console.log('Building timeline...');
+  timeline.value = buildCompleteTimeline({
     headline: headlineVaraInstance.value,
     subheadline: subheadlineVaraInstance.value,
     loadVara: async () => {
+      console.log('loadVara called');
       return Promise.resolve();
     },
     onContainersDrawn: async () => {
+      console.log('Containers drawn, isPausedAfterVara:', isPausedAfterVara.value);
+      console.log('Timeline value exists:', !!timeline.value);
+      
       // Get container width for responsive sizing
       const container = document.querySelector('#headline-vara-container');
       const containerWidth = container?.clientWidth || 1180;
@@ -428,18 +482,36 @@ onMounted(async () => {
         font: '/futoro-site/fonts/Satisfy/SatisfySL.json',
         delay: 1000
       });
+      
+      // Pause after Vara if enabled
+      if (isPausedAfterVara.value && timeline.value) {
+        console.log('Attempting to pause timeline');
+        timeline.value.pause();
+        console.log('Timeline paused, isPaused:', timeline.value.paused());
+        emit('pause');
+      }
     },
     onSpotlightStart: () => {
-      console.log('Spotlight movement started');
+      // Spotlight movement started
     },
     onSpotlightUpdate: (x, y) => {
       updateSpotlightPosition(x, y);
     },
     onSpotlightComplete: () => {
-      console.log('Spotlight movement completed');
+      // Spotlight movement completed
+      
+      // Pause after Outline if enabled
+      if (isPausedAfterOutline.value && timeline.value) {
+        timeline.value.pause();
+      }
     },
     onComplete: () => {
-      console.log('Animation completed - staying on loader for debugging');
+      // Animation completed
+      
+      // Pause after Spotlight Text if enabled
+      if (isPausedAfterSpotlight.value && timeline.value) {
+        timeline.value.pause();
+      }
     }
   });
 
@@ -492,8 +564,10 @@ onMounted(async () => {
 
   // Start the main timeline if not paused
   if (!isPausedAfterVara.value) {
-    console.log('Starting timeline');
-    timeline.play();
+    console.log('Starting timeline (not paused)');
+    timeline.value?.play();
+  } else {
+    console.log('Timeline created but not started (paused)');
   }
 
   // Add resize listener
@@ -764,13 +838,19 @@ onUnmounted(() => {
   z-index: 2;
   opacity: 0;
   clip-path: inset(0 0% 0 0);
-  transition: clip-path 0.1s ease;
+  transition: clip-path 0.1s ease, opacity 0.3s ease;
 }
 
 .outline-text-wrapper .letter {
   color: transparent;
   -webkit-text-stroke: 2px var(--theme-primary, #88C0D0);
   transition: all 0.3s ease;
+  opacity: 0;
+}
+
+.outline-text-wrapper .letter.focused {
+  opacity: 1;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
 /* Modified filled state specifically for headline letters */
@@ -827,20 +907,55 @@ onUnmounted(() => {
   object-fit: contain;
 }
 
+.spotlight-text-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .spotlight-text-wrapper {
+  font-size: 72px;
+  line-height: 1.2;
+  opacity: 0;
   clip-path: inset(0 100% 0 0);
   transition: clip-path 0.1s ease;
-  z-index: 1;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-size: 200% 100%;
+  animation: shine 3s linear infinite;
 }
 
-.spotlight-text-wrapper .letter {
-  opacity: 1;
-  color: var(--theme-primary, #88C0D0);
+.spotlight-text-wrapper.headline-spotlight {
+  background: linear-gradient(
+    to right,
+    var(--theme-primary, #88C0D0),
+    var(--theme-secondary, #5E81AC),
+    var(--theme-primary, #88C0D0)
+  );
 }
 
-.spotlight-text-wrapper.headline-spotlight .letter {
-  color: white;
-  -webkit-text-stroke: 2px var(--theme-primary, #88C0D0);
+.spotlight-text-wrapper.subheading-responsive {
+  background: linear-gradient(
+    to right,
+    var(--theme-primary, #88C0D0),
+    var(--theme-secondary, #5E81AC)
+  );
+}
+
+@keyframes shine {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
 }
 
 /* Hide Vara text when spotlight text is visible */
@@ -866,6 +981,13 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+.pause-options label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
 }
 
 .resume-button {
@@ -910,7 +1032,7 @@ onUnmounted(() => {
   transition: opacity 0.3s ease;
 }
 
-.spotlight-text-wrapper.headline-spotlight .letter {
+.spotlight-text-wrapper .letter.focused {
   color: white;
   -webkit-text-stroke: 2px var(--theme-primary, #88C0D0);
 }
@@ -958,7 +1080,7 @@ onUnmounted(() => {
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  opacity: 0;
+  opacity: 1;
   transition: opacity 0.3s ease;
 }
 
@@ -971,7 +1093,8 @@ onUnmounted(() => {
   position: relative;
   opacity: 0;
   transition: opacity 0.2s ease;
-  color: white;
+  color: transparent;
+  -webkit-text-stroke: 2px var(--theme-primary, #88C0D0);
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
@@ -1023,5 +1146,20 @@ onUnmounted(() => {
 
 .headline-content {
   transform-origin: center;
+}
+
+/* Debug Toggle Button */
+.debug-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  background: var(--theme-primary, #88C0D0);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
 }
 </style> 
