@@ -58,10 +58,17 @@ const props = withDefaults(defineProps<Props>(), {
     display: flex;
     flex-direction: column;
     gap: 2rem;
+    position: relative;
     
     @media (min-width: 1024px) {
       flex-direction: row;
       gap: 4rem;
+
+      /* Force 50/50 split for children */
+      > .content-area {
+        flex: 0 0 50%; /* flex-grow: 0, flex-shrink: 0, flex-basis: 50% */
+        min-width: 0; /* Allow content to shrink below its minimum intrinsic width if needed */
+      }
     }
     
     @media (max-width: 768px) {
@@ -76,6 +83,7 @@ const props = withDefaults(defineProps<Props>(), {
     flex-direction: column;
     justify-content: center;
     padding: 2rem 0;
+    position: relative;
     
     @media (min-width: 768px) {
       padding: 3rem 0;
@@ -86,8 +94,8 @@ const props = withDefaults(defineProps<Props>(), {
       justify-content: center;
       align-items: center;
       position: relative;
-      max-width: 600px;
-      margin-right: 100px;
+      max-width: 100%;
+      // margin-right: 100px;
       
       @media (max-width: 1024px) {
         margin-right: 0;

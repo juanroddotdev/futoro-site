@@ -625,18 +625,25 @@ watch(() => props.resetKey, runAnimation);
 
 <style scoped>
 .animated-text-container {
-  min-height: 100px;
-  overflow: visible;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  /* line-height: .9; */
+  /* Base styling for the container */
+  display: inline-block; /* Or block, depending on desired flow */
+  position: relative;
+  width: 100%; /* Ensure container takes available width */
 }
 
-.initially-hidden {
+.animated-text-container > span,
+.animated-text-container .word-effect {
+  /* Ensure spans allow word wrapping */
+  display: inline; /* Keep inline flow but allow wrapping */
+  /* word-wrap: break-word; */ /* REMOVE - Don't break mid-word */
+  /* overflow-wrap: break-word; */ /* REMOVE - Don't break mid-word */
+  white-space: normal; /* Allow normal wrapping */
+  /* hyphens: auto; */ /* REMOVE - Don't hyphenate */
+  /* Prevent potential fixed width issues */
+  max-width: 100%; 
+}
+
+.initially-hidden > span {
   opacity: 0;
   visibility: hidden;
   
@@ -651,7 +658,7 @@ watch(() => props.resetKey, runAnimation);
   display: inline-block;
   position: relative;
   transform-origin: center bottom;
-  white-space: nowrap; /* Prevent words from breaking */
+  white-space: normal; /* CHANGE from nowrap to allow wrapping */
   will-change: transform; /* Optimize for animations */
 }
 
