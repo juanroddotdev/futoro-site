@@ -3,18 +3,30 @@
     width="195"
     height="51"
     viewBox="0 0 195 51"
-    fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <rect x="2" y="2" width="191" height="47" rx="23.5" fill="#D9D9D9" />
-    <rect
-      x="2"
-      y="2"
-      width="191"
-      height="47"
-      rx="23.5"
+    <defs>
+      <mask id="buttonMask">
+        <rect width="100%" height="100%" fill="white" class="reveal-mask-rect" />
+      </mask>
+    </defs>
+
+    <!-- Text -->
+    <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="black" font-size="20" font-family="sans-serif">
+      CTA Button
+    </text>
+
+    <!-- Background Rectangle -->
+    <rect 
+      x="2" 
+      y="2" 
+      width="191" 
+      height="47" 
+      rx="23.5" 
+      fill="#D9D9D9" 
       stroke="black"
       stroke-width="2"
+      mask="url(#buttonMask)"
     />
   </svg>
 </template>

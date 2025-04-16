@@ -95,6 +95,7 @@ const props = withDefaults(defineProps<Props>(), {
       align-items: center;
       position: relative;
       max-width: 100%;
+      z-index: -1;
       // margin-right: 100px;
       
       @media (max-width: 1024px) {

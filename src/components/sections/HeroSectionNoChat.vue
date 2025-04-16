@@ -50,6 +50,9 @@
             </div>
             <div ref="svgNavRef" class="svg-layer svg-layer--nav">
               <SvgNav />
+              <!-- <div ref="svgNavPullRef" class="svg-layer svg-pull-graphic">
+                <SvgNavPull />
+              </div> -->
             </div>
             <div ref="svgLeftsideRef" class="svg-layer svg-layer--leftside">
               <SvgLeftside />
@@ -85,6 +88,7 @@ import SvgRightSide from "@/assets/svg/SvgRightSide.vue";
 import SvgButton from "@/assets/svg/SvgButton.vue";
 import SvgHeader from "@/assets/svg/SvgHeader.vue";
 import FullLayout from "@/assets/svg/FullLayout.vue";
+import SvgNavPull from "@/assets/svg/SvgNavPull.vue"; // Import SvgNavPull
 
 // --- Animation Configuration Object ---
 const animationConfig = reactive({
@@ -97,12 +101,13 @@ const animationConfig = reactive({
       opacity: 0,
       z: -50,
       filter: "drop-shadow(2px 4px 2px rgba(0,0,0,0))",
+      scale: 1.8, // Add initial scale
     },
     to: {
       opacity: 1,
       z: 0,
       filter: "drop-shadow(8px 15px 10px rgba(0,0,0,0.3))",
-      
+      scale: 1, // Animate to default scale
     },
     duration: 1.2,
     startTime: 0,
@@ -112,16 +117,18 @@ const animationConfig = reactive({
       opacity: 0,
       z: -70,
       filter: "drop-shadow(1px 2px 1px rgba(0,0,0,0))",
-      yPercent: -24,
+      yPercent: 0,
+      scale: 1.8, // Add initial scale
     },
     to: {
       opacity: 1,
-      z: 20,
+      z: 55,
       filter: "drop-shadow(4px 8px 6px rgba(0,0,0,0.25))",
       yPercent: -38,
+      scale: 1, // Animate to default scale
     },
     duration: 1.0,
-    startTime: "+=0.3",
+    startTime: "<0.2",
   },
   leftSide: {
     from: {
@@ -130,6 +137,7 @@ const animationConfig = reactive({
       filter: "drop-shadow(1px 1px 1px rgba(0,0,0,0))",
       yPercent: 1,
       xPercent: -25,
+      scale: 1.8, // Add initial scale
     },
     to: {
       opacity: 1,
@@ -137,9 +145,10 @@ const animationConfig = reactive({
       filter: "drop-shadow(3px 6px 4px rgba(0,0,0,0.2))",
       yPercent: 1,
       xPercent: -22,
+      scale: 1, // Animate to default scale
     },
     duration: 0.9,
-    startTime: "+=0.2", // Relative to nav start
+    startTime: "<0.2",
   },
   rightSide: {
     from: {
@@ -147,17 +156,19 @@ const animationConfig = reactive({
       z: -70,
       filter: "drop-shadow(1px 1px 1px rgba(0,0,0,0))",
       yPercent: 1,
-      xPercent: 22, // Positive for right
+      xPercent: 0,
+      scale: 1.8, // Add initial scale
     },
     to: {
       opacity: 1,
-      z: 40,
+      z: 55,
       filter: "drop-shadow(3px 6px 4px rgba(0,0,0,0.2))",
       yPercent: 1,
       xPercent: 25,
+      scale: 1, // Animate to default scale
     },
     duration: 0.9,
-    startTime: "<", // Start same time as leftSide
+    startTime: "<",
   },
   preheader: {
     from: {
@@ -166,6 +177,7 @@ const animationConfig = reactive({
       filter: "drop-shadow(1px 1px 1px rgba(0,0,0,0))",
       yPercent: 0,
       xPercent: 0,
+      scale: 1.8, // Add initial scale
     },
     to: {
       opacity: 1,
@@ -173,9 +185,10 @@ const animationConfig = reactive({
       filter: "drop-shadow(2px 4px 3px rgba(0,0,0,0.15))",
       yPercent: -23,
       xPercent: 0,
+      scale: 1, // Animate to default scale
     },
     duration: 0.8,
-    startTime: "+=0.1", // Relative to leftSide start
+    startTime: "<0.2",
   },
   header: {
     from: {
@@ -184,6 +197,7 @@ const animationConfig = reactive({
       filter: "drop-shadow(1px 1px 1px rgba(0,0,0,0))",
       yPercent: 0,
       xPercent: 0,
+      scale: 1.8, // Add initial scale
     },
     to: {
       opacity: 1,
@@ -191,46 +205,50 @@ const animationConfig = reactive({
       filter: "drop-shadow(2px 4px 3px rgba(0,0,0,0.18))",
       yPercent: -3,
       xPercent: 0,
+      scale: 1, // Animate to default scale
     },
     duration: 0.7,
-    startTime: "+=0.1", // Relative to preheader start
+    startTime: "<0.2",
   },
   subheader: {
     from: {
       opacity: 0,
-      z: -105, // Relative to header start: headerInitialZ - 5
+      z: -105,
       filter: "drop-shadow(1px 1px 1px rgba(0,0,0,0))",
       yPercent: 0,
       xPercent: 0,
+      scale: 1.8, // Add initial scale
     },
     to: {
       opacity: 1,
-      z: 17, // Relative to header end: headerFinalZ + 2
+      z: 17,
       filter: "drop-shadow(2px 4px 3px rgba(0,0,0,0.18))",
-      
       yPercent: 18,
       xPercent: 0,
+      scale: 1, // Animate to default scale
     },
     duration: 0.6,
-    startTime: "+=0.1", // Relative to header start
+    startTime: "<0.2",
   },
   button: {
     from: {
       opacity: 0,
-      z: -105, // Relative to subheader start: subheaderInitialZ - 5
+      z: -105,
       filter: "drop-shadow(1px 1px 1px rgba(0,0,0,0))",
       yPercent: 0,
       xPercent: 0,
+      scale: 1.8, // Add initial scale
     },
     to: {
       opacity: 1,
-      z: 17, // Relative to subheader end: subheaderFinalZ + 2  
+      z: 17,
       filter: "drop-shadow(2px 4px 3px rgba(0,0,0,0.18))",
       yPercent: 28,
       xPercent: -12,
+      scale: 1, // Animate to default scale
     },
     duration: 0.5,
-    startTime: "+=0.1", // Relative to subheader start
+    startTime: "<0.2",
   }
   
   // Add subheader and button later if needed
@@ -245,6 +263,7 @@ const svgPreheaderRef = ref<HTMLDivElement | null>(null);
 const svgRightSideRef = ref<HTMLDivElement | null>(null);
 const svgButtonRef = ref<HTMLDivElement | null>(null);
 const svgHeaderRef = ref<HTMLDivElement | null>(null);
+const svgNavPullRef = ref<HTMLDivElement | null>(null); // Add ref for SvgNavPull
 
 // Define props with defaults
 const props = withDefaults(
@@ -315,6 +334,7 @@ onMounted(() => {
     gsap.set(svgHeaderRef.value, { ...animationConfig.header.from, rotationY: animationConfig.defaults.rotationY });
     gsap.set(svgSubheaderRef.value, { ...animationConfig.subheader.from, rotationY: animationConfig.defaults.rotationY });
     gsap.set(svgButtonRef.value, { ...animationConfig.button.from, rotationY: animationConfig.defaults.rotationY });
+
     // Initialize GSAP timeline
     const tl = gsap.timeline({ 
       defaults: { 
@@ -387,6 +407,72 @@ onMounted(() => {
       { ...animationConfig.button.to, duration: animationConfig.button.duration },
       animationConfig.button.startTime
     );
+
+    // Set initial state for SvgNav mask and pull graphic
+    const navMaskRect = svgNavRef.value?.querySelector('.reveal-mask-rect');
+    console.log('Found navMaskRect:', navMaskRect); // Debugging log
+    gsap.set(svgNavPullRef.value, { opacity: 0, x: "0%" }); 
+    if (navMaskRect) { 
+      gsap.set(navMaskRect, { scaleX: 1, transformOrigin: 'right center' }); 
+    }
+    // Add initial states for other masks
+    const leftSideMaskRect = svgLeftsideRef.value?.querySelector('.reveal-mask-rect');
+    if (leftSideMaskRect) { gsap.set(leftSideMaskRect, { scaleX: 1, transformOrigin: 'right center' }); }
+    const rightSideMaskRect = svgRightSideRef.value?.querySelector('.reveal-mask-rect');
+    if (rightSideMaskRect) { gsap.set(rightSideMaskRect, { scaleX: 1, transformOrigin: 'right center' }); }
+    const preheaderMaskRect = svgPreheaderRef.value?.querySelector('.reveal-mask-rect');
+    if (preheaderMaskRect) { gsap.set(preheaderMaskRect, { scaleX: 1, transformOrigin: 'right center' }); }
+    const headerMaskRect = svgHeaderRef.value?.querySelector('.reveal-mask-rect');
+    if (headerMaskRect) { gsap.set(headerMaskRect, { scaleX: 1, transformOrigin: 'right center' }); }
+    const subheaderMaskRect = svgSubheaderRef.value?.querySelector('.reveal-mask-rect');
+    if (subheaderMaskRect) { gsap.set(subheaderMaskRect, { scaleX: 1, transformOrigin: 'right center' }); }
+    const buttonMaskRect = svgButtonRef.value?.querySelector('.reveal-mask-rect');
+    if (buttonMaskRect) { gsap.set(buttonMaskRect, { scaleX: 1, transformOrigin: 'right center' }); }
+
+    // Animate SvgNav Mask Reveal and Pull Graphic (Moved to the end)
+    /* Uncomment reveal animations */
+    const revealDuration = 0.8;
+    const revealEase = 'power2.inOut';
+
+    if (navMaskRect && svgNavPullRef.value) {
+      // Animate mask scaleX from 1 to 0 (reveals left-to-right)
+      tl.to(navMaskRect, 
+        { scaleX: 0, duration: revealDuration, ease: revealEase }, 
+        ">+=0.1" // Start 0.1s AFTER main sequence ends
+      );
+      // Animate pull graphic simultaneously - COMMENTED OUT FOR NOW
+      // tl.to(svgNavPullRef.value, { 
+      //   opacity: 1, 
+      //   x: "100%", 
+      //   duration: revealDuration, 
+      //   ease: revealEase 
+      // }, "<"); 
+    }
+
+    // Add other mask animations
+    if (leftSideMaskRect) {
+      tl.to(leftSideMaskRect, { scaleX: 0, duration: revealDuration, ease: revealEase }, "<");
+    }
+    if (rightSideMaskRect) {
+      tl.to(rightSideMaskRect, { scaleX: 0, duration: revealDuration, ease: revealEase }, "<");
+    }
+    if (preheaderMaskRect) {
+      tl.to(preheaderMaskRect, { scaleX: 0, duration: revealDuration, ease: revealEase }, "<");
+    }
+    if (headerMaskRect) {
+      tl.to(headerMaskRect, { scaleX: 0, duration: revealDuration, ease: revealEase }, "<");
+    }
+    if (subheaderMaskRect) {
+      tl.to(subheaderMaskRect, { scaleX: 0, duration: revealDuration, ease: revealEase }, "<");
+    }
+    if (buttonMaskRect) {
+      tl.to(buttonMaskRect, { scaleX: 0, duration: revealDuration, ease: revealEase }, "<");
+    }
+    
+    /* End uncomment */
+
+    // Slow down the animation for debugging
+    tl.timeScale(0.2); // Restore slow speed
 
     // --- Add Subheader and Button Animations Here using config if re-enabled ---
     /*
@@ -488,15 +574,20 @@ onMounted(() => {
   /* align-items: center; */ /* REMOVE THIS */
   position: relative;
   z-index: 1;
+  perspective: 1000px; /* Add perspective for 3D children */
 
   :deep(.heading--accent) {
     position: relative;
     z-index: 10;
+    transform: translateZ(20px); /* Bring text forward */
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
   }
 
   :deep(.heading--highlight) {
     position: relative;
     z-index: 10;
+    transform: translateZ(20px); /* Bring text forward */
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
   }
 
   :deep(.content-area) {
@@ -539,9 +630,15 @@ onMounted(() => {
   width: 100%; /* Fill the absolutely positioned placeholder */
   height: 100%; /* Fill the absolutely positioned placeholder */
   transform-style: preserve-3d;
-  z-index: -10;
-  /* Scale up and shift right */
-  transform: scale(1.4) translateX(-18%);
+  /* z-index: -10; */ /* REMOVE THIS */
+  /* Add a mask to fade in from the left */
+  // -webkit-mask-image: linear-gradient(to right, transparent 0%, #1A1B26 30%);
+  /* Adjust transparency start/end points (e.g., black 50%) as needed */
+  
+  /* Scale up and shift */
+  // transform: scale(1.4) translateX(-18%);
+  transform: scale(1.1) translateX(-18%) translateY(-50px)
+  
   /* Adjust scale(1.x) and translateX(y%) as needed */
 }
 
@@ -560,7 +657,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: -10;
+  /* z-index: -10; */ /* REMOVE THIS */
 
   /* Base style for contained SVGs */
   > :deep(svg) {
@@ -578,7 +675,11 @@ onMounted(() => {
 /* Specific sizing for inner SVGs via CSS using viewport width */
 .svg-layer--background :deep(svg) {
   width: 50vw; /* Example: 50% of viewport width */
-  z-index: -10;
+  /* z-index: -10; */ /* REMOVE THIS */
+}
+
+.svg-layer--nav {
+  position: relative; /* Make this the positioning context for children */
 }
 
 .svg-layer--nav :deep(svg) {
@@ -593,5 +694,24 @@ onMounted(() => {
 .svg-layer--button :deep(svg) {
   width: 8vw; /* Adjust as needed */
   height: 8vw;
+}
+
+.svg-pull-graphic {
+  /* Inherits position:absolute from .svg-layer */
+  /* Positioned relative to .svg-layer--nav now */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Align icon to the start (left) */
+  left: 26px;
+  top: 1px;
+  /* transform: translateX(-100%); */ /* GSAP handles initial transform */
+  /* width: auto; */ /* REMOVE - Inherit width: 100% from .svg-layer */
+  height: 100%; 
+  pointer-events: none; 
+}
+
+.svg-pull-graphic :deep(svg) {
+  width: 3.4vw; /* Width relative to main nav size */
+  height: auto; /* Maintain aspect ratio */
 }
 </style>
