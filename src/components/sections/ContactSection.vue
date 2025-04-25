@@ -30,7 +30,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="contact-v2">
+  <section class="contact-v2" id="contact">
     <div class="contact-v2__content">
       <h2 class="contact-v2__heading">
         Let's create something

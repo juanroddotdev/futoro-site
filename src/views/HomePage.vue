@@ -17,12 +17,12 @@
     <HeroSectionNoChat :heroContent="heroContent" @mounted="onHeroMounted" />
     <!-- <SectionSeparator width="100%" color="var(--theme-secondary, #ffffff)" type="squiggly" /> -->
     <!-- Hurdles and Solutions Section -->
-    <LazySection
-      id="hurdles-solutions"
-      :trackSection="false"
-      @visible="onSectionVisible('hurdles-solutions', false)"
-    >
-      <HurdlesSolutionsSection />
+      <LazySection
+        id="hurdles-solutions"
+        :trackSection="false"
+        @visible="onSectionVisible('hurdles-solutions', true)"
+      >
+      <HurdlesSolutionsSection id="solutions" />
 
       <template #placeholder>
         <div class="section-placeholder">Loading...</div>
@@ -32,10 +32,10 @@
     <!-- Services section - use default slot instead of content slot -->
     <LazySection
       id="services"
-      @visible="onSectionVisible('services', false)"
+      @visible="onSectionVisible('services', true)"
       :trackSection="false"
     >
-      <ServicesSection />
+      <ServicesSection id="services"/>
 
       <template #placeholder>
         <div class="section-placeholder">Loading...</div>
@@ -45,9 +45,9 @@
     <LazySection
       id="timeline"
       :trackSection="false"
-      @visible="onSectionVisible('timeline', false)"
+      @visible="onSectionVisible('timeline', true)"
     >
-      <ProcessTimeline />
+      <ProcessTimeline id="timeline"/>
 
       <template #placeholder>
         <div class="section-placeholder">Loading...</div>
@@ -55,7 +55,7 @@
     </LazySection>
 
     <!-- Contact Section -->
-    <ContactSection />
+    <ContactSection id="contact"/>
 
     <!-- We'll add more sections as we go -->
   </div>

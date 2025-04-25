@@ -207,7 +207,7 @@ $themes: (
 // Theme Mixins
 @mixin themed() {
   @each $theme-name, $theme-map in $themes {
-    .theme-#{$theme-name} & {
+    :global(.theme-#{$theme-name}) & {
       @content;
     }
   }

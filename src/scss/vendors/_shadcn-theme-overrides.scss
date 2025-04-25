@@ -1,0 +1,53 @@
+@use 'sass:map';
+@import '../abstracts/variables';
+
+// Function to convert hex to HSL string (requires Dart Sass)
+// NOTE: This is complex to write directly. We will use pre-calculated values for now.
+// You might want to implement a proper hex-to-hsl function later.
+
+// Pre-calculated HSL values for 'neon-horizon' (Hue Saturation% Lightness%)
+$neon-horizon-hsl: (
+  'primary': 225 13% 21%,
+  'secondary': 195 38% 67%,
+  'accent': 88 27% 64%,
+  'highlight': 355 39% 56%,
+  'neutral': 220 33% 94%,
+  'background': 232 19% 13%
+);
+
+// Mapping Neon Horizon theme to Shadcn variables
+.theme-neon-horizon {
+  --background: #{map.get($neon-horizon-hsl, 'background')};          // Dark background
+  --foreground: #{map.get($neon-horizon-hsl, 'neutral')};             // Light text (neutral)
+
+  --card: #{map.get($neon-horizon-hsl, 'primary')};                 // Darker card (primary)
+  --card-foreground: #{map.get($neon-horizon-hsl, 'neutral')};         // Light text on card (neutral)
+
+  --popover: #{map.get($neon-horizon-hsl, 'primary')};                // Darker popover (primary)
+  --popover-foreground: #{map.get($neon-horizon-hsl, 'neutral')};      // Light text on popover (neutral)
+
+  --primary: #{map.get($neon-horizon-hsl, 'accent')};                 // Use theme accent as Shadcn primary
+  --primary-foreground: #{map.get($neon-horizon-hsl, 'background')};   // Dark text on primary (background)
+
+  --secondary: #{map.get($neon-horizon-hsl, 'secondary')};            // Theme secondary
+  --secondary-foreground: #{map.get($neon-horizon-hsl, 'background')}; // Dark text on secondary (background)
+
+  --muted: #{map.get($neon-horizon-hsl, 'primary')};                 // Muted background (primary)
+  --muted-foreground: #{map.get($neon-horizon-hsl, 'secondary')};       // Muted text (secondary)
+
+  --accent: #{map.get($neon-horizon-hsl, 'accent')};                  // Theme accent
+  --accent-foreground: #{map.get($neon-horizon-hsl, 'background')};    // Dark text on accent (background)
+
+  --destructive: #{map.get($neon-horizon-hsl, 'highlight')};          // Theme highlight
+  --destructive-foreground: #{map.get($neon-horizon-hsl, 'neutral')};  // Light text on destructive (neutral)
+
+  --border: #{map.get($neon-horizon-hsl, 'secondary')};             // Use theme secondary for borders
+  --input: #{map.get($neon-horizon-hsl, 'primary')};                  // Use theme primary for input background
+  --ring: #{map.get($neon-horizon-hsl, 'accent')};                   // Use theme accent for focus ring
+
+  /* Add other Shadcn variables if needed, mapped from your theme */
+  /* --radius: ...; */
+}
+
+// TODO: Add similar blocks for other themes (.theme-digital-sunset, .theme-retro-wave, etc.)
+// using their respective HSL converted values. 

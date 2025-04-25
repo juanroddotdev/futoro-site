@@ -1,5 +1,6 @@
 // Import Tailwind base styles first
 @import 'vendors/tailwind-base';
+@import "@vueform/multiselect/themes/default.css"; // Import multiselect CSS
 
 // Then import abstracts
 @import 'abstracts/variables';
@@ -60,5 +61,10 @@
 @import 'themes/variables';
 @import 'themes/neutral';
 @import 'themes/theme-classes';
+@import 'vendors/shadcn-theme-overrides';
 
 // Import component styles
+
+html {
+  scroll-behavior: smooth;
+}

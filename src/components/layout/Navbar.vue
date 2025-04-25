@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useScroll } from '@vueuse/core';
+import { RouterLink } from 'vue-router';
 
 const isScrolled = ref(false);
 const isHidden = ref(false);
@@ -46,9 +47,10 @@ onUnmounted(() => {
         ]">Futoro</a>
         
         <div class="navbar__links">
-          <a href="#about" class="navbar__link">About</a>
           <a href="#services" class="navbar__link">Services</a>
-          <a href="#portfolio" class="navbar__link">Portfolio</a>
+          <a href="#solutions" class="navbar__link">Solutions</a>
+          <a href="#timeline" class="navbar__link">Process</a>
+          <router-link to="/client-form" class="navbar__link">Questionnaire</router-link>
           <a href="#contact" class="navbar__cta" :class="[
             isScrolled ? 'btn-round-medium-primary' : 'btn-round-large-primary'
           ]">Contact Us</a>

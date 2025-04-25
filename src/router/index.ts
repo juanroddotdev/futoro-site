@@ -1,10 +1,10 @@
-
 import { createRouter, createWebHistory } from 'vue-router'
 
 // Create a new component for experiments
 // const Playground = () => import('@/views/Playground.vue')
 const HomePage = () => import('@/views/HomePage.vue')
 const WireframeDemo = () => import('@/views/WireframeDemo.vue')
+const ClientFormView = () => import('@/views/ClientFormView.vue')
 
 const routes = [
   {
@@ -23,6 +23,14 @@ const routes = [
     component: WireframeDemo,
     meta: {
       title: 'Wireframe Demo'
+    }
+  },
+  {
+    path: '/client-form',
+    name: 'ClientForm',
+    component: ClientFormView,
+    meta: {
+      title: 'Client Questionnaire'
     }
   }
 ]
