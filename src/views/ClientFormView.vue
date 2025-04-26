@@ -347,6 +347,285 @@
 
         </FormItem>
 
+        <!-- Inspirational Websites Question -->
+        <FormItem class="p-4 border rounded-md bg-card/50 space-y-4">
+           <p class="font-medium text-foreground">Got any favorite websites that you think look really cool?</p>
+
+           <FormField name="inspirationalWebsitesUrls" v-slot="{ componentField }">
+              <FormItem>
+                  <FormLabel for="inspirationalWebsitesUrls">Please share the URLs (web addresses)</FormLabel>
+                  <FormControl>
+                      <Textarea 
+                        id="inspirationalWebsitesUrls"
+                        placeholder="e.g., https://example.com, www.anothercoolsite.net (one per line is helpful)"
+                        v-bind="componentField"
+                        class="mt-1"
+                        rows="3"
+                      />
+                  </FormControl>
+                  <FormMessage />
+              </FormItem>
+           </FormField>
+
+            <FormField name="inspirationalWebsitesComments" v-slot="{ componentField }">
+              <FormItem>
+                  <FormLabel for="inspirationalWebsitesComments">What catches your eye about them?</FormLabel>
+                  <FormControl>
+                      <Textarea 
+                        id="inspirationalWebsitesComments"
+                        placeholder="e.g., I love the color scheme on the first site, the smooth animations on the second..."
+                        v-bind="componentField"
+                        class="mt-1"
+                        rows="4"
+                      />
+                  </FormControl>
+                   <FormDescription class="mt-1">
+                    Visual inspiration is super helpful!
+                  </FormDescription>
+                  <FormMessage />
+              </FormItem>
+           </FormField>
+
+        </FormItem>
+
+        <!-- Aesthetic Style Question -->
+        <FormField name="aestheticStyle" v-slot="{ componentField }">
+           <FormItem class="p-4 border rounded-md bg-card/50">
+            <FormLabel>What is your preferred aesthetic style for your website?</FormLabel>
+            <FormControl class="mt-2">
+              <TooltipProvider :delay-duration="200">
+                <ToggleGroup 
+                    type="multiple" 
+                    variant="outline" 
+                    class="flex flex-wrap gap-2" 
+                    :model-value="componentField.modelValue || []"
+                    @update:model-value="(value) => updateMultiSelectField('aestheticStyle', value)"
+                > 
+                    <Tooltip v-for="option in aestheticStyleOptions" :key="option.value">
+                        <TooltipTrigger asChild>
+                             <ToggleGroupItem 
+                                :value="option.value" 
+                                :aria-label="option.label">
+                                {{ option.label }}
+                            </ToggleGroupItem>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" class="max-w-xs text-center">
+                            <p>{{ option.definition }}</p>
+                        </TooltipContent>
+                    </Tooltip>
+                 </ToggleGroup>
+              </TooltipProvider>
+            </FormControl>
+             <FormDescription class="mt-2">
+              Select multiple styles if applicable. Hover over a style for a brief description.
+            </FormDescription>
+            <FormMessage />
+           </FormItem>
+         </FormField>
+
+        <!-- More questions for this section will go here -->
+      </section>
+
+      <!-- Section 3: Functionality & Content -->
+      <section class="space-y-6 p-6 border rounded-lg bg-background/50">
+        <h2 class="text-2xl font-semibold mb-0 col-span-full">Functionality & Content</h2>
+        
+        <!-- Essential Pages Question -->
+         <FormField name="essentialPages" v-slot="{ componentField }"> 
+           <FormItem class="p-4 border rounded-md bg-card/50">
+            <FormLabel>What are the essential pages you envision for your website?</FormLabel>
+            <FormControl class="mt-2">
+              <TooltipProvider :delay-duration="200">
+                <ToggleGroup 
+                    type="multiple" 
+                    variant="outline" 
+                    class="flex flex-wrap gap-2" 
+                    :model-value="componentField.modelValue || []"
+                    @update:model-value="(value) => updateMultiSelectField('essentialPages', value)"
+                > 
+                    <Tooltip v-for="option in essentialPagesOptions" :key="option.value">
+                        <TooltipTrigger asChild>
+                             <ToggleGroupItem 
+                                :value="option.value" 
+                                :aria-label="option.label">
+                                {{ option.label }}
+                            </ToggleGroupItem>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" class="max-w-xs text-center">
+                            <p>{{ option.definition }}</p>
+                        </TooltipContent>
+                    </Tooltip>
+                 </ToggleGroup>
+              </TooltipProvider>
+            </FormControl>
+             <FormDescription class="mt-2">
+              Select the pages you definitely need. Hover over a page name for a description.
+            </FormDescription>
+            <FormMessage />
+           </FormItem>
+         </FormField>
+
+        <!-- Desired Functionality Question -->
+        <FormField name="desiredFeatures" v-slot="{ field }">
+          <FormItem class="p-4 border rounded-md bg-card/50">
+            <FormLabel>Thinking about what you want your website visitors to be able to do on your site, what key features or functionalities come to mind? Consider these common categories:</FormLabel>
+            <div class="mt-4 space-y-6">
+              <!-- Loop through Categories -->
+              <div v-for="category in functionalityOptions" :key="category.category">
+                <h4 class="font-medium text-foreground mb-1">{{ category.category }}</h4>
+                <p class="text-sm text-muted-foreground mb-3">{{ category.definition }}</p>
+                <div class="space-y-2 pl-2">
+                  <!-- Loop through Examples -->
+                  <div 
+                    v-for="example in category.examples" 
+                    :key="example.value" 
+                    class="flex items-center space-x-2"
+                  >
+                    <Checkbox 
+                      :id="example.value"
+                      :value="example.value"
+                      :checked="field.value?.includes(example.value)"
+                      @update:checked="() => toggleArrayItem('desiredFeatures', example.value)"
+                    />
+                    <Label :for="example.value" class="font-normal">{{ example.label }}</Label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 'Other' Option -->
+              <div class="pt-4 border-t">
+                 <div class="flex items-center space-x-2">
+                     <Checkbox 
+                      id="other_features"
+                      value="other_features"
+                      :checked="field.value?.includes('other_features')"
+                      @update:checked="() => toggleArrayItem('desiredFeatures', 'other_features')"
+                    />
+                    <Label for="other_features" class="font-normal">Other (please specify)</Label>
+                 </div>
+                 <FormField v-if="form.values.desiredFeatures?.includes('other_features')" name="desiredFeaturesOther" v-slot="{ componentField }">
+                    <FormItem class="mt-2 pl-8">
+                      <FormLabel for="desiredFeaturesOther" class="sr-only">Other Desired Features</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          id="desiredFeaturesOther"
+                          placeholder="Describe any other features you need..."
+                          v-bind="componentField"
+                          rows="3"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                 </FormField>
+              </div>
+            </div>
+             <FormMessage /> <!-- For the main desiredFeatures field if needed -->
+          </FormItem>
+        </FormField>
+
+        <!-- More questions for this section will go here -->
+      </section>
+
+      <!-- Section 4: Technical & Logistical Aspects -->
+      <section class="space-y-6 p-6 border rounded-lg bg-background/50">
+        <h2 class="text-2xl font-semibold mb-0 col-span-full">Technical & Logistical Aspects</h2>
+        
+        <!-- Budget Tier Question -->
+        <FormField name="projectBudgetTier" v-slot="{ field }">
+           <FormItem class="p-4 border rounded-md bg-card/50">
+            <FormLabel>What is your desired budget range for this project?</FormLabel> 
+            <FormDescription class="text-xs mt-1 mb-4">
+              (This helps gauge the scope and features feasible. We can adjust based on detailed needs.)
+            </FormDescription>
+            <FormDescription class="text-xs mt-1 mb-4">
+              Just a heads-up, the quicker you need it, the more focused the project might have to be or the more it could cost, while a more relaxed timeline gives us more room to explore and potentially keep the budget a bit easier.
+            </FormDescription>
+            <FormControl>
+                <RadioGroup
+                  :model-value="field.value"
+                  @update:model-value="field.onChange"
+                  class="flex flex-col space-y-4"
+                >
+                  <div v-for="option in budgetTierOptions" :key="option.value">
+                     <FormItem class="flex items-start space-x-3 space-y-0">
+                        <FormControl>
+                           <RadioGroupItem :id="option.value" :value="option.value" />
+                        </FormControl>
+                        <div class="grid gap-1.5 leading-none">
+                           <Label :for="option.value" class="font-medium">
+                            {{ option.label }} <span class="text-muted-foreground text-sm">({{ option.price }})</span>
+                           </Label>
+                           <FormDescription class="text-xs">
+                            {{ option.definition }}
+                           </FormDescription>
+                        </div>
+                     </FormItem>
+                  </div>
+                 </RadioGroup>
+            </FormControl>
+            <FormMessage class="mt-4"/>
+           </FormItem>
+         </FormField>
+
+        <!-- Point of Contact Question -->
+        <FormItem class="p-4 border rounded-md bg-card/50">
+           <p class="font-medium text-foreground">Who will be the primary point of contact for this project?</p>
+           <div class="mt-4 space-y-4">
+              <FormField name="contactName" v-slot="{ componentField }">
+                 <FormItem>
+                   <FormLabel for="contactName">Name</FormLabel>
+                   <FormControl>
+                     <Input id="contactName" type="text" placeholder="Full Name" v-bind="componentField" />
+                   </FormControl>
+                   <FormMessage />
+                 </FormItem>
+               </FormField>
+
+               <FormField name="contactEmail" v-slot="{ componentField }">
+                 <FormItem>
+                   <FormLabel for="contactEmail">Email</FormLabel>
+                   <FormControl>
+                     <Input id="contactEmail" type="email" placeholder="email@example.com" v-bind="componentField" />
+                   </FormControl>
+                   <FormMessage />
+                 </FormItem>
+               </FormField>
+
+               <FormField name="contactPhone" v-slot="{ componentField }">
+                 <FormItem>
+                   <FormLabel for="contactPhone">Phone Number (Optional)</FormLabel>
+                   <FormControl>
+                     <Input id="contactPhone" type="tel" placeholder="(555) 123-4567" v-bind="componentField" />
+                   </FormControl>
+                   <FormMessage />
+                 </FormItem>
+               </FormField>
+           </div>
+        </FormItem>
+
+        <!-- Feedback Preference Question -->
+         <FormField name="feedbackPreference" v-slot="{ field }">
+          <FormItem class="p-4 border rounded-md bg-card/50">
+            <FormLabel>How would you prefer to provide feedback during the design process?</FormLabel>
+             <div class="mt-4 space-y-2">
+              <div 
+                v-for="option in feedbackPreferenceOptions" 
+                :key="option.value" 
+                class="flex items-center space-x-2"
+              >
+                <Checkbox 
+                  :id="option.value"
+                  :value="option.value"
+                  :checked="field.value?.includes(option.value)"
+                  @update:checked="() => toggleArrayItem('feedbackPreference', option.value)" 
+                />
+                <Label :for="option.value" class="font-normal">{{ option.label }}</Label>
+              </div>
+            </div>
+             <FormMessage />
+          </FormItem>
+        </FormField>
+
         <!-- More questions for this section will go here -->
       </section>
 
@@ -378,6 +657,10 @@ import { cn } from '@/lib/utils'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
 
 // --- Kept full options arrays ---
 const fullBusinessDescOptions = [
@@ -476,7 +759,196 @@ const primaryGoalsOptions = [
   { value: 'other', label: 'Other (please specify)' },
 ];
 
-// --- Updated Zod schema (simplified) ---
+// --- Option sets ---
+const aestheticStyleOptions = [
+  { value: 'modern', label: 'Modern', definition: 'Clean lines, open space, contemporary fonts, often incorporates technology and innovation.', style: 'aesthetic' },
+  { value: 'minimalist', label: 'Minimalist', definition: 'Emphasizes simplicity, functionality, and ample white space. Often uses a limited color palette.', style: 'aesthetic' },
+  { value: 'classic', label: 'Classic', definition: 'Timeless design, often with traditional fonts, balanced layouts, and a sense of sophistication.', style: 'aesthetic' },
+  { value: 'bold', label: 'Bold', definition: 'High contrast, strong colors, impactful typography, makes a strong visual statement.', style: 'aesthetic' },
+  { value: 'creative', label: 'Creative', definition: 'Unique, artistic, often breaks traditional design rules, emphasizes originality.', style: 'aesthetic' },
+  { value: 'corporate', label: 'Corporate', definition: 'Professional, trustworthy, often uses a more reserved color palette and structured layouts.', style: 'aesthetic' },
+  { value: 'playful', label: 'Playful', definition: 'Fun, energetic, uses bright colors, whimsical elements, and a lighthearted tone.', style: 'aesthetic' },
+  { value: 'luxury', label: 'Luxury', definition: 'Elegant, sophisticated, often uses high-quality imagery, refined typography, and a sense of exclusivity.', style: 'aesthetic' },
+  { value: 'rustic', label: 'Rustic', definition: 'Natural, organic, often incorporates textures like wood and stone, earthy color palettes.', style: 'aesthetic' },
+  { value: 'industrial', label: 'Industrial', definition: 'Raw, edgy, often inspired by factories and urban environments, uses exposed elements and dark colors.', style: 'aesthetic' },
+  { value: 'bohemian', label: 'Bohemian', definition: 'Relaxed, eclectic, often incorporates natural elements, patterns, and a warm color palette.', style: 'aesthetic' },
+  { value: 'artdeco', label: 'Art Deco', definition: 'Glamorous, geometric patterns, rich colors, and a sense of vintage luxury from the 1920s-1930s.', style: 'aesthetic' },
+  { value: 'vintage', label: 'Vintage', definition: 'Inspired by past eras, can range from retro to antique, often uses specific color palettes and typography.', style: 'aesthetic' },
+  { value: 'scandinavian', label: 'Scandinavian', definition: 'Clean, functional, minimalist with a focus on natural light and materials, often uses muted colors.', style: 'aesthetic' },
+  { value: 'geometric', label: 'Geometric', definition: 'Emphasizes shapes, lines, and patterns in a structured way.', style: 'aesthetic' },
+  { value: 'organic', label: 'Organic', definition: 'Natural, flowing shapes, often uses earthy tones and textures inspired by nature.', style: 'aesthetic' },
+  { value: 'dark', label: 'Dark', definition: 'Evokes a sense of drama, mystery, or sophistication through dark color palettes and contrasting elements.', style: 'aesthetic' },
+  { value: 'bright', label: 'Bright', definition: 'Energetic, optimistic, uses bold and saturated colors.', style: 'aesthetic' },
+  { value: 'elegant', label: 'Elegant', definition: 'Refined, graceful, often uses sophisticated typography and a balanced layout.', style: 'aesthetic' },
+  { value: 'tech', label: 'Tech', definition: 'Sleek, often incorporates digital-inspired elements, sharp lines, and a modern color palette.', style: 'aesthetic' },
+  { value: 'clean', label: 'Clean', definition: 'Prioritizes clarity and simplicity in layout and design elements.', style: 'aesthetic' },
+  { value: 'maximalist', label: 'Maximalist', definition: 'Embraces abundance, patterns, colors, and textures.', style: 'aesthetic' },
+  { value: 'whimsical', label: 'Whimsical', definition: 'Playful, fanciful, imaginative.', style: 'aesthetic' },
+  { value: 'sophisticated', label: 'Sophisticated', definition: 'Refined, cultured, often uses a more mature color palette and elegant typography.', style: 'aesthetic' },
+  { value: 'abstract', label: 'Abstract', definition: 'Non-representational, focuses on form, color, and texture for artistic expression.', style: 'aesthetic' },
+  { value: 'earthy', label: 'Earthy', definition: 'Natural, grounded, uses a color palette inspired by earth tones.', style: 'aesthetic' },
+  { value: 'professional', label: 'Professional', definition: 'Formal, competent, reliable.', style: 'tone' },
+  { value: 'friendly', label: 'Friendly', definition: 'Welcoming, warm, approachable.', style: 'tone' },
+  { value: 'authoritative', label: 'Authoritative', definition: 'Knowledgeable, expert, confident.', style: 'tone' },
+  { value: 'trustworthy', label: 'Trustworthy', definition: 'Reliable, honest, credible.', style: 'tone' },
+  { value: 'modern', label: 'Modern', definition: 'Contemporary, up-to-date, stylish.', style: 'tone' },
+  { value: 'approachable', label: 'Approachable', definition: 'Easy to connect with, open, inviting.', style: 'tone' },
+  { value: 'creative', label: 'Creative', definition: 'Imaginative, original, artistic.', style: 'tone' },
+  { value: 'innovative', label: 'Innovative', definition: 'Cutting-edge, forward-thinking, experimental.', style: 'tone' },
+  { value: 'sophisticated', label: 'Sophisticated', definition: 'Refined, elegant, cultured.', style: 'tone' },
+  { value: 'playful', label: 'Playful', definition: 'Fun, lighthearted, whimsical.', style: 'tone' },
+  { value: 'serious', label: 'Serious', definition: 'Earnest, focused, important.', style: 'tone' },
+  { value: 'calming', label: 'Calming', definition: 'Peaceful, serene, relaxing.', style: 'tone' },
+  { value: 'energetic', label: 'Energetic', definition: 'Lively, dynamic, enthusiastic.', style: 'tone' },
+  { value: 'elegant', label: 'Elegant', definition: 'Graceful, stylish, refined.', style: 'tone' },
+  { value: 'casual', label: 'Casual', definition: 'Relaxed, informal, easygoing.', style: 'tone' },
+  { value: 'bold', label: 'Bold', definition: 'Confident, assertive, impactful.', style: 'tone' },
+  { value: 'minimalist', label: 'Minimalist', definition: 'Simple, clean, uncluttered.', style: 'tone' },
+  { value: 'warm', label: 'Warm', definition: 'Inviting, comforting, friendly.', style: 'tone' },
+  { value: 'cool', label: 'Cool', definition: 'Modern, sleek, sophisticated (can also imply aloofness depending on context).' , style: 'tone' },
+  { value: 'luxurious', label: 'Luxurious', definition: 'High-end, opulent, exclusive.', style: 'tone' },
+  { value: 'down-to-earth', label: 'Down-to-earth', definition: 'Honest, genuine, relatable.', style: 'tone' },
+  { value: 'informative', label: 'Informative', definition: 'Educational, factual, helpful.', style: 'tone' },
+  { value: 'educational', label: 'Educational', definition: 'Instructive, guiding, knowledgeable.', style: 'tone' },
+  { value: 'inspirational', label: 'Inspirational', definition: 'Motivating, uplifting, encouraging.', style: 'tone' },
+  { value: 'empowering', label: 'Empowering', definition: 'Strengthening, confident, enabling.', style: 'tone' },
+  { value: 'authentic', label: 'Authentic', definition: 'Genuine, real, true to its values.', style: 'tone' },
+  { value: 'intriguing', label: 'Intriguing', definition: 'Curious, fascinating, captivating.', style: 'tone' },
+  { value: 'direct', label: 'Direct', definition: 'Clear, straightforward, concise.', style: 'tone' },
+  { value: 'subtle', label: 'Subtle', definition: 'Understated, delicate, nuanced.', style: 'tone' },
+  { value: 'whimsical', label: 'Whimsical', definition: 'Playful, fanciful, imaginative.', style: 'tone' },
+];
+
+const essentialPagesOptions = [
+  { value: 'homepage', label: 'Homepage', definition: 'The main entry point and introduction to your website.' },
+  { value: 'about', label: 'About Us/Me', definition: 'Information about your business, organization, or yourself.' },
+  { value: 'services', label: 'Services', definition: 'A detailed overview of the services you offer.' },
+  { value: 'products', label: 'Products', definition: 'A catalog or listing of the products you sell.' },
+  { value: 'portfolio', label: 'Portfolio/Work', definition: 'Showcase of your previous projects or artistic work.' },
+  { value: 'contact', label: 'Contact Us', definition: 'Information and a form for users to get in touch with you.' },
+  { value: 'blog', label: 'Blog/News', definition: 'A section for sharing updates, articles, and insights.' },
+  { value: 'pricing', label: 'Pricing/Plans', definition: 'Information about your fees, packages, or subscription options.' },
+  { value: 'testimonials', label: 'Testimonials/Reviews', definition: 'Showcase of positive feedback from previous clients or customers.' },
+  { value: 'faq', label: 'FAQ (Frequently Asked Questions)', definition: 'Answers to common questions users might have.' },
+  { value: 'gallery', label: 'Gallery/Images', definition: 'A visual collection of photos or artwork.' },
+  { value: 'team', label: 'Team/Staff', definition: 'Information about the people behind your business or organization.' },
+  { value: 'careers', label: 'Careers/Jobs', definition: 'Information about job openings within your company.' },
+  { value: 'events', label: 'Events/Calendar', definition: 'A listing of upcoming events, workshops, or appointments.' },
+  { value: 'resources', label: 'Resources/Downloads', definition: 'A section for offering helpful documents, guides, or tools.' },
+  { value: 'store', label: 'Online Store/Shop', definition: 'The main section for e-commerce functionality.' },
+  { value: 'account', label: 'User Account/Dashboard', definition: 'A personalized area for registered users to manage their information.' },
+  { value: 'privacy', label: 'Privacy Policy', definition: 'Information about how user data is collected and used.' },
+  { value: 'terms', label: 'Terms of Service/Use', definition: 'The rules and regulations for using your website.' },
+  { value: 'search', label: 'Search', definition: 'Functionality for users to find specific content on your site.' },
+  { value: 'landingpage', label: 'Landing Page (Specific Campaign)', definition: 'A dedicated page for a particular marketing campaign or offer.' },
+  { value: 'membership', label: 'Membership/Subscription', definition: 'Information about joining a membership program or subscribing to content.' },
+  { value: 'booking', label: 'Booking/Reservations', definition: 'Functionality for users to schedule appointments or make reservations.' },
+  { value: 'contactform', label: 'Contact Form (Standalone)', definition: 'A dedicated page with only a contact form.' },
+  { value: 'other', label: 'Other', definition: 'A field for the user to specify any other essential pages.' }
+];
+
+const functionalityOptions = [
+  {
+    category: "Communication",
+    definition: "Ways for you and your website visitors to talk to each other or stay in touch.",
+    examples: [
+      { value: "comm-contact-forms", label: "Contact forms" },
+      { value: "comm-live-chat", label: "Live chat" },
+      { value: "comm-newsletter", label: "Newsletter signup" }
+    ]
+  },
+  {
+    category: "E-commerce",
+    definition: "If you plan to sell things online, these are the tools to make that happen.",
+    examples: [
+      { value: "ecom-cart", label: "Shopping cart" },
+      { value: "ecom-payment", label: "Payment processing" },
+      { value: "ecom-filtering", label: "Product filtering/sorting" },
+      { value: "ecom-order-mgmt", label: "Order management" }
+    ]
+  },
+  {
+    category: "User Interaction",
+    definition: "Features that allow visitors to engage with your website and each other.",
+    examples: [
+      { value: "user-accounts", label: "Account creation/login" },
+      { value: "user-profiles", label: "User profiles" },
+      { value: "user-comments", label: "Commenting systems" },
+      { value: "user-forums", label: "Forums" },
+      { value: "user-surveys", label: "Surveys/Polls" }
+    ]
+  },
+  {
+    category: "Content Display",
+    definition: "How information and media are shown on your website.",
+    examples: [
+      { value: "content-galleries", label: "Image galleries" },
+      { value: "content-video", label: "Video embedding" },
+      { value: "content-search", label: "Search functionality" },
+      { value: "content-blog", label: "Blog/Article sections" },
+      { value: "content-maps", label: "Interactive maps" }
+    ]
+  },
+   // ... Add all other categories and examples here following the same structure ...
+   // Make sure each 'value' is unique across all examples
+   {
+    category: "Community Features",
+    definition: "Tools for building a group of people around your website.",
+    examples: [
+      { value: "commty-discussions", label: "Discussion areas" },
+      { value: "commty-profiles", label: "Personal profiles for members" },
+      { value: "commty-messaging", label: "Ways for members to send private messages" }
+    ]
+  }
+];
+
+const budgetTierOptions = [
+  {
+    value: 'launchpad',
+    label: 'Launchpad',
+    price: 'Under $1,500',
+    definition: 'Ideal for a very simple online presence, such as a basic landing page or informational one-pager. Limited features and design options.'
+  },
+  {
+    value: 'foundation',
+    label: 'Foundation',
+    price: '$1,500 - $3,000',
+    definition: 'Best for foundational websites, simple portfolios, or single landing pages with a bit more customization.'
+  },
+  {
+    value: 'growthengine',
+    label: 'Growth Engine',
+    price: '$3,000 - $7,500',
+    definition: 'Suitable for small business websites with essential features, custom design, and a few key functionalities to get you growing.'
+  },
+  {
+    value: 'expansion',
+    label: 'Expansion',
+    price: '$7,500 - $15,000',
+    definition: 'Ideal for established small to medium-sized businesses needing more advanced features, basic e-commerce, or enhanced customization to attract more customers.'
+  },
+  {
+    value: 'enterprise',
+    label: 'Enterprise',
+    price: '$15,000 - $25,000+',
+    definition: 'For businesses requiring sophisticated design, custom integrations, and robust functionality for significant online presence and growth.'
+  },
+  {
+    value: 'not_sure',
+    label: 'Not Sure / Open to Discussion',
+    price: 'Discuss Needs',
+    definition: "I'm not sure about the cost, but I'm open to discussing options based on my needs."
+  }
+];
+
+const feedbackPreferenceOptions = [
+  { value: 'written', label: 'Primarily through written comments and emails.' },
+  { value: 'video', label: "I'd prefer regular video calls to discuss visuals." },
+  { value: 'mix', label: "I'm happy with a mix of both." },
+  { value: 'milestones', label: 'I trust your expertise and will mostly provide feedback at key milestones.' },
+];
+
+// --- Zod schema ---
 const formSchema = toTypedSchema(z.object({
   businessName: z.string().min(2).max(100),
   businessDescription: z.array(z.string()).optional().default([]),
@@ -499,6 +971,26 @@ const formSchema = toTypedSchema(z.object({
   brandColorsDescription: z.string().optional(),
   hasBrandFonts: z.boolean().optional().default(false),
   brandFontsDescription: z.string().optional(),
+  // Inspiration fields
+  inspirationalWebsitesUrls: z.string().optional(),
+  inspirationalWebsitesComments: z.string().optional(),
+  // New field for aesthetic style
+  aestheticStyle: z.array(z.string()).optional().default([]),
+  // New field for essential pages
+  essentialPages: z.array(z.string()).optional().default([]),
+  // Functionality fields
+  desiredFeatures: z.array(z.string()).optional().default([]),
+  desiredFeaturesOther: z.string().optional(),
+  // New field for budget tier
+  projectBudgetTier: z.string({ 
+    required_error: 'Please select a budget range or indicate if unsure.' 
+  }).optional(), // Making it optional for now, but added error message
+  // Contact fields
+  contactName: z.string().min(1, { message: 'Name is required.'}),
+  contactEmail: z.string().min(1, { message: 'Email is required.'}).email({ message: 'Please enter a valid email address.'}),
+  contactPhone: z.string().optional(),
+  // New field for feedback preference
+  feedbackPreference: z.array(z.string()).optional().default([]),
 }).superRefine((data, ctx) => {
   // If they have a website, the URL is required and must be a valid URL
   if (data.hasExistingWebsite === 'yes') {
@@ -544,16 +1036,53 @@ const formSchema = toTypedSchema(z.object({
         path: ['brandFontsDescription'],
       });
   }
+  // Refinement for Desired Features Other
+  if (data.desiredFeatures?.includes('other_features') && !data.desiredFeaturesOther?.trim()) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Please specify the other desired features.',
+      path: ['desiredFeaturesOther'],
+    });
+  }
 }));
 
-// --- Form setup (simplified watches) ---
-const form = useForm({
-  validationSchema: formSchema,
-})
+// --- Form setup ---
+const form = useForm({ validationSchema: formSchema })
+const onSubmit = form.handleSubmit((values) => { console.log('Form submitted!', values) })
 
-const onSubmit = form.handleSubmit((values) => {
-  console.log('Form submitted!', values)
-})
+// Helper function to update array field values for ToggleGroup
+function updateMultiSelectField(fieldName: string, newValue: unknown) {
+  let finalValue: string[] = [];
+  // Check if it's an array first
+  if (Array.isArray(newValue)) {
+    // Ensure all elements are strings
+    finalValue = newValue.map(item => String(item)); 
+  } else if (newValue !== null && newValue !== undefined) {
+    // Handle single value (string or number), convert to string
+    finalValue = [String(newValue)];
+  } 
+  // Now finalValue is guaranteed to be string[]
+  form.setFieldValue(fieldName as any, finalValue);
+}
+
+// Helper function to toggle features/preferences in an array field
+function toggleArrayItem(fieldName: keyof typeof form.values, itemValue: string) {
+  const currentArray = (form.values[fieldName] as string[] | undefined) || [];
+  const itemIndex = currentArray.indexOf(itemValue);
+  let updatedArray = [...currentArray];
+
+  if (itemIndex > -1) {
+    updatedArray.splice(itemIndex, 1);
+  } else {
+    updatedArray.push(itemValue);
+  }
+  form.setFieldValue(fieldName, updatedArray);
+
+  // Specific logic for clearing 'other' fields if needed (can be expanded)
+  if (fieldName === 'desiredFeatures' && itemValue === 'other_features' && itemIndex > -1) {
+     form.setFieldValue('desiredFeaturesOther', undefined);
+  }
+}
 </script>
 
 <style>
@@ -619,6 +1148,11 @@ const onSubmit = form.handleSubmit((values) => {
 /* Add a style for invalid state */
 :deep(.multiselect-invalid .multiselect-wrapper) {
    @apply border-destructive ring-destructive focus-visible:border-destructive focus-visible:ring-destructive;
+}
+
+/* Add background and text color to Tooltip Content */
+:deep(.tooltip-content) { /* Or inspect browser for the exact class */
+  @apply bg-popover text-popover-foreground;
 }
 
 /* Scoped styles from before */
