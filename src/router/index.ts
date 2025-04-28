@@ -5,6 +5,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 const HomePage = () => import('@/views/HomePage.vue')
 const WireframeDemo = () => import('@/views/WireframeDemo.vue')
 const ClientFormView = () => import('@/views/ClientFormView.vue')
+const ClientFormTwoColumn = () => import('@/views/ClientFormTwoColumn.vue')
 const MockBentoDemo = () => import('@/pages/MockBentoDemo.vue')
 
 const routes = [
@@ -35,11 +36,27 @@ const routes = [
     }
   },
   {
+    path: '/client-form-2col',
+    name: 'ClientFormTwoColumn',
+    component: ClientFormTwoColumn,
+    meta: {
+      title: 'Client Questionnaire (Two Column)'
+    }
+  },
+  {
     path: '/bento-demo',
     name: 'BentoDemo',
     component: MockBentoDemo,
     meta: {
       title: 'Bento Box Demo'
+    }
+  },
+  {
+    path: '/client-form-alt',
+    name: 'ClientFormAlt',
+    component: () => import('@/views/ClientFormAltView.vue'),
+    meta: {
+      title: 'Client Questionnaire (Alternative)'
     }
   }
 ]

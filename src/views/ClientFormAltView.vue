@@ -5,11 +5,11 @@
     <div class="text-center max-w-3xl mx-auto mb-12 client-form-intro">
       <div class="flex justify-center mb-4">
         <div class="bg-muted inline-flex rounded-md p-1">
-          <router-link to="/client-form" class="px-3 py-1.5 text-sm font-medium rounded-md bg-background shadow-sm">Bento Box Version</router-link>
-          <router-link to="/client-form-alt" class="px-3 py-1.5 text-sm font-medium rounded-md text-muted-foreground hover:text-foreground">Alternative Version</router-link>
+          <router-link to="/client-form" class="px-3 py-1.5 text-sm font-medium rounded-md text-muted-foreground hover:text-foreground">Bento Box Version</router-link>
+          <router-link to="/client-form-alt" class="px-3 py-1.5 text-sm font-medium rounded-md bg-background shadow-sm">Alternative Version</router-link>
         </div>
       </div>
-      <h1 class="text-3xl font-bold mb-4">Client Project Questionnaire</h1>
+      <h1 class="text-3xl font-bold mb-4">Client Project Questionnaire (Alternative Version)</h1>
       <h4 class="mb-2 text-lg text-muted-foreground">Hey there! 👋 To make sure I create a website that really clicks with you and your business goals, I've put together a quick little "getting to know you" survey.</h4>
       <h4 class="mb-6 text-lg text-muted-foreground">It's just a friendly way for me to understand exactly what you're looking for, so we can build something awesome together!</h4>
     </div>
@@ -17,10 +17,10 @@
     <!-- Apply paper effect to the form - centered within the full-width container -->
     <form
       @submit="onSubmit"
-      class="space-y-8 max-w-3xl mx-auto text-card-foreground p-8 shadow-lg client-form-bento-box"
+      class="space-y-8 max-w-3xl mx-auto text-card-foreground p-8 shadow-lg client-form-alt"
     >
-      <!-- Use the AboutSection2 component -->
-      <AboutSection2
+      <!-- Use the alternative section components -->
+      <AboutSectionAlt
         :title="sectionInfo[0].title"
         :description="sectionInfo[0].description"
         :form="form"
@@ -30,8 +30,8 @@
         :primaryGoalsOptions="primaryGoalsOptions"
       />
 
-       <!-- Use the new DesignSection component -->
-       <DesignSection
+       <!-- Use the alternative design section component -->
+       <DesignSectionAlt
          :title="sectionInfo[1].title"
          :description="sectionInfo[1].description"
          :form="form"
@@ -41,7 +41,7 @@
        />
 
        <!-- Section 3 -->
-       <FunctionalitySection
+       <FunctionalitySectionAlt
          :title="sectionInfo[2].title"
          :description="sectionInfo[2].description"
          :form="form"
@@ -53,7 +53,7 @@
        />
 
        <!-- Section 4 -->
-       <LogisticsSection
+       <LogisticsSectionAlt
          :title="sectionInfo[3].title"
          :description="sectionInfo[3].description"
          :form="form"
@@ -87,11 +87,11 @@ import {
 import { fieldTexts, type AllFieldTexts } from '@/clientForm/texts';
 import { formSchema } from '@/clientForm/schema';
 
-// import AboutSection from '@/clientForm/AboutSection.vue';
-import AboutSection2 from '@/clientForm/AboutSection2.vue';
-import DesignSection from '@/clientForm/DesignSection.vue';
-import FunctionalitySection from '@/clientForm/FunctionalitySection.vue';
-import LogisticsSection from '@/clientForm/LogisticsSection.vue';
+// Import the alternative section components
+import AboutSectionAlt from '@/clientForm/alt/AboutSectionAlt.vue';
+import DesignSectionAlt from '@/clientForm/alt/DesignSectionAlt.vue';
+import FunctionalitySectionAlt from '@/clientForm/alt/FunctionalitySectionAlt.vue';
+import LogisticsSectionAlt from '@/clientForm/alt/LogisticsSectionAlt.vue';
 
 const sectionInfo = ref([
   { id: 'about', title: 'About Your Website', description: 'In this section, tell us the basics about what you need your website to do and who it\'s for.' },
@@ -108,7 +108,6 @@ const onSubmit = form.handleSubmit((values) => {
 
 // Create a computed property for fieldTexts
 const computedFieldTexts = computed<AllFieldTexts>(() => {
-  // console.log("PARENT: Computing fieldTexts.value:", JSON.stringify(fieldTexts.value));
   return fieldTexts.value;
 });
 
@@ -139,7 +138,11 @@ function toggleArrayItem(fieldName: keyof typeof form.values, itemValue: string)
      form.setFieldValue('desiredFeaturesOther', undefined);
   }
 }
-
-// console.log('PARENT: Initial fieldTexts.value:', JSON.stringify(fieldTexts.value)); // Log initial value
-
 </script>
+
+<style lang="scss">
+.client-form-alt {
+  background-color: hsl(var(--card));
+  border-radius: var(--radius);
+}
+</style>
