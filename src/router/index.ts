@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 // Create a new component for experiments
 // const Playground = () => import('@/views/Playground.vue')
 const HomePage = () => import('@/views/HomePage.vue')
+const SimpleHomePage = () => import('@/views/SimpleHomePage.vue')
 const WireframeDemo = () => import('@/views/WireframeDemo.vue')
 const ClientFormView = () => import('@/views/ClientFormView.vue')
 const ClientFormTwoColumn = () => import('@/views/ClientFormTwoColumn.vue')
@@ -12,6 +13,11 @@ const routes = [
   {
     path: '/',
     name: 'Home',
+    component: SimpleHomePage
+  },
+  {
+    path: '/classic',
+    name: 'ClassicHome',
     component: HomePage
   },
   // {
