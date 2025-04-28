@@ -1,0 +1,91 @@
+/* Multiselect CSS Variables */
+
+:root {
+  /* Base variables */
+  --ms-font-size: 1rem;
+  --ms-line-height: 1.375;
+  --ms-bg: #FFFFFF;
+  --ms-bg-disabled: #F3F4F6;
+  --ms-border-color: #D1D5DB;
+  --ms-border-width: 1px;
+  --ms-border-color-active: #2563EB;
+  --ms-border-width-active: 1px;
+  --ms-radius: 0.375rem;
+  --ms-py: 0.5rem;
+  --ms-px: 0.75rem;
+  --ms-ring-width: 3px;
+  --ms-ring-color: rgba(37, 99, 235, 0.1);
+  --ms-placeholder-color: #9CA3AF;
+  --ms-max-height: 10rem;
+
+  /* Options */
+  --ms-option-font-size: 1rem;
+  --ms-option-line-height: 1.375;
+  --ms-option-bg-pointed: #F3F4F6;
+  --ms-option-bg-selected: rgba(37, 99, 235, 0.1);
+  --ms-option-bg-selected-pointed: rgba(37, 99, 235, 0.2);
+  --ms-option-bg-disabled: #F3F4F6;
+  --ms-option-color-disabled: #9CA3AF;
+  --ms-option-py: 0.5rem;
+  --ms-option-px: 0.75rem;
+
+  /* Tags */
+  --ms-tag-font-size: 0.875rem;
+  --ms-tag-line-height: 1.25rem;
+  --ms-tag-font-weight: 600;
+  --ms-tag-bg: rgba(37, 99, 235, 0.1);
+  --ms-tag-bg-disabled: rgba(37, 99, 235, 0.05);
+  --ms-tag-color: #2563EB;
+  --ms-tag-color-disabled: #9CA3AF;
+  --ms-tag-radius: 0.25rem;
+  --ms-tag-py: 0.125rem;
+  --ms-tag-px: 0.5rem;
+  --ms-tag-my: 0.25rem;
+  --ms-tag-mx: 0.25rem;
+
+  /* Clear, Spinner, Caret */
+  --ms-clear-color: #9CA3AF;
+  --ms-clear-color-hover: #6B7280;
+  --ms-clear-margin: 0 0.5rem 0 0;
+  --ms-spinner-color: #9CA3AF;
+  --ms-spinner-margin: 0 0.5rem 0 0;
+  --ms-caret-color: #9CA3AF;
+  --ms-caret-margin: 0 0.5rem 0 0;
+
+  /* States */
+  --ms-error-color: #EF4444;
+  --ms-error-border-color: #EF4444;
+  --ms-success-color: #10B981;
+  --ms-success-border-color: #10B981;
+
+  /* Theme-specific overrides */
+  .theme-neon-horizon & {
+    --ms-border-color: hsl(var(--border));
+    --ms-border-color-active: hsl(var(--ring));
+    --ms-ring-color: hsla(var(--ring), 0.2);
+    --ms-tag-bg: hsla(var(--primary), 0.1);
+    --ms-tag-color: hsl(var(--primary));
+    --ms-option-bg-selected: hsla(var(--primary), 0.1);
+    --ms-option-bg-selected-pointed: hsla(var(--primary), 0.2);
+  }
+
+  .theme-digital-sunset & {
+    --ms-border-color: hsl(var(--border));
+    --ms-border-color-active: hsl(var(--ring));
+    --ms-ring-color: hsla(var(--ring), 0.2);
+    --ms-tag-bg: hsla(var(--primary), 0.1);
+    --ms-tag-color: hsl(var(--primary));
+    --ms-option-bg-selected: hsla(var(--primary), 0.1);
+    --ms-option-bg-selected-pointed: hsla(var(--primary), 0.2);
+  }
+
+  .theme-retro-wave & {
+    --ms-border-color: hsl(var(--border));
+    --ms-border-color-active: hsl(var(--ring));
+    --ms-ring-color: hsla(var(--ring), 0.2);
+    --ms-tag-bg: hsla(var(--primary), 0.1);
+    --ms-tag-color: hsl(var(--primary));
+    --ms-option-bg-selected: hsla(var(--primary), 0.1);
+    --ms-option-bg-selected-pointed: hsla(var(--primary), 0.2);
+  }
+}

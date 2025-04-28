@@ -1,0 +1,215 @@
+/* Style Guide Option 1: "Neon Horizon" */
+/* Style Guide Option 2: "Digital Sunset" */
+/* Style Guide Option 3: "Retro Wave" */
+/* Style Guide Option 4: "Pastel Future" */
+/* Cyber Boom  */
+/* Quantum Leap */
+/* Pixel Nebula */
+/* Circuit Dusk */
+/* Professional Edge */
+.retro-wave-element {
+  background: linear-gradient(to right, #2980B9, #6DD5FA);
+}
+
+.border-primary {
+  border: 1px solid;
+  border-color: #2A3FFB;
+}
+
+.border-secondary {
+  border: 1px solid;
+  border-color: #FF6B4A;
+}
+
+.border-accent {
+  border: 1px solid;
+  border-color: #7000FF;
+}
+
+.border-space {
+  border: 1px solid;
+  border-color: #0A0A0F;
+}
+
+.border-neutral-900 {
+  border: 1px solid;
+  border-color: #342E2E;
+}
+
+.border-neutral-700 {
+  border: 1px solid;
+  border-color: #817A7A;
+}
+
+.border-neutral-500 {
+  border: 1px solid;
+  border-color: #CFCDC7;
+}
+
+.border-neutral-400 {
+  border: 1px solid;
+  border-color: #D9D9D9;
+}
+
+.border-neutral-300 {
+  border: 1px solid;
+  border-color: #E8E8E8;
+}
+
+.border-neutral-100 {
+  border: 1px solid;
+  border-color: #FBFBFB;
+}
+
+.form-grid {
+  border: 2px solid red;
+  display: grid;
+  /* gap: $spacing-unit * 2; // 4 units in Tailwind (gap-4) */
+}
+@media (min-width: 768px) {
+  .form-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+}
+@media (min-width: 1024px) {
+  .form-grid {
+    grid-template-columns: repeat(8, 1fr);
+    gap: 24px;
+  }
+}
+.form-grid .form-item {
+  border: 2px solid blue;
+  padding: 16px;
+  border-radius: 12px;
+  /* opacity: 0.5; */
+}
+.theme-neon-horizon .form-grid .form-item {
+  background-color: #ECEFF4;
+  border: 2px solid #2E3440;
+}
+.theme-digital-sunset .form-grid .form-item {
+  background-color: #F8F8F8;
+  border: 2px solid #4C566A;
+}
+.theme-retro-wave .form-grid .form-item {
+  background-color: #E0E0E0;
+  border: 2px solid #1A1A1A;
+}
+.theme-pastel-future .form-grid .form-item {
+  background-color: #F5F5F5;
+  border: 2px solid #6A5ACD;
+}
+.theme-cyber-bloom .form-grid .form-item {
+  background-color: #E1E1E6;
+  border: 2px solid #1A1A2E;
+}
+.theme-quantum-leap .form-grid .form-item {
+  background-color: #E8F0FE;
+  border: 2px solid #222F3E;
+}
+.theme-pixel-nebula .form-grid .form-item {
+  background-color: #E0E0E0;
+  border: 2px solid #121212;
+}
+.theme-circuit-dusk .form-grid .form-item {
+  background-color: #ECEFF1;
+  border: 2px solid #263238;
+}
+.theme-professional-edge .form-grid .form-item {
+  background-color: #D8DEE9;
+  border: 2px solid #2E3440;
+}
+@media (min-width: 768px) {
+  .form-grid .form-item--about-name {
+    grid-column: 1/span 2;
+  }
+  .form-grid .form-item--about-desc {
+    grid-column: 3/span 2;
+  }
+  .form-grid .form-item--about-audience {
+    grid-column: 1/span 2;
+  }
+  .form-grid .form-item--about-goals {
+    grid-column: 3/span 2;
+  }
+  .form-grid .form-item--about-existing-website {
+    grid-column: 1/span 2;
+  }
+  .form-grid .form-item--about-domain-status {
+    grid-column: 3/span 2;
+  }
+  .form-grid .form-item--design-visual-identity {
+    grid-column: span 2;
+  }
+  .form-grid .form-item--design-inspiration {
+    grid-column: span 2;
+  }
+  .form-grid .form-item--design-aesthetic {
+    grid-column: span 2;
+  }
+  .form-grid .form-item--functionality-pages {
+    grid-column: span 2;
+  }
+  .form-grid .form-item--functionality-features {
+    grid-column: span 2;
+  }
+  .form-grid .form-item--logistics-budget {
+    grid-column: span 1;
+  }
+  .form-grid .form-item--logistics-contact {
+    grid-column: span 1;
+  }
+  .form-grid .form-item--logistics-feedback {
+    grid-column: span 2;
+  }
+}
+@media (min-width: 1024px) {
+  .form-grid .form-item--about-name {
+    grid-column: 1/5;
+    grid-row: 1/2;
+  }
+  .form-grid .form-item--about-desc {
+    grid-column: 5/-1;
+    grid-row: 1/4;
+  }
+  .form-grid .form-item--about-audience {
+    grid-column: 1/4;
+    grid-row: 2/5;
+  }
+  .form-grid .form-item--about-goals {
+    grid-column: 1/4;
+    grid-row: 5/-1;
+  }
+  .form-grid .form-item--about-existing-website {
+    grid-column: 4/-1;
+    grid-row: 4/-1;
+  }
+  .form-grid .form-item--about-domain-status {
+    grid-column: 5/span 3;
+  }
+  .form-grid .form-item--design-visual-identity {
+    grid-column: span 2;
+  }
+  .form-grid .form-item--design-inspiration {
+    grid-column: span 2;
+  }
+  .form-grid .form-item--design-aesthetic {
+    grid-column: span 2;
+  }
+  .form-grid .form-item--functionality-pages {
+    grid-column: span 2;
+  }
+  .form-grid .form-item--functionality-features {
+    grid-column: span 2;
+  }
+  .form-grid .form-item--logistics-budget {
+    grid-column: span 1;
+  }
+  .form-grid .form-item--logistics-contact {
+    grid-column: span 1;
+  }
+  .form-grid .form-item--logistics-feedback {
+    grid-column: span 2;
+  }
+}

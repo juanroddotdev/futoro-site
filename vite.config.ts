@@ -4,6 +4,10 @@ import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  define: {
+    // Add global variables for Node.js polyfills
+    global: {},
+  },
   base: '/futoro-site/',
   plugins: [vue()],
   resolve: {

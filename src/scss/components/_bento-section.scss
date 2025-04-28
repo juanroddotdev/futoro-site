@@ -1,0 +1,76 @@
+// Styles for items within the BentoSection layout
+
+
+// Styles for the form section container
+@import '../abstracts/variables';
+
+.form-grid {
+  // Section container styles
+  /* padding: $spacing-unit * 3; // 6 units in Tailwind (p-6) */
+  border-radius: 12px;
+  max-height: 100%;
+  overflow-y: auto;
+  /* // Temporary grid visualization
+  background: linear-gradient(to right, rgba(255, 0, 0, 0.3) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(255, 0, 0, 0.3) 1px, transparent 1px);
+  background-size: calc(100% / 8) 100%, 100% calc(100% / 8); */
+
+  .form-grid-heading {
+    border: 2px solid black;
+    grid-column: 1 / 3;
+    grid-row: 1 / 3;
+  }
+  // Title styles
+  h2 {
+    font-size: 1.5rem; // text-2xl
+    font-weight: 600; // font-semibold
+    margin-bottom: 0;
+    padding: $spacing-unit * 1.5 0; // py-2
+    z-index: 10;
+
+    @media (min-width: map-get($breakpoints, 'lg')) {
+      grid-column: span 2;
+    }
+  }
+
+  // Description styles
+  .description {
+    border: 2px solid white;
+    padding: $spacing-unit * 2; // p-4
+    border-radius: 6px; // rounded-md
+    font-size: 0.875rem; // text-sm
+    grid-column: 3/-1;
+    grid-row: 1 / 3;
+
+    @media (min-width: map-get($breakpoints, 'lg')) {
+      grid-column: 3 / span 6;
+    }
+  }
+
+  // Form content container
+  .form-content {
+    grid-column: 1 / -1;
+    grid-row-start: 3;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(6, minmax(60px, auto)); // 8 rows with minimum height
+    gap: $spacing-unit * 2; // 4 units in Tailwind (gap-4)
+    /* // Temporary grid visualization
+    background: linear-gradient(to right, rgba(0, 0, 255, 0.3) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 0, 255, 0.3) 1px, transparent 1px);
+    background-size: calc(100% / 8) 100%, 100% calc(100% / 8); */
+
+    @media (min-width: map-get($breakpoints, 'md')) {
+      grid-template-columns: repeat(4, 1fr);
+      gap: $spacing-unit * 2.5; // 5 units in Tailwind (gap-5)
+      background-size: calc(100% / 4) 100%, 100% calc(100% / 4);
+    }
+
+    @media (min-width: map-get($breakpoints, 'lg')) {
+      grid-column: 1 / span 8;
+      grid-template-columns: repeat(8, 1fr);
+      gap: $spacing-unit * 3; // 6 units in Tailwind (gap-6)
+      background-size: calc(100% / 8) 100%, 100% calc(100% / 8);
+    }
+  }
+} 

@@ -44,9 +44,7 @@ $neon-horizon-hsl: (
   --border: #{map.get($neon-horizon-hsl, 'secondary')};             // Use theme secondary for borders
   --input: #{map.get($neon-horizon-hsl, 'primary')};                  // Use theme primary for input background
   --ring: #{map.get($neon-horizon-hsl, 'accent')};                   // Use theme accent for focus ring
-
-  /* Add other Shadcn variables if needed, mapped from your theme */
-  /* --radius: ...; */
+  --radius: 0.5rem;                                                   // Border radius value
 }
 
 // TODO: Add similar blocks for other themes (.theme-digital-sunset, .theme-retro-wave, etc.)
