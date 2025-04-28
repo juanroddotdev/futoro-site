@@ -1,0 +1,107 @@
+// Styles specific to the ClientFormView and its elements
+
+.client-form-container {
+  color: #f0f0f0; // Consider using theme variables if available
+  // height: 100vh; // Re-evaluate if this is necessary globally
+}
+
+.client-form-bento-box {
+  padding: 20px;
+  color: black;
+}
+
+.client-form-intro {
+  color: #f0f0f0; // Consider using theme variables
+  margin-top: 96px; // Or use theme spacing variables
+}
+
+// Custom styling for Multiselect to better match Shadcn/Tailwind
+// Removed :deep() as this is now global
+.multiselect-wrapper {
+  /* @apply relative w-full flex items-center justify-end box-border cursor-pointer border border-input bg-background rounded-md shadow-sm pl-3 pr-10 py-2 text-left 
+         focus:outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring sm:text-sm; */
+}
+
+.multiselect-tags {
+  @apply flex-grow flex-shrink flex flex-wrap items-center gap-1;
+}
+
+.multiselect-tag {
+  @apply inline-flex items-center text-sm font-medium whitespace-nowrap rounded-md 
+         bg-secondary text-secondary-foreground 
+         py-0.5 px-2 mr-1 mb-1;
+}
+
+.multiselect-tag-remove {
+  @apply inline-flex items-center justify-center w-4 h-4 ml-1.5;
+}
+.multiselect-tag-remove-icon {
+  @apply w-3 h-3;
+}
+
+.multiselect-placeholder {
+ @apply absolute left-3 right-10 top-1/2 transform -translate-y-1/2 text-muted-foreground;
+}
+
+.multiselect-search {
+  @apply w-full absolute inset-0 outline-none appearance-none box-border border-0 
+         bg-transparent text-sm font-sans pl-3;
+}
+
+.multiselect-dropdown {
+  @apply absolute -left-px -right-px bottom-0 transform translate-y-full border border-input mt-1.5 
+         max-h-60 w-[calc(100%+2px)] overflow-auto rounded-md bg-popover py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 
+         focus:outline-none sm:text-sm z-10;
+}
+
+.multiselect-options {
+  @apply list-none p-0 m-0;
+}
+
+.multiselect-option {
+  @apply relative cursor-default select-none py-2 pl-3 pr-9 text-popover-foreground;
+}
+.multiselect-option.is-pointed {
+  @apply bg-accent text-accent-foreground;
+}
+.multiselect-option.is-selected {
+  @apply font-semibold;
+}
+.multiselect-option.is-disabled {
+  @apply text-muted-foreground cursor-not-allowed;
+}
+
+/* Style for invalid state */
+/* .multiselect-invalid .multiselect-wrapper {
+   @apply border-destructive ring-destructive focus-visible:border-destructive focus-visible:ring-destructive;
+} */
+
+// Custom Switch Styling (previously :deep())
+button[role='switch'] {
+  @apply relative;
+}
+
+button[role='switch'][data-state='unchecked'] {
+  @apply bg-muted/50 border border-muted;
+}
+
+button[role='switch'][data-state='checked'] {
+   /* @apply bg-primary; */ 
+}
+
+button[role='switch'] > span { 
+  @apply pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-lg ring-0 transition-transform duration-200 ease-in-out;
+}
+
+button[role='switch'][data-state='unchecked'] > span {
+   @apply translate-x-0.5;
+}
+
+button[role='switch'][data-state='checked'] > span {
+   @apply translate-x-[1.125rem];
+}
+
+// Tooltip Content Styling (previously :deep())
+.tooltip-content {
+  @apply bg-popover text-popover-foreground;
+} 

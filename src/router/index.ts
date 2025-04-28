@@ -5,6 +5,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 const HomePage = () => import('@/views/HomePage.vue')
 const WireframeDemo = () => import('@/views/WireframeDemo.vue')
 const ClientFormView = () => import('@/views/ClientFormView.vue')
+const MockBentoDemo = () => import('@/pages/MockBentoDemo.vue')
 
 const routes = [
   {
@@ -31,6 +32,14 @@ const routes = [
     component: ClientFormView,
     meta: {
       title: 'Client Questionnaire'
+    }
+  },
+  {
+    path: '/bento-demo',
+    name: 'BentoDemo',
+    component: MockBentoDemo,
+    meta: {
+      title: 'Bento Box Demo'
     }
   }
 ]

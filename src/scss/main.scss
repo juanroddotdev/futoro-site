@@ -1,5 +1,9 @@
-// Import Tailwind base styles first
+// Import Tailwind and shadcn base styles first
 @import 'vendors/tailwind-base';
+@import 'vendors/shadcn-base';
+@import 'vendors/shadcn-theme-overrides';
+@import 'vendors/tailwind-utilities'; // Import Tailwind utility variables
+@import 'vendors/multiselect-variables'; // Import multiselect variables
 @import "@vueform/multiselect/themes/default.css"; // Import multiselect CSS
 
 // Then import abstracts
@@ -14,7 +18,7 @@
 @import 'base/animations';
 @import 'base/utilities';
 
-// Import Tailwind components
+// Import Tailwind components and utilities
 @import 'vendors/tailwind-components-utilities';
 
 // Then your custom components
@@ -23,6 +27,7 @@
 /* @import 'components/availability-badge'; *//* Moved to _unused folder */
 @import 'components/buttons-round';
 @import 'components/form';
+@import 'components/form-grid';
 @import 'components/transitions';
 /* @import 'components/headings'; */
 @import 'components/custom-headings';
@@ -49,6 +54,8 @@
 @import 'components/message-bubble';
 @import 'components/text-animations';
 @import 'components/collide-stack';
+@import 'components/client-form';
+@import 'components/bento-section';
 // Playground styles
 /* @import 'playground/_index'; */
 
@@ -61,9 +68,6 @@
 @import 'themes/variables';
 @import 'themes/neutral';
 @import 'themes/theme-classes';
-@import 'vendors/shadcn-theme-overrides';
-
-// Import component styles
 
 html {
   scroll-behavior: smooth;
