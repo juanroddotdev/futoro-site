@@ -638,6 +638,124 @@ const mergedFormValues = computed(() => {
   flex-direction: column;
 }
 
+/* Default desktop styles */
+.form-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  margin-top: 200px;
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 2rem;
+}
+
+.steps-nav {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.step-button {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  flex-direction: row;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+.step-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.step-button--active {
+  background-color: var(--form-primary);
+}
+
+.step-button--active .step-title,
+.step-button--active .step-description {
+  color: white;
+}
+
+.step-button--active .step-description {
+  display: block;
+}
+
+/* Mobile styles */
+@media (max-width: 1023px) {
+  .form-container {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .steps-nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    margin-top: 0;
+    flex-direction: row;
+    justify-content: space-between;
+    background-color: var(--form-bg);
+    border-bottom: 1px solid var(--form-border);
+    padding: 0.75rem 1rem;
+    gap: 0;
+  }
+
+  .step-button {
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem;
+    gap: 0.25rem;
+    width: auto;
+  }
+
+  .step-content {
+    display: none;
+  }
+
+  .step-button--active {
+    flex: 3;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: transparent;
+  }
+
+  .step-button--active .step-content {
+    display: block;
+  }
+
+  .step-button--active .step-title {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--form-primary);
+    margin: 0;
+  }
+
+  .step-button--active .step-description {
+    display: none;
+  }
+
+  .form-content {
+    padding: 1rem;
+  }
+}
+
 .form-header {
   background-color: var(--form-bg);
   border-bottom: 1px solid var(--form-border);
@@ -689,38 +807,6 @@ const mergedFormValues = computed(() => {
   color: var(--form-text-muted);
 }
 
-.form-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
-  margin-top: 200px;
-  display: grid;
-  grid-template-columns: 240px 1fr;
-  gap: 2rem;
-}
-
-.steps-nav {
-  margin-top: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.step-button {
-  position: relative;
-  display: flex;
-  width: 100%;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  transition: all 0.2s ease;
-  cursor: pointer;
-  border: none;
-  background: none;
-}
-
 .step-title {
   font-weight: 500;
   color: #1F2937;
@@ -755,46 +841,6 @@ const mergedFormValues = computed(() => {
 
 .step-button--accessible .step-description {
   color: #4B5563;
-}
-
-.step-icon {
-  width: 16px;
-  height: 16px;
-  stroke-width: 2px;
-}
-
-.step-number {
-  display: flex;
-  height: 32px;
-  width: 32px;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  border: 1px solid;
-  text-align: center;
-}
-
-.step-number--active {
-  border-color: white;
-  background-color: white;
-  color: var(--form-primary);
-}
-
-.step-number--completed {
-  border-color: var(--form-primary);
-  background-color: var(--form-primary);
-  color: white;
-}
-
-.step-number--accessible {
-  border-color: #d1d5db;
-}
-
-.step-content {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
 }
 
 .step-progress {
@@ -835,14 +881,6 @@ const mergedFormValues = computed(() => {
 
 .step-button--active .progress-dot--filled {
   background-color: white;
-}
-
-.form-content {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  padding: 0 100px;
-  margin-top: 1rem;
 }
 
 .error-message {

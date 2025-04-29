@@ -386,7 +386,15 @@ watch(() => props.modelValue, (newValue) => {
 .design-step {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
+  padding: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .design-step {
+    gap: 1.5rem;
+    padding: 0;
+  }
 }
 
 .card {
@@ -394,47 +402,85 @@ watch(() => props.modelValue, (newValue) => {
   border-radius: 0.5rem;
   border: 1px solid var(--form-border);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
 }
 
 .card-header {
-  padding: 1.5rem;
+  padding: 1rem;
   border-bottom: 1px solid var(--form-border);
 }
 
+@media (min-width: 640px) {
+  .card-header {
+    padding: 1.5rem;
+  }
+}
+
 .card-title {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .card-title {
+    font-size: 1.25rem;
+  }
 }
 
 .card-description {
   color: var(--form-text-muted);
   font-size: 0.875rem;
+  line-height: 1.4;
 }
 
 .card-content {
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-.card-footer {
-  padding: 1.5rem;
-  border-top: 1px solid var(--form-border);
-  display: flex;
-  justify-content: space-between;
-}
-
-.section {
+  padding: 1rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
+@media (min-width: 640px) {
+  .card-content {
+    padding: 1.5rem;
+    gap: 2rem;
+  }
+}
+
+.card-footer {
+  padding: 1rem;
+  border-top: 1px solid var(--form-border);
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .card-footer {
+    padding: 1.5rem;
+    gap: 1rem;
+  }
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .section {
+    gap: 1.5rem;
+  }
+}
+
 .section-title {
   font-size: 1rem;
   font-weight: 500;
+  margin-bottom: 0.25rem;
 }
 
 .form-item {
@@ -445,13 +491,14 @@ watch(() => props.modelValue, (newValue) => {
 
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(1, 1fr);
-  gap: 1rem;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
 }
 
 @media (min-width: 640px) {
   .feature-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
   }
 }
 
@@ -465,8 +512,8 @@ watch(() => props.modelValue, (newValue) => {
   position: relative;
   display: flex;
   align-items: flex-start;
-  gap: 1rem;
-  padding: 1rem;
+  gap: 0.75rem;
+  padding: 0.875rem;
   border: 1px solid var(--form-border);
   border-radius: 0.5rem;
   background-color: white;
@@ -474,6 +521,15 @@ watch(() => props.modelValue, (newValue) => {
   transition: all 0.2s ease;
   cursor: pointer;
   width: 100%;
+  min-height: 3.5rem;
+}
+
+@media (min-width: 640px) {
+  .feature-card {
+    gap: 1rem;
+    padding: 1rem;
+    min-height: 4rem;
+  }
 }
 
 .feature-card:hover {
@@ -488,9 +544,16 @@ watch(() => props.modelValue, (newValue) => {
 
 .feature-card__checkbox {
   flex-shrink: 0;
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 1.125rem;
+  height: 1.125rem;
   margin-top: 0.125rem;
+}
+
+@media (min-width: 640px) {
+  .feature-card__checkbox {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
 }
 
 .feature-card__checkbox-icon {
@@ -532,5 +595,28 @@ watch(() => props.modelValue, (newValue) => {
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Custom input styles */
+:deep(.multiselect) {
+  min-height: 2.5rem;
+  font-size: 0.875rem;
+}
+
+:deep(.textarea) {
+  min-height: 5rem;
+  font-size: 0.875rem;
+}
+
+:deep(.input) {
+  height: 2.5rem;
+  font-size: 0.875rem;
+}
+
+/* Button styles */
+:deep(.button) {
+  min-height: 2.5rem;
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
 }
 </style> 
