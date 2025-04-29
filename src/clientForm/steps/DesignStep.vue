@@ -344,6 +344,7 @@ watch(() => props.modelValue, (newValue) => {
                   class="feature-card"
                   :class="{ 'feature-card--selected': (field.value || []).includes(option.value) }"
                   @click="toggleSelection('aestheticStyle', option.value)"
+                  :title="option.definition"
                 >
                   <div class="feature-card__checkbox">
                     <div class="feature-card__checkbox-icon">

@@ -49,7 +49,7 @@ Project Steps:
     <!-- Show success view if form is submitted -->
     <SubmissionSuccessView
       v-if="submissionSuccess"
-      :form-data="form.values"
+      :form-data="mergedFormValues"
     />
     
     <!-- Show form if not submitted -->
@@ -300,26 +300,35 @@ const handleSubmit = async () => {
       return
     }
     
-    // Get all form values directly from the form object
+    // Get saved data from localStorage
+    const savedData = localStorage.getItem(STORAGE_KEY)
+    const savedValues = savedData ? JSON.parse(savedData) : {}
+    
+    // Merge saved values with current form values
     const formValues = {
-      businessName: form.values.businessName,
-      businessDescription: form.values.businessDescription,
-      targetAudience: form.values.targetAudience,
-      primaryGoals: form.values.primaryGoals,
-      hasLogo: form.values.hasLogo,
-      hasBrandColors: form.values.hasBrandColors,
-      hasBrandFonts: form.values.hasBrandFonts,
-      brandColorsDescription: form.values.brandColorsDescription,
-      brandFontsDescription: form.values.brandFontsDescription,
-      aestheticStyle: form.values.aestheticStyle,
-      essentialPages: form.values.essentialPages,
-      desiredFeatures: form.values.desiredFeatures,
-      desiredFeaturesOther: form.values.desiredFeaturesOther,
-      timeline: form.values.timeline,
-      budgetTier: form.values.budgetTier
+      ...savedValues,
+      ...form.values,
+      businessName: savedValues.businessName || form.values.businessName,
+      businessDescription: savedValues.businessDescription || form.values.businessDescription,
+      targetAudience: savedValues.targetAudience || form.values.targetAudience,
+      primaryGoals: savedValues.primaryGoals || form.values.primaryGoals,
+      hasLogo: savedValues.hasLogo || form.values.hasLogo,
+      hasBrandColors: savedValues.hasBrandColors || form.values.hasBrandColors,
+      hasBrandFonts: savedValues.hasBrandFonts || form.values.hasBrandFonts,
+      brandColorsDescription: savedValues.brandColorsDescription || form.values.brandColorsDescription,
+      brandFontsDescription: savedValues.brandFontsDescription || form.values.brandFontsDescription,
+      aestheticStyle: savedValues.aestheticStyle || form.values.aestheticStyle,
+      essentialPages: savedValues.essentialPages || form.values.essentialPages,
+      desiredFeatures: savedValues.desiredFeatures || form.values.desiredFeatures,
+      desiredFeaturesOther: savedValues.desiredFeaturesOther || form.values.desiredFeaturesOther,
+      timeline: form.values.timeline || savedValues.timeline,
+      budgetTier: form.values.budgetTier || savedValues.budgetTier
     }
     
     console.log('Complete form values for submission:', formValues)
+    
+    // Store the form values in localStorage before simulating submission
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(formValues))
     
     // Here you would typically send the form data to your backend
     // For now, we'll just simulate a successful submission
@@ -601,6 +610,17 @@ const isQuestionAnswered = (stepId: string, questionId: string) => {
   
   return true;
 };
+
+// Create a computed property for merged form values
+const mergedFormValues = computed(() => {
+  const savedData = localStorage.getItem(STORAGE_KEY)
+  const savedValues = savedData ? JSON.parse(savedData) : {}
+  
+  return {
+    ...savedValues,
+    ...form.values
+  }
+})
 </script>
 
 <style scoped>

@@ -115,6 +115,7 @@ const updateCheckboxValue = (field: any, value: string, checked: boolean) => {
                     class="feature-card"
                     :class="{ 'feature-card--selected': field.value?.includes(option.value) }"
                     @click="updateCheckboxValue(field, option.value, !field.value?.includes(option.value))"
+                    :title="option.definition"
                   >
                     <div class="feature-card__checkbox">
                       <Checkbox
