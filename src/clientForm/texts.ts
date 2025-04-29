@@ -219,5 +219,24 @@ export const fieldTexts = ref<AllFieldTexts>({
         { value: 'mix', label: "I'm happy with a mix of both." },
         { value: 'milestones', label: 'I trust your expertise and will mostly provide feedback at key milestones.' },
     ]
+  },
+
+  // Project Timeline
+  projectTimeline: {
+    label: 'When would you like to start your project?',
+    description: 'This helps us plan resources and set realistic expectations.',
+    options: [
+      { value: 'asap', label: 'As soon as possible' },
+      { value: 'within_month', label: 'Within a month' },
+      { value: 'within_quarter', label: 'Within 3 months' },
+      { value: 'within_6months', label: 'Within 6 months' },
+      { value: 'flexible', label: 'Flexible / No specific timeline' }
+    ]
+  },
+
+  // Budget Range
+  budgetRange: {
+    label: 'What is your budget range for this project?',
+    description: 'This helps us recommend the most suitable solutions within your budget.'
   }
 }); 
