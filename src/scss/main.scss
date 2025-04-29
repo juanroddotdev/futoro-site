@@ -69,6 +69,16 @@
 @import 'themes/neutral';
 @import 'themes/theme-classes';
 
+// Components
+@import './components/steps';
+
+// Hide navbar when client form is active
+body.client-form-active {
+  .navbar {
+    display: none !important;
+  }
+}
+
 html {
   scroll-behavior: smooth;
 }
