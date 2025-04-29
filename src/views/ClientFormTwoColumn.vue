@@ -638,145 +638,121 @@ const mergedFormValues = computed(() => {
   flex-direction: column;
 }
 
-/* Base mobile styles */
+/* Default desktop styles */
 .form-container {
-  width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0;
+  padding: 0 1rem;
+  margin-top: 200px;
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 0;
+  grid-template-columns: 240px 1fr;
+  gap: 2rem;
 }
 
 .steps-nav {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  margin-top: 0;
+  margin-top: 1rem;
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  background-color: var(--form-bg);
-  border-bottom: 1px solid var(--form-border);
-  padding: 0.75rem 1rem;
-  gap: 0;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .step-button {
-  flex-direction: column;
-  align-items: center;
-  padding: 0.5rem;
-  gap: 0.25rem;
-  width: auto;
-  flex: 1;
+  position: relative;
   display: flex;
-}
-
-.step-number {
-  display: flex;
-  height: 2.5rem;
-  width: 2.5rem;
-  flex-shrink: 0;
+  width: 100%;
   align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  border: 1px solid var(--form-border);
-  background-color: white;
-}
-
-.step-icon {
-  width: 1.25rem;
-  height: 1.25rem;
-  color: var(--form-text-muted);
+  flex-direction: row;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+  background: none;
 }
 
 .step-content {
-  display: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .step-button--active {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 0.5rem;
-  flex: 3;
-}
-
-.step-button--active .step-content {
-  display: block;
-}
-
-.step-button--active .step-title {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--form-primary);
-  margin: 0;
-}
-
-.step-button--active .step-description {
-  display: none;
-}
-
-.step-button--active .step-number {
-  border-color: var(--form-primary);
   background-color: var(--form-primary);
 }
 
-.step-button--active .step-icon {
+.step-button--active .step-title,
+.step-button--active .step-description {
   color: white;
 }
 
-.form-content {
-  padding: 1rem;
+.step-button--active .step-description {
+  display: block;
 }
 
-/* Desktop styles */
-@media (min-width: 1024px) {
-  .client-form .form-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 1rem;
-    margin-top: 200px;
-    grid-template-columns: 240px 1fr;
-    gap: 2rem;
-  }
-
-  .client-form .steps-nav {
-    position: static;
-    margin-top: 1rem;
-    flex-direction: column;
-    gap: 0.5rem;
-    border-bottom: none;
-    padding: 0;
-  }
-
-  .client-form .step-button {
-    position: relative;
-    display: flex;
+/* Mobile styles */
+@media (max-width: 1023px) {
+  .form-container {
     width: 100%;
-    align-items: center;
+    margin: 0;
+    padding: 0;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .steps-nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    margin-top: 0;
     flex-direction: row;
-    gap: 0.75rem;
-    padding: 0.75rem;
+    justify-content: space-between;
+    background-color: var(--form-bg);
+    border-bottom: 1px solid var(--form-border);
+    padding: 0.75rem 1rem;
+    gap: 0;
   }
 
-  .client-form .step-content {
-    display: flex;
+  .step-button {
+    flex: 1;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    padding: 0.5rem;
+    gap: 0.25rem;
+    width: auto;
   }
 
-  .client-form .step-button--active .step-description {
+  .step-content {
+    display: none;
+  }
+
+  .step-button--active {
+    flex: 3;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: transparent;
+  }
+
+  .step-button--active .step-content {
     display: block;
   }
 
-  .client-form .form-content {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    padding: 0 100px;
-    margin-top: 1rem;
+  .step-button--active .step-title {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--form-primary);
+    margin: 0;
+  }
+
+  .step-button--active .step-description {
+    display: none;
+  }
+
+  .form-content {
+    padding: 1rem;
   }
 }
 
