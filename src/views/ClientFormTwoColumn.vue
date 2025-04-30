@@ -643,7 +643,7 @@ const mergedFormValues = computed(() => {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1rem;
-  margin-top: 200px;
+  margin-top: 60px;
   display: grid;
   grid-template-columns: 240px 1fr;
   gap: 2rem;
