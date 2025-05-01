@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { Field as VeeField } from 'vee-validate';
+import { VeeValidateAdapter } from '../validation/veeValidateAdapter';
+import type { ValidationSchema } from '../validation/types';
 
 // UI components
 import {
@@ -18,6 +20,45 @@ import { Search, Check } from 'lucide-vue-next';
 
 // Types
 import type { AllFieldTexts } from '../texts';
+
+// Define validation schema for all fields
+const validationSchema: ValidationSchema = {
+  businessName: {
+    required: true,
+    min: 2,
+    max: 100,
+    custom: (value: string) => {
+      if (!value) return 'Business name is required';
+      if (value.length < 2) return 'Business name must be at least 2 characters';
+      if (value.length > 100) return 'Business name must be less than 100 characters';
+      return true;
+    }
+  },
+  businessDescription: {
+    required: true,
+    custom: (value: string[]) => {
+      if (!value || value.length === 0) return 'At least one business description is required';
+      return true;
+    }
+  },
+  targetAudience: {
+    required: true,
+    custom: (value: string[]) => {
+      if (!value || value.length === 0) return 'At least one target audience is required';
+      return true;
+    }
+  },
+  primaryGoals: {
+    required: true,
+    custom: (value: string[]) => {
+      if (!value || value.length === 0) return 'At least one primary goal is required';
+      return true;
+    }
+  }
+};
+
+// Initialize validator
+const validator = new VeeValidateAdapter(validationSchema);
 
 // Props
 const props = defineProps<{
@@ -150,6 +191,73 @@ const emit = defineEmits<{
 // Access form values
 const formValues = computed(() => props.form?.values ?? {});
 
+// Add validation for all fields
+const businessNameError = ref('');
+const businessDescriptionError = ref('');
+const targetAudienceError = ref('');
+const primaryGoalsError = ref('');
+
+const validateBusinessName = async (value: string) => {
+  try {
+    const result = await validator.validateField('businessName', value);
+    businessNameError.value = result.errors.businessName || '';
+    return result.valid;
+  } catch (error) {
+    console.error('Validation error:', error);
+    businessNameError.value = 'An error occurred during validation';
+    return false;
+  }
+};
+
+const validateBusinessDescription = async (value: string[]) => {
+  try {
+    const result = await validator.validateField('businessDescription', value);
+    businessDescriptionError.value = result.errors.businessDescription || '';
+    return result.valid;
+  } catch (error) {
+    console.error('Validation error:', error);
+    businessDescriptionError.value = 'An error occurred during validation';
+    return false;
+  }
+};
+
+const validateTargetAudience = async (value: string[]) => {
+  try {
+    const result = await validator.validateField('targetAudience', value);
+    targetAudienceError.value = result.errors.targetAudience || '';
+    return result.valid;
+  } catch (error) {
+    console.error('Validation error:', error);
+    targetAudienceError.value = 'An error occurred during validation';
+    return false;
+  }
+};
+
+const validatePrimaryGoals = async (value: string[]) => {
+  try {
+    const result = await validator.validateField('primaryGoals', value);
+    primaryGoalsError.value = result.errors.primaryGoals || '';
+    return result.valid;
+  } catch (error) {
+    console.error('Validation error:', error);
+    primaryGoalsError.value = 'An error occurred during validation';
+    return false;
+  }
+};
+
+// Watch for changes in all fields to validate
+watch(() => props.form.values.businessDescription, (newValue) => {
+  validateBusinessDescription(newValue || []);
+}, { deep: true });
+
+watch(() => props.form.values.targetAudience, (newValue) => {
+  validateTargetAudience(newValue || []);
+}, { deep: true });
+
+watch(() => props.form.values.primaryGoals, (newValue) => {
+  validatePrimaryGoals(newValue || []);
+}, { deep: true });
+
 // Handle next step
 const handleNext = async () => {
   const { valid } = await props.form.validate();
@@ -185,25 +293,22 @@ const handleBack = () => {
       <div class="card-content">
         <!-- Business Name -->
         <FormField v-slot="{ componentField }" name="businessName">
-          <div class="form-item">
+          <FormItem>
             <FormLabel :for="componentField.name">{{ props.fieldTexts?.businessName?.label }}</FormLabel>
             <FormControl>
-              <Input 
-                v-bind="componentField" 
-                type="text" 
+              <Input
+                v-bind="componentField"
+                @input="(e: Event) => validateBusinessName((e.target as HTMLInputElement).value)"
                 :placeholder="props.fieldTexts?.businessName?.placeholder"
               />
             </FormControl>
-            <FormDescription v-if="props.fieldTexts?.businessName?.description">
-              {{ props.fieldTexts?.businessName.description }}
-            </FormDescription>
-            <FormMessage />
-          </div>
+            <FormMessage v-if="businessNameError">{{ businessNameError }}</FormMessage>
+          </FormItem>
         </FormField>
 
         <!-- Business Description -->
         <FormField name="businessDescription" v-slot="{ field, errors }">
-          <div class="form-item">
+          <FormItem>
             <FormLabel :for="field.name">{{ props.fieldTexts?.businessDescription?.label }}</FormLabel>
             <div class="search-container">
               <Input
@@ -241,13 +346,13 @@ const handleBack = () => {
             <FormDescription v-if="props.fieldTexts?.businessDescription?.description">
               {{ props.fieldTexts?.businessDescription.description }}
             </FormDescription>
-            <FormMessage />
-          </div>
+            <FormMessage v-if="businessDescriptionError">{{ businessDescriptionError }}</FormMessage>
+          </FormItem>
         </FormField>
 
         <!-- Target Audience -->
         <FormField name="targetAudience" v-slot="{ field, errors }">
-          <div class="form-item">
+          <FormItem>
             <FormLabel :for="field.name">{{ props.fieldTexts?.targetAudience?.label }}</FormLabel>
             <div class="search-container">
               <Input
@@ -285,13 +390,13 @@ const handleBack = () => {
             <FormDescription v-if="props.fieldTexts?.targetAudience?.description">
               {{ props.fieldTexts?.targetAudience.description }}
             </FormDescription>
-            <FormMessage />
-          </div>
+            <FormMessage v-if="targetAudienceError">{{ targetAudienceError }}</FormMessage>
+          </FormItem>
         </FormField>
 
         <!-- Primary Goals -->
         <FormField name="primaryGoals" v-slot="{ field, errors }">
-          <div class="form-item">
+          <FormItem>
             <FormLabel :for="field.name">{{ props.fieldTexts?.primaryGoals?.label }}</FormLabel>
             <div class="search-container">
               <Input
@@ -329,8 +434,8 @@ const handleBack = () => {
             <FormDescription v-if="props.fieldTexts?.primaryGoals?.description">
               {{ props.fieldTexts?.primaryGoals.description }}
             </FormDescription>
-            <FormMessage />
-          </div>
+            <FormMessage v-if="primaryGoalsError">{{ primaryGoalsError }}</FormMessage>
+          </FormItem>
         </FormField>
       </div>
       <div class="card-footer">

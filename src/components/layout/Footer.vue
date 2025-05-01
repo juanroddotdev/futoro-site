@@ -8,7 +8,6 @@
       <p class="body-text text-white">© {{ new Date().getFullYear() }} Futoro Digital Design Lab. All rights reserved.</p>
       <div class="footer-links">
         <router-link to="/client-form" class="body-text text-white hover:text-white/90">Client Form</router-link>
-        <router-link to="/client-form-2col" class="body-text text-white hover:text-white/90">Client Form (2 Column)</router-link>
         <a href="#" class="body-text text-white hover:text-white/90">Privacy Policy</a>
         <a href="#" class="body-text text-white hover:text-white/90">Terms of Service</a>
       </div>

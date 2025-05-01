@@ -5,7 +5,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 const HomePage = () => import('@/views/HomePage.vue')
 const SimpleHomePage = () => import('@/views/SimpleHomePage.vue')
 const WireframeDemo = () => import('@/views/WireframeDemo.vue')
-const ClientFormView = () => import('@/views/ClientFormView.vue')
 const ClientFormTwoColumn = () => import('@/views/ClientFormTwoColumn.vue')
 const MockBentoDemo = () => import('@/pages/MockBentoDemo.vue')
 
@@ -35,19 +34,52 @@ const routes = [
   },
   {
     path: '/client-form',
-    name: 'ClientForm',
-    component: ClientFormView,
-    meta: {
-      title: 'Client Questionnaire'
-    }
-  },
-  {
-    path: '/client-form-2col',
-    name: 'ClientFormTwoColumn',
     component: ClientFormTwoColumn,
     meta: {
-      title: 'Client Questionnaire (Two Column)'
-    }
+      title: 'Client Questionnaire'
+    },
+    children: [
+      {
+        path: '',
+        redirect: { name: 'ClientFormAbout' }
+      },
+      {
+        path: 'about',
+        name: 'ClientFormAbout',
+        component: ClientFormTwoColumn,
+        meta: {
+          step: 'about',
+          title: 'About Your Website'
+        }
+      },
+      {
+        path: 'design',
+        name: 'ClientFormDesign',
+        component: ClientFormTwoColumn,
+        meta: {
+          step: 'design',
+          title: 'Design Style'
+        }
+      },
+      {
+        path: 'functionality',
+        name: 'ClientFormFunctionality',
+        component: ClientFormTwoColumn,
+        meta: {
+          step: 'functionality',
+          title: 'Features & Content'
+        }
+      },
+      {
+        path: 'logistics',
+        name: 'ClientFormLogistics',
+        component: ClientFormTwoColumn,
+        meta: {
+          step: 'logistics',
+          title: 'Project Details'
+        }
+      }
+    ]
   },
   {
     path: '/bento-demo',
@@ -55,14 +87,6 @@ const routes = [
     component: MockBentoDemo,
     meta: {
       title: 'Bento Box Demo'
-    }
-  },
-  {
-    path: '/client-form-alt',
-    name: 'ClientFormAlt',
-    component: () => import('@/views/ClientFormAltView.vue'),
-    meta: {
-      title: 'Client Questionnaire (Alternative)'
     }
   }
 ]
