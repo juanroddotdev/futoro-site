@@ -30,15 +30,15 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="contact-v2" id="contact">
-    <div class="contact-v2__content">
+  <section class="contact-v2 contact-section-mobile" id="contact">
+    <div class="contact-v2__content contact-form-mobile">
       <h2 class="contact-v2__heading">
         Let's create something
         <span class="underline">extraordinary</span>
         together
       </h2>
       
-      <div class="contact-v2__cta">
+      <div class="contact-v2__cta form-group-mobile">
         <a :href="`mailto:${email}`" class="contact-v2__email">
           {{ email }}
         </a>

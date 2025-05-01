@@ -180,7 +180,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section id="howItWorks" class="section py-32">
+  <section id="howItWorks" class="section py-32 process-timeline-mobile">
     <!-- Section Header -->
     <div class="text-center mb-24">
       <h2 class="heading-responsive text-5xl heading--accent">How It Works</h2>
@@ -207,7 +207,7 @@ onUnmounted(() => {
       <div class="relative">
         <div v-for="(step, index) in steps" 
              :key="step.id"
-             class="timeline-item relative mb-24 last:mb-0"
+             class="timeline-item timeline-item-mobile relative mb-24 last:mb-0"
              :class="[
                { 'text-left ml-auto pl-8': index % 2 === 0, 'text-right mr-auto pr-8': index % 2 === 1 },
                { 'timeline-item--active': activeStepId === step.id }
@@ -224,7 +224,7 @@ onUnmounted(() => {
           ></div>
 
           <!-- Step Content Card -->
-          <div class="timeline-card item hover-card-themed p-6 relative">
+          <div class="timeline-card timeline-content-mobile item hover-card-themed p-6 relative">
             <!-- Step Number -->
             <div class="timeline-number absolute -top-3 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm"
                  :class="[

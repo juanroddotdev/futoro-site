@@ -72,6 +72,9 @@
 // Components
 @import './components/steps';
 
+// Import mobile styles
+@import 'layout/mobile';
+
 // Hide navbar when client form is active
 body.client-form-active {
   .navbar {

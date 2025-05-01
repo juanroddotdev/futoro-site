@@ -1,0 +1,218 @@
+// Mobile breakpoints
+$mobile-breakpoint: 768px;
+$tablet-breakpoint: 1024px;
+
+// Mobile styles for SimpleHomePage
+@media screen and (max-width: $mobile-breakpoint) {
+  .simple-home {
+    // Base mobile styles
+    padding: 0;
+  }
+
+  .viewport-grid {
+    // Adjust grid for mobile
+    height: 100%;
+  }
+
+  // Hero section mobile styles
+  .hero-section-mobile {
+    /* padding: 2rem 1rem; */
+    height: auto;
+    min-height: 100vh;
+    .content-area.right {
+      display: none !important;
+    }
+    
+    .hero-content-mobile {
+      padding: 1rem;
+      
+      h1 {
+        font-size: 4rem;
+        line-height: 1.2;
+      }
+      
+      p {
+        font-size: 1.5rem;
+        line-height: 1.4;
+      }
+      .hero-section-mobile .hero-content-mobile h1 {
+        font-size: 3rem !important;
+      }
+    }
+
+    .right-content-placeholder-mobile {
+      min-height: 300px;
+    }
+
+    // TwoColumnSection classes
+    .scrollable-section {
+      // Add styles here
+    }
+
+    .content-area {
+      // Add styles here
+    }
+
+    .content-left {
+      height: 100vh;
+      // Add styles here
+    }
+
+    .content-right {
+      // Add styles here
+    }
+
+    .content-top {
+      // Add styles here
+    }
+
+    // TextAnimation classes
+    .heading--accent {
+      // Add styles here
+    }
+
+    .heading--highlight {
+      // Add styles here
+    }
+
+    .heading-responsive-large {
+      // Add styles here
+    }
+
+    .subheading-responsive {
+      // Add styles here
+    }
+
+    .theme-text--gradient-animated {
+      // Add styles here
+    }
+
+    .gradient-shine {
+      // Add styles here
+    }
+
+    // Button classes
+    .btn-round--secondary {
+      // Add styles here
+    }
+
+    .btn-round--large {
+      // Add styles here
+    }
+
+    .btn-round-large-outline-secondary {
+      // Add styles here
+    }
+
+    .cta {
+      // Add styles here
+    }
+
+    // Layout classes
+    .flex {
+      // Add styles here
+    }
+
+    .gap-4 {
+      // Add styles here
+    }
+
+    .mb-4 {
+      // Add styles here
+    }
+
+    .mt-2 {
+      // Add styles here
+    }
+
+    .mb-8 {
+      // Add styles here
+    }
+  }
+
+  // Services section mobile styles
+  .services-section-mobile {
+    padding: 2rem 1rem;
+    
+    .service-card-mobile {
+      margin-bottom: 1rem;
+      padding: 1rem;
+      
+      h3 {
+        font-size: 1.25rem;
+      }
+      
+      p {
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  // Process timeline mobile styles
+  .process-timeline-mobile {
+    padding: 2rem 1rem;
+    
+    .timeline-item-mobile {
+      padding: 1rem;
+      margin-bottom: 1rem;
+      
+      .timeline-content-mobile {
+        padding: 1rem;
+        
+        h3 {
+          font-size: 1.25rem;
+        }
+        
+        p {
+          font-size: 0.9rem;
+        }
+      }
+    }
+  }
+
+  // Contact section mobile styles
+  .contact-section-mobile {
+    padding: 2rem 1rem;
+    
+    .contact-form-mobile {
+      padding: 1rem;
+      
+      .form-group-mobile {
+        margin-bottom: 1rem;
+      }
+      
+      input, textarea {
+        padding: 0.75rem;
+        font-size: 1rem;
+      }
+      
+      button {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+      }
+    }
+  }
+}
+
+// Tablet styles
+@media screen and (min-width: $mobile-breakpoint) and (max-width: $tablet-breakpoint) {
+  .simple-home {
+    padding: 0 1rem;
+  }
+
+  .hero-section-mobile {
+    padding: 3rem 2rem;
+    
+    .hero-content-mobile {
+      h1 {
+        font-size: 2.5rem;
+      }
+    }
+  }
+
+  .services-section-mobile,
+  .process-timeline-mobile,
+  .contact-section-mobile {
+    padding: 3rem 2rem;
+  }
+} 

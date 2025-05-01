@@ -1,44 +1,50 @@
 <template>
-  <div class="hero-section-chat">
+  <div class="hero-section-chat hero-section-mobile">
     <TwoColumnSection :layout="layout" :customClass="customClass">  
       <template #headline>
-        <h1 class="heading--accent mb-4 mt-2 heading-responsive-large theme-text--gradient-animated gradient-shine">
-          <TextAnimation 
-            :firstPart="heroContent.headline" 
-            animation="fadeUp" 
-            :useGradient="true"
-            :duration="3" 
-            :initiallyHidden="true" 
-            :triggerOnVisible="true" 
-            :restartOnVisible="true" 
-          />
-        </h1>
+        <div class="hero-content-mobile">
+          <h1 class="heading--accent mb-4 mt-2 heading-responsive-large theme-text--gradient-animated gradient-shine">
+            <TextAnimation 
+              :firstPart="heroContent.headline" 
+              animation="fadeUp" 
+              :useGradient="true"
+              :duration="3" 
+              :initiallyHidden="true" 
+              :triggerOnVisible="true" 
+              :restartOnVisible="true" 
+            />
+          </h1>
+        </div>
       </template>
       <template #subheadline>
-        <p class="mb-8 subheading-responsive heading--highlight">
-          <TextAnimation 
-            :firstPart="heroContent.subheadline" 
-            animation="fade" 
-            :useGradient="true"
-            :duration="3" 
-            :initiallyHidden="true" 
-            :triggerOnVisible="true" 
-            :restartOnVisible="true" 
-          />
-        </p>
+        <div class="hero-content-mobile">
+          <p class="mb-8 subheading-responsive heading--highlight">
+            <TextAnimation 
+              :firstPart="heroContent.subheadline" 
+              animation="fade" 
+              :useGradient="true"
+              :duration="3" 
+              :initiallyHidden="true" 
+              :triggerOnVisible="true" 
+              :restartOnVisible="true" 
+            />
+          </p>
+        </div>
       </template>
       <template #content>
-        <div class="flex gap-4">
-          <a :href="primaryCtaLink" class="btn-round--secondary btn-round--large cta">
-            {{ heroContent.cta }}
-          </a>
-          <a :href="secondaryCtaLink" class="btn-round-large-outline-secondary">
-            {{ secondaryCtaText }}
-          </a>
+        <div class="hero-content-mobile">
+          <div class="flex gap-4">
+            <a :href="primaryCtaLink" class="btn-round--secondary btn-round--large cta">
+              {{ heroContent.cta }}
+            </a>
+            <a :href="secondaryCtaLink" class="btn-round-large-outline-secondary">
+              {{ secondaryCtaText }}
+            </a>
+          </div>
         </div>
       </template>
       <template #right-content>
-        <div class="right-content-placeholder">
+        <div class="right-content-placeholder right-content-placeholder-mobile">
           <!-- Placeholder for right content -->
         </div>
       </template>
@@ -127,6 +133,11 @@ onMounted(() => {
     position: relative;
     z-index: 10;
   }
+}
+
+.hero-content-mobile {
+  width: 100%;
+  max-width: 100%;
 }
 
 .right-content-placeholder {
