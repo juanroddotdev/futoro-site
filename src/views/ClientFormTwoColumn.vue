@@ -134,6 +134,7 @@ import { formSchema, aboutStepSchema, designStepSchema, functionalityStepSchema,
 import { ChevronLeft, Globe2, Paintbrush2, Puzzle, Calendar } from 'lucide-vue-next'
 import StepProgress from '@/components/ui/step-progress.vue'
 import SubmissionSuccessView from './SubmissionSuccessView.vue'
+import { useRouter } from 'vue-router'
 
 // Import step components
 import AboutStep from '@/clientForm/steps/AboutStep.vue'
@@ -360,8 +361,11 @@ const navigateToStep = async (stepId: string) => {
     console.log('Navigating to step:', stepId);
     console.log('Current form values before navigation:', form.values);
     
-    // Only update the current step
+    // Update the current step
     currentStep.value = stepId;
+    
+    // Use router to navigate to the corresponding route
+    router.push(`/client-form/${stepId}`);
     
     console.log('Navigation complete. Form values:', form.values);
   } catch (error) {
@@ -621,6 +625,8 @@ const mergedFormValues = computed(() => {
     ...form.values
   }
 })
+
+const router = useRouter()
 </script>
 
 <style scoped>

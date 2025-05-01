@@ -24,6 +24,7 @@
     "analyze:css-report": "npm run analyze:css && npm run analyze:components && npm run analyze:scss && npm run analyze:report"
   },
   "dependencies": {
+    "@vee-validate/rules": "^4.15.0",
     "@vee-validate/zod": "^4.15.0",
     "@vueform/multiselect": "^2.6.11",
     "@vueuse/core": "^10.11.1",

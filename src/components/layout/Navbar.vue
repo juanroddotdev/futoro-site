@@ -50,7 +50,7 @@ onUnmounted(() => {
           <a href="#services" class="navbar__link">Services</a>
           <!-- <a href="#solutions" class="navbar__link">Solutions</a> -->
           <a href="#timeline" class="navbar__link">Process</a>
-          <router-link to="/client-form-2col" class="navbar__link">Questionnaire</router-link>
+          <router-link to="/client-form" class="navbar__link">Questionnaire</router-link>
           <a href="#contact" class="navbar__cta" :class="[
             isScrolled ? 'btn-round-medium-primary' : 'btn-round-large-primary'
           ]">Contact Us</a>
